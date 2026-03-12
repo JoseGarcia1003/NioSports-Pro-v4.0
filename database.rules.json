@@ -1,0 +1,148 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "users": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid",
+
+        "picks": {
+          "$type": {
+            ".validate": "$type === 'totales' || $type === 'ai' || $type === 'backtesting' || $type === 'props'",
+
+            "$pickId": {
+              ".validate": "newData.hasChildren(['status', 'createdAt'])",
+
+              "localTeam": {
+                ".validate": "newData.isString() && newData.val().length <= 60"
+              },
+              "awayTeam": {
+                ".validate": "newData.isString() && newData.val().length <= 60"
+              },
+              "period": {
+                ".validate": "newData.isString() && newData.val().length <= 10"
+              },
+              "betType": {
+                ".validate": "newData.val() === 'OVER' || newData.val() === 'UNDER'"
+              },
+              "line": {
+                ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 999"
+              },
+              "odds": {
+                ".validate": "newData.isNumber() && newData.val() >= 1.0 && newData.val() <= 50"
+              },
+              "status": {
+                ".validate": "newData.val() === 'pending' || newData.val() === 'win' || newData.val() === 'loss' || newData.val() === 'push'"
+              },
+              "ev": {
+                ".validate": "newData.isNumber() || newData.val() === null"
+              },
+              "closingLine": {
+                ".validate": "newData.isNumber() || newData.val() === null"
+              },
+              "trend": {
+                ".validate": "newData.isNumber() || newData.isString() || newData.val() === null"
+              },
+              "isCombo": {
+                ".validate": "newData.isBoolean()"
+              },
+              "note": {
+                ".validate": "newData.isString() && newData.val().length <= 500"
+              },
+              "createdAt": {
+                ".validate": "newData.isString()"
+              },
+              "resolvedAt": {
+                ".validate": "newData.isString() || newData.val() === null"
+              },
+              "actualResult": {
+                ".validate": "newData.isNumber() || newData.val() === null"
+              }
+            }
+          }
+        },
+
+        "bankroll": {
+          "current": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000000"
+          },
+          "initial": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000000"
+          },
+          "lastSync": {
+            ".validate": "newData.isString() || newData.val() === null"
+          },
+          "resetAt": {
+            ".validate": "newData.isString() || newData.val() === null"
+          },
+          "history": {
+            "$entryId": {
+              ".validate": "newData.hasChildren(['date', 'type', 'amount', 'balance'])",
+              "date": {
+                ".validate": "newData.isString()"
+              },
+              "type": {
+                ".validate": "newData.val() === 'deposit' || newData.val() === 'withdraw'"
+              },
+              "amount": {
+                ".validate": "newData.isNumber() && newData.val() > 0"
+              },
+              "balance": {
+                ".validate": "newData.isNumber() && newData.val() >= 0"
+              },
+              "note": {
+                ".validate": "newData.isString() && newData.val().length <= 200 || newData.val() === null"
+              }
+            }
+          }
+        },
+
+        "profile": {
+          ".validate": "newData.hasChildren(['username'])",
+          "username": {
+            ".validate": "newData.isString() && newData.val().length >= 3 && newData.val().length <= 30"
+          },
+          "displayName": {
+            ".validate": "newData.isString() && newData.val().length <= 60"
+          },
+          "plan": {
+            ".validate": "newData.val() === 'free' || newData.val() === 'pro' || newData.val() === 'elite'"
+          },
+          "createdAt": {
+            ".validate": "newData.isString()"
+          }
+        },
+
+        "preferences": {
+          "theme": {
+            ".validate": "newData.val() === 'dark' || newData.val() === 'light'"
+          },
+          "defaultOdds": {
+            ".validate": "newData.isNumber()"
+          },
+          "notifications": {
+            ".validate": "newData.isBoolean()"
+          }
+        }
+      }
+    },
+
+    "usernamesIndex": {
+      ".read": "auth != null",
+      "$username": {
+        ".validate": "newData.isString() && newData.val().length >= 3 && newData.val().length <= 30",
+        ".write": "auth != null && (!data.exists() || data.val() === auth.uid)"
+      }
+    },
+
+    "usernamesByUid": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.isString()"
+      }
+    }
+  }
+}

@@ -1,0 +1,120 @@
+name: Auditoría de Seguridad — Dependencias
+
+# ─────────────────────────────────────────────────────────────────
+# Se ejecuta en tres situaciones:
+#   1. Cada push a main que toque package.json o package-lock.json
+#   2. Cada Pull Request hacia main
+#   3. Todos los lunes a las 9 AM UTC (auditoría semanal proactiva)
+#
+# FALLA el workflow (y bloquea el merge) si hay vulnerabilidades
+# de severidad MODERATE, HIGH o CRITICAL en las dependencias.
+# ─────────────────────────────────────────────────────────────────
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 9 * * 1'   # Lunes 9 AM UTC
+  workflow_dispatch:
+
+jobs:
+  security-audit:
+    name: npm audit + license check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      # ── 1. Checkout ───────────────────────────────────────────────
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      # ── 2. Node.js ────────────────────────────────────────────────
+      - name: ⚙️ Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # ── 3. Instalar sin ejecutar scripts ─────────────────────────
+      # --ignore-scripts evita correr postinstall de paquetes
+      # potencialmente comprometidos antes de la auditoría.
+      - name: 📦 npm ci --ignore-scripts
+        run: npm ci --ignore-scripts
+
+      # ── 4. npm audit (falla en moderate+) ─────────────────────────
+      - name: 🔍 npm audit
+        run: npm audit --audit-level=moderate
+
+      # ── 5. Reporte completo (siempre visible en el log) ───────────
+      - name: 📋 Reporte completo de vulnerabilidades
+        if: always()
+        run: |
+          echo "════════════════════════════════════════════════"
+          echo "  npm audit — todas las severidades"
+          echo "════════════════════════════════════════════════"
+          npm audit --json | node -e "
+            const chunks = [];
+            process.stdin.on('data', c => chunks.push(c));
+            process.stdin.on('end', () => {
+              try {
+                const data  = JSON.parse(chunks.join(''));
+                const vulns = data.vulnerabilities || {};
+                const meta  = data.metadata || {};
+                const total = Object.keys(vulns).length;
+
+                console.log('Total vulnerabilidades:', total);
+                if (meta.vulnerabilities) {
+                  const v = meta.vulnerabilities;
+                  console.log('  🔴 Critical:', v.critical || 0);
+                  console.log('  🟠 High:    ', v.high     || 0);
+                  console.log('  🟡 Moderate:', v.moderate || 0);
+                  console.log('  🟢 Low:     ', v.low      || 0);
+                  console.log('  ℹ️  Info:    ', v.info     || 0);
+                }
+                if (total > 0) {
+                  console.log('\nPaquetes afectados:');
+                  Object.entries(vulns).forEach(([name, vuln]) => {
+                    console.log(' -', name,
+                      '| severity:', vuln.severity,
+                      '| fixable:', vuln.fixAvailable ? 'YES' : 'no');
+                  });
+                  console.log('\nPara corregir:');
+                  console.log('  npm audit fix          (cambios seguros)');
+                  console.log('  npm audit fix --force  (puede romper APIs — revisar)');
+                }
+              } catch (e) {
+                console.log('No se pudo parsear el reporte:', e.message);
+              }
+            });
+          " || true
+
+      # ── 6. Verificar dependencias directas ────────────────────────
+      - name: ⚖️ Dependencias directas del proyecto
+        if: always()
+        run: |
+          echo "════════════════════════════════════════════════"
+          echo "  Dependencias directas (package.json)"
+          echo "════════════════════════════════════════════════"
+          node -e "
+            const pkg = require('./package.json');
+            const all = { ...pkg.dependencies, ...pkg.devDependencies };
+            console.log('Total:', Object.keys(all).length);
+            console.log('\nProducción:');
+            Object.entries(pkg.dependencies || {}).forEach(([n, v]) => console.log(' -', n, v));
+            console.log('\nDesarrollo:');
+            Object.entries(pkg.devDependencies || {}).forEach(([n, v]) => console.log(' -', n, v));
+          "
+
+      # ── 7. Resumen ────────────────────────────────────────────────
+      - name: 📊 Resumen final
+        if: always()
+        run: |
+          echo "════════════════════════════════════════════════"
+          echo "✅ Auditoría completada — $(date -u)"
+          echo "   Node: $(node --version)"
+          echo "   npm:  $(npm --version)"
+          echo "════════════════════════════════════════════════"
