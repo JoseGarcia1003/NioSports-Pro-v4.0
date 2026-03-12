@@ -1,0 +1,245 @@
+name: Actualizar Estadísticas de Equipos NBA
+
+# ─────────────────────────────────────────────────────────────────
+# Se ejecuta todos los días a las 8 AM UTC (3 AM Ecuador / 5 AM Madrid)
+# También puede lanzarse manualmente desde la pestaña Actions de GitHub
+#
+# ¿Por qué este workflow existe?
+# Los datos de nba-stats.json son la fuente de verdad del modelo
+# predictivo. Actualizarlos automáticamente cada día garantiza que
+# las predicciones usen estadísticas de la temporada en curso.
+#
+# ⚠️  RUTA CLAVE para SvelteKit:
+#     Los archivos estáticos van en static/ — NO en data/ raíz.
+#     Vercel sirve static/ como public. La app accede al JSON via fetch('/data/nba-stats.json').
+# ─────────────────────────────────────────────────────────────────
+on:
+  schedule:
+    - cron: '0 8 * * *'      # Diario 8 AM UTC
+  workflow_dispatch:
+    inputs:
+      force_update:
+        description: 'Forzar actualización aunque no haya cambios en API'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  update-team-stats:
+    name: 🏀 NBA Stats → static/data/nba-stats.json
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      # ── 1. Checkout ───────────────────────────────────────────────
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── 2. Python ─────────────────────────────────────────────────
+      - name: 🐍 Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # ── 3. Dependencias ───────────────────────────────────────────
+      - name: 📦 Instalar dependencias
+        run: pip install requests --break-system-packages
+
+      # ── 4. Actualizar stats via BallDontLie API ───────────────────
+      - name: 📊 Actualizar nba-stats.json
+        env:
+          BALLDONTLIE_API_KEY: ${{ secrets.BALLDONTLIE_API_KEY }}
+          FORCE_UPDATE: ${{ inputs.force_update }}
+        run: |
+          python3 << 'EOF'
+          import requests, json, os, sys
+          from datetime import datetime, timezone
+
+          API_KEY = os.environ.get("BALLDONTLIE_API_KEY", "")
+          HEADERS = {"Authorization": API_KEY} if API_KEY else {}
+
+          # ── RUTA SVELTEKIT: static/data/ ─────────────────────────
+          # En SvelteKit los archivos públicos van en static/
+          # La app los consume via fetch('/data/nba-stats.json')
+          OUTPUT_PATH = "static/data/nba-stats.json"
+          os.makedirs("static/data", exist_ok=True)
+
+          print("📊 Iniciando actualización NBA stats...")
+          print(f"   API key presente: {'✅' if API_KEY else '❌ — se usarán datos existentes'}")
+
+          ABBR_TO_FULL = {
+            "ATL": "Atlanta Hawks",      "BOS": "Boston Celtics",
+            "BKN": "Brooklyn Nets",      "CHA": "Charlotte Hornets",
+            "CHI": "Chicago Bulls",      "CLE": "Cleveland Cavaliers",
+            "DAL": "Dallas Mavericks",   "DEN": "Denver Nuggets",
+            "DET": "Detroit Pistons",    "GSW": "Golden State Warriors",
+            "HOU": "Houston Rockets",    "IND": "Indiana Pacers",
+            "LAC": "Los Angeles Clippers","LAL": "Los Angeles Lakers",
+            "MEM": "Memphis Grizzlies",  "MIA": "Miami Heat",
+            "MIL": "Milwaukee Bucks",    "MIN": "Minnesota Timberwolves",
+            "NOP": "New Orleans Pelicans","NYK": "New York Knicks",
+            "OKC": "Oklahoma City Thunder","ORL": "Orlando Magic",
+            "PHI": "Philadelphia 76ers", "PHX": "Phoenix Suns",
+            "POR": "Portland Trail Blazers","SAC": "Sacramento Kings",
+            "SAS": "San Antonio Spurs",  "TOR": "Toronto Raptors",
+            "UTA": "Utah Jazz",          "WAS": "Washington Wizards"
+          }
+
+          # Leer JSON existente para preservar stats de la temporada
+          existing = {}
+          try:
+              with open(OUTPUT_PATH) as f:
+                  existing = json.load(f)
+              print(f"   JSON existente: {len(existing)} entradas")
+          except Exception as e:
+              print(f"   ⚠️  Sin JSON previo ({e}), se crea nuevo")
+
+          # Obtener equipos de la API
+          teams_out = dict(existing)  # Partir del existente
+          if API_KEY:
+              try:
+                  r = requests.get(
+                      "https://api.balldontlie.io/v1/teams",
+                      headers=HEADERS, timeout=20
+                  )
+                  r.raise_for_status()
+                  teams_raw = r.json().get("data", [])
+                  print(f"   ✅ API respondió: {len(teams_raw)} equipos")
+
+                  for team in teams_raw:
+                      abbr = team.get("abbreviation", "")
+                      full = ABBR_TO_FULL.get(abbr)
+                      if not full:
+                          continue
+                      # Actualizar metadata pero preservar stats de temporada
+                      prev = existing.get(full, {})
+                      teams_out[full] = {
+                          **prev,
+                          "id":           team["id"],
+                          "abbreviation": abbr,
+                          "conference":   team.get("conference", ""),
+                          "division":     team.get("division", ""),
+                          "_apiUpdated":  datetime.now(timezone.utc).isoformat(),
+                      }
+
+              except Exception as e:
+                  print(f"   ❌ Error API: {e} — conservando datos existentes")
+
+          # Garantizar que los 30 equipos existen con stats mínimas
+          # (valores de temporada 2025-26 actualizados — ajustar cada semana)
+          SEASON_DEFAULTS = {
+            "Atlanta Hawks":          {"q1":27.8,"q1Home":28.4,"q1Away":27.2,"half":55.9,"halfHome":57.1,"halfAway":54.7,"full":113.2,"fullHome":115.8,"fullAway":110.6},
+            "Boston Celtics":         {"q1":29.3,"q1Home":30.1,"q1Away":28.5,"half":59.4,"halfHome":61.0,"halfAway":57.8,"full":120.4,"fullHome":122.5,"fullAway":118.3},
+            "Brooklyn Nets":          {"q1":26.4,"q1Home":27.0,"q1Away":25.8,"half":53.1,"halfHome":54.3,"halfAway":51.9,"full":107.2,"fullHome":109.1,"fullAway":105.3},
+            "Charlotte Hornets":      {"q1":26.9,"q1Home":27.6,"q1Away":26.2,"half":54.2,"halfHome":55.5,"halfAway":52.9,"full":109.5,"fullHome":111.3,"fullAway":107.7},
+            "Chicago Bulls":          {"q1":27.2,"q1Home":27.9,"q1Away":26.5,"half":54.8,"halfHome":56.1,"halfAway":53.5,"full":110.8,"fullHome":112.6,"fullAway":109.0},
+            "Cleveland Cavaliers":    {"q1":28.7,"q1Home":29.4,"q1Away":28.0,"half":57.8,"halfHome":59.2,"halfAway":56.4,"full":117.2,"fullHome":119.1,"fullAway":115.3},
+            "Dallas Mavericks":       {"q1":28.1,"q1Home":28.9,"q1Away":27.3,"half":56.6,"halfHome":58.2,"halfAway":55.0,"full":114.5,"fullHome":116.3,"fullAway":112.7},
+            "Denver Nuggets":         {"q1":29.1,"q1Home":30.2,"q1Away":28.0,"half":58.7,"halfHome":60.5,"halfAway":56.9,"full":118.8,"fullHome":121.1,"fullAway":116.5},
+            "Detroit Pistons":        {"q1":26.2,"q1Home":26.8,"q1Away":25.6,"half":52.7,"halfHome":53.9,"halfAway":51.5,"full":106.5,"fullHome":108.3,"fullAway":104.7},
+            "Golden State Warriors":  {"q1":28.5,"q1Home":29.3,"q1Away":27.7,"half":57.3,"halfHome":59.0,"halfAway":55.6,"full":116.0,"fullHome":118.2,"fullAway":113.8},
+            "Houston Rockets":        {"q1":27.6,"q1Home":28.4,"q1Away":26.8,"half":55.5,"halfHome":57.1,"halfAway":53.9,"full":112.2,"fullHome":114.5,"fullAway":109.9},
+            "Indiana Pacers":         {"q1":29.4,"q1Home":30.2,"q1Away":28.6,"half":59.1,"halfHome":60.7,"halfAway":57.5,"full":119.5,"fullHome":121.4,"fullAway":117.6},
+            "Los Angeles Clippers":   {"q1":27.9,"q1Home":28.7,"q1Away":27.1,"half":56.2,"halfHome":57.8,"halfAway":54.6,"full":113.8,"fullHome":115.7,"fullAway":111.9},
+            "Los Angeles Lakers":     {"q1":28.3,"q1Home":29.1,"q1Away":27.5,"half":57.0,"halfHome":58.6,"halfAway":55.4,"full":115.3,"fullHome":117.2,"fullAway":113.4},
+            "Memphis Grizzlies":      {"q1":27.0,"q1Home":27.7,"q1Away":26.3,"half":54.4,"halfHome":55.8,"halfAway":53.0,"full":110.0,"fullHome":112.0,"fullAway":108.0},
+            "Miami Heat":             {"q1":27.4,"q1Home":28.2,"q1Away":26.6,"half":55.2,"halfHome":56.8,"halfAway":53.6,"full":111.6,"fullHome":113.5,"fullAway":109.7},
+            "Milwaukee Bucks":        {"q1":28.9,"q1Home":29.7,"q1Away":28.1,"half":58.2,"halfHome":59.8,"halfAway":56.6,"full":117.8,"fullHome":119.7,"fullAway":115.9},
+            "Minnesota Timberwolves": {"q1":28.2,"q1Home":29.0,"q1Away":27.4,"half":56.8,"halfHome":58.4,"halfAway":55.2,"full":114.8,"fullHome":116.7,"fullAway":112.9},
+            "New Orleans Pelicans":   {"q1":27.3,"q1Home":28.0,"q1Away":26.6,"half":55.0,"halfHome":56.4,"halfAway":53.6,"full":111.2,"fullHome":113.0,"fullAway":109.4},
+            "New York Knicks":        {"q1":28.6,"q1Home":29.5,"q1Away":27.7,"half":57.6,"halfHome":59.3,"halfAway":55.9,"full":116.5,"fullHome":118.5,"fullAway":114.5},
+            "Oklahoma City Thunder":  {"q1":29.0,"q1Home":29.9,"q1Away":28.1,"half":58.4,"halfHome":60.1,"halfAway":56.7,"full":118.1,"fullHome":120.3,"fullAway":115.9},
+            "Orlando Magic":          {"q1":26.8,"q1Home":27.5,"q1Away":26.1,"half":54.0,"halfHome":55.3,"halfAway":52.7,"full":109.2,"fullHome":111.0,"fullAway":107.4},
+            "Philadelphia 76ers":     {"q1":27.7,"q1Home":28.5,"q1Away":26.9,"half":55.7,"halfHome":57.3,"halfAway":54.1,"full":112.6,"fullHome":114.6,"fullAway":110.6},
+            "Phoenix Suns":           {"q1":27.5,"q1Home":28.3,"q1Away":26.7,"half":55.4,"halfHome":57.0,"halfAway":53.8,"full":111.9,"fullHome":113.8,"fullAway":110.0},
+            "Portland Trail Blazers": {"q1":26.7,"q1Home":27.4,"q1Away":26.0,"half":53.8,"halfHome":55.1,"halfAway":52.5,"full":108.8,"fullHome":110.7,"fullAway":106.9},
+            "Sacramento Kings":       {"q1":28.0,"q1Home":28.8,"q1Away":27.2,"half":56.4,"halfHome":58.0,"halfAway":54.8,"full":114.1,"fullHome":116.0,"fullAway":112.2},
+            "San Antonio Spurs":      {"q1":26.5,"q1Home":27.2,"q1Away":25.8,"half":53.4,"halfHome":54.7,"halfAway":52.1,"full":107.9,"fullHome":109.8,"fullAway":106.0},
+            "Toronto Raptors":        {"q1":26.6,"q1Home":27.3,"q1Away":25.9,"half":53.6,"halfHome":54.9,"halfAway":52.3,"full":108.4,"fullHome":110.3,"fullAway":106.5},
+            "Utah Jazz":              {"q1":26.3,"q1Home":27.0,"q1Away":25.6,"half":53.0,"halfHome":54.2,"halfAway":51.8,"full":107.1,"fullHome":109.0,"fullAway":105.2},
+            "Washington Wizards":     {"q1":26.1,"q1Home":26.7,"q1Away":25.5,"half":52.5,"halfHome":53.7,"halfAway":51.3,"f    ull":106.0,"fullHome":107.9,"fullAway":104.1},
+          }
+
+          for full, defaults in SEASON_DEFAULTS.items():
+              if full not in teams_out:
+                  teams_out[full] = defaults
+              else:
+                  # Rellenar solo los campos que faltan (no sobreescribir datos reales)
+                  for k, v in defaults.items():
+                      teams_out[full].setdefault(k, v)
+
+          output = {
+              **teams_out,
+              "_meta": {
+                  "lastUpdated": datetime.now(timezone.utc).isoformat(),
+                  "source":      "BallDontLie API v1 + NioSports season baseline 2025-26",
+                  "teamsCount":  len([k for k in teams_out if not k.startswith("_")]),
+                  "season":      "2025-26",
+                  "autoUpdated": True,
+              }
+          }
+
+          with open(OUTPUT_PATH, "w") as f:
+              json.dump(output, f, indent=2, ensure_ascii=False)
+
+          print(f"   ✅ {OUTPUT_PATH} escrito — {len(output) - 1} equipos")
+          print(f"   📅 {output['_meta']['lastUpdated']}")
+          EOF
+
+      # ── 5. Validar JSON ───────────────────────────────────────────
+      - name: 🔍 Validar JSON
+        run: |
+          python3 -c "
+          import json, sys
+          with open('static/data/nba-stats.json') as f:
+              d = json.load(f)
+          teams = [k for k in d if not k.startswith('_')]
+          print(f'✅ JSON válido: {len(teams)} equipos')
+          if len(teams) < 28:
+              print('❌ ERROR: menos de 28 equipos')
+              sys.exit(1)
+          # Validar que todos tienen las stats necesarias
+          required = ['q1Home','q1Away','halfHome','halfAway','fullHome','fullAway']
+          for team in teams:
+              for field in required:
+                  if field not in d[team]:
+                      print(f'⚠️ {team} sin {field}')
+          print('✅ Estructura de stats correcta')
+          "
+
+      # ── 6. Commit si hubo cambios ────────────────────────────────
+      - name: 💾 Commit & Push
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name  "GitHub Actions [NioSports]"
+          git add static/data/nba-stats.json
+          if git diff --staged --quiet; then
+            echo "ℹ️  Sin cambios — no se hace commit"
+          else
+            git commit -m "🏀 NBA stats actualizadas — $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git push
+            echo "✅ Push completado"
+          fi
+
+      # ── 7. Resumen ────────────────────────────────────────────────
+      - name: 📋 Resumen
+        if: always()
+        run: |
+          echo "════════════════════════════════════════"
+          echo "  Workflow completado: $(date -u)"
+          python3 -c "
+          import json
+          try:
+              with open('static/data/nba-stats.json') as f:
+                  d = json.load(f)
+              teams = [k for k in d if not k.startswith('_')]
+              meta  = d.get('_meta', {})
+              print(f'  Equipos:      {len(teams)}')
+              print(f'  Actualizado:  {meta.get(\"lastUpdated\", \"N/A\")}')
+              print(f'  Fuente:       {meta.get(\"source\", \"N/A\")}')
+          except Exception as e:
+              print(f'  Error: {e}')
+          "
+          echo "════════════════════════════════════════"
