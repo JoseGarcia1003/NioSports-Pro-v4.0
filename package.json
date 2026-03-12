@@ -1,0 +1,39 @@
+{
+  "name": "niosports-pro",
+  "version": "4.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Sistema predictivo NBA profesional — SvelteKit + Vite",
+  "author": "Jose Garcia",
+  "license": "MIT",
+
+  "scripts": {
+    "dev":        "vite dev",
+    "build":      "vite build",
+    "preview":    "vite preview",
+    "check":      "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
+    "test":       "vitest",
+    "lint":       "eslint src --ext .js,.svelte"
+  },
+
+  "dependencies": {
+    "@upstash/redis":    "^1.34.0",
+    "firebase":          "^10.7.1",
+    "dompurify":         "^3.1.5"
+  },
+
+  "devDependencies": {
+    "@sveltejs/adapter-vercel": "^5.3.0",
+    "@sveltejs/kit":            "^2.5.0",
+    "@sveltejs/vite-plugin-svelte": "^3.1.0",
+    "svelte":                   "^5.0.0",
+    "vite":                     "^5.2.0",
+    "tailwindcss":              "^3.4.0",
+    "postcss":                  "^8.4.0",
+    "autoprefixer":             "^10.4.0",
+    "svelte-check":             "^3.6.0",
+    "vitest":                   "^1.2.0",
+    "eslint":                   "^8.57.0",
+    "eslint-plugin-svelte":     "^2.35.0"
+  }
+}
