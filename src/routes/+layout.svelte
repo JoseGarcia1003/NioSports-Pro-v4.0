@@ -1,5 +1,4 @@
 <!-- src/routes/+layout.svelte -->
-<!-- FASE 5: Añadidos SystemStatus y Onboarding al shell global -->
 <script>
   import { onMount }         from 'svelte';
   import { goto }            from '$app/navigation';
@@ -8,8 +7,7 @@
   import Nav                 from '$lib/components/Nav.svelte';
   import DemoBanner          from '$lib/components/DemoBanner.svelte';
   import ToastContainer      from '$lib/components/ToastContainer.svelte';
-  import SystemStatus        from '$lib/components/SystemStatus.svelte';
-  import Onboarding          from '$lib/components/Onboarding.svelte';
+  import DataSourceBadge     from '$lib/components/DataSourceBadge.svelte';
 
   import { initFirebase }    from '$lib/firebase';
   import { authStore,
@@ -44,12 +42,12 @@
 
   {:else}
     {#if !isPublicPage}
-      <!-- Bloque del header: Nav + DemoBanner + SystemStatus -->
-      <div class="app-header">
-        <Nav />
-        <DemoBanner />
-        <!-- SystemStatus va pegado al Nav, debajo de él -->
-        <SystemStatus />
+      <Nav />
+      <DemoBanner />
+
+      <!-- ✅ FASE 6: Badge de fuente de datos — siempre visible en esquina inferior derecha -->
+      <div class="datasource-corner">
+        <DataSourceBadge />
       </div>
     {/if}
 
@@ -60,11 +58,6 @@
     >
       <slot />
     </main>
-
-    <!-- Onboarding — solo para usuarios autenticados, primera vez -->
-    {#if !isPublicPage && $isAuthenticated}
-      <Onboarding />
-    {/if}
   {/if}
 
   <ToastContainer />
@@ -102,22 +95,20 @@
   :global(a) { color: inherit; }
 
   .app-shell { min-height: 100vh; }
+  .app-main  { width: 100%; }
+  .app-main--with-nav { padding-top: 64px; }
 
-  /* El header agrupa Nav + DemoBanner + SystemStatus en posición fija */
-  .app-header {
+  /* Badge flotante — esquina inferior derecha, encima del nav móvil */
+  .datasource-corner {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
+    bottom: 20px;
+    right: 16px;
+    z-index: 40;
+    pointer-events: none; /* No interfiere con clicks */
   }
-
-  .app-main { width: 100%; }
-  .app-main--with-nav {
-    /* Nav (64px) + SystemStatus (~28px) = ~92px de offset */
-    padding-top: 92px;
+  /* En móvil lo subimos para no tapar la barra de navegación del sistema */
+  @media (max-width: 768px) {
+    .datasource-corner { bottom: 72px; }
   }
 
   .app-loading {
@@ -129,20 +120,13 @@
     gap: 20px;
     background: var(--color-bg, #0a0f1c);
   }
-
   .app-loading__spinner {
-    width: 40px;
-    height: 40px;
+    width: 40px; height: 40px;
     border: 3px solid rgba(251,191,36,0.2);
     border-top-color: #fbbf24;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
   }
-
   @keyframes spin { to { transform: rotate(360deg); } }
-
-  .app-loading__text {
-    color: rgba(255,255,255,0.6);
-    font-size: 0.95rem;
-  }
+  .app-loading__text { color: rgba(255,255,255,0.6); font-size: 0.95rem; }
 </style>

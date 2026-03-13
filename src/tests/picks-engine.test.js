@@ -308,8 +308,10 @@ describe('calcProb()', () => {
   it('OVER y UNDER son complementarios para el mismo edge', () => {
     const overProb  = calcProb(225, 220, 'OVER');
     const underProb = calcProb(225, 220, 'UNDER');
-    // overProb + underProb debería ser ~100
-    expect(overProb + underProb).toBe(100);
+    // La suma debe ser ~100. Puede ser 99-101 por redondeo de Math.round()
+    // Ej: 67.5 → 68 y 32.5 → 33 suma 101. Es comportamiento correcto.
+    expect(overProb + underProb).toBeGreaterThanOrEqual(99);
+    expect(overProb + underProb).toBeLessThanOrEqual(101);
   });
 
   it('5 pts de edge → probabilidad razonable (55-75%)', () => {
