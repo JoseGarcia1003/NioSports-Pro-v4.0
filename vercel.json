@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "npx vite build",
+  "buildCommand": "node node_modules/vite/bin/vite.js build",
   "outputDirectory": ".svelte-kit/output",
   "installCommand": "npm install",
   "framework": "sveltekit",
