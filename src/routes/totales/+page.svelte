@@ -1,37 +1,27 @@
 <!-- src/routes/totales/+page.svelte -->
-<!--
-  REEMPLAZA: renderTendencia() / renderTotales() de renders.js
-  
-  Herramienta de análisis de partido: seleccionas local y visitante,
-  el modelo calcula la tendencia de totales por periodo (1Q, 1H, FULL)
-  con los datos de nba-stats.json y los factores contextuales.
-  
-  También permite guardar un pick directamente a Firebase desde aquí.
--->
 <script>
   import { onMount }       from 'svelte';
   import { userId }        from '$lib/stores/auth';
   import { teamStats }     from '$lib/stores/data';
   import { toasts }        from '$lib/stores/ui';
   import { dbPush, userPath } from '$lib/firebase';
+  import SkeletonCard      from '$lib/components/SkeletonCard.svelte';
 
   // ── Estado ───────────────────────────────────────────────────────
-  let statsData    = null;   // nba-stats.json
+  let statsData    = null;
   let loadingStats = true;
   let statsError   = false;
 
   let localTeam    = '';
   let awayTeam     = '';
 
-  // Factores contextuales
   let localB2B     = false;
   let awayB2B      = false;
   let localInjury  = false;
   let awayInjury   = false;
 
-  // Estado del guardado de pick
   let savingPick   = false;
-  let saveTarget   = null;   // { period, line, betType, trend }
+  let saveTarget   = null;
 
   // ── Cargar nba-stats.json ────────────────────────────────────────
   onMount(async () => {
@@ -45,22 +35,15 @@
     } catch {
       statsError   = true;
       loadingStats = false;
-      // Datos demo para que la herramienta funcione sin la API
       statsData = getDemoStats();
       teamStats.set(statsData);
     }
   });
 
-  // ── Teams list ───────────────────────────────────────────────────
   $: teams = statsData ? Object.keys(statsData).sort() : [];
-
-  // ── Stats de cada equipo ─────────────────────────────────────────
-  $: localData = localTeam  ? statsData?.[localTeam]  : null;
-  $: awayData  = awayTeam   ? statsData?.[awayTeam]   : null;
+  $: localData = localTeam ? statsData?.[localTeam] : null;
+  $: awayData  = awayTeam  ? statsData?.[awayTeam]  : null;
   $: bothSelected = !!(localData && awayData);
-
-  // ── Modelo de tendencias ─────────────────────────────────────────
-  // Cálculo: (home stat local) + (away stat visitante) + ajustes contextuales
   $: trends = bothSelected ? calcTrends() : null;
 
   function calcTrends() {
@@ -71,11 +54,8 @@
     let half = (l.halfHome  ?? l.half) + (a.halfAway  ?? a.half);
     let full = (l.fullHome  ?? l.full) + (a.fullAway  ?? a.full);
 
-    // Factor B2B: -1.25 pts por equipo
-    if (localB2B)   { q1 -= 0.3; half -= 0.6; full -= 1.25; }
-    if (awayB2B)    { q1 -= 0.3; half -= 0.6; full -= 1.25; }
-
-    // Factor lesión estrella: -3.5 pts por equipo
+    if (localB2B)    { q1 -= 0.3; half -= 0.6; full -= 1.25; }
+    if (awayB2B)     { q1 -= 0.3; half -= 0.6; full -= 1.25; }
     if (localInjury) { q1 -= 0.9; half -= 1.75; full -= 3.5; }
     if (awayInjury)  { q1 -= 0.9; half -= 1.75; full -= 3.5; }
 
@@ -83,7 +63,6 @@
       q1:   parseFloat(q1.toFixed(1)),
       half: parseFloat(half.toFixed(1)),
       full: parseFloat(full.toFixed(1)),
-      // Línea sugerida (redondeada a .5)
       sugQ1:   roundHalf(q1),
       sugHalf: roundHalf(half),
       sugFull: roundHalf(full),
@@ -94,18 +73,15 @@
     return (Math.round(n * 2) / 2).toFixed(1);
   }
 
-  // Probabilidad simple de OVER/UNDER dado tendencia vs línea
   function calcProb(trend, line, type) {
     if (!trend || !line) return null;
     const diff = type === 'OVER'
       ? parseFloat(trend) - parseFloat(line)
       : parseFloat(line)  - parseFloat(trend);
-    // Escala sigmoidea aproximada
     const prob = 50 + Math.min(Math.max(diff * 3.5, -25), 25);
     return Math.round(prob);
   }
 
-  // ── Guardar pick ─────────────────────────────────────────────────
   function openSave(period, line, betType, trend) {
     saveTarget = { period, line, betType, trend };
   }
@@ -140,7 +116,6 @@
     }
   }
 
-  // ── Datos demo (fallback si no hay nba-stats.json) ───────────────
   function getDemoStats() {
     const BASE_TEAMS = [
       'Boston Celtics','Brooklyn Nets','New York Knicks','Philadelphia 76ers','Toronto Raptors',
@@ -168,7 +143,6 @@
     return demo;
   }
 
-  // ── Getters de ranking informal ──────────────────────────────────
   function getRank(team, key) {
     if (!statsData) return '';
     const sorted = Object.entries(statsData)
@@ -191,7 +165,6 @@
 
 <div class="page">
 
-  <!-- ── Header ────────────────────────────────────────── -->
   <div class="page__header">
     <h1 class="page__title">📈 Análisis de Totales</h1>
     <p class="page__subtitle">
@@ -203,11 +176,11 @@
   </div>
 
   {#if loadingStats}
-    <div class="skeleton-selectors"></div>
+    <!-- ✅ FASE 6: SkeletonCard reemplaza skeleton-selectors manual -->
+    <SkeletonCard type="stat" count={4} />
 
   {:else}
 
-    <!-- ── Selección de equipos ──────────────────────── -->
     <div class="selectors">
       <div class="selector selector--home">
         <div class="selector__label">🏠 Equipo local</div>
@@ -264,7 +237,6 @@
       </div>
     </div>
 
-    <!-- ── Factores contextuales ─────────────────────── -->
     {#if bothSelected}
       <div class="factors">
         <div class="factors__title">⚙️ Factores contextuales</div>
@@ -288,7 +260,6 @@
         </div>
       </div>
 
-      <!-- ── Predicción del modelo ─────────────────── -->
       {#if trends}
         <div class="prediction">
           <div class="prediction__header">
@@ -298,8 +269,8 @@
 
           <div class="prediction__grid">
             {#each [
-              { period: '1Q',  trend: trends.q1,   sug: trends.sugQ1   },
-              { period: '1H',  trend: trends.half, sug: trends.sugHalf },
+              { period: '1Q',   trend: trends.q1,   sug: trends.sugQ1   },
+              { period: '1H',   trend: trends.half, sug: trends.sugHalf },
               { period: 'FULL', trend: trends.full, sug: trends.sugFull },
             ] as row}
               {@const pOver  = calcProb(row.trend, row.sug, 'OVER')}
@@ -345,7 +316,6 @@
   {/if}
 </div>
 
-<!-- ── Modal guardar pick ────────────────────────────────── -->
 {#if saveTarget}
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -378,9 +348,7 @@
         </div>
       </div>
       <div class="modal__actions">
-        <button class="btn btn--ghost" on:click={closeSave} disabled={savingPick}>
-          Cancelar
-        </button>
+        <button class="btn btn--ghost" on:click={closeSave} disabled={savingPick}>Cancelar</button>
         <button class="btn btn--save" on:click={handleSavePick} disabled={savingPick}>
           {savingPick ? 'Guardando...' : '✅ Guardar en Mis Picks'}
         </button>
@@ -390,11 +358,7 @@
 {/if}
 
 <style>
-  .page {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 32px 20px 80px;
-  }
+  .page { max-width: 900px; margin: 0 auto; padding: 32px 20px 80px; }
   .page__header  { margin-bottom: 28px; }
   .page__title {
     font-family: 'Orbitron', sans-serif;
@@ -420,7 +384,6 @@
     font-weight: 700;
   }
 
-  /* Selectors */
   .selectors {
     display: flex;
     align-items: flex-start;
@@ -478,11 +441,7 @@
   }
 
   .team-preview { margin-top: 12px; }
-  .team-preview__row {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
+  .team-preview__row { display: flex; gap: 8px; flex-wrap: wrap; }
   .team-preview__stat {
     display: flex;
     flex-direction: column;
@@ -497,7 +456,6 @@
   .team-preview__lbl  { font-size: .65rem; color: var(--color-text-muted); text-align: center; }
   .team-preview__rank { font-size: .7rem; font-weight: 700; margin-top: 2px; }
 
-  /* Factors */
   .factors {
     background: var(--color-bg-card);
     border: 1px solid var(--color-border);
@@ -505,17 +463,8 @@
     padding: 16px 18px;
     margin-bottom: 22px;
   }
-  .factors__title {
-    font-size: .85rem;
-    font-weight: 700;
-    margin-bottom: 12px;
-    color: var(--color-text-muted);
-  }
-  .factors__grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
+  .factors__title { font-size: .85rem; font-weight: 700; margin-bottom: 12px; color: var(--color-text-muted); }
+  .factors__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   @media (max-width: 500px) { .factors__grid { grid-template-columns: 1fr; } }
 
   .factor-toggle {
@@ -533,7 +482,6 @@
   .factor-toggle input { accent-color: #fbbf24; cursor: pointer; }
   .factor-toggle small  { color: var(--color-text-muted); }
 
-  /* Prediction */
   .prediction {
     background: linear-gradient(135deg, rgba(30,50,100,.5), rgba(10,15,28,.8));
     border: 1px solid rgba(251,191,36,.2);
@@ -544,11 +492,7 @@
   .prediction__title   { font-family: 'Orbitron', sans-serif; font-size: 1.1rem; font-weight: 900; color: #fbbf24; }
   .prediction__sub     { font-size: .83rem; color: var(--color-text-muted); margin-top: 4px; }
 
-  .prediction__grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-  }
+  .prediction__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
   @media (max-width: 600px) { .prediction__grid { grid-template-columns: 1fr; } }
 
   .pred-card {
@@ -562,17 +506,12 @@
     gap: 6px;
     text-align: center;
   }
-  .pred-card__period   { font-family: 'Orbitron', sans-serif; font-size: .75rem; font-weight: 700; color: var(--color-text-muted); letter-spacing: .08em; }
-  .pred-card__trend    { font-size: 2rem; font-weight: 900; color: #fff; line-height: 1; }
+  .pred-card__period    { font-family: 'Orbitron', sans-serif; font-size: .75rem; font-weight: 700; color: var(--color-text-muted); letter-spacing: .08em; }
+  .pred-card__trend     { font-size: 2rem; font-weight: 900; color: #fff; line-height: 1; }
   .pred-card__sug-label { font-size: .68rem; color: var(--color-text-muted); text-transform: uppercase; }
-  .pred-card__sug      { font-size: 1.2rem; font-weight: 800; color: #fbbf24; }
+  .pred-card__sug       { font-size: 1.2rem; font-weight: 800; color: #fbbf24; }
 
-  .pred-card__probs {
-    display: flex;
-    gap: 8px;
-    width: 100%;
-    margin-top: 4px;
-  }
+  .pred-card__probs { display: flex; gap: 8px; width: 100%; margin-top: 4px; }
   .prob {
     flex: 1;
     display: flex;
@@ -589,13 +528,7 @@
   .prob__label { font-size: .65rem; color: var(--color-text-muted); text-transform: uppercase; }
   .prob__val   { font-size: .9rem; font-weight: 800; }
 
-  .pred-card__actions {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    width: 100%;
-    margin-top: 4px;
-  }
+  .pred-card__actions { display: flex; flex-direction: column; gap: 6px; width: 100%; margin-top: 4px; }
   .save-btn {
     width: 100%;
     padding: 7px 10px;
@@ -610,7 +543,6 @@
   .save-btn--over  { background: rgba(52,211,153,.15); color: #34d399; border: 1px solid rgba(52,211,153,.3); }
   .save-btn--under { background: rgba(248,113,113,.15); color: #f87171; border: 1px solid rgba(248,113,113,.3); }
 
-  /* Prompt */
   .prompt {
     text-align: center;
     padding: 64px 20px;
@@ -623,27 +555,13 @@
   .prompt span { font-size: 3.5rem; }
   .prompt p    { font-size: .95rem; }
 
-  /* Skeleton */
-  .skeleton-selectors {
-    height: 160px;
-    border-radius: 16px;
-    margin-bottom: 22px;
-    background: linear-gradient(90deg, rgba(255,255,255,.04) 25%, rgba(255,255,255,.07) 50%, rgba(255,255,255,.04) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.4s infinite;
-  }
-  @keyframes shimmer { to { background-position: -200% 0; } }
-
   /* Modal */
   .modal-overlay {
-    position: fixed;
-    inset: 0;
+    position: fixed; inset: 0;
     background: rgba(0,0,0,.65);
     backdrop-filter: blur(4px);
     z-index: 50;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     padding: 20px;
   }
   .modal {
@@ -651,18 +569,12 @@
     border: 1px solid rgba(255,255,255,.12);
     border-radius: 18px;
     padding: 26px 22px;
-    width: 100%;
-    max-width: 420px;
+    width: 100%; max-width: 420px;
   }
-  .modal__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 18px;
-  }
-  .modal__title { font-size: 1rem; font-weight: 800; }
-  .modal__close { background: none; border: none; color: var(--color-text-muted); font-size: 1rem; cursor: pointer; padding: 4px 8px; }
-  .modal__body  { margin-bottom: 18px; }
+  .modal__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .modal__title  { font-size: 1rem; font-weight: 800; }
+  .modal__close  { background: none; border: none; color: var(--color-text-muted); font-size: 1rem; cursor: pointer; padding: 4px 8px; }
+  .modal__body   { margin-bottom: 18px; }
   .modal__actions { display: flex; gap: 10px; justify-content: flex-end; }
 
   .pick-summary { display: flex; flex-direction: column; gap: 10px; }
