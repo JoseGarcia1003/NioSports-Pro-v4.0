@@ -1,5 +1,9 @@
 {
 	"/": [],
+	"/bankroll": [],
 	"/login": [],
-	"/picks": []
+	"/picks": [],
+	"/stats": [],
+	"/totales": [],
+	"/tracking": []
 }
