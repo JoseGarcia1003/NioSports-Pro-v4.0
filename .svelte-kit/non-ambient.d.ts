@@ -42,6 +42,6 @@ declare module "$app/types" {
 		};
 		Pathname(): "/" | "/bankroll" | "/login" | "/picks" | "/stats" | "/totales" | "/tracking";
 		ResolvedPathname(): `${"" | `/${string}`}${ReturnType<AppTypes['Pathname']>}`;
-		Asset(): "/data/nba-stats.json" | "/icons/icon-128.png" | "/icons/icon-144.png" | "/icons/icon-152.png" | "/icons/icon-192.png" | "/icons/icon-384.png" | "/icons/icon-512.png" | "/icons/icon-72.png" | "/icons/icon-96.png" | string & {};
+		Asset(): "/data/backtesting-results.json" | "/data/nba-stats.json" | "/icons/icon-128.png" | "/icons/icon-144.png" | "/icons/icon-152.png" | "/icons/icon-192.png" | "/icons/icon-384.png" | "/icons/icon-512.png" | "/icons/icon-72.png" | "/icons/icon-96.png" | string & {};
 	}
 }
