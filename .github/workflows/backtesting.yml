@@ -1,0 +1,130 @@
+name: Backtesting Semanal del Modelo Predictivo
+
+# ─────────────────────────────────────────────────────────────────
+# Ejecuta el backtesting automáticamente cada lunes a las 10 AM UTC.
+# También puede lanzarse manualmente desde la pestaña Actions.
+#
+# ¿Por qué semanal y no diario?
+# El backtesting procesa hasta 500 partidos históricos — es intensivo
+# en llamadas a la API. Una vez a la semana es suficiente para
+# mantener las métricas actualizadas sin agotar el quota de la API.
+#
+# El resultado se guarda en static/data/backtesting-results.json
+# y se despliega automáticamente a Vercel via el push.
+# ─────────────────────────────────────────────────────────────────
+on:
+  schedule:
+    - cron: '0 10 * * 1'   # Lunes 10 AM UTC (5 AM Ecuador)
+  workflow_dispatch:
+    inputs:
+      season:
+        description: 'Temporada NBA (ej: 2024 para 2024-25)'
+        required: false
+        default: '2024'
+        type: string
+      limit:
+        description: 'Número máximo de partidos a analizar'
+        required: false
+        default: '500'
+        type: string
+
+jobs:
+  backtesting:
+    name: 🔍 Backtesting del motor predictivo
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      # ── 1. Checkout ───────────────────────────────────────────────
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── 2. Node.js ────────────────────────────────────────────────
+      - name: ⚙️ Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # ── 3. Instalar dependencias mínimas ──────────────────────────
+      # Solo necesitamos las deps de runtime — no de build
+      - name: 📦 npm ci --ignore-scripts
+        run: npm ci --ignore-scripts
+
+      # ── 4. Verificar que nba-stats.json existe ────────────────────
+      - name: 📊 Verificar stats de equipos
+        run: |
+          if [ -f "static/data/nba-stats.json" ]; then
+            echo "✅ nba-stats.json encontrado"
+            node -e "
+              const d = JSON.parse(require('fs').readFileSync('static/data/nba-stats.json', 'utf8'));
+              const teams = Object.keys(d).filter(k => !k.startsWith('_'));
+              console.log('   Equipos disponibles:', teams.length);
+            "
+          else
+            echo "❌ nba-stats.json no existe — el backtesting usará datos demo"
+          fi
+
+      # ── 5. Ejecutar backtesting ───────────────────────────────────
+      - name: 🔍 Ejecutar backtesting runner
+        env:
+          BALLDONTLIE_API_KEY: ${{ secrets.BALLDONTLIE_API_KEY }}
+        run: |
+          SEASON="${{ inputs.season || '2024' }}"
+          LIMIT="${{ inputs.limit || '500' }}"
+          echo "📊 Temporada: $SEASON | Límite: $LIMIT partidos"
+          node scripts/backtesting-runner.js --season "$SEASON" --limit "$LIMIT"
+
+      # ── 6. Validar el JSON generado ───────────────────────────────
+      - name: 🔍 Validar backtesting-results.json
+        run: |
+          node -e "
+            const fs = require('fs');
+            const d  = JSON.parse(fs.readFileSync('static/data/backtesting-results.json', 'utf8'));
+            const m  = d.metrics;
+            console.log('✅ JSON válido');
+            console.log('   Win rate:     ' + m.winRate + '%');
+            console.log('   Total picks:  ' + m.total);
+            console.log('   Tiene edge:   ' + (m.hasEdge ? 'SÍ' : 'NO'));
+            if (m.total < 10) {
+              console.log('⚠️ ADVERTENCIA: muy pocos picks para ser estadísticamente significativo');
+            }
+          "
+
+      # ── 7. Commit si hubo cambios ────────────────────────────────
+      - name: 💾 Commit & Push resultados
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name  "GitHub Actions [NioSports Backtesting]"
+          git add static/data/backtesting-results.json
+          if git diff --staged --quiet; then
+            echo "ℹ️ Sin cambios en los resultados — no se hace commit"
+          else
+            git commit -m "📊 Backtesting actualizado — $(date -u +'%Y-%m-%d')"
+            git push
+            echo "✅ Resultados actualizados y desplegados"
+          fi
+
+      # ── 8. Resumen ────────────────────────────────────────────────
+      - name: 📋 Resumen del backtesting
+        if: always()
+        run: |
+          echo "═══════════════════════════════════════════"
+          echo "  Backtesting completado: $(date -u)"
+          node -e "
+            try {
+              const d = JSON.parse(require('fs').readFileSync('static/data/backtesting-results.json', 'utf8'));
+              const m = d.metrics;
+              const meta = d._meta;
+              console.log('  Win rate:     ' + m.winRate + '%  (break-even: 52.4%)');
+              console.log('  Total picks:  ' + m.total);
+              console.log('  Edge:         ' + (m.hasEdge ? '✅ SÍ' : '❌ NO'));
+              console.log('  Modelo v:     ' + meta.modelVersion);
+              console.log('  Fuente:       ' + meta.source);
+            } catch(e) {
+              console.log('  No se pudo leer el resultado');
+            }
+          " || true
+          echo "═══════════════════════════════════════════"

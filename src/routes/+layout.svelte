@@ -1,16 +1,5 @@
 <!-- src/routes/+layout.svelte -->
-<!--
-  EL LAYOUT RAÍZ — el equivalente del <body> del index.html actual.
-
-  En SvelteKit, el layout raíz es el componente que envuelve TODAS
-  las páginas. <slot /> es donde se renderiza el contenido de la
-  página activa. Si navegas de /picks a /bankroll, solo el <slot />
-  cambia — Nav, DemoBanner y ToastContainer se mantienen montados.
-
-  Esto resuelve uno de los problemas del index.html actual: cada
-  "navegación" destruía y reconstruía el DOM completo, lo que causaba
-  parpadeos y perdía el estado de scroll.
--->
+<!-- FASE 5: Añadidos SystemStatus y Onboarding al shell global -->
 <script>
   import { onMount }         from 'svelte';
   import { goto }            from '$app/navigation';
@@ -19,6 +8,8 @@
   import Nav                 from '$lib/components/Nav.svelte';
   import DemoBanner          from '$lib/components/DemoBanner.svelte';
   import ToastContainer      from '$lib/components/ToastContainer.svelte';
+  import SystemStatus        from '$lib/components/SystemStatus.svelte';
+  import Onboarding          from '$lib/components/Onboarding.svelte';
 
   import { initFirebase }    from '$lib/firebase';
   import { authStore,
@@ -27,44 +18,24 @@
   import { theme }           from '$lib/stores/ui';
   import { browser }         from '$app/environment';
 
-  // Rutas que no requieren autenticación
   const PUBLIC_ROUTES = ['/login', '/register', '/forgot-password'];
 
   onMount(async () => {
-    // Inicializar Firebase una sola vez cuando la app monta
     await initFirebase();
-
-    // Aplicar tema guardado al elemento raíz
     document.documentElement.setAttribute('data-theme', $theme);
   });
 
-  // Protección de rutas: si el usuario no está autenticado y la
-  // ruta no es pública, redirigir al login.
-  // El bloque $: se re-evalúa cada vez que $authLoading, $isAuthenticated
-  // o $page.url.pathname cambian — incluyendo después de cada navegación.
   $: if (browser && !$authLoading) {
     const isPublic = PUBLIC_ROUTES.some(r => $page.url.pathname.startsWith(r));
-    if (!$isAuthenticated && !isPublic) {
-      goto('/login');
-    }
-    if ($isAuthenticated && $page.url.pathname === '/login') {
-      goto('/');
-    }
+    if (!$isAuthenticated && !isPublic) goto('/login');
+    if ($isAuthenticated && $page.url.pathname === '/login') goto('/');
   }
 
-  // Detectar si la página actual es pública para no mostrar el Nav
   $: isPublicPage = PUBLIC_ROUTES.some(r => $page.url.pathname.startsWith(r));
 </script>
 
-<!--
-  El atributo data-theme en el <div> raíz aplica el tema a toda la app.
-  Las variables CSS definidas en app.css reaccionan a este atributo:
-    [data-theme="dark"]  { --bg: #0a0f1c; --text: #fff; }
-    [data-theme="light"] { --bg: #f8fafc; --text: #111; }
--->
 <div data-theme={$theme} class="app-shell">
 
-  <!-- Pantalla de carga inicial mientras Firebase verifica la sesión -->
   {#if $authLoading}
     <div class="app-loading" role="status" aria-label="Cargando NioSports">
       <div class="app-loading__spinner"></div>
@@ -72,33 +43,34 @@
     </div>
 
   {:else}
-    <!-- Nav solo en rutas protegidas (no en login/register) -->
     {#if !isPublicPage}
-      <Nav />
-      <DemoBanner />
+      <!-- Bloque del header: Nav + DemoBanner + SystemStatus -->
+      <div class="app-header">
+        <Nav />
+        <DemoBanner />
+        <!-- SystemStatus va pegado al Nav, debajo de él -->
+        <SystemStatus />
+      </div>
     {/if}
 
-    <!--
-      main tiene padding-top para compensar el navbar fijo de 64px.
-      Solo aplica en rutas protegidas — las páginas públicas (login)
-      usan su propio layout centrado sin offset.
-    -->
     <main
       id="main-content"
       class="app-main"
       class:app-main--with-nav={!isPublicPage}
     >
-      <!-- Aquí SvelteKit renderiza la página activa -->
       <slot />
     </main>
+
+    <!-- Onboarding — solo para usuarios autenticados, primera vez -->
+    {#if !isPublicPage && $isAuthenticated}
+      <Onboarding />
+    {/if}
   {/if}
 
-  <!-- Los toasts siempre están disponibles, en cualquier ruta -->
   <ToastContainer />
 </div>
 
 <style>
-  /* Variables globales del tema — la única fuente de verdad para colores */
   :global([data-theme="dark"]) {
     --color-bg:          #0a0f1c;
     --color-bg-card:     rgba(255,255,255,0.05);
@@ -119,7 +91,6 @@
     --color-accent-dark: #b45309;
   }
 
-  /* Reset global mínimo */
   :global(*, *::before, *::after) { box-sizing: border-box; margin: 0; padding: 0; }
   :global(body) {
     font-family: 'DM Sans', system-ui, sans-serif;
@@ -132,12 +103,23 @@
 
   .app-shell { min-height: 100vh; }
 
-  .app-main { width: 100%; }
-  .app-main--with-nav {
-    padding-top: 64px; /* Altura del navbar fijo */
+  /* El header agrupa Nav + DemoBanner + SystemStatus en posición fija */
+  .app-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
   }
 
-  /* Pantalla de carga inicial */
+  .app-main { width: 100%; }
+  .app-main--with-nav {
+    /* Nav (64px) + SystemStatus (~28px) = ~92px de offset */
+    padding-top: 92px;
+  }
+
   .app-loading {
     min-height: 100vh;
     display: flex;

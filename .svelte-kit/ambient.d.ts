@@ -54,7 +54,8 @@ declare module '$env/static/private' {
 	export const ComSpec: string;
 	export const DriverData: string;
 	export const EDITOR: string;
-	export const EFC_8460_1592913036: string;
+	export const EFC_12220_1592913036: string;
+	export const GIT_ASKPASS: string;
 	export const HOME: string;
 	export const HOMEDRIVE: string;
 	export const HOMEPATH: string;
@@ -115,6 +116,10 @@ declare module '$env/static/private' {
 	export const USERNAME: string;
 	export const USERPROFILE: string;
 	export const VSCODE_A11Y_MODE: string;
+	export const VSCODE_GIT_ASKPASS_EXTRA_ARGS: string;
+	export const VSCODE_GIT_ASKPASS_MAIN: string;
+	export const VSCODE_GIT_ASKPASS_NODE: string;
+	export const VSCODE_GIT_IPC_HANDLE: string;
 	export const VSCODE_INJECTION: string;
 	export const VSCODE_NONCE: string;
 	export const VSCODE_STABLE: string;
@@ -228,7 +233,8 @@ declare module '$env/dynamic/private' {
 		ComSpec: string;
 		DriverData: string;
 		EDITOR: string;
-		EFC_8460_1592913036: string;
+		EFC_12220_1592913036: string;
+		GIT_ASKPASS: string;
 		HOME: string;
 		HOMEDRIVE: string;
 		HOMEPATH: string;
@@ -289,6 +295,10 @@ declare module '$env/dynamic/private' {
 		USERNAME: string;
 		USERPROFILE: string;
 		VSCODE_A11Y_MODE: string;
+		VSCODE_GIT_ASKPASS_EXTRA_ARGS: string;
+		VSCODE_GIT_ASKPASS_MAIN: string;
+		VSCODE_GIT_ASKPASS_NODE: string;
+		VSCODE_GIT_IPC_HANDLE: string;
 		VSCODE_INJECTION: string;
 		VSCODE_NONCE: string;
 		VSCODE_STABLE: string;

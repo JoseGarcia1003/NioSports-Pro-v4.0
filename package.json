@@ -12,7 +12,8 @@
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
     "test": "vitest",
-    "lint": "eslint src --ext .js,.svelte"
+    "lint": "eslint src --ext .js,.svelte",
+    "backtesting": "node scripts/backtesting-runner.js"
   },
   "dependencies": {
     "@sentry/sveltekit": "^10.43.0",
