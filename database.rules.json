@@ -30,14 +30,41 @@
               "line": {
                 ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 999"
               },
-              "odds": {
-                ".validate": "newData.isNumber() && newData.val() >= 1.0 && newData.val() <= 50"
+              "projection": {
+                ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 999"
               },
-              "status": {
-                ".validate": "newData.val() === 'pending' || newData.val() === 'win' || newData.val() === 'loss' || newData.val() === 'push'"
+              "probability": {
+                ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1"
+              },
+              "probabilityPercent": {
+                ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100"
+              },
+              "confidence": {
+                ".validate": "newData.val() === 'HIGH' || newData.val() === 'MEDIUM' || newData.val() === 'LOW'"
+              },
+              "edge": {
+                ".validate": "newData.isNumber() && newData.val() >= -50 && newData.val() <= 50"
               },
               "ev": {
                 ".validate": "newData.isNumber() || newData.val() === null"
+              },
+              "evPercent": {
+                ".validate": "newData.isNumber() || newData.val() === null"
+              },
+              "odds": {
+                ".validate": "newData.isNumber() && newData.val() >= -1000 && newData.val() <= 10000"
+              },
+              "modelVersion": {
+                ".validate": "newData.isString() && newData.val().length <= 20"
+              },
+              "source": {
+                ".validate": "newData.isString() && newData.val().length <= 50"
+              },
+              "totalAdjustment": {
+                ".validate": "newData.isNumber() || newData.val() === null"
+              },
+              "status": {
+                ".validate": "newData.val() === 'pending' || newData.val() === 'win' || newData.val() === 'loss' || newData.val() === 'push'"
               },
               "closingLine": {
                 ".validate": "newData.isNumber() || newData.val() === null"

@@ -49,3 +49,14 @@ export {
   PERIODS,
   BETTING
 } from './constants.js';
+
+// Team Mapping
+export {
+  TEAM_NAME_MAP,
+  TEAM_NAME_REVERSE,
+  toShortName,
+  toFullName,
+  isValidTeam,
+  getAllShortNames,
+  getAllFullNames
+} from './team-mapping.js';
