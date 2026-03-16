@@ -46,7 +46,6 @@ declare module '$env/static/private' {
 	export const ACLOCAL_PATH: string;
 	export const ALLUSERSPROFILE: string;
 	export const APPDATA: string;
-	export const BASE_URL: string;
 	export const CHROME_CRASHPAD_PIPE_NAME: string;
 	export const COLOR: string;
 	export const COLORTERM: string;
@@ -55,7 +54,6 @@ declare module '$env/static/private' {
 	export const COMPUTERNAME: string;
 	export const COMSPEC: string;
 	export const CONFIG_SITE: string;
-	export const DEV: string;
 	export const DISPLAY: string;
 	export const DriverData: string;
 	export const EDITOR: string;
@@ -76,7 +74,6 @@ declare module '$env/static/private' {
 	export const MINGW_CHOST: string;
 	export const MINGW_PACKAGE_PREFIX: string;
 	export const MINGW_PREFIX: string;
-	export const MODE: string;
 	export const MSYSTEM: string;
 	export const MSYSTEM_CARCH: string;
 	export const MSYSTEM_CHOST: string;
@@ -119,7 +116,6 @@ declare module '$env/static/private' {
 	export const PROCESSOR_IDENTIFIER: string;
 	export const PROCESSOR_LEVEL: string;
 	export const PROCESSOR_REVISION: string;
-	export const PROD: string;
 	export const ProgramData: string;
 	export const PROGRAMFILES: string;
 	export const ProgramW6432: string;
@@ -137,14 +133,12 @@ declare module '$env/static/private' {
 	export const TERM: string;
 	export const TERM_PROGRAM: string;
 	export const TERM_PROGRAM_VERSION: string;
-	export const TEST: string;
 	export const TMP: string;
 	export const TMPDIR: string;
 	export const USERDOMAIN: string;
 	export const USERDOMAIN_ROAMINGPROFILE: string;
 	export const USERNAME: string;
 	export const USERPROFILE: string;
-	export const VITEST: string;
 	export const VSCODE_GIT_ASKPASS_EXTRA_ARGS: string;
 	export const VSCODE_GIT_ASKPASS_MAIN: string;
 	export const VSCODE_GIT_ASKPASS_NODE: string;
@@ -253,7 +247,6 @@ declare module '$env/dynamic/private' {
 		ACLOCAL_PATH: string;
 		ALLUSERSPROFILE: string;
 		APPDATA: string;
-		BASE_URL: string;
 		CHROME_CRASHPAD_PIPE_NAME: string;
 		COLOR: string;
 		COLORTERM: string;
@@ -262,7 +255,6 @@ declare module '$env/dynamic/private' {
 		COMPUTERNAME: string;
 		COMSPEC: string;
 		CONFIG_SITE: string;
-		DEV: string;
 		DISPLAY: string;
 		DriverData: string;
 		EDITOR: string;
@@ -283,7 +275,6 @@ declare module '$env/dynamic/private' {
 		MINGW_CHOST: string;
 		MINGW_PACKAGE_PREFIX: string;
 		MINGW_PREFIX: string;
-		MODE: string;
 		MSYSTEM: string;
 		MSYSTEM_CARCH: string;
 		MSYSTEM_CHOST: string;
@@ -326,7 +317,6 @@ declare module '$env/dynamic/private' {
 		PROCESSOR_IDENTIFIER: string;
 		PROCESSOR_LEVEL: string;
 		PROCESSOR_REVISION: string;
-		PROD: string;
 		ProgramData: string;
 		PROGRAMFILES: string;
 		ProgramW6432: string;
@@ -344,14 +334,12 @@ declare module '$env/dynamic/private' {
 		TERM: string;
 		TERM_PROGRAM: string;
 		TERM_PROGRAM_VERSION: string;
-		TEST: string;
 		TMP: string;
 		TMPDIR: string;
 		USERDOMAIN: string;
 		USERDOMAIN_ROAMINGPROFILE: string;
 		USERNAME: string;
 		USERPROFILE: string;
-		VITEST: string;
 		VSCODE_GIT_ASKPASS_EXTRA_ARGS: string;
 		VSCODE_GIT_ASKPASS_MAIN: string;
 		VSCODE_GIT_ASKPASS_NODE: string;
