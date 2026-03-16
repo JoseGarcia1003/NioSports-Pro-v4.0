@@ -52,7 +52,7 @@
                 ".validate": "newData.isNumber() || newData.val() === null"
               },
               "odds": {
-                ".validate": "newData.isNumber() && newData.val() >= -1000 && newData.val() <= 10000"
+                ".validate": "newData.isNumber() && newData.val() >= -10000 && newData.val() <= 10000"
               },
               "modelVersion": {
                 ".validate": "newData.isString() && newData.val().length <= 20"
@@ -86,6 +86,18 @@
               },
               "actualResult": {
                 ".validate": "newData.isNumber() || newData.val() === null"
+              },
+              "didBet": {
+                ".validate": "newData.isBoolean()"
+              },
+              "betAmount": {
+                ".validate": "newData.isNumber() && newData.val() >= 0 || newData.val() === null"
+              },
+              "actualTotal": {
+                ".validate": "newData.isNumber() && newData.val() >= 0 || newData.val() === null"
+              },
+              "modelError": {
+                ".validate": "newData.isNumber() || newData.val() === null"
               }
             }
           }
@@ -93,7 +105,7 @@
 
         "bankroll": {
           "current": {
-            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000000"
+            ".validate": "newData.isNumber() && newData.val() >= -10000000 && newData.val() <= 10000000"
           },
           "initial": {
             ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000000"
@@ -111,16 +123,19 @@
                 ".validate": "newData.isString()"
               },
               "type": {
-                ".validate": "newData.val() === 'deposit' || newData.val() === 'withdraw'"
+                ".validate": "newData.val() === 'deposit' || newData.val() === 'withdraw' || newData.val() === 'bet_win' || newData.val() === 'bet_loss' || newData.val() === 'bet_push'"
               },
               "amount": {
-                ".validate": "newData.isNumber() && newData.val() > 0"
+                ".validate": "newData.isNumber() && newData.val() >= 0"
               },
               "balance": {
-                ".validate": "newData.isNumber() && newData.val() >= 0"
+                ".validate": "newData.isNumber()"
               },
               "note": {
                 ".validate": "newData.isString() && newData.val().length <= 200 || newData.val() === null"
+              },
+              "pickId": {
+                ".validate": "newData.isString() || newData.val() === null"
               }
             }
           }

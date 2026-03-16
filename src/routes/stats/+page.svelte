@@ -1,6 +1,5 @@
 <!-- src/routes/stats/+page.svelte -->
 <!--
-  REEMPLAZA: renderDashboard() de renders.js
   Dashboard de análisis avanzado: profit acumulado, rendimiento por
   periodo, CLV tracker, top equipos y desglose de picks.
 -->
@@ -45,6 +44,25 @@
     if (periodCanvas && resolvedPicks.length >= 1) buildPeriodChart();
   });
 
+  // ── Función para convertir odds americano a decimal ─────────────
+  function americanToDecimal(odds) {
+    const numOdds = parseFloat(odds);
+    if (isNaN(numOdds)) return 1.91; // Default -110 = 1.91
+    if (numOdds > 0) {
+      // Odds positivo: +150 = 2.50
+      return (numOdds / 100) + 1;
+    } else {
+      // Odds negativo: -110 = 1.91
+      return (100 / Math.abs(numOdds)) + 1;
+    }
+  }
+
+  // Calcular ganancia por unidad para un pick ganador
+  function getWinProfit(odds) {
+    const decimal = americanToDecimal(odds || -110);
+    return decimal - 1; // Ganancia neta por unidad apostada
+  }
+
   // ── Stats derivadas ─────────────────────────────────────────────
   $: allPicks      = $picksTotales;
   $: resolvedPicks = allPicks.filter(p => p.status && p.status !== 'pending')
@@ -54,17 +72,17 @@
   $: wins    = resolvedPicks.filter(p => p.status === 'win').length;
   $: losses  = resolvedPicks.filter(p => p.status === 'loss').length;
   $: pushes  = resolvedPicks.filter(p => p.status === 'push').length;
-  $: total   = resolvedPicks.length;
+  $: total   = wins + losses; // Solo picks con resultado definitivo (sin pushes)
 
-  $: winRate = (wins + losses) > 0
-               ? ((wins / (wins + losses)) * 100).toFixed(1)
+  $: winRate = total > 0
+               ? ((wins / total) * 100).toFixed(1)
                : '0.0';
 
-  // Profit en unidades (cada win +odds-1, cada loss -1)
+  // Profit en unidades (cada win +ganancia según odds, cada loss -1)
   $: profitUnits = resolvedPicks.reduce((acc, p) => {
-    if (p.status === 'win')  return acc + ((parseFloat(p.odds) || 1.91) - 1);
+    if (p.status === 'win')  return acc + getWinProfit(p.odds);
     if (p.status === 'loss') return acc - 1;
-    return acc;
+    return acc; // push = 0
   }, 0);
 
   $: roi = total > 0
@@ -82,7 +100,7 @@
       }, 0) / picksWithCLV.length).toFixed(2)
     : null;
 
-  // Rendimiento por periodo (1Q, 1H, FULL, etc.)
+  // Rendimiento por periodo (Q1, HALF, FULL, etc.)
   $: periodStats = resolvedPicks.reduce((acc, p) => {
     const period = p.period || 'FULL';
     if (!acc[period]) acc[period] = { wins: 0, losses: 0, pushes: 0 };
@@ -110,8 +128,14 @@
       [p.localTeam, p.awayTeam].forEach(team => {
         if (!team) return;
         if (!map[team]) map[team] = { wins: 0, losses: 0, profit: 0 };
-        if (p.status === 'win')  { map[team].wins++;   map[team].profit += (parseFloat(p.odds) || 1.91) - 1; }
-        if (p.status === 'loss') { map[team].losses++; map[team].profit -= 1; }
+        if (p.status === 'win') {
+          map[team].wins++;
+          map[team].profit += getWinProfit(p.odds);
+        }
+        if (p.status === 'loss') {
+          map[team].losses++;
+          map[team].profit -= 1;
+        }
       });
     });
     return Object.entries(map)
@@ -133,10 +157,12 @@
 
     let cumulative = 0;
     const data = resolvedPicks.map(p => {
-      if (p.status === 'win')  cumulative += (parseFloat(p.odds) || 1.91) - 1;
+      if (p.status === 'win')  cumulative += getWinProfit(p.odds);
       if (p.status === 'loss') cumulative -= 1;
-      return { x: new Date(p.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }),
-               y: parseFloat(cumulative.toFixed(2)) };
+      return { 
+        x: new Date(p.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }),
+        y: parseFloat(cumulative.toFixed(2)) 
+      };
     });
 
     const isPositive = data[data.length - 1]?.y >= 0;
