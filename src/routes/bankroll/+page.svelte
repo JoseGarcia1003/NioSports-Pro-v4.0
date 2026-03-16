@@ -65,6 +65,39 @@
                      ? ((wins / (wins + losses)) * 100).toFixed(1)
                      : '—';
 
+  // Helper para mostrar info del movimiento
+  function getEntryDisplay(entry) {
+    switch (entry.type) {
+      case 'deposit':
+        return { icon: '⬆️', label: 'Depósito', colorClass: 'pos' };
+      case 'withdraw':
+        return { icon: '⬇️', label: 'Retiro', colorClass: 'neg' };
+      case 'bet_win':
+        return { icon: '✅', label: 'Apuesta Ganada', colorClass: 'pos' };
+      case 'bet_loss':
+        return { icon: '❌', label: 'Apuesta Perdida', colorClass: 'neg' };
+      case 'bet_push':
+        return { icon: '↔️', label: 'Push (Empate)', colorClass: 'neutral' };
+      default:
+        return { icon: '📝', label: entry.type, colorClass: 'neutral' };
+    }
+  }
+
+  // Helper para mostrar el monto con signo correcto
+  function getAmountDisplay(entry) {
+    const isPositive = entry.type === 'deposit' || entry.type === 'bet_win';
+    const isNeutral = entry.type === 'bet_push';
+    
+    if (isNeutral) {
+      return { text: '$0.00', colorClass: 'neutral' };
+    }
+    
+    return {
+      text: `${isPositive ? '+' : '-'}$${entry.amount.toFixed(2)}`,
+      colorClass: isPositive ? 'pos' : 'neg'
+    };
+  }
+
   function buildChart(historyData) {
     if (typeof window === 'undefined' || !window.Chart) return;
     if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
@@ -157,7 +190,6 @@
   </div>
 
   {#if loading}
-    <!-- ✅ FASE 6: SkeletonCard reemplaza skeleton-grid y skeleton-chart manuales -->
     <SkeletonCard type="kpi" count={4} />
     <SkeletonCard type="chart" />
 
@@ -228,20 +260,20 @@
       {:else}
         <div class="history-list">
           {#each [...history].reverse() as entry, i (entry.date + i)}
+            {@const display = getEntryDisplay(entry)}
+            {@const amountDisplay = getAmountDisplay(entry)}
             <div class="history-item">
-              <div class="history-item__icon">{entry.type === 'deposit' ? '⬆️' : '⬇️'}</div>
+              <div class="history-item__icon">{display.icon}</div>
               <div class="history-item__info">
-                <span class="history-item__type">{entry.type === 'deposit' ? 'Depósito' : 'Retiro'}</span>
+                <span class="history-item__type">{display.label}</span>
                 {#if entry.note}<span class="history-item__note">{entry.note}</span>{/if}
                 <span class="history-item__date">
                   {new Date(entry.date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
               <div class="history-item__right">
-                <span class="history-item__amount"
-                  class:history-item__amount--pos={entry.type === 'deposit'}
-                  class:history-item__amount--neg={entry.type === 'withdraw'}>
-                  {entry.type === 'deposit' ? '+' : '−'}${entry.amount.toFixed(2)}
+                <span class="history-item__amount history-item__amount--{amountDisplay.colorClass}">
+                  {amountDisplay.text}
                 </span>
                 <span class="history-item__balance">Balance: ${entry.balance.toFixed(2)}</span>
               </div>
@@ -370,6 +402,7 @@
   .history-item__amount { font-weight: 800; font-size: 1rem; font-family: 'DM Mono', monospace; }
   .history-item__amount--pos { color: #34d399; }
   .history-item__amount--neg { color: #f87171; }
+  .history-item__amount--neutral { color: var(--color-text-muted); }
   .history-item__balance     { font-size: 0.72rem; color: var(--color-text-muted); }
 
   .empty-state { text-align: center; padding: 48px 20px; color: var(--color-text-muted); display: flex; flex-direction: column; align-items: center; gap: 8px; }
@@ -391,4 +424,4 @@
 
   .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
   @keyframes spin { to { transform: rotate(360deg); } }
-</style>  
+</style>
