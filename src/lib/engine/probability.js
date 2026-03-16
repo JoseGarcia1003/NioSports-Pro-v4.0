@@ -148,13 +148,13 @@ export function calculateEV(winProbability, americanOdds = BETTING.STANDARD_JUIC
   const potentialLoss = 100;
 
   const ev = (winProbability * potentialWin) - (lossProbability * potentialLoss);
-  const evPercent = ev / 100; // Como porcentaje del stake
+  const evPercent = ev / 100; // Como porcentaje del stake (0.05 = 5%)
 
   return {
     ev: Math.round(ev * 100) / 100,
-    evPercent: Math.round(evPercent * 1000) / 10, // 1 decimal
+    evPercent: Math.round(evPercent * 1000) / 10, // 1 decimal (ej: 5.2)
     isPositive: ev > 0,
-    meetsThreshold: evPercent >= BETTING.MIN_EV_THRESHOLD * 100
+    meetsThreshold: evPercent >= BETTING.MIN_EV_THRESHOLD // FIX: comparar sin multiplicar
   };
 }
 
