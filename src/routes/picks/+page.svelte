@@ -22,6 +22,9 @@
   let isDemo = false;
   let gamesCount = 0;
 
+  // Trackear picks guardados para ocultarlos de la lista IA
+  let savedPickKeys = new Set();
+
   // Cargar picks del usuario
   onMount(async () => {
     if (!$userId) return;
@@ -45,6 +48,7 @@
   async function loadAIPicks() {
     aiLoading = true;
     aiError = null;
+    savedPickKeys = new Set(); // Reset al recargar
 
     try {
       // Obtener stats de equipos
@@ -68,7 +72,7 @@
 
       // Generar picks IA
       aiPicks = generateAIPicks(games, stats, {
-        maxPicks: 10,
+        maxPicks: 12,
         minEV: 1.5,
         minEdge: 1.0,
       });
@@ -83,18 +87,22 @@
 
   async function handleDeletePick(event) {
     const pickId = event.detail;
-    if (!$userId) return;
+    if (!$userId || !pickId) {
+      toasts.error('Error: No se pudo identificar el pick.');
+      return;
+    }
     try {
       await dbRemove(userPath($userId, 'picks', 'totales', pickId));
       toasts.success('Pick eliminado.');
-    } catch {
+    } catch (err) {
+      console.error('Error deleting pick:', err);
       toasts.error('No se pudo eliminar el pick.');
     }
   }
 
   async function handleResultPick(event) {
     const { id, result } = event.detail;
-    if (!$userId) return;
+    if (!$userId || !id) return;
     try {
       await dbWrite(userPath($userId, 'picks', 'totales', id, 'status'), result);
       toasts.success(`Pick marcado como ${result === 'win' ? '✅ ganado' : result === 'loss' ? '❌ perdido' : '↔️ push'}.`);
@@ -107,6 +115,15 @@
     const pick = event.detail;
     if (!$userId) {
       toasts.error('Inicia sesión para guardar picks.');
+      return;
+    }
+
+    // Crear key única para este pick
+    const pickKey = `${pick.homeTeam}-${pick.awayTeam}-${pick.period}-${pick.direction}`;
+    
+    // Verificar si ya fue guardado
+    if (savedPickKeys.has(pickKey)) {
+      toasts.error('Este pick ya fue guardado.');
       return;
     }
 
@@ -130,10 +147,59 @@
         status: 'pending',
         createdAt: new Date().toISOString(),
       });
+      
+      // Marcar como guardado
+      savedPickKeys.add(pickKey);
+      savedPickKeys = savedPickKeys; // Trigger reactivity
+      
       toasts.success(`✅ Pick guardado: ${pick.direction} ${pick.line} (${pick.period})`);
-    } catch {
+    } catch (err) {
+      console.error('Error saving pick:', err);
       toasts.error('No se pudo guardar el pick.');
     }
+  }
+
+  // Función para guardar todos los picks
+  async function handleSaveAllPicks() {
+    if (!$userId) {
+      toasts.error('Inicia sesión para guardar picks.');
+      return;
+    }
+
+    let saved = 0;
+    for (const pick of visibleAIPicks) {
+      const pickKey = `${pick.homeTeam}-${pick.awayTeam}-${pick.period}-${pick.direction}`;
+      if (savedPickKeys.has(pickKey)) continue;
+
+      try {
+        await dbPush(userPath($userId, 'picks', 'totales'), {
+          localTeam: pick.homeTeam,
+          awayTeam: pick.awayTeam,
+          period: pick.period,
+          betType: pick.direction,
+          line: pick.line,
+          projection: pick.projection,
+          probability: pick.probability,
+          probabilityPercent: pick.probabilityPercent,
+          confidence: pick.confidence,
+          ev: pick.ev,
+          evPercent: pick.evPercent,
+          edge: pick.edge,
+          modelVersion: MODEL_VERSION.version,
+          source: 'ai-generator',
+          odds: -110,
+          status: 'pending',
+          createdAt: new Date().toISOString(),
+        });
+        savedPickKeys.add(pickKey);
+        saved++;
+      } catch (err) {
+        console.error('Error saving pick:', err);
+      }
+    }
+    
+    savedPickKeys = savedPickKeys; // Trigger reactivity
+    toasts.success(`✅ ${saved} picks guardados correctamente.`);
   }
 
   // Estadísticas de picks del usuario
@@ -144,8 +210,17 @@
   $: pending = picks.filter(p => p.status === 'pending').length;
   $: winRate = (wins + losses) > 0 ? ((wins / (wins + losses)) * 100).toFixed(1) : '—';
 
-  // Resumen de picks IA
-  $: aiSummary = getPicksSummary(aiPicks);
+  // Filtrar picks IA que ya fueron guardados
+  $: visibleAIPicks = aiPicks.filter(pick => {
+    const pickKey = `${pick.homeTeam}-${pick.awayTeam}-${pick.period}-${pick.direction}`;
+    return !savedPickKeys.has(pickKey);
+  });
+
+  // Resumen de picks IA (solo los visibles)
+  $: aiSummary = getPicksSummary(visibleAIPicks);
+  
+  // Verificar si todos fueron guardados
+  $: allSaved = aiPicks.length > 0 && visibleAIPicks.length === 0;
 </script>
 
 <svelte:head>
@@ -166,8 +241,8 @@
       on:click={() => activeTab = 'ai'}
     >
       🎯 Picks del Día
-      {#if aiPicks.length > 0}
-        <span class="tab-badge">{aiPicks.length}</span>
+      {#if visibleAIPicks.length > 0}
+        <span class="tab-badge">{visibleAIPicks.length}</span>
       {/if}
     </button>
     <button 
@@ -203,7 +278,17 @@
         <button class="retry-btn" on:click={loadAIPicks}>Reintentar</button>
       </div>
 
-    {:else if aiPicks.length === 0}
+    {:else if allSaved}
+      <div class="all-saved-state">
+        <p>🎉</p>
+        <p>¡Todos los picks han sido guardados!</p>
+        <p class="muted">Ve a "Mis Picks" para ver tu lista completa.</p>
+        <button class="btn-secondary" on:click={() => activeTab = 'mis-picks'}>
+          Ver Mis Picks →
+        </button>
+      </div>
+
+    {:else if visibleAIPicks.length === 0}
       <div class="empty-state">
         <p>🏀</p>
         <p>No hay picks con valor suficiente para hoy.</p>
@@ -218,7 +303,7 @@
           <span class="summary-label">Partidos</span>
         </div>
         <div class="summary-stat">
-          <span class="summary-value">{aiPicks.length}</span>
+          <span class="summary-value">{visibleAIPicks.length}</span>
           <span class="summary-label">Picks</span>
         </div>
         <div class="summary-stat">
@@ -231,9 +316,18 @@
         </div>
       </div>
 
+      <!-- Botón guardar todos -->
+      {#if visibleAIPicks.length > 1}
+        <div class="save-all-wrapper">
+          <button class="btn-save-all" on:click={handleSaveAllPicks}>
+            💾 Guardar todos los picks ({visibleAIPicks.length})
+          </button>
+        </div>
+      {/if}
+
       <!-- Lista de picks IA -->
       <div class="ai-picks-list">
-        {#each aiPicks as pick (pick.gameId + pick.period)}
+        {#each visibleAIPicks as pick (pick.gameId + pick.period)}
           <AIPickCard {pick} on:save={handleSaveAIPick} />
         {/each}
       </div>
@@ -282,7 +376,7 @@
 
     {:else}
       <div class="picks-list">
-        {#each picks as pick (pick.id ?? pick)}
+        {#each picks as pick (pick.id)}
           <PickCard
             {pick}
             on:delete={handleDeletePick}
@@ -413,6 +507,29 @@
     text-transform: uppercase;
   }
 
+  /* Save All Button */
+  .save-all-wrapper {
+    margin-bottom: 16px;
+  }
+
+  .btn-save-all {
+    width: 100%;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, rgba(251,191,36,.15), rgba(52,211,153,.1));
+    border: 1px solid rgba(251,191,36,.3);
+    border-radius: 12px;
+    color: #fbbf24;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-save-all:hover {
+    background: linear-gradient(135deg, rgba(251,191,36,.25), rgba(52,211,153,.15));
+    transform: translateY(-1px);
+  }
+
   /* AI Picks List */
   .ai-picks-list {
     display: flex;
@@ -482,17 +599,40 @@
   }
   @keyframes shimmer { to { background-position: -200% 0; } }
 
-  .empty-state {
+  .empty-state, .all-saved-state {
     text-align: center;
     padding: 60px 20px;
     color: var(--color-text-muted);
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 10px;
   }
-  .empty-state p:first-child { font-size: 3rem; }
+  .empty-state p:first-child, .all-saved-state p:first-child { font-size: 3rem; }
   .empty-state a { color: var(--color-accent); }
-  .empty-state .muted { font-size: 0.85rem; opacity: 0.7; }
+  .empty-state .muted, .all-saved-state .muted { font-size: 0.85rem; opacity: 0.7; }
+
+  .all-saved-state {
+    background: linear-gradient(135deg, rgba(52,211,153,.05), rgba(251,191,36,.05));
+    border: 1px solid rgba(52,211,153,.2);
+    border-radius: 16px;
+  }
+
+  .btn-secondary {
+    margin-top: 10px;
+    padding: 12px 24px;
+    background: rgba(251,191,36,.15);
+    color: #fbbf24;
+    border: 1px solid rgba(251,191,36,.3);
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-secondary:hover {
+    background: rgba(251,191,36,.25);
+  }
 
   .error-state {
     text-align: center;

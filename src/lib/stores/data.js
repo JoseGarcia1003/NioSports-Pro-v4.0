@@ -59,9 +59,19 @@ export const picksStore = {
 };
 
 // Stores derivados para consumo directo en componentes
-export const picksTotales    = derived(_picks, $p => Object.values($p.totales    || {}));
-export const picksAI         = derived(_picks, $p => Object.values($p.ai         || {}));
-export const picksBacktesting= derived(_picks, $p => Object.values($p.backtesting|| {}));
+export const picksTotales    = derived(_picks, $p => {
+  const data = $p.totales || {};
+  // Incluir el ID de Firebase en cada objeto pick
+  return Object.entries(data).map(([id, pick]) => ({ ...pick, id }));
+});
+export const picksAI         = derived(_picks, $p => {
+  const data = $p.ai || {};
+  return Object.entries(data).map(([id, pick]) => ({ ...pick, id }));
+});
+export const picksBacktesting= derived(_picks, $p => {
+  const data = $p.backtesting || {};
+  return Object.entries(data).map(([id, pick]) => ({ ...pick, id }));
+});
 
 // ── Bankroll ──────────────────────────────────────────────────────
 const _bankroll = writable({
