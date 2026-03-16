@@ -19,7 +19,9 @@
     ? new Date(pick.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })
     : '';
 
-  $: evPositive = pick.ev && parseFloat(pick.ev) >= 0;
+  // FIX: Usar evPercent si existe, sino ev
+  $: evValue = pick.evPercent ?? pick.ev ?? null;
+  $: evPositive = evValue !== null && parseFloat(evValue) >= 0;
 
   $: clvDisplay = (() => {
     if (!pick.closingLine || !pick.line || pick.isCombo) return null;
@@ -29,10 +31,38 @@
     return { value: clv.toFixed(1), positive: clv >= 0 };
   })();
 
-  // Barra de confianza
-  $: confidence = pick.probability ? parseFloat(pick.probability) : 0;
-  $: confColor  = confidence >= 68 ? '#34d399' : confidence >= 55 ? '#fbbf24' : '#f87171';
-  $: confLabel  = confidence >= 68 ? 'Alta confianza' : confidence >= 55 ? 'Confianza media' : 'Baja confianza';
+  // FIX: Usar probabilityPercent si existe, sino convertir probability de decimal a porcentaje
+  $: confidencePct = (() => {
+    if (pick.probabilityPercent) return parseFloat(pick.probabilityPercent);
+    if (pick.probability) {
+      const prob = parseFloat(pick.probability);
+      // Si es menor a 1, es decimal (0.88), convertir a porcentaje
+      return prob < 1 ? Math.round(prob * 100 * 10) / 10 : prob;
+    }
+    return 0;
+  })();
+
+  // FIX: Usar confidence directamente si es texto ('HIGH', 'MEDIUM', 'LOW')
+  $: confLabel = (() => {
+    // Si ya tenemos el campo confidence como texto
+    if (pick.confidence === 'HIGH') return 'Alta confianza';
+    if (pick.confidence === 'MEDIUM') return 'Confianza media';
+    if (pick.confidence === 'LOW') return 'Baja confianza';
+    // Fallback: calcular por porcentaje
+    if (confidencePct >= 65) return 'Alta confianza';
+    if (confidencePct >= 55) return 'Confianza media';
+    return 'Baja confianza';
+  })();
+
+  $: confColor = (() => {
+    if (pick.confidence === 'HIGH') return '#34d399';
+    if (pick.confidence === 'MEDIUM') return '#fbbf24';
+    if (pick.confidence === 'LOW') return '#f87171';
+    // Fallback
+    if (confidencePct >= 65) return '#34d399';
+    if (confidencePct >= 55) return '#fbbf24';
+    return '#f87171';
+  })();
 
   // Factores del modelo (opcionales)
   $: factors = pick.factors ?? [];
@@ -44,7 +74,7 @@
   $: ariaDescription = [
     pick.localTeam + ' vs ' + pick.awayTeam,
     pick.isCombo ? pick.line : (pick.period + ' ' + pick.betType + ' ' + pick.line),
-    confidence + '% confianza. ' + confLabel + '.',
+    confidencePct + '% confianza. ' + confLabel + '.',
     statusLabel,
   ].join('. ');
 
@@ -82,14 +112,14 @@
   </div>
 
   <!-- Barra de confianza -->
-  {#if confidence > 0}
-    <div class="conf-wrap" aria-label="{confLabel}: {confidence}%">
-      <div class="conf-track" role="progressbar" aria-valuenow={confidence} aria-valuemin={0} aria-valuemax={100}>
-        <div class="conf-fill" style="width:{confidence}%;background:{confColor}"></div>
+  {#if confidencePct > 0}
+    <div class="conf-wrap" aria-label="{confLabel}: {confidencePct}%">
+      <div class="conf-track" role="progressbar" aria-valuenow={confidencePct} aria-valuemin={0} aria-valuemax={100}>
+        <div class="conf-fill" style="width:{Math.min(confidencePct, 100)}%;background:{confColor}"></div>
       </div>
       <div class="conf-labels">
         <span class="conf-label" style="color:{confColor}">{confLabel}</span>
-        <span class="conf-pct">{confidence}%</span>
+        <span class="conf-pct">{confidencePct}%</span>
       </div>
     </div>
   {/if}
@@ -98,9 +128,9 @@
   <div class="pick-card__stats">
     {#if date}<span class="stat-date" aria-label="Fecha: {date}">📅 {date}</span>{/if}
     {#if pick.odds}<span class="stat-odds" aria-label="Cuota: {pick.odds}">@{pick.odds}</span>{/if}
-    {#if pick.ev !== null && pick.ev !== undefined}
-      <span class="stat-ev" class:pos={evPositive} class:neg={!evPositive} aria-label="EV: {pick.ev}%">
-        EV {evPositive?'+':''}{pick.ev}%
+    {#if evValue !== null && evValue !== undefined}
+      <span class="stat-ev" class:pos={evPositive} class:neg={!evPositive} aria-label="EV: {evValue}%">
+        EV {evPositive ? '+' : ''}{evValue}%
       </span>
     {/if}
     {#if clvDisplay}
