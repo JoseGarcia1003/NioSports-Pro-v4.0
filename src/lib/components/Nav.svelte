@@ -26,6 +26,7 @@
     { href: '/picks',    label: 'Picks IA', icon: '🤖', ariaLabel: 'Picks generados por IA' },
     { href: '/bankroll', label: 'Bankroll', icon: '💰', ariaLabel: 'Gestión de bankroll' },
     { href: '/stats',    label: 'Stats',    icon: '📈', ariaLabel: 'Estadísticas de rendimiento' },
+    { href: '/results',  label: 'Resultados', icon: '🏆', ariaLabel: 'Track record público' },
     { href: '/tracking', label: 'Tracking', icon: '📋', ariaLabel: 'Tracking de picks' },
   ];
 

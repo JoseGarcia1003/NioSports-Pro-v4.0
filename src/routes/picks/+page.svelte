@@ -258,6 +258,49 @@
         odds: -110,
         status: 'pending',
         createdAt: new Date().toISOString(),
+        // CLV Tracking - línea al momento de guardar
+        lineAtPick: pick.line,
+        lineRecordedAt: new Date().toISOString(),
+      });
+      
+      savedPickKeys.add(pickKey);
+      deletedPickKeys.delete(pickKey);
+      savedPickKeys = savedPickKeys;
+      deletedPickKeys = deletedPickKeys;
+      
+      toasts.success(`✅ Pick guardado: ${pick.direction} ${pick.line} (${pick.period})`);
+    } catch (err) {
+      console.error('Error saving pick:', err);
+      toasts.error('No se pudo guardar el pick.');
+    }
+  }
+
+    const pickKey = `${pick.homeTeam}-${pick.awayTeam}-${pick.period}-${pick.direction}`;
+    
+    if (savedPickKeys.has(pickKey)) {
+      toasts.error('Este pick ya fue guardado.');
+      return;
+    }
+
+    try {
+      await dbPush(userPath($userId, 'picks', 'totales'), {
+        localTeam: pick.homeTeam,
+        awayTeam: pick.awayTeam,
+        period: pick.period,
+        betType: pick.direction,
+        line: pick.line,
+        projection: pick.projection,
+        probability: pick.probability,
+        probabilityPercent: pick.probabilityPercent,
+        confidence: pick.confidence,
+        ev: pick.ev,
+        evPercent: pick.evPercent,
+        edge: pick.edge,
+        modelVersion: MODEL_VERSION.version,
+        source: 'ai-generator',
+        odds: -110,
+        status: 'pending',
+        createdAt: new Date().toISOString(),
       });
       
       savedPickKeys.add(pickKey);
