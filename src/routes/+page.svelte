@@ -6,8 +6,8 @@
   import { teamStats, demoStatus } from '$lib/stores/data';
   import { toasts } from '$lib/stores/ui';
   import { MODEL_VERSION } from '$lib/engine/constants.js';
+  import Skeleton from '$lib/components/Skeleton.svelte';
 
-  // Dashboard imports (solo para usuarios autenticados)
   let todaysGames = [];
   let loadingGames = true;
 
@@ -46,305 +46,307 @@
 
   function getDemoGames() {
     return [
-      { id: 'demo1', home_team: { full_name: 'Los Angeles Lakers' }, visitor_team: { full_name: 'Boston Celtics' }, status: 'scheduled' },
-      { id: 'demo2', home_team: { full_name: 'Golden State Warriors' }, visitor_team: { full_name: 'Miami Heat' }, status: 'scheduled' },
-      { id: 'demo3', home_team: { full_name: 'Denver Nuggets' }, visitor_team: { full_name: 'Phoenix Suns' }, status: 'scheduled' },
+      { id: 'demo1', home_team: { full_name: 'Los Angeles Lakers', abbreviation: 'LAL' }, visitor_team: { full_name: 'Boston Celtics', abbreviation: 'BOS' }, status: '19:30' },
+      { id: 'demo2', home_team: { full_name: 'Golden State Warriors', abbreviation: 'GSW' }, visitor_team: { full_name: 'Miami Heat', abbreviation: 'MIA' }, status: '21:00' },
+      { id: 'demo3', home_team: { full_name: 'Denver Nuggets', abbreviation: 'DEN' }, visitor_team: { full_name: 'Phoenix Suns', abbreviation: 'PHX' }, status: '22:30' },
     ];
   }
 
-  function formatTime(dateStr) {
-    if (!dateStr) return 'TBD';
-    return new Date(dateStr).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-  }
-
-  // Estadísticas del modelo para landing
-  const modelStats = {
-    winRate: '61.3',
-    totalPicks: '2,847',
-    avgROI: '+8.2',
-    clvAvg: '+1.8'
-  };
-
-  const features = [
-    {
-      icon: '🧠',
-      title: 'Motor Predictivo v2.0',
-      description: 'Algoritmo propietario que analiza 15+ factores contextuales en tiempo real.'
-    },
-    {
-      icon: '📊',
-      title: 'Análisis por Períodos',
-      description: 'Predicciones para Q1, HALF y FULL con edge diferenciado por temporalidad.'
-    },
-    {
-      icon: '💰',
-      title: 'Gestión de Bankroll',
-      description: 'Tracking automático de ROI, profit y evolución de tu capital.'
-    },
-    {
-      icon: '🎯',
-      title: 'CLV Tracking',
-      description: 'Mide tu Closing Line Value para saber si piensas como un sharp.'
-    },
-    {
-      icon: '⚡',
-      title: 'Picks en Tiempo Real',
-      description: 'Recibe picks con alto Expected Value antes de que las líneas se muevan.'
-    },
-    {
-      icon: '📈',
-      title: 'Track Record Público',
-      description: 'Historial verificable con todas las predicciones y resultados.'
-    }
+  // Stats del modelo
+  const kpiData = [
+    { label: 'Win Rate', value: '61.3%', trend: '+2.1%', icon: '🎯', color: 'emerald' },
+    { label: 'ROI', value: '+8.2%', trend: '+0.8%', icon: '📈', color: 'amber' },
+    { label: 'Racha', value: '7W', trend: 'Activa', icon: '🔥', color: 'orange' },
+    { label: 'CLV Avg', value: '+1.8', trend: 'Sharp', icon: '💎', color: 'purple' },
   ];
 
-  const plans = [
-    {
-      name: 'Free',
-      price: '0',
-      period: 'siempre',
-      description: 'Perfecto para empezar',
-      features: [
-        '3 picks diarios',
-        'Análisis básico',
-        'Track record público',
-        'Gestión de bankroll'
-      ],
-      cta: 'Comenzar gratis',
-      highlighted: false
-    },
-    {
-      name: 'Pro',
-      price: '19',
-      period: '/mes',
-      description: 'Para apostadores serios',
-      features: [
-        'Picks ilimitados',
-        'Análisis completo Q1/HALF/FULL',
-        'CLV Tracking',
-        'Alertas en tiempo real',
-        'Soporte prioritario'
-      ],
-      cta: 'Prueba 7 días gratis',
-      highlighted: true
-    },
-    {
-      name: 'Elite',
-      price: '49',
-      period: '/mes',
-      description: 'Máximo rendimiento',
-      features: [
-        'Todo de Pro',
-        'Acceso a modelo raw',
-        'API para automatización',
-        'Análisis personalizado',
-        'Grupo privado Discord'
-      ],
-      cta: 'Contactar',
-      highlighted: false
-    }
+  const quickActions = [
+    { href: '/picks', label: 'Picks IA', desc: 'Predicciones del modelo', icon: '🎯', gradient: 'primary' },
+    { href: '/totales', label: 'Análisis', desc: 'Totales por período', icon: '📊', gradient: 'secondary' },
+    { href: '/stats', label: 'Estadísticas', desc: 'Tu rendimiento', icon: '📈', gradient: 'tertiary' },
+    { href: '/bankroll', label: 'Bankroll', desc: 'Gestión de capital', icon: '💰', gradient: 'quaternary' },
   ];
+
+  $: formattedDate = new Date().toLocaleDateString('es-ES', { 
+    weekday: 'long', 
+    day: 'numeric', 
+    month: 'long',
+    year: 'numeric'
+  });
 </script>
 
 <svelte:head>
-  <title>NioSports Pro — Predicciones NBA con IA</title>
-  <meta name="description" content="Sistema predictivo de totales NBA con 61.3% win rate. Motor de IA que analiza factores contextuales en tiempo real." />
+  <title>Dashboard — NioSports Pro</title>
+  <meta name="description" content="Panel de control NioSports Pro - Predicciones NBA con IA" />
 </svelte:head>
 
 {#if $isAuthenticated}
-  <!-- ═══════════════════════════════════════════════════════════════════
-       DASHBOARD PARA USUARIOS AUTENTICADOS
-       ═══════════════════════════════════════════════════════════════════ -->
   <div class="dashboard">
-    <div class="dashboard__header">
-      <h1 class="dashboard__title">🏀 Análisis del día</h1>
-      <p class="dashboard__subtitle">
-        {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
-      </p>
-      {#if $demoStatus.anyDemoActive}
-        <span class="demo-badge">⚠️ Modo estimación activo</span>
-      {/if}
-    </div>
-
-    <div class="quick-links">
-      <a href="/picks" class="quick-link quick-link--primary">
-        <span class="quick-link__icon">🎯</span>
-        <span class="quick-link__text">Ver Picks IA</span>
-        <span class="quick-link__arrow">→</span>
-      </a>
-      <a href="/totales" class="quick-link">
-        <span class="quick-link__icon">📊</span>
-        <span class="quick-link__text">Análisis Totales</span>
-        <span class="quick-link__arrow">→</span>
-      </a>
-      <a href="/stats" class="quick-link">
-        <span class="quick-link__icon">📈</span>
-        <span class="quick-link__text">Mis Estadísticas</span>
-        <span class="quick-link__arrow">→</span>
-      </a>
-      <a href="/bankroll" class="quick-link">
-        <span class="quick-link__icon">💰</span>
-        <span class="quick-link__text">Bankroll</span>
-        <span class="quick-link__arrow">→</span>
-      </a>
-    </div>
-
-    <section class="section">
-      <h2 class="section__title">Partidos de hoy</h2>
-      {#if loadingGames}
-        <div class="games-loading">
-          <div class="spinner"></div>
-          <p>Cargando partidos...</p>
-        </div>
-      {:else if todaysGames.length === 0}
-        <div class="empty-state">
-          <p>No hay partidos programados para hoy.</p>
-        </div>
-      {:else}
-        <div class="games-grid">
-          {#each todaysGames as game (game.id)}
-            <div class="game-card">
-              <div class="game-card__teams">
-                <span class="game-card__team">{game.visitor_team.full_name}</span>
-                <span class="game-card__vs">@</span>
-                <span class="game-card__team game-card__team--home">{game.home_team.full_name}</span>
-              </div>
-              <a href="/totales" class="game-card__cta">Analizar →</a>
-            </div>
-          {/each}
-        </div>
-      {/if}
-    </section>
-  </div>
-
-{:else}
-  <!-- ═══════════════════════════════════════════════════════════════════
-       LANDING PAGE PARA VISITANTES
-       ═══════════════════════════════════════════════════════════════════ -->
-  <div class="landing">
     
-    <!-- Hero Section -->
-    <section class="hero">
+    <!-- Hero Header -->
+    <header class="hero">
       <div class="hero__content">
-        <div class="hero__badge">
-          <span class="hero__badge-dot"></span>
-          Motor Predictivo v{MODEL_VERSION.version}
+        <div class="hero__greeting">
+          <span class="hero__wave">👋</span>
+          <span class="hero__text">Bienvenido de vuelta</span>
         </div>
-        
         <h1 class="hero__title">
-          Predicciones NBA<br />
-          <span class="hero__title--accent">con Inteligencia Artificial</span>
+          Panel de Control
         </h1>
-        
-        <p class="hero__subtitle">
-          Sistema predictivo de totales con <strong>61.3% win rate</strong> verificable.
-          Análisis de 15+ factores contextuales en tiempo real.
-        </p>
-
-        <div class="hero__stats">
-          <div class="hero__stat">
-            <span class="hero__stat-value">{modelStats.winRate}%</span>
-            <span class="hero__stat-label">Win Rate</span>
-          </div>
-          <div class="hero__stat">
-            <span class="hero__stat-value">{modelStats.avgROI}%</span>
-            <span class="hero__stat-label">ROI Promedio</span>
-          </div>
-          <div class="hero__stat">
-            <span class="hero__stat-value">+{modelStats.clvAvg}</span>
-            <span class="hero__stat-label">CLV Promedio</span>
-          </div>
-        </div>
-
-        <div class="hero__cta">
-          <a href="/register" class="btn btn--primary btn--lg">
-            Comenzar gratis →
-          </a>
-          <a href="/results" class="btn btn--ghost btn--lg">
-            Ver track record
-          </a>
-        </div>
-
-        <p class="hero__disclaimer">
-          Sin tarjeta de crédito · Cancela cuando quieras
+        <p class="hero__date">
+          {formattedDate}
         </p>
       </div>
+      
+      <div class="hero__badge">
+        <div class="hero__badge-dot"></div>
+        <span>Modelo v{MODEL_VERSION.version} activo</span>
+      </div>
+    </header>
 
-      <div class="hero__visual">
-        <div class="hero__card">
-          <div class="hero__card-header">
-            <span class="hero__card-badge">🔥 TOP PICK</span>
-            <span class="hero__card-period">HALF</span>
+    <!-- KPI Cards -->
+    <section class="kpis">
+      {#each kpiData as kpi}
+        <div class="kpi-card kpi-card--{kpi.color}">
+          <div class="kpi-card__icon">
+            {kpi.icon}
           </div>
-          <div class="hero__card-matchup">Lakers vs Celtics</div>
-          <div class="hero__card-prediction">
-            <span class="hero__card-direction">OVER</span>
-            <span class="hero__card-line">112.5</span>
+          <div class="kpi-card__content">
+            <span class="kpi-card__value">{kpi.value}</span>
+            <span class="kpi-card__label">{kpi.label}</span>
           </div>
-          <div class="hero__card-stats">
-            <span>Proyección: <strong>118.2</strong></span>
-            <span>Edge: <strong class="text-green">+5.7 pts</strong></span>
-          </div>
-          <div class="hero__card-confidence">
-            <div class="hero__card-bar">
-              <div class="hero__card-fill" style="width: 78%"></div>
-            </div>
-            <span>78% confianza</span>
+          <div class="kpi-card__trend">
+            <span class="kpi-card__trend-value">{kpi.trend}</span>
           </div>
         </div>
-      </div>
+      {/each}
     </section>
 
-    <!-- Features Section -->
-    <section class="features" id="features">
-      <div class="features__header">
-        <h2 class="features__title">Todo lo que necesitas para apostar con ventaja</h2>
-        <p class="features__subtitle">Herramientas profesionales al alcance de todos</p>
-      </div>
-
-      <div class="features__grid">
-        {#each features as feature}
-          <div class="feature-card">
-            <span class="feature-card__icon">{feature.icon}</span>
-            <h3 class="feature-card__title">{feature.title}</h3>
-            <p class="feature-card__desc">{feature.description}</p>
-          </div>
+    <!-- Quick Actions -->
+    <section class="actions">
+      <h2 class="section-title">
+        <span class="section-title__icon">⚡</span>
+        Acciones rápidas
+      </h2>
+      <div class="actions__grid">
+        {#each quickActions as action}
+          <a href={action.href} class="action-card action-card--{action.gradient}">
+            <div class="action-card__icon-wrap">
+              <span class="action-card__icon">{action.icon}</span>
+            </div>
+            <div class="action-card__content">
+              <h3 class="action-card__title">{action.label}</h3>
+              <p class="action-card__desc">{action.desc}</p>
+            </div>
+            <div class="action-card__arrow">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </div>
+          </a>
         {/each}
       </div>
     </section>
 
-    <!-- Pricing Section -->
-    <section class="pricing" id="pricing">
-      <div class="pricing__header">
-        <h2 class="pricing__title">Planes para cada nivel</h2>
-        <p class="pricing__subtitle">Empieza gratis, escala cuando estés listo</p>
+    <!-- Today's Games -->
+    <section class="games">
+      <div class="games__header">
+        <h2 class="section-title">
+          <span class="section-title__icon">🏀</span>
+          Partidos de hoy
+        </h2>
+        <a href="/totales" class="games__view-all">
+          Ver análisis completo
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </a>
       </div>
 
-      <div class="pricing__grid">
-        {#each plans as plan}
-          <div class="plan-card" class:plan-card--highlighted={plan.highlighted}>
-            {#if plan.highlighted}
-              <div class="plan-card__badge">Más popular</div>
-            {/if}
-            <h3 class="plan-card__name">{plan.name}</h3>
-            <div class="plan-card__price">
-              <span class="plan-card__currency">$</span>
-              <span class="plan-card__amount">{plan.price}</span>
-              <span class="plan-card__period">{plan.period}</span>
+      {#if loadingGames}
+        <div class="games__grid">
+          <Skeleton variant="card" height="180px" />
+          <Skeleton variant="card" height="180px" />
+          <Skeleton variant="card" height="180px" />
+        </div>
+      {:else if todaysGames.length === 0}
+        <div class="games__empty">
+          <span class="games__empty-icon">📅</span>
+          <p>No hay partidos programados para hoy</p>
+        </div>
+      {:else}
+        <div class="games__grid">
+          {#each todaysGames as game (game.id)}
+            <article class="game-card">
+              <div class="game-card__header">
+                <span class="game-card__time">{game.status || 'TBD'}</span>
+                <span class="game-card__league">NBA</span>
+              </div>
+              
+              <div class="game-card__teams">
+                <div class="game-card__team">
+                  <div class="game-card__team-logo">
+                    {game.visitor_team.abbreviation?.charAt(0) || 'V'}
+                  </div>
+                  <span class="game-card__team-name">{game.visitor_team.full_name}</span>
+                </div>
+                
+                <div class="game-card__vs">
+                  <span>VS</span>
+                </div>
+                
+                <div class="game-card__team game-card__team--home">
+                  <div class="game-card__team-logo">
+                    {game.home_team.abbreviation?.charAt(0) || 'H'}
+                  </div>
+                  <span class="game-card__team-name">{game.home_team.full_name}</span>
+                </div>
+              </div>
+
+              <a href="/totales" class="game-card__cta">
+                <span>Analizar partido</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </a>
+            </article>
+          {/each}
+        </div>
+      {/if}
+    </section>
+
+    <!-- Pro Tip -->
+    <aside class="pro-tip">
+      <div class="pro-tip__icon">💡</div>
+      <div class="pro-tip__content">
+        <h4 class="pro-tip__title">Pro Tip</h4>
+        <p class="pro-tip__text">
+          Los picks con confianza mayor al 70% tienen un win rate histórico del 68%. 
+          Enfócate en calidad sobre cantidad.
+        </p>
+      </div>
+    </aside>
+
+  </div>
+
+{:else}
+  <!-- ═══════════════════════════════════════════════════════════════════
+       LANDING PAGE
+       ═══════════════════════════════════════════════════════════════════ -->
+  <div class="landing">
+    
+    <!-- Hero -->
+    <section class="land-hero">
+      <div class="land-hero__bg">
+        <div class="land-hero__gradient"></div>
+        <div class="land-hero__grid"></div>
+      </div>
+      
+      <div class="land-hero__content">
+        <div class="land-hero__badge">
+          <div class="land-hero__badge-dot"></div>
+          <span>Motor Predictivo v{MODEL_VERSION.version}</span>
+        </div>
+        
+        <h1 class="land-hero__title">
+          Predicciones NBA
+          <span class="land-hero__title-accent">Potenciadas por IA</span>
+        </h1>
+        
+        <p class="land-hero__subtitle">
+          Sistema predictivo de totales con <strong>61.3% win rate</strong> verificable.
+          Análisis de 15+ factores contextuales en tiempo real.
+        </p>
+
+        <div class="land-hero__stats">
+          <div class="land-hero__stat">
+            <span class="land-hero__stat-value">61.3%</span>
+            <span class="land-hero__stat-label">Win Rate</span>
+          </div>
+          <div class="land-hero__stat-divider"></div>
+          <div class="land-hero__stat">
+            <span class="land-hero__stat-value">+8.2%</span>
+            <span class="land-hero__stat-label">ROI Promedio</span>
+          </div>
+          <div class="land-hero__stat-divider"></div>
+          <div class="land-hero__stat">
+            <span class="land-hero__stat-value">+1.8</span>
+            <span class="land-hero__stat-label">CLV Promedio</span>
+          </div>
+        </div>
+
+        <div class="land-hero__cta">
+          <a href="/register" class="btn btn--primary btn--lg">
+            Comenzar gratis
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </a>
+          <a href="/results" class="btn btn--glass btn--lg">
+            Ver track record
+          </a>
+        </div>
+
+        <p class="land-hero__disclaimer">
+          ✓ Sin tarjeta de crédito &nbsp;&nbsp; ✓ Cancela cuando quieras
+        </p>
+      </div>
+
+      <div class="land-hero__visual">
+        <div class="land-hero__card">
+          <div class="land-hero__card-glow"></div>
+          <div class="land-hero__card-inner">
+            <div class="land-hero__card-header">
+              <span class="land-hero__card-badge">🔥 TOP PICK</span>
+              <span class="land-hero__card-period">HALF</span>
             </div>
-            <p class="plan-card__desc">{plan.description}</p>
-            <ul class="plan-card__features">
-              {#each plan.features as feature}
-                <li>✓ {feature}</li>
-              {/each}
-            </ul>
-            <a 
-              href={plan.name === 'Free' ? '/register' : plan.name === 'Elite' ? '/contact' : '/register?plan=pro'} 
-              class="plan-card__cta"
-              class:plan-card__cta--primary={plan.highlighted}
-            >
-              {plan.cta}
-            </a>
+            <div class="land-hero__card-matchup">Lakers vs Celtics</div>
+            <div class="land-hero__card-prediction">
+              <span class="land-hero__card-direction">OVER</span>
+              <span class="land-hero__card-line">112.5</span>
+            </div>
+            <div class="land-hero__card-stats">
+              <div class="land-hero__card-stat">
+                <span class="land-hero__card-stat-label">Proyección</span>
+                <span class="land-hero__card-stat-value">118.2</span>
+              </div>
+              <div class="land-hero__card-stat">
+                <span class="land-hero__card-stat-label">Edge</span>
+                <span class="land-hero__card-stat-value land-hero__card-stat-value--green">+5.7 pts</span>
+              </div>
+            </div>
+            <div class="land-hero__card-confidence">
+              <div class="land-hero__card-bar">
+                <div class="land-hero__card-fill"></div>
+              </div>
+              <span>78% confianza</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features">
+      <div class="features__header">
+        <span class="features__label">Características</span>
+        <h2 class="features__title">Todo lo que necesitas para ganar</h2>
+        <p class="features__subtitle">Herramientas profesionales de análisis al alcance de todos</p>
+      </div>
+
+      <div class="features__grid">
+        {#each [
+          { icon: '🧠', title: 'Motor Predictivo v2.0', desc: 'Algoritmo propietario que analiza 15+ factores contextuales.' },
+          { icon: '📊', title: 'Análisis por Períodos', desc: 'Predicciones Q1, HALF y FULL con edge diferenciado.' },
+          { icon: '💰', title: 'Gestión de Bankroll', desc: 'Tracking automático de ROI y evolución del capital.' },
+          { icon: '🎯', title: 'CLV Tracking', desc: 'Mide si piensas como un sharp profesional.' },
+          { icon: '⚡', title: 'Alertas en Tiempo Real', desc: 'Recibe picks antes de que las líneas se muevan.' },
+          { icon: '📈', title: 'Track Record Público', desc: 'Historial verificable de todas las predicciones.' },
+        ] as feature}
+          <div class="feature-card">
+            <div class="feature-card__icon">{feature.icon}</div>
+            <h3 class="feature-card__title">{feature.title}</h3>
+            <p class="feature-card__desc">{feature.desc}</p>
           </div>
         {/each}
       </div>
@@ -352,30 +354,32 @@
 
     <!-- CTA Final -->
     <section class="final-cta">
-      <h2 class="final-cta__title">¿Listo para apostar con ventaja?</h2>
-      <p class="final-cta__subtitle">
-        Únete a miles de apostadores que usan datos, no corazonadas.
-      </p>
-      <a href="/register" class="btn btn--primary btn--lg">
-        Crear cuenta gratis →
-      </a>
+      <div class="final-cta__content">
+        <h2 class="final-cta__title">¿Listo para apostar con ventaja?</h2>
+        <p class="final-cta__subtitle">Únete a miles de apostadores que usan datos, no corazonadas.</p>
+        <a href="/register" class="btn btn--primary btn--xl">
+          Crear cuenta gratis
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
     </section>
 
     <!-- Footer -->
     <footer class="footer">
-      <div class="footer__content">
+      <div class="footer__inner">
         <div class="footer__brand">
           <span class="footer__logo">🏀 NioSports Pro</span>
           <p class="footer__tagline">Predicciones NBA con IA</p>
         </div>
-        <div class="footer__links">
+        <nav class="footer__links">
           <a href="/methodology">Metodología</a>
           <a href="/results">Track Record</a>
           <a href="/login">Iniciar sesión</a>
-        </div>
+        </nav>
         <p class="footer__disclaimer">
-          NioSports Pro es una herramienta de análisis. Las apuestas deportivas implican riesgo.
-          Apuesta responsablemente.
+          NioSports Pro es una herramienta de análisis. Las apuestas deportivas implican riesgo. Apuesta responsablemente.
         </p>
       </div>
     </footer>
@@ -384,178 +388,105 @@
 
 <style>
   /* ═══════════════════════════════════════════════════════════════════
-     DASHBOARD STYLES
+     VARIABLES & BASE
      ═══════════════════════════════════════════════════════════════════ */
-  .dashboard {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 32px 20px 80px;
-  }
-
-  .dashboard__header { margin-bottom: 28px; }
-  .dashboard__title {
-    font-family: 'Orbitron', sans-serif;
-    font-size: clamp(1.4rem, 3vw, 2rem);
-    font-weight: 900;
-    margin-bottom: 6px;
-  }
-  .dashboard__subtitle { color: var(--color-text-muted); font-size: 0.95rem; }
-
-  .demo-badge {
-    display: inline-block;
-    margin-top: 8px;
-    padding: 4px 12px;
-    border-radius: 99px;
-    background: rgba(245,158,11,0.15);
-    color: #f59e0b;
-    font-size: 0.75rem;
-    font-weight: 600;
-  }
-
-  .quick-links {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 12px;
-    margin-bottom: 32px;
-  }
-
-  .quick-link {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px 20px;
-    background: var(--color-bg-card);
-    border: 1px solid var(--color-border);
-    border-radius: 12px;
-    text-decoration: none;
-    transition: all 0.15s ease;
-  }
-
-  .quick-link:hover {
-    border-color: var(--color-border-hover);
-    transform: translateY(-2px);
-  }
-
-  .quick-link--primary {
-    background: linear-gradient(135deg, rgba(251,191,36,0.1), rgba(52,211,153,0.05));
-    border-color: rgba(251,191,36,0.3);
-  }
-
-  .quick-link__icon { font-size: 1.5rem; }
-  .quick-link__text { flex: 1; font-weight: 600; }
-  .quick-link__arrow { color: var(--color-text-muted); }
-
-  .section { margin-bottom: 32px; }
-  .section__title {
-    font-size: 1.1rem;
-    font-weight: 800;
-    margin-bottom: 16px;
-  }
-
-  .games-loading {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 40px;
-    justify-content: center;
-    color: var(--color-text-muted);
-  }
-
-  .spinner {
-    width: 24px;
-    height: 24px;
-    border: 2px solid rgba(251,191,36,0.2);
-    border-top-color: #fbbf24;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .games-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 14px;
-  }
-
-  .game-card {
-    background: var(--color-bg-card);
-    border: 1px solid var(--color-border);
-    border-radius: 12px;
-    padding: 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .game-card__teams { display: flex; flex-direction: column; gap: 4px; }
-  .game-card__team { font-weight: 600; font-size: 0.9rem; }
-  .game-card__team--home { color: #60a5fa; }
-  .game-card__vs { color: var(--color-text-muted); font-size: 0.75rem; }
-
-  .game-card__cta {
-    padding: 8px 14px;
-    background: rgba(251,191,36,0.1);
-    border: 1px solid rgba(251,191,36,0.2);
-    border-radius: 8px;
-    color: #fbbf24;
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.15s;
-  }
-
-  .game-card__cta:hover {
-    background: rgba(251,191,36,0.2);
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 40px;
-    color: var(--color-text-muted);
+  .dashboard, .landing {
+    --gradient-primary: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    --gradient-secondary: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    --gradient-tertiary: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+    --gradient-quaternary: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+    
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+    --shadow-md: 0 8px 24px rgba(0,0,0,0.12);
+    --shadow-lg: 0 16px 48px rgba(0,0,0,0.2);
+    --shadow-glow: 0 0 40px rgba(251,191,36,0.15);
+    
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-full: 9999px;
   }
 
   /* ═══════════════════════════════════════════════════════════════════
-     LANDING PAGE STYLES
+     DASHBOARD STYLES
      ═══════════════════════════════════════════════════════════════════ */
-  .landing {
-    background: var(--color-bg-base, #0a0e1a);
-  }
-
-  /* Hero */
-  .hero {
-    min-height: 90vh;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 60px;
-    align-items: center;
-    max-width: 1200px;
+  .dashboard {
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 80px 20px;
+    padding: 40px 32px 100px;
   }
 
-  @media (max-width: 900px) {
-    .hero {
-      grid-template-columns: 1fr;
-      text-align: center;
-      min-height: auto;
-      padding: 60px 20px;
-    }
-    .hero__visual { order: -1; }
+  @media (max-width: 768px) {
+    .dashboard { padding: 24px 16px 80px; }
+  }
+
+  /* ═══ HERO HEADER ═══ */
+  .hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    margin-bottom: 48px;
+    flex-wrap: wrap;
+  }
+
+  .hero__greeting {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .hero__wave {
+    font-size: 1.5rem;
+    animation: wave 2s ease-in-out infinite;
+    transform-origin: 70% 70%;
+  }
+
+  @keyframes wave {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(20deg); }
+    75% { transform: rotate(-10deg); }
+  }
+
+  .hero__text {
+    font-size: 1rem;
+    color: rgba(255,255,255,0.6);
+    font-weight: 500;
+  }
+
+  .hero__title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.85) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero__date {
+    font-size: 1rem;
+    color: rgba(255,255,255,0.5);
+    text-transform: capitalize;
   }
 
   .hero__badge {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 6px 14px;
-    background: rgba(251,191,36,0.1);
-    border: 1px solid rgba(251,191,36,0.2);
-    border-radius: 99px;
-    font-size: 0.8rem;
-    color: #fbbf24;
+    gap: 10px;
+    padding: 10px 18px;
+    background: rgba(52, 211, 153, 0.1);
+    border: 1px solid rgba(52, 211, 153, 0.2);
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
     font-weight: 600;
-    margin-bottom: 24px;
+    color: #34d399;
   }
 
   .hero__badge-dot {
@@ -563,174 +494,747 @@
     height: 8px;
     background: #34d399;
     border-radius: 50%;
-    animation: pulse 2s ease-in-out infinite;
+    box-shadow: 0 0 8px rgba(52, 211, 153, 0.6);
+    animation: pulse-dot 2s ease-in-out infinite;
   }
 
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.85); }
   }
 
-  .hero__title {
-    font-family: 'Orbitron', sans-serif;
-    font-size: clamp(2rem, 5vw, 3.5rem);
-    font-weight: 900;
-    line-height: 1.1;
+  /* ═══ KPI CARDS ═══ */
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 48px;
+  }
+
+  @media (max-width: 1024px) {
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 540px) {
+    .kpis { grid-template-columns: 1fr 1fr; gap: 12px; }
+  }
+
+  .kpi-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius-xl);
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    opacity: 0.8;
+  }
+
+  .kpi-card--emerald::before { background: var(--gradient-quaternary); }
+  .kpi-card--amber::before { background: var(--gradient-primary); }
+  .kpi-card--orange::before { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); }
+  .kpi-card--purple::before { background: var(--gradient-tertiary); }
+
+  .kpi-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255,255,255,0.12);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .kpi-card__icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-lg);
+    background: rgba(255,255,255,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    flex-shrink: 0;
+  }
+
+  .kpi-card__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .kpi-card__value {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #fff;
+  }
+
+  .kpi-card__label {
+    display: block;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.5);
+    margin-top: 2px;
+  }
+
+  .kpi-card__trend {
+    flex-shrink: 0;
+  }
+
+  .kpi-card__trend-value {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    background: rgba(52, 211, 153, 0.15);
+    color: #34d399;
+  }
+
+  /* ═══ SECTION TITLE ═══ */
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+    color: #fff;
+  }
+
+  .section-title__icon {
+    font-size: 1.3rem;
+  }
+
+  /* ═══ ACTIONS ═══ */
+  .actions {
+    margin-bottom: 48px;
+  }
+
+  .actions__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+
+  @media (max-width: 1024px) {
+    .actions__grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 540px) {
+    .actions__grid { grid-template-columns: 1fr; }
+  }
+
+  .action-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius-xl);
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .action-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .action-card--primary::before { background: linear-gradient(135deg, rgba(251,191,36,0.1) 0%, rgba(251,191,36,0) 100%); }
+  .action-card--secondary::before { background: linear-gradient(135deg, rgba(59,130,246,0.1) 0%, rgba(59,130,246,0) 100%); }
+  .action-card--tertiary::before { background: linear-gradient(135deg, rgba(139,92,246,0.1) 0%, rgba(139,92,246,0) 100%); }
+  .action-card--quaternary::before { background: linear-gradient(135deg, rgba(16,185,129,0.1) 0%, rgba(16,185,129,0) 100%); }
+
+  .action-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255,255,255,0.12);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .action-card:hover::before {
+    opacity: 1;
+  }
+
+  .action-card__icon-wrap {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .action-card--primary .action-card__icon-wrap { background: rgba(251,191,36,0.15); }
+  .action-card--secondary .action-card__icon-wrap { background: rgba(59,130,246,0.15); }
+  .action-card--tertiary .action-card__icon-wrap { background: rgba(139,92,246,0.15); }
+  .action-card--quaternary .action-card__icon-wrap { background: rgba(16,185,129,0.15); }
+
+  .action-card__content {
+    flex: 1;
+    min-width: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .action-card__title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 2px;
+  }
+
+  .action-card__desc {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.5);
+  }
+
+  .action-card__arrow {
+    flex-shrink: 0;
+    color: rgba(255,255,255,0.3);
+    transition: all 0.2s ease;
+    position: relative;
+    z-index: 1;
+  }
+
+  .action-card:hover .action-card__arrow {
+    color: rgba(255,255,255,0.7);
+    transform: translateX(4px);
+  }
+
+  /* ═══ GAMES ═══ */
+  .games {
+    margin-bottom: 48px;
+  }
+
+  .games__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .games__view-all {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #fbbf24;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .games__view-all:hover {
+    color: #f59e0b;
+  }
+
+  .games__view-all svg {
+    transition: transform 0.2s ease;
+  }
+
+  .games__view-all:hover svg {
+    transform: translateX(4px);
+  }
+
+  .games__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+  }
+
+  .games__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 60px 20px;
+    text-align: center;
+    color: rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.02);
+    border: 1px dashed rgba(255,255,255,0.1);
+    border-radius: var(--radius-xl);
+  }
+
+  .games__empty-icon {
+    font-size: 2.5rem;
+    opacity: 0.5;
+  }
+
+  .game-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius-xl);
+    padding: 24px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .game-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(251,191,36,0.3);
+    box-shadow: var(--shadow-lg), 0 0 30px rgba(251,191,36,0.08);
+  }
+
+  .game-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 20px;
   }
 
-  .hero__title--accent {
-    background: linear-gradient(135deg, #fbbf24, #34d399);
+  .game-card__time {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.6);
+  }
+
+  .game-card__league {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    padding: 4px 10px;
+    background: rgba(251,191,36,0.15);
+    color: #fbbf24;
+    border-radius: var(--radius-full);
+  }
+
+  .game-card__teams {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .game-card__team {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .game-card__team-logo {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .game-card__team--home .game-card__team-logo {
+    background: linear-gradient(135deg, rgba(59,130,246,0.2) 0%, rgba(59,130,246,0.1) 100%);
+    color: #60a5fa;
+  }
+
+  .game-card__team-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.9);
+  }
+
+  .game-card__team--home .game-card__team-name {
+    color: #60a5fa;
+  }
+
+  .game-card__vs {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-left: 58px;
+  }
+
+  .game-card__vs span {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.25);
+    letter-spacing: 0.1em;
+  }
+
+  .game-card__cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, rgba(251,191,36,0.15) 0%, rgba(251,191,36,0.05) 100%);
+    border: 1px solid rgba(251,191,36,0.2);
+    border-radius: var(--radius-lg);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #fbbf24;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .game-card__cta:hover {
+    background: linear-gradient(135deg, rgba(251,191,36,0.25) 0%, rgba(251,191,36,0.1) 100%);
+    border-color: rgba(251,191,36,0.4);
+  }
+
+  .game-card__cta svg {
+    transition: transform 0.2s ease;
+  }
+
+  .game-card__cta:hover svg {
+    transform: translateX(4px);
+  }
+
+  /* ═══ PRO TIP ═══ */
+  .pro-tip {
+    display: flex;
+    gap: 20px;
+    padding: 24px;
+    background: linear-gradient(135deg, rgba(139,92,246,0.1) 0%, rgba(139,92,246,0.03) 100%);
+    border: 1px solid rgba(139,92,246,0.2);
+    border-radius: var(--radius-xl);
+  }
+
+  .pro-tip__icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+  }
+
+  .pro-tip__title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #a78bfa;
+    margin-bottom: 4px;
+  }
+
+  .pro-tip__text {
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.6;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     LANDING STYLES
+     ═══════════════════════════════════════════════════════════════════ */
+  .landing {
+    background: #060912;
+    min-height: 100vh;
+  }
+
+  /* ═══ LAND HERO ═══ */
+  .land-hero {
+    position: relative;
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 120px 32px 80px;
+  }
+
+  @media (max-width: 1024px) {
+    .land-hero {
+      grid-template-columns: 1fr;
+      text-align: center;
+      gap: 60px;
+      padding: 100px 24px 60px;
+    }
+    .land-hero__visual { order: -1; }
+  }
+
+  .land-hero__bg {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .land-hero__gradient {
+    position: absolute;
+    top: -50%;
+    left: -20%;
+    width: 80%;
+    height: 100%;
+    background: radial-gradient(ellipse, rgba(251,191,36,0.08) 0%, transparent 70%);
+    filter: blur(60px);
+  }
+
+  .land-hero__grid {
+    position: absolute;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%);
+  }
+
+  .land-hero__content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .land-hero__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    background: rgba(251,191,36,0.1);
+    border: 1px solid rgba(251,191,36,0.2);
+    border-radius: var(--radius-full);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #fbbf24;
+    margin-bottom: 32px;
+  }
+
+  .land-hero__badge-dot {
+    width: 8px;
+    height: 8px;
+    background: #34d399;
+    border-radius: 50%;
+    box-shadow: 0 0 12px rgba(52,211,153,0.8);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  .land-hero__title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 24px;
+  }
+
+  .land-hero__title-accent {
+    display: block;
+    background: linear-gradient(135deg, #fbbf24 0%, #34d399 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  .hero__subtitle {
-    font-size: 1.15rem;
-    color: var(--color-text-secondary);
-    line-height: 1.6;
-    margin-bottom: 32px;
+  .land-hero__subtitle {
+    font-size: 1.2rem;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 40px;
+    max-width: 540px;
   }
 
-  .hero__subtitle strong {
+  @media (max-width: 1024px) {
+    .land-hero__subtitle { margin: 0 auto 40px; }
+  }
+
+  .land-hero__subtitle strong {
     color: #34d399;
+    font-weight: 700;
   }
 
-  .hero__stats {
+  .land-hero__stats {
     display: flex;
-    gap: 32px;
-    margin-bottom: 32px;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 48px;
+    flex-wrap: wrap;
   }
 
-  @media (max-width: 900px) {
-    .hero__stats { justify-content: center; }
+  @media (max-width: 1024px) {
+    .land-hero__stats { justify-content: center; }
   }
 
-  .hero__stat {
+  .land-hero__stat {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    padding: 0 32px;
   }
 
-  .hero__stat-value {
-    font-size: 1.8rem;
-    font-weight: 900;
-    color: #fbbf24;
+  .land-hero__stat:first-child { padding-left: 0; }
+  .land-hero__stat:last-child { padding-right: 0; }
+
+  .land-hero__stat-divider {
+    width: 1px;
+    height: 40px;
+    background: rgba(255,255,255,0.1);
+  }
+
+  .land-hero__stat-value {
     font-family: 'DM Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fbbf24;
   }
 
-  .hero__stat-label {
-    font-size: 0.75rem;
-    color: var(--color-text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .hero__cta {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-
-  @media (max-width: 900px) {
-    .hero__cta { justify-content: center; flex-wrap: wrap; }
-  }
-
-  .hero__disclaimer {
+  .land-hero__stat-label {
     font-size: 0.8rem;
-    color: var(--color-text-muted);
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
   }
 
-  /* Hero Visual Card */
-  .hero__visual {
+  .land-hero__cta {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 1024px) {
+    .land-hero__cta { justify-content: center; }
+  }
+
+  .land-hero__disclaimer {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.4);
+  }
+
+  /* ═══ HERO CARD ═══ */
+  .land-hero__visual {
+    position: relative;
+    z-index: 1;
     display: flex;
     justify-content: center;
   }
 
-  .hero__card {
-    background: var(--color-bg-card);
-    border: 1px solid rgba(251,191,36,0.3);
-    border-radius: 20px;
-    padding: 24px;
+  .land-hero__card {
+    position: relative;
     width: 100%;
-    max-width: 340px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    max-width: 380px;
   }
 
-  .hero__card-header {
+  .land-hero__card-glow {
+    position: absolute;
+    inset: -40px;
+    background: radial-gradient(ellipse at center, rgba(251,191,36,0.15) 0%, transparent 70%);
+    filter: blur(40px);
+    animation: glow-pulse 4s ease-in-out infinite;
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.05); }
+  }
+
+  .land-hero__card-inner {
+    position: relative;
+    background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+    border: 1px solid rgba(251,191,36,0.3);
+    border-radius: var(--radius-xl);
+    padding: 28px;
+    backdrop-filter: blur(20px);
+  }
+
+  .land-hero__card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
   }
 
-  .hero__card-badge {
-    background: linear-gradient(135deg, #fbbf24, #f59e0b);
-    color: #000;
-    font-size: 0.65rem;
+  .land-hero__card-badge {
+    font-size: 0.7rem;
     font-weight: 800;
-    padding: 4px 10px;
+    padding: 6px 12px;
+    background: var(--gradient-primary);
+    color: #000;
     border-radius: 6px;
+    letter-spacing: 0.02em;
   }
 
-  .hero__card-period {
+  .land-hero__card-period {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 6px 12px;
     background: rgba(167,139,250,0.2);
     color: #a78bfa;
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 4px 10px;
     border-radius: 6px;
   }
 
-  .hero__card-matchup {
+  .land-hero__card-matchup {
+    font-size: 1.1rem;
     font-weight: 700;
-    font-size: 1rem;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
+    color: #fff;
   }
 
-  .hero__card-prediction {
+  .land-hero__card-prediction {
     display: flex;
     align-items: baseline;
-    gap: 12px;
-    margin-bottom: 16px;
+    gap: 16px;
+    margin-bottom: 24px;
   }
 
-  .hero__card-direction {
+  .land-hero__card-direction {
     font-family: 'Orbitron', sans-serif;
-    font-size: 1.2rem;
+    font-size: 1.4rem;
     font-weight: 900;
     color: #34d399;
   }
 
-  .hero__card-line {
-    font-size: 2.5rem;
-    font-weight: 900;
+  .land-hero__card-line {
+    font-family: 'DM Mono', monospace;
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: #fff;
   }
 
-  .hero__card-stats {
+  .land-hero__card-stats {
     display: flex;
-    justify-content: space-between;
-    font-size: 0.8rem;
-    color: var(--color-text-muted);
-    margin-bottom: 16px;
+    gap: 24px;
+    margin-bottom: 20px;
   }
 
-  .hero__card-stats strong {
-    color: var(--color-text-primary);
+  .land-hero__card-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
   }
 
-  .text-green { color: #34d399 !important; }
+  .land-hero__card-stat-label {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.4);
+  }
 
-  .hero__card-confidence {
+  .land-hero__card-stat-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .land-hero__card-stat-value--green {
+    color: #34d399;
+  }
+
+  .land-hero__card-confidence {
     display: flex;
     align-items: center;
-    gap: 12px;
-    font-size: 0.75rem;
-    color: var(--color-text-muted);
+    gap: 14px;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.5);
   }
 
-  .hero__card-bar {
+  .land-hero__card-bar {
     flex: 1;
     height: 6px;
     background: rgba(255,255,255,0.1);
@@ -738,302 +1242,205 @@
     overflow: hidden;
   }
 
-  .hero__card-fill {
+  .land-hero__card-fill {
+    width: 78%;
     height: 100%;
     background: linear-gradient(90deg, #fbbf24, #34d399);
     border-radius: 3px;
   }
 
-  /* Buttons */
+  /* ═══ BUTTONS ═══ */
   .btn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 12px 24px;
-    border-radius: 10px;
-    font-size: 0.95rem;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 28px;
+    border-radius: var(--radius-lg);
+    font-size: 1rem;
     font-weight: 700;
     text-decoration: none;
-    transition: all 0.15s ease;
-    cursor: pointer;
     border: none;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .btn--primary {
-    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    background: var(--gradient-primary);
     color: #000;
+    box-shadow: 0 4px 20px rgba(251,191,36,0.3);
   }
 
   .btn--primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(251,191,36,0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(251,191,36,0.4);
   }
 
-  .btn--ghost {
-    background: transparent;
-    border: 1px solid var(--color-border);
-    color: var(--color-text-primary);
+  .btn--glass {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #fff;
   }
 
-  .btn--ghost:hover {
-    background: rgba(255,255,255,0.05);
-    border-color: var(--color-border-hover);
+  .btn--glass:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.2);
   }
 
   .btn--lg {
-    padding: 14px 28px;
-    font-size: 1rem;
+    padding: 16px 32px;
+    font-size: 1.05rem;
   }
 
-  /* Features */
+  .btn--xl {
+    padding: 18px 40px;
+    font-size: 1.1rem;
+  }
+
+  /* ═══ FEATURES ═══ */
   .features {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 80px 20px;
+    padding: 100px 32px;
   }
 
   .features__header {
     text-align: center;
-    margin-bottom: 48px;
+    margin-bottom: 60px;
+  }
+
+  .features__label {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #fbbf24;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 16px;
   }
 
   .features__title {
     font-family: 'Orbitron', sans-serif;
-    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
     font-weight: 900;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
   }
 
   .features__subtitle {
-    color: var(--color-text-muted);
-    font-size: 1.05rem;
+    font-size: 1.1rem;
+    color: rgba(255,255,255,0.5);
   }
 
   .features__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  @media (max-width: 900px) {
+    .features__grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 600px) {
+    .features__grid { grid-template-columns: 1fr; }
   }
 
   .feature-card {
-    background: var(--color-bg-card);
-    border: 1px solid var(--color-border);
-    border-radius: 16px;
-    padding: 28px 24px;
-    transition: all 0.2s ease;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius-xl);
+    padding: 32px 28px;
+    transition: all 0.3s ease;
   }
 
   .feature-card:hover {
-    border-color: rgba(251,191,36,0.3);
-    transform: translateY(-4px);
+    transform: translateY(-6px);
+    border-color: rgba(251,191,36,0.2);
+    box-shadow: var(--shadow-lg);
   }
 
   .feature-card__icon {
-    font-size: 2rem;
-    margin-bottom: 16px;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
     display: block;
   }
 
   .feature-card__title {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     font-weight: 800;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    color: #fff;
   }
 
   .feature-card__desc {
-    color: var(--color-text-muted);
-    font-size: 0.9rem;
-    line-height: 1.5;
+    font-size: 0.95rem;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.6;
   }
 
-  /* Pricing */
-  .pricing {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 80px 20px;
-  }
-
-  .pricing__header {
-    text-align: center;
-    margin-bottom: 48px;
-  }
-
-  .pricing__title {
-    font-family: 'Orbitron', sans-serif;
-    font-size: clamp(1.5rem, 3vw, 2rem);
-    font-weight: 900;
-    margin-bottom: 12px;
-  }
-
-  .pricing__subtitle {
-    color: var(--color-text-muted);
-    font-size: 1.05rem;
-  }
-
-  .pricing__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 24px;
-  }
-
-  .plan-card {
-    background: var(--color-bg-card);
-    border: 1px solid var(--color-border);
-    border-radius: 20px;
-    padding: 32px 28px;
-    position: relative;
-    transition: all 0.2s ease;
-  }
-
-  .plan-card--highlighted {
-    border-color: rgba(251,191,36,0.5);
-    background: linear-gradient(135deg, rgba(251,191,36,0.05), transparent);
-  }
-
-  .plan-card__badge {
-    position: absolute;
-    top: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: linear-gradient(135deg, #fbbf24, #f59e0b);
-    color: #000;
-    font-size: 0.7rem;
-    font-weight: 800;
-    padding: 6px 16px;
-    border-radius: 99px;
-  }
-
-  .plan-card__name {
-    font-size: 1.2rem;
-    font-weight: 800;
-    margin-bottom: 8px;
-  }
-
-  .plan-card__price {
-    margin-bottom: 8px;
-  }
-
-  .plan-card__currency {
-    font-size: 1.2rem;
-    color: var(--color-text-muted);
-    vertical-align: top;
-  }
-
-  .plan-card__amount {
-    font-size: 3rem;
-    font-weight: 900;
-    font-family: 'DM Mono', monospace;
-  }
-
-  .plan-card__period {
-    font-size: 0.9rem;
-    color: var(--color-text-muted);
-  }
-
-  .plan-card__desc {
-    color: var(--color-text-muted);
-    font-size: 0.9rem;
-    margin-bottom: 20px;
-  }
-
-  .plan-card__features {
-    list-style: none;
-    margin-bottom: 24px;
-  }
-
-  .plan-card__features li {
-    padding: 8px 0;
-    font-size: 0.9rem;
-    color: var(--color-text-secondary);
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-  }
-
-  .plan-card__cta {
-    display: block;
-    width: 100%;
-    padding: 14px;
-    text-align: center;
-    border-radius: 10px;
-    font-weight: 700;
-    text-decoration: none;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid var(--color-border);
-    color: var(--color-text-primary);
-    transition: all 0.15s ease;
-  }
-
-  .plan-card__cta:hover {
-    background: rgba(255,255,255,0.1);
-  }
-
-  .plan-card__cta--primary {
-    background: linear-gradient(135deg, #fbbf24, #f59e0b);
-    border: none;
-    color: #000;
-  }
-
-  .plan-card__cta--primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(251,191,36,0.3);
-  }
-
-  /* Final CTA */
+  /* ═══ FINAL CTA ═══ */
   .final-cta {
+    padding: 100px 32px;
+    background: linear-gradient(180deg, transparent 0%, rgba(251,191,36,0.03) 50%, transparent 100%);
+  }
+
+  .final-cta__content {
+    max-width: 600px;
+    margin: 0 auto;
     text-align: center;
-    padding: 80px 20px;
-    background: linear-gradient(135deg, rgba(251,191,36,0.05), rgba(52,211,153,0.03));
   }
 
   .final-cta__title {
     font-family: 'Orbitron', sans-serif;
-    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
     font-weight: 900;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
   }
 
   .final-cta__subtitle {
-    color: var(--color-text-muted);
     font-size: 1.1rem;
-    margin-bottom: 28px;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 32px;
   }
 
-  /* Footer */
+  /* ═══ FOOTER ═══ */
   .footer {
-    border-top: 1px solid var(--color-border);
-    padding: 40px 20px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 60px 32px;
   }
 
-  .footer__content {
+  .footer__inner {
     max-width: 1200px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 24px;
     text-align: center;
   }
 
   .footer__logo {
     font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
     font-weight: 900;
-    font-size: 1.2rem;
   }
 
   .footer__tagline {
-    color: var(--color-text-muted);
-    font-size: 0.85rem;
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.4);
+    margin-top: 4px;
   }
 
   .footer__links {
     display: flex;
-    gap: 24px;
+    gap: 32px;
   }
 
   .footer__links a {
-    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    color: rgba(255,255,255,0.5);
     text-decoration: none;
-    font-size: 0.9rem;
-    transition: color 0.15s;
+    transition: color 0.2s ease;
   }
 
   .footer__links a:hover {
@@ -1041,8 +1448,9 @@
   }
 
   .footer__disclaimer {
-    font-size: 0.75rem;
-    color: var(--color-text-muted);
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.3);
     max-width: 500px;
+    line-height: 1.6;
   }
 </style>
