@@ -9,10 +9,11 @@
            dbWrite, dbPush,
            dbRemove,
            userPath }         from '$lib/firebase';
-  import SkeletonCard         from '$lib/components/SkeletonCard.svelte';
+  import Skeleton             from '$lib/components/Skeleton.svelte';
 
   let loading   = true;
   let cleanupFn = null;
+  let hasSubscribed = false;
 
   let showForm    = false;
   let formLoading = false;
@@ -20,8 +21,9 @@
 
   let resultInputs = {};
 
-  onMount(async () => {
-    if (!$userId) return;
+  // Suscripción reactiva
+  $: if ($userId && !hasSubscribed) {
+    hasSubscribed = true;
     cleanupFn = dbSubscribe(
       userPath($userId, 'picks', 'backtesting'),
       (data) => {
@@ -29,6 +31,15 @@
         loading = false;
       }
     );
+  }
+
+  // Timeout para evitar carga infinita
+  onMount(() => {
+    setTimeout(() => {
+      if (loading && !$userId) {
+        loading = false;
+      }
+    }, 2000);
   });
 
   onDestroy(() => cleanupFn?.());
@@ -123,8 +134,11 @@
   </div>
 
   {#if loading}
-    <!-- ✅ FASE 6: SkeletonCard reemplaza skeleton-grid manual -->
-    <SkeletonCard type="pick" count={3} />
+    <div class="skeleton-list">
+      <Skeleton variant="pick" />
+      <Skeleton variant="pick" />
+      <Skeleton variant="pick" />
+    </div>
 
   {:else}
 
@@ -261,6 +275,8 @@
   .page__title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   .page__title { font-family: 'Orbitron', sans-serif; font-size: clamp(1.3rem, 3vw, 1.8rem); font-weight: 900; }
   .page__subtitle { color: var(--color-text-muted); font-size: 0.9rem; margin-top: 4px; }
+
+  .skeleton-list { display: flex; flex-direction: column; gap: 14px; }
 
   .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; border-radius: 10px; border: none; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: opacity .15s, transform .1s; }
   .btn:active:not(:disabled) { transform: scale(0.97); }

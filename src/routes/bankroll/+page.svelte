@@ -10,7 +10,7 @@
   import { dbSubscribe,
            dbWrite,
            userPath }         from '$lib/firebase';
-  import SkeletonCard         from '$lib/components/SkeletonCard.svelte';
+  import Skeleton             from '$lib/components/Skeleton.svelte';
 
   let loading        = true;
   let cleanupBankroll = null;
@@ -190,8 +190,18 @@
   </div>
 
   {#if loading}
-    <SkeletonCard type="kpi" count={4} />
-    <SkeletonCard type="chart" />
+    <div class="kpi-grid">
+      <Skeleton variant="stat" />
+      <Skeleton variant="stat" />
+      <Skeleton variant="stat" />
+      <Skeleton variant="stat" />
+    </div>
+    <div class="card">
+      <Skeleton variant="text" width="150px" height="20px" />
+      <div style="height: 220px; margin-top: 16px;">
+        <Skeleton variant="card" height="200px" />
+      </div>
+    </div>
 
   {:else}
 

@@ -1,0 +1,494 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   NioSports Pro — Animations & Microinteractions v1.0
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────
+   KEYFRAMES - Animaciones base
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* Fade */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Scale */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes scaleOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  70% {
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Slide */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* Pulse & Glow */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(251, 191, 36, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.6);
+  }
+}
+
+@keyframes glowSuccess {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(52, 211, 153, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(52, 211, 153, 0.6);
+  }
+}
+
+/* Shake */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+/* Bounce */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: translateY(-8px);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+/* Spin */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Shimmer (para skeletons) */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Number count up effect */
+@keyframes countPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); color: var(--color-brand-primary); }
+  100% { transform: scale(1); }
+}
+
+/* Card enter */
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Ripple effect */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   CLASES DE ANIMACIÓN
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* Aplicar animaciones */
+.animate-fadeIn { animation: fadeIn var(--transition-moderate) var(--ease-out) both; }
+.animate-fadeInUp { animation: fadeInUp var(--transition-moderate) var(--ease-out) both; }
+.animate-fadeInDown { animation: fadeInDown var(--transition-moderate) var(--ease-out) both; }
+.animate-scaleIn { animation: scaleIn var(--transition-moderate) var(--ease-out) both; }
+.animate-popIn { animation: popIn var(--transition-slow) var(--ease-bounce) both; }
+.animate-slideInRight { animation: slideInRight var(--transition-moderate) var(--ease-out) both; }
+.animate-slideInLeft { animation: slideInLeft var(--transition-moderate) var(--ease-out) both; }
+.animate-cardEnter { animation: cardEnter 0.25s var(--ease-out) both; }
+
+/* Animaciones continuas */
+.animate-pulse { animation: pulse 2s var(--ease-in-out) infinite; }
+.animate-glow { animation: glow 2s var(--ease-in-out) infinite; }
+.animate-glowSuccess { animation: glowSuccess 2s var(--ease-in-out) infinite; }
+.animate-bounce { animation: bounce 1s infinite; }
+.animate-spin { animation: spin 1s linear infinite; }
+.animate-shake { animation: shake 0.5s var(--ease-in-out); }
+
+/* Delays para stagger effect */
+.delay-1 { animation-delay: 0.05s; }
+.delay-2 { animation-delay: 0.1s; }
+.delay-3 { animation-delay: 0.15s; }
+.delay-4 { animation-delay: 0.2s; }
+.delay-5 { animation-delay: 0.25s; }
+.delay-6 { animation-delay: 0.3s; }
+.delay-7 { animation-delay: 0.35s; }
+.delay-8 { animation-delay: 0.4s; }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   MICROINTERACCIONES - Hover & Active
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* Hover lift - Eleva el elemento */
+.hover-lift {
+  transition: transform var(--transition-base) var(--ease-out),
+              box-shadow var(--transition-base) var(--ease-out);
+}
+
+.hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.hover-lift:active {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Hover scale - Escala suave */
+.hover-scale {
+  transition: transform var(--transition-base) var(--ease-out);
+}
+
+.hover-scale:hover {
+  transform: scale(1.03);
+}
+
+.hover-scale:active {
+  transform: scale(0.98);
+}
+
+/* Hover glow - Brillo en hover */
+.hover-glow {
+  transition: box-shadow var(--transition-base) var(--ease-out);
+}
+
+.hover-glow:hover {
+  box-shadow: var(--shadow-glow-brand);
+}
+
+.hover-glow--success:hover {
+  box-shadow: var(--shadow-glow-success);
+}
+
+.hover-glow--error:hover {
+  box-shadow: var(--shadow-glow-error);
+}
+
+/* Hover brighten - Ilumina el fondo */
+.hover-brighten {
+  transition: background-color var(--transition-base) var(--ease-out),
+              border-color var(--transition-base) var(--ease-out);
+}
+
+.hover-brighten:hover {
+  background-color: var(--color-bg-card-hover);
+  border-color: var(--color-border-hover);
+}
+
+/* Active press - Efecto de presión */
+.active-press {
+  transition: transform var(--transition-fast) var(--ease-out);
+}
+
+.active-press:active {
+  transform: scale(0.96);
+}
+
+/* Button interactions combinadas */
+.btn-interactive {
+  position: relative;
+  overflow: hidden;
+  transition: 
+    transform var(--transition-fast) var(--ease-out),
+    background-color var(--transition-base) var(--ease-out),
+    border-color var(--transition-base) var(--ease-out),
+    box-shadow var(--transition-base) var(--ease-out);
+}
+
+.btn-interactive:hover {
+  transform: translateY(-1px);
+}
+
+.btn-interactive:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.btn-interactive:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+/* Ripple effect para botones */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  transform: scale(0);
+  opacity: 0;
+}
+
+.ripple:active::after {
+  animation: ripple 0.4s ease-out;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   CARDS - Interacciones específicas
+   ───────────────────────────────────────────────────────────────────────── */
+
+.card-interactive {
+  transition: 
+    transform var(--transition-base) var(--ease-out),
+    border-color var(--transition-base) var(--ease-out),
+    box-shadow var(--transition-base) var(--ease-out);
+}
+
+.card-interactive:hover {
+  border-color: var(--color-border-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+}
+
+.card-interactive:focus-within {
+  border-color: var(--color-brand-primary);
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2);
+}
+
+/* Card con glow en hover */
+.card-glow {
+  transition: 
+    border-color var(--transition-base) var(--ease-out),
+    box-shadow var(--transition-slow) var(--ease-out);
+}
+
+.card-glow:hover {
+  border-color: rgba(251, 191, 36, 0.3);
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.3),
+    0 0 30px rgba(251, 191, 36, 0.1);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   INPUTS - Focus states
+   ───────────────────────────────────────────────────────────────────────── */
+
+.input-focus {
+  transition: 
+    border-color var(--transition-base) var(--ease-out),
+    box-shadow var(--transition-base) var(--ease-out),
+    background-color var(--transition-base) var(--ease-out);
+}
+
+.input-focus:focus {
+  outline: none;
+  border-color: var(--color-brand-primary);
+  box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.15);
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   BADGES & TAGS - Animaciones
+   ───────────────────────────────────────────────────────────────────────── */
+
+.badge-pulse {
+  animation: pulse 2s var(--ease-in-out) infinite;
+}
+
+.badge-new {
+  animation: popIn 0.3s var(--ease-bounce) both, glow 2s var(--ease-in-out) infinite 0.3s;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   NÚMEROS - Animación de cambio
+   ───────────────────────────────────────────────────────────────────────── */
+
+.number-change {
+  display: inline-block;
+  transition: transform var(--transition-fast) var(--ease-out);
+}
+
+.number-change.changed {
+  animation: countPulse 0.4s var(--ease-out);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   TOOLTIPS
+   ───────────────────────────────────────────────────────────────────────── */
+
+.tooltip-trigger {
+  position: relative;
+}
+
+.tooltip-trigger::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  padding: 6px 10px;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: 
+    opacity var(--transition-base) var(--ease-out),
+    transform var(--transition-base) var(--ease-out),
+    visibility var(--transition-base);
+  z-index: var(--z-tooltip);
+  pointer-events: none;
+}
+
+.tooltip-trigger:hover::before {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(-8px);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   TRANSITIONS UTILITARIAS
+   ───────────────────────────────────────────────────────────────────────── */
+
+.transition-none { transition: none !important; }
+.transition-fast { transition-duration: var(--transition-fast) !important; }
+.transition-base { transition-duration: var(--transition-base) !important; }
+.transition-slow { transition-duration: var(--transition-slow) !important; }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   REDUCED MOTION
+   ───────────────────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .hover-lift:hover,
+  .hover-scale:hover,
+  .card-interactive:hover {
+    transform: none;
+  }
+}

@@ -1,8 +1,4 @@
 <!-- src/routes/stats/+page.svelte -->
-<!--
-  Dashboard de análisis avanzado: profit acumulado, rendimiento por
-  periodo, CLV tracker, top equipos y desglose de picks.
--->
 <script>
   import { onMount, onDestroy, afterUpdate } from 'svelte';
   import { userId }        from '$lib/stores/auth';
@@ -10,10 +6,11 @@
            picksTotales }  from '$lib/stores/data';
   import { dbSubscribe,
            userPath }      from '$lib/firebase';
+  import Skeleton          from '$lib/components/Skeleton.svelte';
 
-  // ── Estado local ────────────────────────────────────────────────
   let loading   = true;
   let cleanupFn = null;
+  let hasSubscribed = false;
 
   // Canvas refs
   let profitCanvas;
@@ -21,8 +18,9 @@
   let profitChart  = null;
   let periodChart  = null;
 
-  onMount(async () => {
-    if (!$userId) return;
+  // Suscripción reactiva - se activa cuando userId está disponible
+  $: if ($userId && !hasSubscribed) {
+    hasSubscribed = true;
     cleanupFn = dbSubscribe(
       userPath($userId, 'picks', 'totales'),
       (data) => {
@@ -30,6 +28,15 @@
         loading = false;
       }
     );
+  }
+
+  // Si no hay userId después de un tiempo, dejar de cargar
+  onMount(() => {
+    setTimeout(() => {
+      if (loading && !$userId) {
+        loading = false;
+      }
+    }, 2000);
   });
 
   onDestroy(() => {
@@ -44,26 +51,23 @@
     if (periodCanvas && resolvedPicks.length >= 1) buildPeriodChart();
   });
 
-  // ── Función para convertir odds americano a decimal ─────────────
+  // Función para convertir odds americano a decimal
   function americanToDecimal(odds) {
     const numOdds = parseFloat(odds);
-    if (isNaN(numOdds)) return 1.91; // Default -110 = 1.91
+    if (isNaN(numOdds)) return 1.91;
     if (numOdds > 0) {
-      // Odds positivo: +150 = 2.50
       return (numOdds / 100) + 1;
     } else {
-      // Odds negativo: -110 = 1.91
       return (100 / Math.abs(numOdds)) + 1;
     }
   }
 
-  // Calcular ganancia por unidad para un pick ganador
   function getWinProfit(odds) {
     const decimal = americanToDecimal(odds || -110);
-    return decimal - 1; // Ganancia neta por unidad apostada
+    return decimal - 1;
   }
 
-  // ── Stats derivadas ─────────────────────────────────────────────
+  // Stats derivadas
   $: allPicks      = $picksTotales;
   $: resolvedPicks = allPicks.filter(p => p.status && p.status !== 'pending')
                              .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
@@ -72,17 +76,16 @@
   $: wins    = resolvedPicks.filter(p => p.status === 'win').length;
   $: losses  = resolvedPicks.filter(p => p.status === 'loss').length;
   $: pushes  = resolvedPicks.filter(p => p.status === 'push').length;
-  $: total   = wins + losses; // Solo picks con resultado definitivo (sin pushes)
+  $: total   = wins + losses;
 
   $: winRate = total > 0
                ? ((wins / total) * 100).toFixed(1)
                : '0.0';
 
-  // Profit en unidades (cada win +ganancia según odds, cada loss -1)
   $: profitUnits = resolvedPicks.reduce((acc, p) => {
     if (p.status === 'win')  return acc + getWinProfit(p.odds);
     if (p.status === 'loss') return acc - 1;
-    return acc; // push = 0
+    return acc;
   }, 0);
 
   $: roi = total > 0
@@ -100,7 +103,7 @@
       }, 0) / picksWithCLV.length).toFixed(2)
     : null;
 
-  // Rendimiento por periodo (Q1, HALF, FULL, etc.)
+  // Rendimiento por periodo
   $: periodStats = resolvedPicks.reduce((acc, p) => {
     const period = p.period || 'FULL';
     if (!acc[period]) acc[period] = { wins: 0, losses: 0, pushes: 0 };
@@ -151,7 +154,7 @@
       .slice(0, 8);
   })();
 
-  // ── Gráficos ─────────────────────────────────────────────────────
+  // Gráficos
   function buildProfitChart() {
     if (profitChart) { profitChart.destroy(); profitChart = null; }
 
@@ -249,10 +252,18 @@
   </div>
 
   {#if loading}
-    <div class="skeleton-grid">
-      {#each Array(4) as _}<div class="skeleton-kpi"></div>{/each}
+    <div class="kpi-grid">
+      <Skeleton variant="stat" />
+      <Skeleton variant="stat" />
+      <Skeleton variant="stat" />
+      <Skeleton variant="stat" />
     </div>
-    <div class="skeleton-chart"></div>
+    <div class="card">
+      <Skeleton variant="text" width="180px" height="20px" />
+      <div style="height: 220px; margin-top: 16px;">
+        <Skeleton variant="card" height="200px" />
+      </div>
+    </div>
 
   {:else if allPicks.length === 0}
     <div class="empty-page">
@@ -263,7 +274,7 @@
 
   {:else}
 
-    <!-- ── KPIs ─────────────────────────────────────────── -->
+    <!-- KPIs -->
     <div class="kpi-grid">
       <div class="kpi">
         <span class="kpi__icon">🎯</span>
@@ -305,7 +316,7 @@
       </div>
     </div>
 
-    <!-- ── CLV Banner ─────────────────────────────────── -->
+    <!-- CLV Banner -->
     {#if avgCLV !== null}
       <div class="clv-banner" class:clv-banner--pos={parseFloat(avgCLV) >= 0}>
         <div class="clv-banner__left">
@@ -321,7 +332,7 @@
       </div>
     {/if}
 
-    <!-- ── Profit Chart ───────────────────────────────── -->
+    <!-- Profit Chart -->
     <div class="card">
       <h2 class="card__title">📈 Profit acumulado</h2>
       {#if resolvedPicks.length >= 3}
@@ -335,7 +346,7 @@
       {/if}
     </div>
 
-    <!-- ── Period Chart + Table ───────────────────────── -->
+    <!-- Period Chart + Table -->
     <div class="two-col">
       <div class="card">
         <h2 class="card__title">📋 Por periodo</h2>
@@ -361,7 +372,7 @@
         {/if}
       </div>
 
-      <!-- ── Top Equipos ──────────────────────────────── -->
+      <!-- Top Equipos -->
       <div class="card">
         <h2 class="card__title">🏆 Mejores equipos</h2>
         {#if teamPerf.length > 0}
@@ -396,7 +407,7 @@
       </div>
     </div>
 
-    <!-- ── CLV Tip ─────────────────────────────────────── -->
+    <!-- CLV Tip -->
     {#if avgCLV === null}
       <div class="tip">
         💡 <strong>¿Qué es CLV?</strong> El Closing Line Value mide si apostaste antes de que la línea
@@ -423,7 +434,6 @@
   }
   .page__subtitle { color: var(--color-text-muted); font-size: 0.9rem; }
 
-  /* KPIs */
   .kpi-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -447,7 +457,6 @@
   .kpi__value--red   { color: #f87171; }
   .kpi__value--gold  { color: #fbbf24; }
 
-  /* CLV Banner */
   .clv-banner {
     display: flex;
     align-items: center;
@@ -469,7 +478,6 @@
   .clv-banner__value { font-size: 1.6rem; font-weight: 800; color: #f87171; }
   .clv-banner__value--pos { color: #34d399; }
 
-  /* Cards */
   .card {
     background: var(--color-bg-card);
     border: 1px solid var(--color-border);
@@ -479,7 +487,6 @@
   }
   .card__title { font-size: 1rem; font-weight: 800; margin-bottom: 16px; }
 
-  /* Charts */
   .chart-wrap    { height: 220px; }
   .chart-wrap--sm { height: 160px; margin-bottom: 14px; }
   .chart-placeholder {
@@ -489,7 +496,6 @@
     padding: 24px 0;
   }
 
-  /* Two-col layout */
   .two-col {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -498,7 +504,6 @@
   }
   @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
 
-  /* Period table */
   .period-table { display: flex; flex-direction: column; gap: 6px; }
   .period-row {
     display: flex;
@@ -514,7 +519,6 @@
   .period-row__wr--bad  { color: #f87171; }
   .period-row__detail { color: var(--color-text-muted); font-size: 0.75rem; }
 
-  /* Team list */
   .team-list { display: flex; flex-direction: column; gap: 8px; }
   .team-row {
     display: flex;
@@ -536,7 +540,6 @@
   .team-row__profit--pos { color: #34d399; }
   .team-row__profit--neg { color: #f87171; }
 
-  /* Empty states */
   .empty-page {
     text-align: center;
     padding: 80px 20px;
@@ -562,7 +565,6 @@
   }
   .empty-inline span { font-size: 2rem; }
 
-  /* Tip */
   .tip {
     background: rgba(251,191,36,0.06);
     border: 1px solid rgba(251,191,36,0.15);
@@ -574,16 +576,4 @@
   }
   .tip strong { color: #fbbf24; }
   .tip a      { color: #fbbf24; }
-
-  /* Skeleton */
-  .skeleton-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
-  .skeleton-kpi, .skeleton-chart {
-    border-radius: 14px;
-    background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.04) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.4s infinite;
-  }
-  .skeleton-kpi   { height: 110px; }
-  .skeleton-chart { height: 240px; border-radius: 16px; }
-  @keyframes shimmer { to { background-position: -200% 0; } }
 </style>

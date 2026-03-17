@@ -1,6 +1,10 @@
 <!-- src/routes/+layout.svelte -->
 <script>
   import { onMount }         from 'svelte';
+  
+  // Design System - Tokens y Animaciones
+  import '$lib/styles/tokens.css';
+  import '$lib/styles/animations.css';
   import { goto }            from '$app/navigation';
   import { page }            from '$app/stores';
 
@@ -8,6 +12,7 @@
   import DemoBanner          from '$lib/components/DemoBanner.svelte';
   import ToastContainer      from '$lib/components/ToastContainer.svelte';
   import DataSourceBadge     from '$lib/components/DataSourceBadge.svelte';
+  import SystemStatus        from '$lib/components/SystemStatus.svelte';;
 
   import { initFirebase }    from '$lib/firebase';
   import { authStore,
@@ -43,9 +48,10 @@
   {:else}
     {#if !isPublicPage}
       <Nav />
+      <SystemStatus />
       <DemoBanner />
 
-      <!-- ✅ FASE 6: Badge de fuente de datos — siempre visible en esquina inferior derecha -->
+      <!-- Badge de fuente de datos — esquina inferior derecha -->
       <div class="datasource-corner">
         <DataSourceBadge />
       </div>
