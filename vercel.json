@@ -4,6 +4,20 @@
   "outputDirectory": ".svelte-kit/output",
   "installCommand": "npm install",
   "framework": "sveltekit",
+  "crons": [
+    {
+      "path": "/api/cron/fetch-games",
+      "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/cron/fetch-odds",
+      "schedule": "0 17,20,23 * * *"
+    },
+    {
+      "path": "/api/cron/verify-results",
+      "schedule": "0 2,3,4,5 * * *"
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/(.*)",

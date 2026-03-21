@@ -5,10 +5,10 @@
   import { teamStats } from '$lib/stores/data';
   import { toasts } from '$lib/stores/ui';
   import { dbPush, userPath } from '$lib/firebase';
+  import { savePick } from '$lib/supabase/client.js';
   import SkeletonCard from '$lib/components/SkeletonCard.svelte';
   
-  // Importar el engine predictivo
-  import { predict } from '$lib/engine';
+  // Motor ejecuta server-side — llamamos al API
   import { MODEL_VERSION } from '$lib/engine/constants.js';
 
   // ── Estado ───────────────────────────────────────────────────────
@@ -54,23 +54,65 @@
   $: awayData = awayTeam ? statsData?.[awayTeam] : null;
   $: bothSelected = !!(localData && awayData);
 
-  // Predicciones usando el engine real
-  $: predictions = bothSelected ? generatePredictions() : null;
+  // Predicciones usando el API server-side
+  let predictions = null;
+  let predictionsLoading = false;
+
+  $: if (bothSelected) {
+    loadPredictions();
+  }
+
+  async function loadPredictions() {
+    predictionsLoading = true;
+    try {
+      predictions = await generatePredictions();
+    } catch (err) {
+      console.error('[Totales] Error generating predictions:', err);
+      predictions = null;
+    } finally {
+      predictionsLoading = false;
+    }
+  }
 
   // Auto-rellenar líneas sugeridas cuando se generan predicciones
   $: if (predictions && !lineQ1) lineQ1 = predictions.Q1?.projection?.toFixed(1) || '';
   $: if (predictions && !lineHalf) lineHalf = predictions.HALF?.projection?.toFixed(1) || '';
   $: if (predictions && !lineFull) lineFull = predictions.FULL?.projection?.toFixed(1) || '';
 
-  // Recalcular cuando cambian las líneas
-  $: analysisQ1 = predictions?.Q1 && lineQ1 ? recalcWithLine(predictions.Q1, parseFloat(lineQ1), 'Q1') : predictions?.Q1;
-  $: analysisHalf = predictions?.HALF && lineHalf ? recalcWithLine(predictions.HALF, parseFloat(lineHalf), 'HALF') : predictions?.HALF;
-  $: analysisFull = predictions?.FULL && lineFull ? recalcWithLine(predictions.FULL, parseFloat(lineFull), 'FULL') : predictions?.FULL;
+  // Análisis recalculados cuando cambian las líneas
+  let analysisQ1 = null;
+  let analysisHalf = null;
+  let analysisFull = null;
+
+  // Actualizar análisis cuando cambian predicciones
+  $: if (predictions?.Q1) analysisQ1 = predictions.Q1;
+  $: if (predictions?.HALF) analysisHalf = predictions.HALF;
+  $: if (predictions?.FULL) analysisFull = predictions.FULL;
+
+  // Recalcular con líneas personalizadas (debounced)
+  let recalcTimer = null;
+  function scheduleRecalc(period, lineValue) {
+    clearTimeout(recalcTimer);
+    recalcTimer = setTimeout(async () => {
+      const val = parseFloat(lineValue);
+      if (!val || isNaN(val)) return;
+      const base = predictions?.[period];
+      if (!base) return;
+      const result = await recalcWithLine(base, val, period);
+      if (period === 'Q1') analysisQ1 = result;
+      if (period === 'HALF') analysisHalf = result;
+      if (period === 'FULL') analysisFull = result;
+    }, 400);
+  }
+
+  $: if (lineQ1 && predictions?.Q1) scheduleRecalc('Q1', lineQ1);
+  $: if (lineHalf && predictions?.HALF) scheduleRecalc('HALF', lineHalf);
+  $: if (lineFull && predictions?.FULL) scheduleRecalc('FULL', lineFull);
 
   /**
-   * Genera predicciones usando el engine
+   * Genera predicciones llamando al API server-side
    */
-  function generatePredictions() {
+  async function generatePredictions() {
     const homeTeamData = {
       name: localTeam,
       stats: localData,
@@ -92,48 +134,65 @@
     const periods = ['Q1', 'HALF', 'FULL'];
     const results = {};
 
-    periods.forEach(period => {
+    for (const period of periods) {
       const defaultLine = period === 'Q1' ? 55 : period === 'HALF' ? 110 : 220;
       
-      results[period] = predict({
-        homeTeam: homeTeamData,
-        awayTeam: awayTeamData,
-        line: defaultLine,
-        period,
-        gameInfo
-      });
-    });
+      try {
+        const res = await fetch('/api/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            homeTeam: homeTeamData,
+            awayTeam: awayTeamData,
+            line: defaultLine,
+            period,
+            gameInfo
+          })
+        });
+        if (res.ok) {
+          results[period] = await res.json();
+        }
+      } catch (err) {
+        console.error(`[Totales] Error predicting ${period}:`, err);
+      }
+    }
 
-    return results;
+    return Object.keys(results).length > 0 ? results : null;
   }
 
   /**
-   * Recalcula análisis con línea específica
+   * Recalcula análisis con línea específica (server-side)
    */
-  function recalcWithLine(basePrediction, newLine, period) {
+  async function recalcWithLine(basePrediction, newLine, period) {
     if (!newLine || isNaN(newLine)) return basePrediction;
 
-    const homeTeamData = {
-      name: localTeam,
-      stats: localData,
-      restDays: localB2B ? 0 : 2,
-      injuries: localInjury ? [{ name: 'Star Player', type: 'star' }] : []
-    };
-
-    const awayTeamData = {
-      name: awayTeam,
-      stats: awayData,
-      restDays: awayB2B ? 0 : 2,
-      injuries: awayInjury ? [{ name: 'Star Player', type: 'star' }] : []
-    };
-
-    return predict({
-      homeTeam: homeTeamData,
-      awayTeam: awayTeamData,
-      line: newLine,
-      period,
-      gameInfo: { arena: localTeam.includes('Nuggets') ? 'Denver' : null }
-    });
+    try {
+      const res = await fetch('/api/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          homeTeam: {
+            name: localTeam,
+            stats: localData,
+            restDays: localB2B ? 0 : 2,
+            injuries: localInjury ? [{ name: 'Star Player', type: 'star' }] : []
+          },
+          awayTeam: {
+            name: awayTeam,
+            stats: awayData,
+            restDays: awayB2B ? 0 : 2,
+            injuries: awayInjury ? [{ name: 'Star Player', type: 'star' }] : []
+          },
+          line: newLine,
+          period,
+          gameInfo: { arena: localTeam.includes('Nuggets') ? 'Denver' : null }
+        })
+      });
+      if (res.ok) return await res.json();
+    } catch (err) {
+      console.error(`[Totales] Error recalculating ${period}:`, err);
+    }
+    return basePrediction;
   }
 
   /**

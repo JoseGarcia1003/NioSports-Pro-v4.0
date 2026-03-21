@@ -1,5 +1,20 @@
 {
 	"/": [],
+	"/api/cron/fetch-games": [
+		"src/routes/api/cron/fetch-games/+server.js"
+	],
+	"/api/cron/fetch-odds": [
+		"src/routes/api/cron/fetch-odds/+server.js"
+	],
+	"/api/cron/verify-results": [
+		"src/routes/api/cron/verify-results/+server.js"
+	],
+	"/api/predict-batch": [
+		"src/routes/api/predict-batch/+server.js"
+	],
+	"/api/predict": [
+		"src/routes/api/predict/+server.js"
+	],
 	"/bankroll": [],
 	"/login": [],
 	"/methodology": [],

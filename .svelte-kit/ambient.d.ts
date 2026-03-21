@@ -38,10 +38,15 @@
  * The above values will be the same _even if_ different values for `ENVIRONMENT` or `PUBLIC_BASE_URL` are set at runtime, as they are statically replaced in your code with their build time values.
  */
 declare module '$env/static/private' {
+	export const VITE_SUPABASE_URL: string;
+	export const VITE_SUPABASE_ANON_KEY: string;
+	export const SUPABASE_SERVICE_ROLE_KEY: string;
 	export const BALLDONTLIE_API_KEY: string;
+	export const ODDS_API_KEY: string;
 	export const NS_PROXY_SECRET: string;
 	export const UPSTASH_REDIS_REST_URL: string;
 	export const UPSTASH_REDIS_REST_TOKEN: string;
+	export const CRON_SECRET: string;
 	export const SENTRY_DSN: string;
 	export const ACLOCAL_PATH: string;
 	export const ALLUSERSPROFILE: string;
@@ -57,8 +62,10 @@ declare module '$env/static/private' {
 	export const DISPLAY: string;
 	export const DriverData: string;
 	export const EDITOR: string;
-	export const EFC_28408_1592913036: string;
+	export const EFC_17964_1592913036: string;
 	export const EXEPATH: string;
+	export const FPS_BROWSER_APP_PROFILE_STRING: string;
+	export const FPS_BROWSER_USER_PROFILE_STRING: string;
 	export const GIT_ASKPASS: string;
 	export const HOME: string;
 	export const HOMEDRIVE: string;
@@ -238,10 +245,15 @@ declare module '$env/static/public' {
  */
 declare module '$env/dynamic/private' {
 	export const env: {
+		VITE_SUPABASE_URL: string;
+		VITE_SUPABASE_ANON_KEY: string;
+		SUPABASE_SERVICE_ROLE_KEY: string;
 		BALLDONTLIE_API_KEY: string;
+		ODDS_API_KEY: string;
 		NS_PROXY_SECRET: string;
 		UPSTASH_REDIS_REST_URL: string;
 		UPSTASH_REDIS_REST_TOKEN: string;
+		CRON_SECRET: string;
 		SENTRY_DSN: string;
 		ACLOCAL_PATH: string;
 		ALLUSERSPROFILE: string;
@@ -257,8 +269,10 @@ declare module '$env/dynamic/private' {
 		DISPLAY: string;
 		DriverData: string;
 		EDITOR: string;
-		EFC_28408_1592913036: string;
+		EFC_17964_1592913036: string;
 		EXEPATH: string;
+		FPS_BROWSER_APP_PROFILE_STRING: string;
+		FPS_BROWSER_USER_PROFILE_STRING: string;
 		GIT_ASKPASS: string;
 		HOME: string;
 		HOMEDRIVE: string;

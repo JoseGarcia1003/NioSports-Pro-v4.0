@@ -4,7 +4,7 @@
 // Analiza todos los partidos del día y selecciona los mejores
 // ════════════════════════════════════════════════════════════════
 
-import { predict } from '$lib/engine';
+// Motor ejecuta server-side — llamamos al API /api/predict
 import { MODEL_VERSION, CONFIDENCE_THRESHOLDS, BETTING } from '$lib/engine/constants.js';
 
 /**
@@ -32,9 +32,9 @@ const AI_CONFIG = {
 };
 
 /**
- * Genera predicción para un partido y período específico
+ * Genera predicción para un partido llamando al API server-side
  */
-function generatePrediction(game, period, teamStats) {
+async function generatePrediction(game, period, teamStats) {
   const homeTeam = game.homeTeam;
   const awayTeam = game.awayTeam;
   
@@ -42,24 +42,19 @@ function generatePrediction(game, period, teamStats) {
     return null;
   }
 
-  // Obtener línea del mercado (o estimarla)
   let marketLine = game.lines?.[period];
   
   if (!marketLine) {
-    // Estimar línea basada en promedios si no hay línea de mercado
     const home = teamStats[homeTeam];
     const away = teamStats[awayTeam];
-    
     const periodKeys = {
       Q1: { home: 'q1Home', away: 'q1Away' },
       HALF: { home: 'halfHome', away: 'halfAway' },
       FULL: { home: 'fullHome', away: 'fullAway' },
     };
-    
     const keys = periodKeys[period];
     const homeVal = home[keys.home] || home[period.toLowerCase()] || 0;
     const awayVal = away[keys.away] || away[period.toLowerCase()] || 0;
-    
     if (homeVal && awayVal) {
       marketLine = Math.round((homeVal + awayVal) * 2) / 2;
     } else {
@@ -67,33 +62,20 @@ function generatePrediction(game, period, teamStats) {
     }
   }
 
-  // Usar el engine para generar predicción
-  const homeTeamData = {
-    name: homeTeam,
-    stats: teamStats[homeTeam],
-    restDays: 2, // Default, se puede mejorar con datos reales
-    injuries: [],
-  };
-
-  const awayTeamData = {
-    name: awayTeam,
-    stats: teamStats[awayTeam],
-    restDays: 2,
-    injuries: [],
-  };
-
-  const gameInfo = {
-    arena: homeTeam === 'Nuggets' ? 'Denver' : null,
-  };
-
   try {
-    const prediction = predict({
-      homeTeam: homeTeamData,
-      awayTeam: awayTeamData,
-      line: marketLine,
-      period,
-      gameInfo,
+    const res = await fetch('/api/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        homeTeam: { name: homeTeam, stats: teamStats[homeTeam], restDays: 2, injuries: [] },
+        awayTeam: { name: awayTeam, stats: teamStats[awayTeam], restDays: 2, injuries: [] },
+        line: marketLine,
+        period,
+        gameInfo: { arena: homeTeam === 'Nuggets' ? 'Denver' : null },
+      })
     });
+    if (!res.ok) return null;
+    const prediction = await res.json();
 
     return {
       ...prediction,
@@ -135,7 +117,7 @@ function calculateValueScore(pick) {
  * @param {Object} options - Opciones adicionales
  * @returns {Array} - Lista de picks ordenados por valor
  */
-export function generateAIPicks(games, teamStats, options = {}) {
+export async function generateAIPicks(games, teamStats, options = {}) {
   const {
     maxPicks = AI_CONFIG.MAX_PICKS_PER_DAY,
     minEV = AI_CONFIG.MIN_EV_PERCENT,
@@ -151,7 +133,7 @@ export function generateAIPicks(games, teamStats, options = {}) {
     if (game.isFinal) continue;
 
     for (const period of periods) {
-      const prediction = generatePrediction(game, period, teamStats);
+      const prediction = await generatePrediction(game, period, teamStats);
       
       if (!prediction) continue;
 

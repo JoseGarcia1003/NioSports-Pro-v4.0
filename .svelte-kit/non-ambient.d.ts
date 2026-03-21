@@ -27,12 +27,19 @@ export {};
 
 declare module "$app/types" {
 	export interface AppTypes {
-		RouteId(): "/" | "/bankroll" | "/login" | "/methodology" | "/picks" | "/results" | "/stats" | "/totales" | "/tracking";
+		RouteId(): "/" | "/api" | "/api/cron" | "/api/cron/fetch-games" | "/api/cron/fetch-odds" | "/api/cron/verify-results" | "/api/predict-batch" | "/api/predict" | "/bankroll" | "/login" | "/methodology" | "/picks" | "/results" | "/stats" | "/totales" | "/tracking";
 		RouteParams(): {
 			
 		};
 		LayoutParams(): {
 			"/": Record<string, never>;
+			"/api": Record<string, never>;
+			"/api/cron": Record<string, never>;
+			"/api/cron/fetch-games": Record<string, never>;
+			"/api/cron/fetch-odds": Record<string, never>;
+			"/api/cron/verify-results": Record<string, never>;
+			"/api/predict-batch": Record<string, never>;
+			"/api/predict": Record<string, never>;
 			"/bankroll": Record<string, never>;
 			"/login": Record<string, never>;
 			"/methodology": Record<string, never>;
@@ -42,7 +49,7 @@ declare module "$app/types" {
 			"/totales": Record<string, never>;
 			"/tracking": Record<string, never>
 		};
-		Pathname(): "/" | "/bankroll" | "/login" | "/methodology" | "/picks" | "/results" | "/stats" | "/totales" | "/tracking";
+		Pathname(): "/" | "/api/cron/fetch-games" | "/api/cron/fetch-odds" | "/api/cron/verify-results" | "/api/predict-batch" | "/api/predict" | "/bankroll" | "/login" | "/methodology" | "/picks" | "/results" | "/stats" | "/totales" | "/tracking";
 		ResolvedPathname(): `${"" | `/${string}`}${ReturnType<AppTypes['Pathname']>}`;
 		Asset(): "/data/backtesting-results.json" | "/data/nba-stats.json" | "/icons/icon-128.png" | "/icons/icon-144.png" | "/icons/icon-152.png" | "/icons/icon-192.png" | "/icons/icon-384.png" | "/icons/icon-512.png" | "/icons/icon-72.png" | "/icons/icon-96.png" | string & {};
 	}
