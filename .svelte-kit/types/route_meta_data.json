@@ -15,10 +15,23 @@
 	"/api/predict": [
 		"src/routes/api/predict/+server.js"
 	],
+	"/api/stripe/checkout": [
+		"src/routes/api/stripe/checkout/+server.js"
+	],
+	"/api/stripe/portal": [
+		"src/routes/api/stripe/portal/+server.js"
+	],
+	"/api/stripe/webhooks": [
+		"src/routes/api/stripe/webhooks/+server.js"
+	],
 	"/bankroll": [],
+	"/legal/privacy": [],
+	"/legal/responsible-gambling": [],
+	"/legal/terms": [],
 	"/login": [],
 	"/methodology": [],
 	"/picks": [],
+	"/pricing": [],
 	"/results": [],
 	"/stats": [],
 	"/totales": [],

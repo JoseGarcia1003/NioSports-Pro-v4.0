@@ -14,7 +14,11 @@ export const nodes = [
 	() => import('./nodes/7'),
 	() => import('./nodes/8'),
 	() => import('./nodes/9'),
-	() => import('./nodes/10')
+	() => import('./nodes/10'),
+	() => import('./nodes/11'),
+	() => import('./nodes/12'),
+	() => import('./nodes/13'),
+	() => import('./nodes/14')
 ];
 
 export const server_loads = [];
@@ -22,13 +26,17 @@ export const server_loads = [];
 export const dictionary = {
 		"/": [2],
 		"/bankroll": [3],
-		"/login": [4],
-		"/methodology": [5],
-		"/picks": [6],
-		"/results": [7],
-		"/stats": [8],
-		"/totales": [9],
-		"/tracking": [10]
+		"/legal/privacy": [4],
+		"/legal/responsible-gambling": [5],
+		"/legal/terms": [6],
+		"/login": [7],
+		"/methodology": [8],
+		"/picks": [9],
+		"/pricing": [10],
+		"/results": [11],
+		"/stats": [12],
+		"/totales": [13],
+		"/tracking": [14]
 	};
 
 export const hooks = {

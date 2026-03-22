@@ -1,1 +1,1 @@
-export { default as component } from "../../../../src/routes/methodology/+page.svelte";
+export { default as component } from "../../../../src/routes/legal/responsible-gambling/+page.svelte";
