@@ -1,0 +1,28 @@
+{
+  "trained_at": "2026-03-22T11:04:47.605497",
+  "feature_cols": [
+    "home_total_l5",
+    "home_total_l10",
+    "home_total_l20",
+    "home_home_avg",
+    "home_std",
+    "away_total_l5",
+    "away_total_l10",
+    "away_total_l20",
+    "away_away_avg",
+    "away_std",
+    "total_sum_l5",
+    "total_sum_l10",
+    "total_diff_l5",
+    "home_rest_days",
+    "away_rest_days",
+    "is_b2b_home",
+    "is_b2b_away",
+    "rest_diff",
+    "altitude_ft",
+    "days_into_season"
+  ],
+  "folds": [
+    {
+      "fold": 1,
+      "test_season": 
