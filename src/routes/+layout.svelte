@@ -1,4 +1,3 @@
-<!-- src/routes/+layout.svelte -->
 <script>
   import { onMount } from 'svelte';
   import '$lib/styles/tokens.css';
@@ -36,7 +35,13 @@
   {#if $authLoading}
     <div class="app-loading">
       <div class="app-loading__content">
-        <div class="app-loading__logo">🏀</div>
+        <div class="app-loading__logo">
+          <svg width="48" height="48" viewBox="0 0 40 40" fill="none">
+            <rect width="40" height="40" rx="10" fill="#6366F1"/>
+            <path d="M12 28V12l8 5.5L28 12v16l-8-5.5L12 28z" fill="white" opacity="0.9"/>
+            <path d="M20 17.5l8 5.5V12l-8 5.5z" fill="white" opacity="0.6"/>
+          </svg>
+        </div>
         <div class="app-loading__spinner"></div>
         <p class="app-loading__text">Cargando NioSports Pro</p>
       </div>
@@ -63,14 +68,17 @@
     --color-bg-elevated: rgba(255,255,255,0.06);
     --color-border: rgba(255,255,255,0.08);
     --color-border-hover: rgba(255,255,255,0.15);
-    --color-text-primary: #ffffff;
+    --color-text-primary: #ededed;
     --color-text-secondary: rgba(255,255,255,0.7);
     --color-text-muted: rgba(255,255,255,0.45);
-    --color-accent: #fbbf24;
-    --color-accent-hover: #f59e0b;
-    --color-success: #34d399;
-    --color-warning: #fbbf24;
-    --color-error: #f87171;
+    --color-accent: #6366F1;
+    --color-accent-hover: #4F46E5;
+    --color-accent-glow: rgba(99,102,241,0.15);
+    --color-cta: #F59E0B;
+    --color-cta-hover: #D97706;
+    --color-success: #10B981;
+    --color-warning: #F59E0B;
+    --color-error: #EF4444;
   }
 
   :global([data-theme="light"]) {
@@ -83,10 +91,13 @@
     --color-text-primary: #0f172a;
     --color-text-secondary: #334155;
     --color-text-muted: #64748b;
-    --color-accent: #d97706;
-    --color-accent-hover: #b45309;
+    --color-accent: #4F46E5;
+    --color-accent-hover: #4338CA;
+    --color-accent-glow: rgba(79,70,229,0.1);
+    --color-cta: #D97706;
+    --color-cta-hover: #B45309;
     --color-success: #059669;
-    --color-warning: #d97706;
+    --color-warning: #D97706;
     --color-error: #dc2626;
   }
 
@@ -115,7 +126,7 @@
   }
 
   :global(::selection) {
-    background: rgba(251, 191, 36, 0.3);
+    background: rgba(99, 102, 241, 0.3);
     color: #fff;
   }
 
@@ -140,7 +151,6 @@
     }
   }
 
-  /* Loading Screen */
   .app-loading {
     min-height: 100vh;
     display: flex;
@@ -157,9 +167,8 @@
   }
 
   .app-loading__logo {
-    font-size: 4rem;
     animation: float 2s ease-in-out infinite;
-    filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.4));
+    filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.4));
   }
 
   @keyframes float {
@@ -170,8 +179,8 @@
   .app-loading__spinner {
     width: 48px;
     height: 48px;
-    border: 3px solid rgba(251, 191, 36, 0.1);
-    border-top-color: #fbbf24;
+    border: 3px solid rgba(99, 102, 241, 0.1);
+    border-top-color: #6366F1;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
   }

@@ -40,7 +40,7 @@ function formatDate(date) {
  */
 export async function fetchTodayGames(apiKey = '', date = new Date()) {
   const dateStr = formatDate(date);
-  const headers = apiKey ? { Authorization: apiKey } : {};
+  const headers = apiKey ? { Authorization: `Bearer ${apiKey}` } : {};
 
   try {
     const params = new URLSearchParams({

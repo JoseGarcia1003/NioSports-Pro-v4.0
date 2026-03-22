@@ -342,7 +342,7 @@
 
 <div class="page">
   <div class="page__header">
-    <h1 class="page__title">🤖 Picks IA</h1>
+    <h1 class="page__title">Picks del Modelo</h1>
     <p class="page__subtitle">Motor Predictivo v{MODEL_VERSION.version}</p>
   </div>
 
