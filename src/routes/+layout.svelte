@@ -6,6 +6,7 @@
   import { page } from '$app/stores';
 
   import Nav from '$lib/components/Nav.svelte';
+  import BottomNav from '$lib/components/BottomNav.svelte';
   import DemoBanner from '$lib/components/DemoBanner.svelte';
   import ToastContainer from '$lib/components/ToastContainer.svelte';
 
@@ -29,6 +30,7 @@
 
   $: isPublicPage = PUBLIC_ROUTES.some(r => $page.url.pathname.startsWith(r));
   $: isLandingPage = !$isAuthenticated && $page.url.pathname === '/';
+  $: showNav = !isPublicPage && !isLandingPage;
 </script>
 
 <div data-theme={$theme} class="app">
@@ -47,14 +49,18 @@
       </div>
     </div>
   {:else}
-    {#if !isPublicPage && !isLandingPage}
+    {#if showNav}
       <Nav />
       <DemoBanner />
     {/if}
 
-    <main class="app-main" class:app-main--with-nav={!isPublicPage && !isLandingPage}>
+    <main id="main-content" class="app-main" class:app-main--with-nav={showNav} class:app-main--with-bottom={showNav}>
       <slot />
     </main>
+
+    {#if showNav}
+      <BottomNav />
+    {/if}
   {/if}
 
   <ToastContainer />
@@ -119,6 +125,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     line-height: 1.5;
+    overscroll-behavior-y: contain;
   }
 
   :global(a) {
@@ -128,6 +135,11 @@
   :global(::selection) {
     background: rgba(99, 102, 241, 0.3);
     color: #fff;
+  }
+
+  /* Ensure all interactive elements meet 44px touch target */
+  :global(button, a, input, select, textarea) {
+    min-height: 44px;
   }
 
   .app {
@@ -145,12 +157,23 @@
     padding-top: 72px;
   }
 
+  .app-main--with-bottom {
+    padding-bottom: 0;
+  }
+
+  @media (max-width: 768px) {
+    .app-main--with-bottom {
+      padding-bottom: 72px;
+    }
+  }
+
   @media (max-width: 480px) {
     .app-main--with-nav {
       padding-top: 64px;
     }
   }
 
+  /* Loading Screen */
   .app-loading {
     min-height: 100vh;
     display: flex;
