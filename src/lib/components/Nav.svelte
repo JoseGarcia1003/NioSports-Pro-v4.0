@@ -6,7 +6,7 @@
   import { browser } from '$app/environment';
   import { onMount, onDestroy } from 'svelte';
   import Logo from '$lib/components/Logo.svelte';
-  import { Home, BarChart3, Cpu, Wallet, TrendingUp, Trophy, ClipboardList, Sun, Moon, LogOut } from 'lucide-svelte';
+  import { Home, BarChart3, Cpu, Wallet, TrendingUp, Gem, Trophy, ClipboardList, Sun, Moon, LogOut } from 'lucide-svelte';
 
   const NAV_LINKS = [
     { href: '/',         label: 'Inicio',      icon: Home },
@@ -14,6 +14,7 @@
     { href: '/picks',    label: 'Picks',       icon: Cpu },
     { href: '/bankroll', label: 'Bankroll',    icon: Wallet },
     { href: '/stats',    label: 'Stats',       icon: TrendingUp },
+    { href: '/pricing',  label: 'Precios',     icon: Gem },
     { href: '/results',  label: 'Resultados',  icon: Trophy },
     { href: '/tracking', label: 'Tracking',    icon: ClipboardList },
   ];
