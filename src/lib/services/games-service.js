@@ -19,9 +19,13 @@ const TEAM_NAME_REVERSE = Object.fromEntries(
 function toShortName(fullName) {
   if (!fullName) return null;
   if (TEAM_NAME_MAP[fullName]) return TEAM_NAME_MAP[fullName];
+
   for (const [full, short] of Object.entries(TEAM_NAME_MAP)) {
-    if (fullName.includes(short) || full.includes(fullName)) return short;
+    if (fullName.includes(short) || full.includes(fullName)) {
+      return short;
+    }
   }
+
   return null;
 }
 
@@ -36,10 +40,12 @@ function formatDate(date) {
  * Obtiene partidos del día desde BallDontLie API
  * @param {string} apiKey - API key de BallDontLie (opcional)
  * @param {Date} date - Fecha a consultar (default: hoy)
- * @returns {Promise<Array>} - Lista de partidos formateados
+ * @returns {Promise<Array|null>} - Lista de partidos formateados o null si falla la API
  */
 export async function fetchTodayGames(apiKey = '', date = new Date()) {
   const dateStr = formatDate(date);
+
+  // FIX: BallDontLie requiere Bearer token
   const headers = apiKey ? { Authorization: `Bearer ${apiKey}` } : {};
 
   try {
@@ -48,7 +54,7 @@ export async function fetchTodayGames(apiKey = '', date = new Date()) {
       per_page: '15',
     });
 
-    const res = await fetch(`${API_BASE}/games?${params}`, {
+    const res = await fetch(`${API_BASE}/games?${params.toString()}`, {
       headers,
       signal: AbortSignal.timeout(10000),
     });
@@ -58,7 +64,8 @@ export async function fetchTodayGames(apiKey = '', date = new Date()) {
     }
 
     const data = await res.json();
-    const games = (data.data || []).map(game => ({
+
+    const games = (data.data || []).map((game) => ({
       id: game.id,
       date: game.date,
       time: game.status,
@@ -69,19 +76,21 @@ export async function fetchTodayGames(apiKey = '', date = new Date()) {
       awayTeamFull: game.visitor_team?.full_name,
       homeScore: game.home_team_score,
       awayScore: game.visitor_team_score,
-      isLive: game.status !== 'Final' && game.status !== 'Scheduled' && game.home_team_score > 0,
+      isLive:
+        game.status !== 'Final' &&
+        game.status !== 'Scheduled' &&
+        game.home_team_score > 0,
       isFinal: game.status === 'Final',
       // Campos para líneas (se llenarán con The Odds API después)
       lines: {
         Q1: null,
         HALF: null,
         FULL: null,
-      }
+      },
     }));
 
     // Filtrar juegos con equipos válidos
-    return games.filter(g => g.homeTeam && g.awayTeam);
-
+    return games.filter((g) => g.homeTeam && g.awayTeam);
   } catch (error) {
     console.warn('Error fetching games from API:', error.message);
     return null; // Retorna null para indicar que debe usar demo
@@ -94,15 +103,26 @@ export async function fetchTodayGames(apiKey = '', date = new Date()) {
  * @returns {Array} - Lista de partidos demo
  */
 export function generateDemoGames(teamStats) {
-  const teams = Object.keys(teamStats).filter(t => !t.startsWith('_') && t !== 'leagueAverages');
-  
+  const teams = Object.keys(teamStats).filter(
+    (t) => !t.startsWith('_') && t !== 'leagueAverages'
+  );
+
   if (teams.length < 10) {
     // Usar lista hardcoded si no hay suficientes equipos
     const defaultTeams = [
-      'Thunder', 'Nuggets', 'Celtics', 'Lakers', 'Heat',
-      'Warriors', 'Bucks', 'Suns', '76ers', 'Mavericks'
+      'Thunder',
+      'Nuggets',
+      'Celtics',
+      'Lakers',
+      'Heat',
+      'Warriors',
+      'Bucks',
+      'Suns',
+      '76ers',
+      'Mavericks',
     ];
-    teams.push(...defaultTeams.filter(t => !teams.includes(t)));
+
+    teams.push(...defaultTeams.filter((t) => !teams.includes(t)));
   }
 
   // Generar 4-6 partidos demo
@@ -113,12 +133,13 @@ export function generateDemoGames(teamStats) {
   for (let i = 0; i < numGames && i * 2 + 1 < shuffled.length; i++) {
     const homeTeam = shuffled[i * 2];
     const awayTeam = shuffled[i * 2 + 1];
-    
+
     // Generar líneas realistas basadas en promedios de equipos
     const homeStats = teamStats[homeTeam];
     const awayStats = teamStats[awayTeam];
-    
+
     let fullLine = 220;
+
     if (homeStats && awayStats) {
       const homeAvg = homeStats.fullHome || homeStats.full || 115;
       const awayAvg = awayStats.fullAway || awayStats.full || 115;
@@ -143,7 +164,7 @@ export function generateDemoGames(teamStats) {
         Q1: Math.round(fullLine * 0.25 * 2) / 2,
         HALF: Math.round(fullLine * 0.48 * 2) / 2,
         FULL: fullLine,
-      }
+      },
     });
   }
 
@@ -153,7 +174,7 @@ export function generateDemoGames(teamStats) {
 /**
  * Obtiene partidos del día con fallback a demo
  * @param {Object} options - Opciones
- * @returns {Promise<{games: Array, isDemo: boolean}>}
+ * @returns {Promise<{games: Array, isDemo: boolean, reason?: string}>}
  */
 export async function getGamesToday(options = {}) {
   const { apiKey = '', teamStats = {}, forceDemo = false } = options;

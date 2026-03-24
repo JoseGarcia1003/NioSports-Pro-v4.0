@@ -1,93 +1,172 @@
 // src/routes/api/predict/+server.js
-// ════════════════════════════════════════════════════════════════
-// Motor predictivo ejecutando 100% server-side.
-// El cliente NUNCA ve la lógica del engine.
-// ════════════════════════════════════════════════════════════════
+// Motor predictivo server-side con Railway ML fallback a heurístico local.
 
 import { json } from '@sveltejs/kit';
 import { predict } from '$lib/engine/predictor.js';
 import { MODEL_VERSION } from '$lib/engine/constants.js';
+import { env } from '$env/dynamic/private';
 
-const CRON_SECRET = import.meta.env.CRON_SECRET || process.env.CRON_SECRET || '';
+const ML_API_URL = env.ML_API_URL || '';
+const ML_API_KEY = env.ML_API_KEY || '';
 
-// Simple in-memory cache (replaced by Redis in production)
+// In-memory cache
 const cache = new Map();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const CACHE_TTL = 5 * 60 * 1000;
 
 function getCacheKey(body) {
-  return JSON.stringify(body);
+  return JSON.stringify({
+    h: body.homeTeam?.name,
+    a: body.awayTeam?.name,
+    l: body.line,
+    p: body.period,
+  });
 }
 
 function getCached(key) {
   const entry = cache.get(key);
   if (!entry) return null;
-  if (Date.now() - entry.timestamp > CACHE_TTL) {
-    cache.delete(key);
-    return null;
-  }
+  if (Date.now() - entry.ts > CACHE_TTL) { cache.delete(key); return null; }
   return entry.data;
 }
 
 function setCache(key, data) {
-  // Limit cache size
-  if (cache.size > 500) {
-    const oldest = cache.keys().next().value;
-    cache.delete(oldest);
+  if (cache.size > 500) cache.delete(cache.keys().next().value);
+  cache.set(key, { data, ts: Date.now() });
+}
+
+/**
+ * Try Railway FastAPI first, fallback to local heuristic.
+ */
+async function predictWithML(body) {
+  if (!ML_API_URL) return null;
+
+  try {
+    const homeStats = body.homeTeam?.stats || {};
+    const awayStats = body.awayTeam?.stats || {};
+
+    const mlBody = {
+      home_team: {
+        name: body.homeTeam?.name || '',
+        total_l5: homeStats.fullHome || homeStats.full || 220,
+        total_l10: homeStats.fullHome || homeStats.full || 220,
+        total_l20: homeStats.fullHome || homeStats.full || 220,
+        home_avg: homeStats.fullHome || homeStats.full || 220,
+        away_avg: homeStats.fullAway || homeStats.full || 220,
+        std: 10,
+        rest_days: body.homeTeam?.restDays ?? 2,
+        is_b2b: (body.homeTeam?.restDays ?? 2) === 0,
+      },
+      away_team: {
+        name: body.awayTeam?.name || '',
+        total_l5: awayStats.fullAway || awayStats.full || 220,
+        total_l10: awayStats.fullAway || awayStats.full || 220,
+        total_l20: awayStats.fullAway || awayStats.full || 220,
+        home_avg: awayStats.fullHome || awayStats.full || 220,
+        away_avg: awayStats.fullAway || awayStats.full || 220,
+        std: 10,
+        rest_days: body.awayTeam?.restDays ?? 2,
+        is_b2b: (body.awayTeam?.restDays ?? 2) === 0,
+      },
+      line: body.line || 220,
+      period: body.period || 'FULL',
+      days_into_season: 150,
+    };
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+
+    const res = await fetch(`${ML_API_URL}/predict`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': ML_API_KEY,
+      },
+      body: JSON.stringify(mlBody),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+
+    if (res.ok) {
+      const data = await res.json();
+      return {
+        projection: data.projection,
+        line: data.line,
+        edge: data.edge,
+        period: body.period || 'FULL',
+        direction: data.direction,
+        probability: data.probability,
+        probabilityPercent: data.probability_pct,
+        confidence: data.confidence,
+        ev: data.ev,
+        evPercent: data.ev_percent,
+        isValueBet: data.is_value_bet,
+        totalAdjustment: 0,
+        topFactors: [],
+        factorsDisplay: '',
+        modelVersion: data.model_version,
+        generatedAt: new Date().toISOString(),
+        source: data.source,
+      };
+    }
+  } catch (err) {
+    console.warn('[API/predict] ML API unavailable, using fallback:', err.message);
   }
-  cache.set(key, { data, timestamp: Date.now() });
+
+  return null;
 }
 
 /** @type {import('@sveltejs/kit').RequestHandler} */
 export async function POST({ request }) {
   try {
     const body = await request.json();
-    const { homeTeam, awayTeam, line, period, gameInfo } = body;
+    const { homeTeam, awayTeam } = body;
 
-    // Validate required fields
     if (!homeTeam || !awayTeam) {
       return json({ error: 'homeTeam and awayTeam are required' }, { status: 400 });
     }
 
     // Check cache
-    const cacheKey = getCacheKey({ homeTeam: homeTeam.name, awayTeam: awayTeam.name, line, period });
+    const cacheKey = getCacheKey(body);
     const cached = getCached(cacheKey);
-    if (cached) {
-      return json({ ...cached, cached: true });
+    if (cached) return json({ ...cached, cached: true });
+
+    // Try ML API first
+    let result = await predictWithML(body);
+
+    // Fallback to local heuristic
+    if (!result) {
+      const prediction = predict({
+        homeTeam,
+        awayTeam,
+        line: body.line || 0,
+        period: body.period || 'FULL',
+        gameInfo: body.gameInfo || {},
+      });
+
+      result = {
+        projection: prediction.projection,
+        baseProjection: prediction.baseProjection,
+        line: prediction.line,
+        edge: prediction.edge,
+        period: prediction.period,
+        direction: prediction.direction,
+        probability: prediction.probability,
+        probabilityPercent: prediction.probabilityPercent,
+        confidence: prediction.confidence,
+        ev: prediction.ev,
+        evPercent: prediction.evPercent,
+        isValueBet: prediction.isValueBet,
+        totalAdjustment: prediction.totalAdjustment,
+        topFactors: prediction.topFactors,
+        factorsDisplay: prediction.factorsDisplay,
+        modelVersion: prediction.modelVersion,
+        generatedAt: prediction.generatedAt,
+        source: 'heuristic-local',
+      };
     }
 
-    // Execute prediction server-side
-    const prediction = predict({
-      homeTeam,
-      awayTeam,
-      line: line || 0,
-      period: period || 'FULL',
-      gameInfo: gameInfo || {},
-    });
-
-    // Build response — expose results but NOT internal constants/weights
-    const result = {
-      projection: prediction.projection,
-      baseProjection: prediction.baseProjection,
-      line: prediction.line,
-      edge: prediction.edge,
-      period: prediction.period,
-      direction: prediction.direction,
-      probability: prediction.probability,
-      probabilityPercent: prediction.probabilityPercent,
-      confidence: prediction.confidence,
-      ev: prediction.ev,
-      evPercent: prediction.evPercent,
-      isValueBet: prediction.isValueBet,
-      totalAdjustment: prediction.totalAdjustment,
-      topFactors: prediction.topFactors,
-      factorsDisplay: prediction.factorsDisplay,
-      modelVersion: prediction.modelVersion,
-      generatedAt: prediction.generatedAt,
-    };
-
-    // Cache
     setCache(cacheKey, result);
-
     return json(result);
   } catch (err) {
     console.error('[API/predict] Error:', err.message);
@@ -97,9 +176,19 @@ export async function POST({ request }) {
 
 /** @type {import('@sveltejs/kit').RequestHandler} */
 export async function GET() {
+  const mlAvailable = !!ML_API_URL;
+  let mlHealthy = false;
+
+  if (mlAvailable) {
+    try {
+      const res = await fetch(`${ML_API_URL}/health`, { signal: AbortSignal.timeout(2000) });
+      mlHealthy = res.ok;
+    } catch { /* ignore */ }
+  }
+
   return json({
     status: 'ok',
     modelVersion: MODEL_VERSION.version,
-    lastUpdated: MODEL_VERSION.lastUpdated,
+    mlApi: { configured: mlAvailable, healthy: mlHealthy },
   });
 }
