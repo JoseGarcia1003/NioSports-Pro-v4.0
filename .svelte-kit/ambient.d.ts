@@ -48,6 +48,8 @@ declare module '$env/static/private' {
 	export const UPSTASH_REDIS_REST_TOKEN: string;
 	export const CRON_SECRET: string;
 	export const SENTRY_DSN: string;
+	export const ML_API_URL: string;
+	export const ML_API_KEY: string;
 	export const ACLOCAL_PATH: string;
 	export const ALLUSERSPROFILE: string;
 	export const APPDATA: string;
@@ -62,8 +64,7 @@ declare module '$env/static/private' {
 	export const DISPLAY: string;
 	export const DriverData: string;
 	export const EDITOR: string;
-	export const EFC_17964_1592913036: string;
-	export const EFC_17964_344590478: string;
+	export const EFC_5428_1592913036: string;
 	export const EXEPATH: string;
 	export const GIT_ASKPASS: string;
 	export const HOME: string;
@@ -254,6 +255,8 @@ declare module '$env/dynamic/private' {
 		UPSTASH_REDIS_REST_TOKEN: string;
 		CRON_SECRET: string;
 		SENTRY_DSN: string;
+		ML_API_URL: string;
+		ML_API_KEY: string;
 		ACLOCAL_PATH: string;
 		ALLUSERSPROFILE: string;
 		APPDATA: string;
@@ -268,8 +271,7 @@ declare module '$env/dynamic/private' {
 		DISPLAY: string;
 		DriverData: string;
 		EDITOR: string;
-		EFC_17964_1592913036: string;
-		EFC_17964_344590478: string;
+		EFC_5428_1592913036: string;
 		EXEPATH: string;
 		GIT_ASKPASS: string;
 		HOME: string;
