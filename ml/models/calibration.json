@@ -1,0 +1,61 @@
+{
+  "method": "platt",
+  "A": -0.16291216566444167,
+  "B": 0.2555929709006456,
+  "feature_cols": [
+    "home_total_l5",
+    "home_total_l10",
+    "home_total_l20",
+    "home_home_avg",
+    "home_std",
+    "away_total_l5",
+    "away_total_l10",
+    "away_total_l20",
+    "away_away_avg",
+    "away_std",
+    "total_sum_l5",
+    "total_sum_l10",
+    "total_diff_l5",
+    "home_rest_days",
+    "away_rest_days",
+    "is_b2b_home",
+    "is_b2b_away",
+    "rest_diff",
+    "altitude_ft",
+    "days_into_season",
+    "momentum_5v10",
+    "matchup_volatility",
+    "total_rest",
+    "both_rested",
+    "both_b2b",
+    "venue_split_diff"
+  ],
+  "feature_count": 26,
+  "training_samples": 5999,
+  "validation_results": [
+    {
+      "fold": 1,
+      "mae": 14.949525985717774,
+      "wr": 0.6141666666666666,
+      "roi": 17.25,
+      "wins": 737,
+      "losses": 463,
+      "total": 1200
+    },
+    {
+      "fold": 2,
+      "mae": 15.308109550476074,
+      "wr": 0.6075,
+      "roi": 15.977272727272728,
+      "wins": 729,
+      "losses": 471,
+      "total": 1200
+    }
+  ],
+  "period_std": {
+    "Q1": 4.8,
+    "HALF": 7.2,
+    "FULL": 10.5
+  },
+  "version": "3.0.0"
+}
