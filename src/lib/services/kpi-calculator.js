@@ -1,84 +1,106 @@
 // src/lib/services/kpi-calculator.js
-// Calcula KPIs REALES a partir de picks resueltos del usuario.
+// Calculates user KPIs from picks data (now from Supabase arrays, not Firebase objects).
 
-function americanToDecimal(odds) {
-  if (!odds) return 1.909;
-  if (odds > 0) return (odds / 100) + 1;
-  return (100 / Math.abs(odds)) + 1;
-}
-
-function calculateStreak(picks) {
-  if (!picks || picks.length === 0) return { value: '—', label: 'Sin datos' };
-  const sorted = [...picks]
-    .filter(p => p.status === 'win' || p.status === 'loss')
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  if (sorted.length === 0) return { value: '—', label: 'Sin resultados' };
-  const firstResult = sorted[0].status;
-  let count = 0;
-  for (const pick of sorted) {
-    if (pick.status === firstResult) count++;
-    else break;
-  }
-  if (firstResult === 'win') return { value: `${count}W`, label: count >= 3 ? 'Racha activa' : '' };
-  return { value: `${count}L`, label: count >= 3 ? 'Racha negativa' : '' };
-}
-
-function calculateAvgCLV(picks) {
-  const withCLV = picks.filter(p => p.closingLine != null && p.line != null && p.status !== 'pending');
-  if (withCLV.length === 0) return { value: '—', label: 'Sin datos CLV' };
-  let totalCLV = 0;
-  for (const p of withCLV) {
-    const clv = p.betType === 'OVER'
-      ? parseFloat(p.closingLine) - parseFloat(p.line)
-      : parseFloat(p.line) - parseFloat(p.closingLine);
-    totalCLV += clv;
-  }
-  const avg = totalCLV / withCLV.length;
-  const sign = avg >= 0 ? '+' : '';
-  const label = avg >= 1 ? 'Sharp' : avg >= 0 ? 'Neutral' : 'Mejorable';
-  return { value: `${sign}${avg.toFixed(1)}`, label };
-}
-
+/**
+ * Calculate user KPIs from picks array.
+ * @param {Array} picks - Array of pick objects from Supabase
+ * @returns {Array} KPI cards data
+ */
 export function calculateUserKPIs(picks) {
-  if (!picks || picks.length === 0) {
-    return [
-      { label: 'Win Rate', value: '—', trend: 'Sin picks aún', icon: '🎯', color: 'emerald', empty: true },
-      { label: 'ROI', value: '—', trend: 'Sin picks aún', icon: '📈', color: 'amber', empty: true },
-      { label: 'Racha', value: '—', trend: 'Sin picks aún', icon: '🔥', color: 'orange', empty: true },
-      { label: 'CLV Avg', value: '—', trend: 'Sin datos', icon: '💎', color: 'purple', empty: true },
-    ];
-  }
+  const empty = [
+    { label: 'Win Rate', value: '—', color: 'blue', empty: true, badge: 'Sin picks aún' },
+    { label: 'ROI', value: '—', color: 'green', empty: true, badge: 'Sin picks aún' },
+    { label: 'Racha', value: '—', color: 'orange', empty: true, badge: 'Sin picks aún' },
+    { label: 'CLV Avg', value: '—', color: 'purple', empty: true, badge: 'Sin datos' },
+  ];
 
-  const resolved = picks.filter(p => p.status === 'win' || p.status === 'loss');
-  const wins = resolved.filter(p => p.status === 'win').length;
-  const losses = resolved.filter(p => p.status === 'loss').length;
+  if (!picks || !Array.isArray(picks) || picks.length === 0) return empty;
+
+  // Convert object format to array if needed (backward compat)
+  const picksArray = Array.isArray(picks) ? picks : Object.values(picks);
+
+  // Filter resolved picks
+  const resolved = picksArray.filter(p =>
+    p.status === 'win' || p.status === 'loss' || p.result === 'win' || p.result === 'loss'
+  );
+
+  if (resolved.length === 0) return empty;
+
+  // Win Rate
+  const wins = resolved.filter(p => p.status === 'win' || p.result === 'win').length;
+  const losses = resolved.filter(p => p.status === 'loss' || p.result === 'loss').length;
   const total = wins + losses;
+  const winRate = total > 0 ? (wins / total * 100).toFixed(1) : '0.0';
 
-  let winRateValue = '—', winRateTrend = 'Sin resultados';
-  if (total > 0) {
-    winRateValue = `${((wins / total) * 100).toFixed(1)}%`;
-    winRateTrend = `${wins}W - ${losses}L`;
-  }
+  // ROI (assuming -110 odds flat betting)
+  const profitPerWin = 100 / 110;  // $0.909 profit per $1 risked
+  const totalProfit = (wins * profitPerWin) - losses;
+  const roi = total > 0 ? (totalProfit / total * 100).toFixed(1) : '0.0';
 
-  let roiValue = '—', roiTrend = 'Sin resultados';
-  if (total > 0) {
-    let profit = 0;
-    for (const p of resolved) {
-      const dec = americanToDecimal(p.odds || -110);
-      profit += p.status === 'win' ? (dec - 1) : -1;
+  // Streak (sort by date, most recent first)
+  const sorted = [...resolved].sort((a, b) => {
+    const dateA = a.resolved_at || a.created_at || a.createdAt || '';
+    const dateB = b.resolved_at || b.created_at || b.createdAt || '';
+    return dateB.localeCompare(dateA);
+  });
+
+  let streak = 0;
+  let streakType = '';
+  if (sorted.length > 0) {
+    const firstResult = sorted[0].status || sorted[0].result;
+    streakType = firstResult === 'win' ? 'W' : 'L';
+    for (const pick of sorted) {
+      const result = pick.status || pick.result;
+      if (result === firstResult) {
+        streak++;
+      } else {
+        break;
+      }
     }
-    const roi = (profit / total) * 100;
-    roiValue = `${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%`;
-    roiTrend = `${profit >= 0 ? '+' : ''}${profit.toFixed(1)}u`;
   }
 
-  const streak = calculateStreak(picks);
-  const clv = calculateAvgCLV(picks);
+  // CLV Average
+  const picksWithCLV = resolved.filter(p => p.clv_points != null && p.clv_points !== undefined);
+  let clvAvg = null;
+  if (picksWithCLV.length > 0) {
+    const totalCLV = picksWithCLV.reduce((sum, p) => sum + (p.clv_points || 0), 0);
+    clvAvg = (totalCLV / picksWithCLV.length).toFixed(2);
+  }
+
+  // Color coding
+  const wrColor = parseFloat(winRate) >= 55 ? 'green' : parseFloat(winRate) >= 52 ? 'blue' : 'red';
+  const roiColor = parseFloat(roi) > 0 ? 'green' : 'red';
+  const streakColor = streakType === 'W' ? 'green' : 'orange';
+  const clvColor = clvAvg !== null ? (parseFloat(clvAvg) > 0 ? 'green' : 'red') : 'purple';
 
   return [
-    { label: 'Win Rate', value: winRateValue, trend: winRateTrend, icon: '🎯', color: 'emerald', empty: total === 0 },
-    { label: 'ROI', value: roiValue, trend: roiTrend, icon: '📈', color: 'amber', empty: total === 0 },
-    { label: 'Racha', value: streak.value, trend: streak.label, icon: '🔥', color: 'orange', empty: total === 0 },
-    { label: 'CLV Avg', value: clv.value, trend: clv.label, icon: '💎', color: 'purple', empty: total === 0 },
+    {
+      label: 'Win Rate',
+      value: `${winRate}%`,
+      color: wrColor,
+      empty: false,
+      badge: `${wins}W-${losses}L`,
+    },
+    {
+      label: 'ROI',
+      value: `${roi}%`,
+      color: roiColor,
+      empty: false,
+      badge: `${total} picks`,
+    },
+    {
+      label: 'Racha',
+      value: `${streak}${streakType}`,
+      color: streakColor,
+      empty: false,
+      badge: streakType === 'W' ? 'Ganando' : 'Perdiendo',
+    },
+    {
+      label: 'CLV Avg',
+      value: clvAvg !== null ? `${clvAvg > 0 ? '+' : ''}${clvAvg}` : '—',
+      color: clvColor,
+      empty: clvAvg === null,
+      badge: clvAvg !== null ? `${picksWithCLV.length} medidos` : 'Sin datos',
+    },
   ];
 }

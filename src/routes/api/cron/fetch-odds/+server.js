@@ -1,153 +1,141 @@
 // src/routes/api/cron/fetch-odds/+server.js
-// ════════════════════════════════════════════════════════════════
-// Cron: obtiene líneas de totales NBA desde The Odds API.
-// Schedule: 0 17,20,23 * * * (cada 3h durante horario de partidos)
-// ════════════════════════════════════════════════════════════════
+// Fetches NBA totals odds from The Odds API and stores snapshots in Supabase.
+// Cron: runs 3x daily (17:00, 20:00, 23:00 UTC) or on-demand.
 
 import { json } from '@sveltejs/kit';
-import { createClient } from '@supabase/supabase-js';
 import { env } from '$env/dynamic/private';
+import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = env.VITE_SUPABASE_URL || '';
-const SUPABASE_SERVICE_KEY = env.SUPABASE_SERVICE_ROLE_KEY || '';
 const ODDS_API_KEY = env.ODDS_API_KEY || '';
-const CRON_SECRET = env.CRON_SECRET || '';
+const ODDS_API_BASE = 'https://api.the-odds-api.com/v4/sports/basketball_nba/odds';
 
-const ODDS_API_BASE = 'https://api.the-odds-api.com/v4';
-
-function getSupabaseAdmin() {
-  return createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+function getSupabase() {
+  return createClient(env.VITE_SUPABASE_URL || '', env.SUPABASE_SERVICE_ROLE_KEY || '');
 }
 
-/** @type {import('@sveltejs/kit').RequestHandler} */
+function determineSnapshotType() {
+  const hour = new Date().getUTCHours();
+  // Before 17:00 UTC = opening, 17:00-22:00 = current, after 22:00 = closing
+  if (hour < 17) return 'opening';
+  if (hour >= 22) return 'closing';
+  return 'current';
+}
+
 export async function GET({ request }) {
+  // Verify cron secret
   const authHeader = request.headers.get('authorization');
-  if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
+  const cronSecret = env.CRON_SECRET || '';
+  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
     return json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   if (!ODDS_API_KEY) {
     return json({
-      success: false,
-      message: 'ODDS_API_KEY not configured. Skipping odds fetch.',
-      note: 'Configure ODDS_API_KEY in Vercel env vars to enable real odds.'
+      status: 'skipped',
+      message: 'ODDS_API_KEY not configured. Add it to enable CLV tracking.',
     });
   }
 
-  try {
-    const supabase = getSupabaseAdmin();
+  const supabase = getSupabase();
+  const snapshotType = determineSnapshotType();
+  const today = new Date().toISOString().split('T')[0];
 
+  try {
     // Fetch NBA totals odds
-    const url = new URL(`${ODDS_API_BASE}/sports/basketball_nba/odds`);
+    const url = new URL(ODDS_API_BASE);
     url.searchParams.set('apiKey', ODDS_API_KEY);
     url.searchParams.set('regions', 'us');
     url.searchParams.set('markets', 'totals');
     url.searchParams.set('oddsFormat', 'american');
 
-    const res = await fetch(url.toString(), { signal: AbortSignal.timeout(10000) });
-
+    const res = await fetch(url.toString());
     if (!res.ok) {
-      const remaining = res.headers.get('x-requests-remaining');
-      return json({
-        error: `Odds API error: ${res.status}`,
-        requestsRemaining: remaining
-      }, { status: 502 });
+      const errText = await res.text();
+      console.error('[fetch-odds] API error:', res.status, errText);
+      return json({ error: 'Odds API error', status: res.status }, { status: 500 });
     }
 
     const games = await res.json();
-    const requestsRemaining = res.headers.get('x-requests-remaining');
-    const requestsUsed = res.headers.get('x-requests-used');
+    const remaining = res.headers.get('x-requests-remaining');
+    console.log(`[fetch-odds] Got ${games.length} games. API requests remaining: ${remaining}`);
 
-    let oddsStored = 0;
+    let savedCount = 0;
 
     for (const game of games) {
-      const gameDate = game.commence_time?.split('T')[0];
-      if (!gameDate) continue;
+      // Find the game in our database by team names and date
+      const homeTeam = game.home_team;
+      const awayTeam = game.away_team;
+      const gameDate = game.commence_time?.split('T')[0] || today;
 
-      // Extract totals from bookmakers (prefer Pinnacle, FanDuel, DraftKings)
-      const preferredBooks = ['pinnacle', 'fanduel', 'draftkings', 'betmgm'];
-      let bestLine = null;
-      let bestBookmaker = null;
+      // Look up game_id in Supabase
+      const { data: dbGame } = await supabase
+        .from('games')
+        .select('id')
+        .eq('date', gameDate)
+        .limit(1)
+        .maybeSingle();
+
+      // Extract best totals line (use first bookmaker with totals)
+      let totalLine = null;
       let overOdds = null;
       let underOdds = null;
+      let bookmaker = null;
 
-      for (const bookmaker of (game.bookmakers || [])) {
-        const totalsMarket = bookmaker.markets?.find(m => m.key === 'totals');
-        if (!totalsMarket) continue;
-
-        const overOutcome = totalsMarket.outcomes?.find(o => o.name === 'Over');
-        const underOutcome = totalsMarket.outcomes?.find(o => o.name === 'Under');
-
-        if (overOutcome?.point) {
-          const priority = preferredBooks.indexOf(bookmaker.key);
-          if (!bestLine || (priority >= 0 && priority < preferredBooks.indexOf(bestBookmaker))) {
-            bestLine = overOutcome.point;
-            bestBookmaker = bookmaker.key;
-            overOdds = overOutcome.price;
-            underOdds = underOutcome?.price;
-          } else if (!bestBookmaker || !preferredBooks.includes(bestBookmaker)) {
-            bestLine = overOutcome.point;
-            bestBookmaker = bookmaker.key;
-            overOdds = overOutcome.price;
-            underOdds = underOutcome?.price;
+      for (const bk of game.bookmakers || []) {
+        const totalsMarket = bk.markets?.find(m => m.key === 'totals');
+        if (totalsMarket && totalsMarket.outcomes?.length >= 2) {
+          const over = totalsMarket.outcomes.find(o => o.name === 'Over');
+          const under = totalsMarket.outcomes.find(o => o.name === 'Under');
+          if (over && under) {
+            totalLine = over.point;
+            overOdds = over.price;
+            underOdds = under.price;
+            bookmaker = bk.key;
+            // Prefer Pinnacle if available
+            if (bk.key === 'pinnacle') break;
           }
         }
       }
 
-      if (!bestLine) continue;
+      if (!totalLine) continue;
 
-      // Find matching game in Supabase
-      const { data: dbGames } = await supabase
-        .from('games')
-        .select('id')
-        .eq('date', gameDate)
-        .limit(20);
-
-      if (!dbGames || dbGames.length === 0) continue;
-
-      const homeNorm = game.home_team?.toLowerCase().replace(/[^a-z]/g, '') || '';
-      const matchedGame = dbGames.find(g => {
-        const gidLower = g.id.toLowerCase().replace(/[^a-z]/g, '');
-        return gidLower.includes(homeNorm.slice(-8));
-      });
-
-      const gameId = matchedGame?.id || dbGames[0]?.id;
-      if (!gameId) continue;
-
-      const { data: existingOdds } = await supabase
-        .from('odds_snapshots')
-        .select('id')
-        .eq('game_id', gameId)
-        .eq('period', 'FULL')
-        .limit(1);
-
-      const snapshotType = (!existingOdds || existingOdds.length === 0) ? 'opening' : 'current';
+      // Save odds snapshot
+      const snapshot = {
+        game_id: dbGame?.id || null,
+        external_game_id: game.id,
+        home_team: homeTeam,
+        away_team: awayTeam,
+        game_date: gameDate,
+        bookmaker: bookmaker,
+        period: 'FULL',
+        total_line: totalLine,
+        over_odds: overOdds,
+        under_odds: underOdds,
+        snapshot_type: snapshotType,
+        captured_at: new Date().toISOString(),
+      };
 
       const { error } = await supabase
         .from('odds_snapshots')
-        .insert({
-          game_id: gameId,
-          period: 'FULL',
-          line: bestLine,
-          bookmaker: bestBookmaker,
-          over_odds: overOdds,
-          under_odds: underOdds,
-          snapshot_type: snapshotType,
-        });
+        .insert(snapshot);
 
-      if (!error) oddsStored++;
+      if (error) {
+        console.warn(`[fetch-odds] Insert error for ${homeTeam} vs ${awayTeam}:`, error.message);
+      } else {
+        savedCount++;
+      }
     }
 
     return json({
-      success: true,
-      gamesFromAPI: games.length,
-      oddsStored,
-      requestsRemaining,
-      requestsUsed,
-      timestamp: new Date().toISOString(),
+      status: 'ok',
+      snapshot_type: snapshotType,
+      games_found: games.length,
+      snapshots_saved: savedCount,
+      api_requests_remaining: remaining,
     });
+
   } catch (err) {
-    console.error('[cron/fetch-odds] Error:', err.message);
+    console.error('[fetch-odds] Error:', err);
     return json({ error: err.message }, { status: 500 });
   }
 }

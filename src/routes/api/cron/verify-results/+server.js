@@ -1,167 +1,167 @@
 // src/routes/api/cron/verify-results/+server.js
-// ════════════════════════════════════════════════════════════════
-// Cron: verifica resultados de partidos finalizados,
-// resuelve predicciones y picks pendientes automáticamente.
-// Schedule: 0 2,3,4,5 * * * (10PM-1AM ET = 2-5 UTC)
-// ════════════════════════════════════════════════════════════════
+// Verifies prediction results and calculates CLV for resolved picks.
+// Cron: runs daily at 10:00 UTC (after all games from previous night finish).
 
 import { json } from '@sveltejs/kit';
-import { createClient } from '@supabase/supabase-js';
 import { env } from '$env/dynamic/private';
+import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = env.VITE_SUPABASE_URL || '';
-const SUPABASE_SERVICE_KEY = env.SUPABASE_SERVICE_ROLE_KEY || '';
 const BDL_API_KEY = env.BALLDONTLIE_API_KEY || '';
-const CRON_SECRET = env.CRON_SECRET || '';
 
-function getSupabaseAdmin() {
-  return createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+function getSupabase() {
+  return createClient(env.VITE_SUPABASE_URL || '', env.SUPABASE_SERVICE_ROLE_KEY || '');
 }
 
-/** @type {import('@sveltejs/kit').RequestHandler} */
 export async function GET({ request }) {
   const authHeader = request.headers.get('authorization');
-  if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
+  const cronSecret = env.CRON_SECRET || '';
+  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
     return json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  const supabase = getSupabase();
+
+  // Get yesterday's date
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const dateStr = yesterday.toISOString().split('T')[0];
+
   try {
-    const supabase = getSupabaseAdmin();
-    const today = new Date().toISOString().split('T')[0];
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-
-    // 1. Find games that might have finished (today and yesterday)
-    const { data: pendingGames } = await supabase
-      .from('games')
-      .select('*')
-      .in('date', [today, yesterday])
-      .neq('status', 'final')
-      .not('external_id', 'is', null);
-
-    if (!pendingGames || pendingGames.length === 0) {
-      return json({ success: true, message: 'No pending games to verify', resolved: 0 });
-    }
-
-    let gamesResolved = 0;
-    let predictionsResolved = 0;
-    let picksResolved = 0;
-
-    for (const game of pendingGames) {
-      // Fetch latest score from BallDontLie
-      const headers = BDL_API_KEY ? { Authorization: BDL_API_KEY } : {};
+    // 1. Fetch final scores from BallDontLie
+    let games = [];
+    if (BDL_API_KEY) {
       const res = await fetch(
-        `https://api.balldontlie.io/v1/games/${game.external_id}`,
-        { headers, signal: AbortSignal.timeout(8000) }
+        `https://api.balldontlie.io/v1/games?dates[]=${dateStr}&per_page=15`,
+        { headers: { Authorization: `Bearer ${BDL_API_KEY}` } }
       );
 
-      if (!res.ok) continue;
-      const bdlGame = await res.json();
-
-      if (bdlGame.status !== 'Final') continue;
-
-      // Update game with final scores
-      const { error: gameError } = await supabase
-        .from('games')
-        .update({
-          status: 'final',
-          home_score: bdlGame.home_team_score,
-          away_score: bdlGame.visitor_team_score,
-        })
-        .eq('id', game.id);
-
-      if (gameError) {
-        console.error(`[verify-results] Error updating game ${game.id}:`, gameError.message);
-        continue;
+      if (res.ok) {
+        const data = await res.json();
+        games = (data.data || []).filter(g => g.status === 'Final');
+        console.log(`[verify-results] ${games.length} final games for ${dateStr}`);
       }
+    }
 
-      gamesResolved++;
-      const fullTotal = bdlGame.home_team_score + bdlGame.visitor_team_score;
+    let resolvedPicks = 0;
+    let clvCalculated = 0;
 
-      // 2. Resolve predictions for this game
-      const { data: predictions } = await supabase
-        .from('predictions')
-        .select('*')
-        .eq('game_id', game.id)
-        .is('result', null);
+    for (const game of games) {
+      const actualTotal = game.home_team_score + game.visitor_team_score;
 
-      if (predictions) {
-        for (const pred of predictions) {
-          if (pred.period !== 'FULL') continue;
-
-          const actualTotal = fullTotal;
-          const won = pred.direction === 'OVER'
-            ? actualTotal > pred.line
-            : actualTotal < pred.line;
-          const isPush = actualTotal === pred.line;
-
-          const result = isPush ? 'push' : (won ? 'win' : 'loss');
-          const modelError = pred.projection - actualTotal;
-
-          const { error: predError } = await supabase
-            .from('predictions')
-            .update({
-              result,
-              actual_total: actualTotal,
-              model_error: Math.round(modelError * 10) / 10,
-            })
-            .eq('id', pred.id);
-
-          if (!predError) predictionsResolved++;
-        }
-      }
-
-      // 3. Resolve user picks for this game (FULL period)
+      // 2. Find pending picks for this game date
       const { data: picks } = await supabase
         .from('picks')
         .select('*')
-        .eq('game_id', game.id)
         .eq('status', 'pending')
-        .eq('period', 'FULL');
+        .gte('created_at', `${dateStr}T00:00:00`)
+        .lte('created_at', `${dateStr}T23:59:59`);
 
-      if (picks) {
-        for (const pick of picks) {
-          const actualTotal = fullTotal;
-          const won = pick.bet_type === 'OVER'
-            ? actualTotal > pick.line
-            : actualTotal < pick.line;
-          const isPush = actualTotal === pick.line;
+      if (!picks || picks.length === 0) continue;
 
-          const result = isPush ? 'push' : (won ? 'win' : 'loss');
-          const modelError = pick.projection ? pick.projection - actualTotal : null;
+      for (const pick of picks) {
+        // Match pick to game (by team names if available)
+        const pickLine = pick.line || pick.bet_line || 0;
+        const pickDirection = pick.direction || 'OVER';
 
-          let clv = null;
-          if (pick.closing_line != null) {
-            clv = pick.bet_type === 'OVER'
-              ? pick.closing_line - pick.line
-              : pick.line - pick.closing_line;
-          }
-
-          const { error: pickError } = await supabase
-            .from('picks')
-            .update({
-              status: result,
-              actual_total: actualTotal,
-              model_error: modelError ? Math.round(modelError * 10) / 10 : null,
-              clv: clv ? Math.round(clv * 10) / 10 : null,
-              resolved_at: new Date().toISOString(),
-            })
-            .eq('id', pick.id);
-
-          if (!pickError) picksResolved++;
+        // Determine result
+        let result;
+        if (pickDirection === 'OVER') {
+          result = actualTotal > pickLine ? 'win' : actualTotal < pickLine ? 'loss' : 'push';
+        } else {
+          result = actualTotal < pickLine ? 'win' : actualTotal > pickLine ? 'loss' : 'push';
         }
+
+        // 3. Calculate CLV from odds_snapshots
+        let clvPoints = null;
+        let closingLine = null;
+
+        // Get closing line for this game
+        const { data: closingSnap } = await supabase
+          .from('odds_snapshots')
+          .select('total_line')
+          .eq('game_date', dateStr)
+          .eq('snapshot_type', 'closing')
+          .eq('period', 'FULL')
+          .order('captured_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (closingSnap) {
+          closingLine = closingSnap.total_line;
+
+          // CLV = closing_line - bet_line (for OVER)
+          // CLV = bet_line - closing_line (for UNDER)
+          if (pickDirection === 'OVER') {
+            clvPoints = closingLine - pickLine;
+          } else {
+            clvPoints = pickLine - closingLine;
+          }
+          clvCalculated++;
+        }
+
+        // 4. Update pick with result and CLV
+        const updates = {
+          status: result,
+          result: result,
+          actual_total: actualTotal,
+          closing_line: closingLine,
+          clv_points: clvPoints,
+          resolved_at: new Date().toISOString(),
+        };
+
+        await supabase
+          .from('picks')
+          .update(updates)
+          .eq('id', pick.id);
+
+        resolvedPicks++;
+      }
+    }
+
+    // 5. Also resolve predictions table
+    for (const game of games) {
+      const actualTotal = game.home_team_score + game.visitor_team_score;
+
+      const { data: preds } = await supabase
+        .from('predictions')
+        .select('*')
+        .eq('source', 'live')
+        .is('result', null);
+
+      if (!preds) continue;
+
+      for (const pred of preds) {
+        const predLine = pred.line || 0;
+        const predDirection = pred.direction || 'OVER';
+
+        let result;
+        if (predDirection === 'OVER') {
+          result = actualTotal > predLine ? 'win' : actualTotal < predLine ? 'loss' : 'push';
+        } else {
+          result = actualTotal < predLine ? 'win' : actualTotal > predLine ? 'loss' : 'push';
+        }
+
+        await supabase
+          .from('predictions')
+          .update({
+            result,
+            actual_total: actualTotal,
+            resolved_at: new Date().toISOString(),
+          })
+          .eq('id', pred.id);
       }
     }
 
     return json({
-      success: true,
-      gamesChecked: pendingGames.length,
-      gamesResolved,
-      predictionsResolved,
-      picksResolved,
-      timestamp: new Date().toISOString(),
+      status: 'ok',
+      date: dateStr,
+      games_found: games.length,
+      picks_resolved: resolvedPicks,
+      clv_calculated: clvCalculated,
     });
+
   } catch (err) {
-    console.error('[cron/verify-results] Error:', err.message);
+    console.error('[verify-results] Error:', err);
     return json({ error: err.message }, { status: 500 });
   }
 }
