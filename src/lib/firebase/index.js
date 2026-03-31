@@ -33,6 +33,7 @@ import {
 } from '$env/static/public';
 
 import { authStore } from '$lib/stores/auth';
+import { loadUserData, clearUserData } from '$lib/stores/data';
 import { firebaseStatus } from '$lib/stores/ui';
 import { browser } from '$app/environment';
 
@@ -86,6 +87,11 @@ export function initFirebase() {
     (user) => {
       authStore.setUser(user);
       firebaseStatus.set('ready');
+      if (user) {
+        loadUserData(user.uid, { email: user.email, displayName: user.displayName });
+      } else {
+        clearUserData();
+      }
     },
     (error) => {
       console.error('[Firebase] Auth error:', error);
@@ -125,6 +131,7 @@ export async function loginWithGoogle() {
 
 export async function logout() {
   await signOut(requireAuth());
+  clearUserData();
   authStore.clear();
 }
 

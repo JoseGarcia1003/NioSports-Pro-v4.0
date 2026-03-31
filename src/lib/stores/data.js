@@ -1,28 +1,20 @@
 // src/lib/stores/data.js
 // ════════════════════════════════════════════════════════════════
-// REEMPLAZA: window.TEAM_STATS, window.USER_PICKS_TOTALES,
-//            window.USER_PICKS_AI, window.USER_BANKROLL,
-//            window.AI_PICKS_TODAY, AppState.picks, AppState.bankroll
-//
-// PATRÓN IMPORTANTE — por qué separamos datos de UI:
-// En el sistema actual, todo vive junto en AppState. Aquí separamos
-// deliberadamente:
-//   • ui.js   → estado efímero de la interfaz (tema, toasts, loading)
-//   • data.js → datos persistentes del usuario y la temporada NBA
-//   • auth.js → identidad del usuario (quién es)
-//
-// Esta separación importa porque los datos del usuario vienen de Firebase
-// (async, pueden cambiar desde otro dispositivo), los datos de la NBA
-// vienen de una API externa (pueden fallar), y el estado de UI es local
-// y síncrono. Mezclarlos en un solo objeto hace que cualquier cambio
-// en cualquier parte re-renderice todo. Con stores separados, solo
-// re-renderizan los componentes que consumen el store que cambió.
+// Stores de datos del usuario — ahora backed by Supabase.
+// Firebase Auth se mantiene para identidad.
+// Supabase es la única fuente de datos para picks y bankroll.
 // ════════════════════════════════════════════════════════════════
 
 import { writable, derived } from 'svelte/store';
+import { getUserPicks, savePick as sbSavePick, updatePick, deletePick as sbDeletePick,
+         getBankrollHistory, addBankrollTransaction, getUserProfile, upsertUserProfile
+} from '$lib/supabase/client.js';
 
-// ── Estadísticas de equipos NBA ───────────────────────────────────
-// Cargadas desde /data/nba-stats.json (actualizado por el GitHub Action)
+// ── Estado de carga ───────────────────────────────────────────
+export const dataLoading = writable(false);
+export const dataError = writable(null);
+
+// ── Estadísticas de equipos NBA ───────────────────────────────
 const _teamStats = writable({});
 const _usingDemoStats = writable(false);
 
@@ -36,44 +28,126 @@ export const teamStats = {
 };
 export const usingDemoStats = { subscribe: _usingDemoStats.subscribe };
 
-// ── Picks del usuario guardados en Firebase ───────────────────────
+// ── Picks del usuario (Supabase) ──────────────────────────────
 const _picks = writable({
-  totales:    {},  // keyed by pickId
-  ai:         {},
-  backtesting: {},
-  props:      {},
+  totales:     [],
+  ai:          [],
+  backtesting: [],
+  props:       [],
+  all:         [],
 });
 
 export const picksStore = {
   subscribe: _picks.subscribe,
 
   setByType(type, data) {
-    _picks.update(p => ({ ...p, [type]: data || {} }));
+    _picks.update(p => ({ ...p, [type]: data || [] }));
   },
 
-  // Helpers para obtener picks como array (más conveniente para iteración)
   getArray(type) {
     let p; _picks.subscribe(v => p = v)();
-    return Object.values(p[type] || {});
+    return p[type] || [];
+  },
+
+  /** Load all picks for a user from Supabase */
+  async loadForUser(userId) {
+    if (!userId) return;
+    dataLoading.set(true);
+    dataError.set(null);
+
+    try {
+      const allPicks = await getUserPicks(userId, { limit: 500 });
+
+      const totales = allPicks.filter(p => p.source === 'totales' || p.source === 'manual');
+      const ai = allPicks.filter(p => p.source === 'ai' || p.source === 'model');
+      const backtesting = allPicks.filter(p => p.source === 'backtesting');
+      const props = allPicks.filter(p => p.source === 'props');
+
+      _picks.set({ totales, ai, backtesting, props, all: allPicks });
+    } catch (err) {
+      console.error('[data.js] Error loading picks:', err);
+      dataError.set(err.message);
+    } finally {
+      dataLoading.set(false);
+    }
+  },
+
+  /** Save a new pick to Supabase and update store */
+  async save(pick) {
+    try {
+      const saved = await sbSavePick(pick);
+      // Add to local store immediately
+      _picks.update(p => {
+        const type = pick.source || 'totales';
+        const key = type === 'model' ? 'ai' : (type === 'manual' ? 'totales' : type);
+        return {
+          ...p,
+          [key]: [saved, ...(p[key] || [])],
+          all: [saved, ...(p.all || [])],
+        };
+      });
+      return saved;
+    } catch (err) {
+      console.error('[data.js] Error saving pick:', err);
+      throw err;
+    }
+  },
+
+  /** Update a pick in Supabase and update store */
+  async update(pickId, updates) {
+    try {
+      const updated = await updatePick(pickId, updates);
+      _picks.update(p => {
+        const updateInArray = (arr) =>
+          arr.map(pick => pick.id === pickId ? { ...pick, ...updated } : pick);
+        return {
+          totales: updateInArray(p.totales),
+          ai: updateInArray(p.ai),
+          backtesting: updateInArray(p.backtesting),
+          props: updateInArray(p.props),
+          all: updateInArray(p.all),
+        };
+      });
+      return updated;
+    } catch (err) {
+      console.error('[data.js] Error updating pick:', err);
+      throw err;
+    }
+  },
+
+  /** Delete a pick from Supabase and update store */
+  async remove(pickId) {
+    try {
+      await sbDeletePick(pickId);
+      _picks.update(p => {
+        const filterOut = (arr) => arr.filter(pick => pick.id !== pickId);
+        return {
+          totales: filterOut(p.totales),
+          ai: filterOut(p.ai),
+          backtesting: filterOut(p.backtesting),
+          props: filterOut(p.props),
+          all: filterOut(p.all),
+        };
+      });
+    } catch (err) {
+      console.error('[data.js] Error deleting pick:', err);
+      throw err;
+    }
+  },
+
+  /** Clear all local data (on logout) */
+  clear() {
+    _picks.set({ totales: [], ai: [], backtesting: [], props: [], all: [] });
   }
 };
 
-// Stores derivados para consumo directo en componentes
-export const picksTotales    = derived(_picks, $p => {
-  const data = $p.totales || {};
-  // Incluir el ID de Firebase en cada objeto pick
-  return Object.entries(data).map(([id, pick]) => ({ ...pick, id }));
-});
-export const picksAI         = derived(_picks, $p => {
-  const data = $p.ai || {};
-  return Object.entries(data).map(([id, pick]) => ({ ...pick, id }));
-});
-export const picksBacktesting= derived(_picks, $p => {
-  const data = $p.backtesting || {};
-  return Object.entries(data).map(([id, pick]) => ({ ...pick, id }));
-});
+// Stores derivados — same interface as before, pages don't need to change
+export const picksTotales     = derived(_picks, $p => $p.totales || []);
+export const picksAI          = derived(_picks, $p => $p.ai || []);
+export const picksBacktesting = derived(_picks, $p => $p.backtesting || []);
+export const allPicks         = derived(_picks, $p => $p.all || []);
 
-// ── Bankroll ──────────────────────────────────────────────────────
+// ── Bankroll (Supabase) ──────────────────────────────────────
 const _bankroll = writable({
   current:  0,
   initial:  0,
@@ -83,11 +157,62 @@ const _bankroll = writable({
 
 export const bankrollStore = {
   subscribe: _bankroll.subscribe,
-  set(data) { _bankroll.set({ ...data, lastSync: new Date().toISOString() }); },
-  getSnapshot() { let s; _bankroll.subscribe(v => s = v)(); return s; }
+
+  set(data) {
+    _bankroll.set({ ...data, lastSync: new Date().toISOString() });
+  },
+
+  getSnapshot() {
+    let s; _bankroll.subscribe(v => s = v)(); return s;
+  },
+
+  /** Load bankroll data from Supabase */
+  async loadForUser(userId) {
+    if (!userId) return;
+    try {
+      const [profile, history] = await Promise.all([
+        getUserProfile(userId),
+        getBankrollHistory(userId, 100),
+      ]);
+
+      const initial = profile?.initial_bankroll || 0;
+      // Calculate current from initial + sum of transactions
+      const totalPnL = history.reduce((sum, tx) => sum + (tx.amount || 0), 0);
+
+      _bankroll.set({
+        current: initial + totalPnL,
+        initial,
+        history: history || [],
+        lastSync: new Date().toISOString(),
+      });
+    } catch (err) {
+      console.error('[data.js] Error loading bankroll:', err);
+    }
+  },
+
+  /** Add a transaction to Supabase and update store */
+  async addTransaction(transaction) {
+    try {
+      const saved = await addBankrollTransaction(transaction);
+      _bankroll.update(b => ({
+        ...b,
+        current: b.current + (transaction.amount || 0),
+        history: [saved, ...b.history],
+        lastSync: new Date().toISOString(),
+      }));
+      return saved;
+    } catch (err) {
+      console.error('[data.js] Error adding transaction:', err);
+      throw err;
+    }
+  },
+
+  /** Clear on logout */
+  clear() {
+    _bankroll.set({ current: 0, initial: 0, history: [], lastSync: null });
+  }
 };
 
-// Métricas derivadas del bankroll — se recalculan automáticamente
 export const bankrollROI = derived(_bankroll, $b => {
   if (!$b.initial || $b.initial === 0) return 0;
   return (($b.current - $b.initial) / $b.initial * 100).toFixed(1);
@@ -95,7 +220,7 @@ export const bankrollROI = derived(_bankroll, $b => {
 
 export const bankrollPnL = derived(_bankroll, $b => $b.current - $b.initial);
 
-// ── AI Picks de hoy (generados por picks-engine.js) ───────────────
+// ── AI Picks de hoy ──────────────────────────────────────────
 const _aiPicksToday = writable([]);
 const _aiPicksCacheDate = writable(null);
 const _usingDemoGames = writable(false);
@@ -111,8 +236,6 @@ export const aiPicksStore = {
 
 export const usingDemoGames = { subscribe: _usingDemoGames.subscribe };
 
-// Store combinado para el banner de datos demo (lo consume DemoBanner.svelte)
-// derived() con múltiples stores: se actualiza cuando CUALQUIERA cambia
 export const demoStatus = derived(
   [_usingDemoStats, _usingDemoGames],
   ([$stats, $games]) => ({
@@ -121,3 +244,42 @@ export const demoStatus = derived(
     anyDemoActive:  $stats || $games,
   })
 );
+
+// ═══════════════════════════════════════════════════════════════
+// MASTER LOADER — call on auth state change
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Load all user data from Supabase. Call when user logs in.
+ * @param {string} userId - Firebase UID
+ * @param {Object} userInfo - { email, displayName }
+ */
+export async function loadUserData(userId, userInfo = {}) {
+  if (!userId) return;
+
+  // Ensure user profile exists in Supabase
+  try {
+    await upsertUserProfile({
+      id: userId,
+      email: userInfo.email || '',
+      display_name: userInfo.displayName || '',
+    });
+  } catch (err) {
+    console.warn('[data.js] Profile upsert warning:', err.message);
+  }
+
+  // Load picks and bankroll in parallel
+  await Promise.all([
+    picksStore.loadForUser(userId),
+    bankrollStore.loadForUser(userId),
+  ]);
+}
+
+/**
+ * Clear all user data. Call on logout.
+ */
+export function clearUserData() {
+  picksStore.clear();
+  bankrollStore.clear();
+  dataError.set(null);
+}
