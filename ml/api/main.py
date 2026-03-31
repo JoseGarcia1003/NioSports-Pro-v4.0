@@ -38,7 +38,7 @@ PERIOD_STD = {'Q1': 4.8, 'HALF': 7.2, 'FULL': 10.5}
 async def lifespan(app: FastAPI):
     global model
     if os.path.exists(MODEL_PATH):
-        model = xgb.XGBRegressor()
+        model = xgb.Booster()
         model.load_model(MODEL_PATH)
         print(f"[ML API] Model loaded: {MODEL_PATH}")
     else:
@@ -143,7 +143,8 @@ def predict_total(req: PredictRequest) -> dict:
     # ML or fallback
     if model is not None:
         X = np.array([[features[col] for col in FEATURE_COLS]])
-        raw_projection = float(model.predict(X)[0])
+        dmatrix = xgb.DMatrix(X, feature_names=FEATURE_COLS)
+        raw_projection = float(model.predict(dmatrix)[0])
         source = 'xgboost'
         version = '3.0.0-xgboost'
     else:
