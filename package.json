@@ -8,7 +8,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build",
+    "build": "node node_modules/vite/bin/vite.js build",
     "preview": "vite preview",
     "test": "vitest",
     "test:unit": "vitest run",
