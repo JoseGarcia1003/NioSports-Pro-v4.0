@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import { onNavigate } from '$app/navigation';
   import '$lib/styles/tokens.css';
   import '$lib/styles/animations.css';
   import { goto } from '$app/navigation';
@@ -19,8 +20,18 @@
   const PUBLIC_ROUTES = ['/login', '/register', '/forgot-password'];
 
   onMount(async () => {
-    await initFirebase();
-    document.documentElement.setAttribute('data-theme', $theme);
+  await initFirebase();
+  document.documentElement.setAttribute('data-theme', $theme);
+  });
+
+  onNavigate((navigation) => {
+    if (!document.startViewTransition) return;
+    return new Promise((resolve) => {
+      document.startViewTransition(async () => {
+        resolve();
+        await navigation.complete;
+      });
+    });
   });
 
   $: if (browser && !$authLoading) {
@@ -216,5 +227,24 @@
     font-size: 1rem;
     color: var(--color-text-muted);
     font-weight: 500;
+  }
+
+  @keyframes fade-in {
+  from { opacity: 0; }
+  }
+  @keyframes fade-out {
+    to { opacity: 0; }
+  }
+  :global(::view-transition-old(root)) {
+    animation: 150ms ease-out fade-out;
+  }
+  :global(::view-transition-new(root)) {
+    animation: 200ms ease-in fade-in;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :global(::view-transition-old(root)),
+    :global(::view-transition-new(root)) {
+      animation: none !important;
+    }
   }
 </style>
