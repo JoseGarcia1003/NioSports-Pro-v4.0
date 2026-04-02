@@ -1,207 +1,236 @@
 <script>
-  import { isAuthenticated, userId, currentUser } from '$lib/stores/auth';
-  import { PLANS } from '$lib/stripe/config.js';
-  import { Check } from 'lucide-svelte';
+  import { page } from '$app/stores';
+  import { userId } from '$lib/stores/auth';
+  import { subscription } from '$lib/stores/subscription';
+  import { toasts } from '$lib/stores/ui';
+  import { PLANS } from '$lib/config/plans.js';
+  import { Check, X, Crown, Zap, Shield } from 'lucide-svelte';
 
-  let billingCycle = 'monthly';
-  let loading = null;
+  let loading = null; // which plan is loading
 
-  const plans = Object.values(PLANS);
+  $: success = $page.url.searchParams.get('success') === 'true';
+  $: canceled = $page.url.searchParams.get('canceled') === 'true';
+  $: currentPlan = $subscription.plan || 'free';
 
-  async function handleSubscribe(plan) {
-    if (plan.id === 'free') return;
-    if (!$isAuthenticated) {
-      window.location.href = '/login';
-      return;
+  const planList = [
+    {
+      ...PLANS.free,
+      icon: Shield,
+      highlights: [
+        { text: 'Calculadora de totales', included: true },
+        { text: '1 pick AI por día', included: true },
+        { text: 'Módulo Bankroll', included: false },
+        { text: 'Estadísticas completas', included: false },
+        { text: 'CLV Tracking', included: false },
+        { text: 'Exportar CSV', included: false },
+      ]
+    },
+    {
+      ...PLANS.pro,
+      icon: Zap,
+      highlights: [
+        { text: 'Calculadora de totales', included: true },
+        { text: '70% picks AI del día', included: true },
+        { text: 'Módulo Bankroll', included: true },
+        { text: 'Dashboard completo', included: true },
+        { text: 'Exportar CSV', included: true },
+        { text: 'CLV Tracking', included: false },
+      ]
+    },
+    {
+      ...PLANS.elite,
+      icon: Crown,
+      highlights: [
+        { text: 'Calculadora de totales', included: true },
+        { text: '100% picks AI del día', included: true },
+        { text: 'Módulo Bankroll', included: true },
+        { text: 'Dashboard + Stats completas', included: true },
+        { text: 'CLV Tracking avanzado', included: true },
+        { text: 'Exportar CSV + Prioridad', included: true },
+      ]
     }
+  ];
+
+  async function handleCheckout(plan) {
+    if (!$userId) { toasts.error('Inicia sesión primero.'); return; }
+    if (!plan.priceId) return;
+    if (currentPlan === plan.id) return;
 
     loading = plan.id;
     try {
-      const priceId = billingCycle === 'annual' ? plan.priceId_annual : plan.priceId_monthly;
-
-      if (!priceId) {
-        alert('Stripe no configurado aún. Configura los Price IDs en src/lib/stripe/config.js');
-        loading = null;
-        return;
-      }
-
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          priceId,
+          priceId: plan.priceId,
           userId: $userId,
-          userEmail: $currentUser?.email,
-          billingCycle,
+          userEmail: '', // Firebase auth email
         }),
       });
-
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert(data.error || 'Error al crear sesión de checkout');
+        toasts.error(data.error || 'Error al crear sesión de pago.');
       }
     } catch (err) {
-      console.error('Checkout error:', err);
-      alert('Error al conectar con Stripe');
+      toasts.error('No se pudo conectar con Stripe.');
     } finally {
       loading = null;
     }
   }
 
-  function formatPrice(plan) {
-    if (plan.price === 0) return 'Gratis';
-    if (billingCycle === 'annual') {
-      return `$${(plan.priceAnnual / 12).toFixed(0)}`;
-    }
-    return `$${plan.price}`;
+  async function handleManage() {
+    if (!$userId) return;
+    loading = 'manage';
+    try {
+      const res = await fetch('/api/stripe/portal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: $userId }),
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+      else toasts.error('No se pudo abrir el portal.');
+    } catch { toasts.error('Error de conexión.'); }
+    finally { loading = null; }
   }
 </script>
 
-<svelte:head>
-  <title>Precios — NioSports Pro</title>
-</svelte:head>
+<svelte:head><title>Planes — NioSports Pro</title></svelte:head>
 
-<div class="pricing">
-  <header class="pricing__header">
-    <span class="pricing__label">Precios</span>
-    <h1 class="pricing__title">Elige tu plan</h1>
-    <p class="pricing__subtitle">7 días gratis en cualquier plan de pago. Cancela cuando quieras.</p>
-
-    <div class="pricing__toggle">
-      <button class="pricing__toggle-btn" class:active={billingCycle === 'monthly'}
-              on:click={() => billingCycle = 'monthly'}>Mensual</button>
-      <button class="pricing__toggle-btn" class:active={billingCycle === 'annual'}
-              on:click={() => billingCycle = 'annual'}>
-        Anual
-        <span class="pricing__toggle-badge">-45%</span>
-      </button>
-    </div>
+<div class="page">
+  <header class="page__header">
+    <span class="page__label">Planes y precios</span>
+    <h1 class="page__title">Elige tu plan</h1>
+    <p class="page__subtitle">Análisis cuantitativo NBA con XGBoost v3.0</p>
   </header>
 
-  <div class="pricing__grid">
-    {#each plans as plan}
-      <div class="plan-card" class:plan-card--popular={plan.popular}>
-        {#if plan.popular}
-          <div class="plan-card__badge">Más popular</div>
-        {/if}
+  {#if success}
+    <div class="banner banner--success">
+      <Check size={20} />
+      <p>Suscripción activada correctamente. Disfruta de NioSports Pro.</p>
+    </div>
+  {/if}
 
-        <div class="plan-card__header">
-          <h2 class="plan-card__name">{plan.name}</h2>
-          <div class="plan-card__price">
-            <span class="plan-card__amount">{formatPrice(plan)}</span>
-            {#if plan.price > 0}
-              <span class="plan-card__period">/mes</span>
-            {/if}
-          </div>
-          {#if billingCycle === 'annual' && plan.priceAnnual > 0}
-            <p class="plan-card__annual">${plan.priceAnnual}/año facturado anualmente</p>
+  {#if canceled}
+    <div class="banner banner--warn">
+      <X size={20} />
+      <p>Pago cancelado. Puedes intentar de nuevo cuando quieras.</p>
+    </div>
+  {/if}
+
+  <div class="plans-grid">
+    {#each planList as plan}
+      {@const isCurrent = currentPlan === plan.id}
+      {@const isPopular = plan.id === 'pro'}
+      <div class="plan" class:plan--popular={isPopular} class:plan--current={isCurrent}>
+        {#if isPopular}<div class="plan__popular-badge">Más popular</div>{/if}
+        {#if isCurrent}<div class="plan__current-badge">Tu plan actual</div>{/if}
+
+        <div class="plan__header">
+          <svelte:component this={plan.icon} size={24} />
+          <h2 class="plan__name">{plan.name}</h2>
+        </div>
+
+        <div class="plan__price">
+          {#if plan.price === 0}
+            <span class="plan__amount">$0</span>
+            <span class="plan__period">siempre gratis</span>
+          {:else}
+            <span class="plan__amount">${plan.price}</span>
+            <span class="plan__period">/mes</span>
           {/if}
         </div>
 
-        <ul class="plan-card__features">
-          {#each plan.features as feature}
-            <li class="plan-card__feature">
-              <Check size={16} strokeWidth={3} />
-              <span>{feature}</span>
+        <ul class="plan__features">
+          {#each plan.highlights as feat}
+            <li class:included={feat.included} class:excluded={!feat.included}>
+              {#if feat.included}<Check size={16} />{:else}<X size={16} />{/if}
+              <span>{feat.text}</span>
             </li>
           {/each}
         </ul>
 
-        <button
-          class="plan-card__cta"
-          class:plan-card__cta--primary={plan.popular}
-          class:plan-card__cta--disabled={plan.id === 'free'}
-          disabled={loading === plan.id || plan.id === 'free'}
-          on:click={() => handleSubscribe(plan)}
-        >
-          {#if loading === plan.id}
-            Procesando...
+        {#if isCurrent}
+          {#if plan.id !== 'free'}
+            <button class="plan__btn plan__btn--manage" on:click={handleManage} disabled={loading === 'manage'}>
+              {loading === 'manage' ? 'Cargando...' : 'Gestionar suscripción'}
+            </button>
           {:else}
-            {plan.cta}
+            <button class="plan__btn plan__btn--current" disabled>Plan actual</button>
           {/if}
-        </button>
+        {:else if plan.price === 0}
+          <button class="plan__btn plan__btn--free" disabled>Incluido</button>
+        {:else}
+          <button class="plan__btn" class:plan__btn--popular={isPopular} on:click={() => handleCheckout(plan)} disabled={loading === plan.id}>
+            {loading === plan.id ? 'Redirigiendo...' : `Suscribirme a ${plan.name}`}
+          </button>
+        {/if}
       </div>
     {/each}
   </div>
 
-  <p class="pricing__disclaimer">
-    Sin compromisos · Cancela cuando quieras · Pago seguro con Stripe
-  </p>
+  <div class="guarantee">
+    <Shield size={20} />
+    <p>Cancela cuando quieras. Sin contratos. Cambio de plan instantáneo.</p>
+  </div>
 </div>
 
 <style>
-  .pricing { max-width: 1200px; margin: 0 auto; padding: 80px 32px 120px; }
-  @media (max-width: 768px) { .pricing { padding: 40px 16px 100px; } }
+  .page { max-width: 1000px; margin: 0 auto; padding: 60px 24px 120px; }
+  @media (max-width: 768px) { .page { padding: 32px 16px 100px; } }
 
-  .pricing__header { text-align: center; margin-bottom: 60px; }
-  .pricing__label { font-size: 0.8rem; font-weight: 700; color: #6366F1; text-transform: uppercase; letter-spacing: 0.15em; }
-  .pricing__title { font-family: 'Inter', sans-serif; font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; letter-spacing: -0.03em; margin: 12px 0 16px; }
-  .pricing__subtitle { font-size: 1.1rem; color: var(--color-text-muted); }
+  .page__header { text-align: center; margin-bottom: 40px; }
+  .page__label { font-size: 0.8rem; font-weight: 700; color: #6366F1; text-transform: uppercase; letter-spacing: 0.15em; }
+  .page__title { font-family: 'Inter', sans-serif; font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 900; letter-spacing: -0.03em; margin: 10px 0 8px; }
+  .page__subtitle { font-size: 1rem; color: rgba(255,255,255,0.45); }
 
-  .pricing__toggle {
-    display: inline-flex; gap: 4px; margin-top: 32px; padding: 4px;
-    background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);
+  .banner { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 12px; margin-bottom: 24px; font-size: 0.9rem; }
+  .banner p { margin: 0; }
+  .banner--success { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); color: #10B981; }
+  .banner--warn { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); color: #F59E0B; }
+
+  .plans-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px; }
+  @media (max-width: 768px) { .plans-grid { grid-template-columns: 1fr; } }
+
+  .plan { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 28px 24px; display: flex; flex-direction: column; position: relative; transition: border-color 0.2s; }
+  .plan:hover { border-color: rgba(255,255,255,0.12); }
+  .plan--popular { border-color: rgba(99,102,241,0.3); background: rgba(99,102,241,0.04); }
+  .plan--current { border-color: rgba(16,185,129,0.3); }
+
+  .plan__popular-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #6366F1; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 4px 14px; border-radius: 20px; }
+  .plan__current-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #10B981; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 4px 14px; border-radius: 20px; }
+
+  .plan__header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; color: rgba(255,255,255,0.7); }
+  .plan__name { font-family: 'Inter', sans-serif; font-size: 1.2rem; font-weight: 800; }
+
+  .plan__price { margin-bottom: 24px; }
+  .plan__amount { font-family: 'DM Mono', monospace; font-size: 2.5rem; font-weight: 800; }
+  .plan__period { font-size: 0.9rem; color: rgba(255,255,255,0.4); }
+
+  .plan__features { list-style: none; margin: 0 0 24px; padding: 0; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .plan__features li { display: flex; align-items: center; gap: 10px; font-size: 0.88rem; }
+  .included { color: rgba(255,255,255,0.7); }
+  .included :global(svg) { color: #10B981; }
+  .excluded { color: rgba(255,255,255,0.25); }
+  .excluded :global(svg) { color: rgba(255,255,255,0.15); }
+
+  .plan__btn { width: 100%; padding: 14px; border-radius: 12px; border: none; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+  .plan__btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .plan__btn:active:not(:disabled) { transform: scale(0.97); }
+
+  .plan__btn--popular { background: #6366F1; color: #fff; }
+  .plan__btn--popular:hover:not(:disabled) { background: #4F46E5; }
+
+  .plan__btn:not(.plan__btn--popular):not(.plan__btn--free):not(.plan__btn--current):not(.plan__btn--manage) {
+    background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.1);
   }
-  .pricing__toggle-btn {
-    display: flex; align-items: center; gap: 8px;
-    padding: 10px 24px; border: none; border-radius: 10px;
-    font-size: 0.9rem; font-weight: 700; cursor: pointer;
-    background: transparent; color: var(--color-text-muted);
-    font-family: 'DM Sans', sans-serif; transition: all 0.2s ease;
-  }
-  .pricing__toggle-btn.active { background: #6366F1; color: #fff; }
-  .pricing__toggle-badge { font-size: 0.7rem; padding: 2px 8px; background: #10B981; color: #fff; border-radius: 9999px; }
+  .plan__btn:not(.plan__btn--popular):hover:not(:disabled) { background: rgba(255,255,255,0.1); }
 
-  .pricing__grid {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; align-items: start;
-  }
-  @media (max-width: 900px) { .pricing__grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; } }
+  .plan__btn--free, .plan__btn--current { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.3); }
+  .plan__btn--manage { background: rgba(16,185,129,0.12); color: #10B981; border: 1px solid rgba(16,185,129,0.2); }
+  .plan__btn--manage:hover:not(:disabled) { background: rgba(16,185,129,0.2); }
 
-  .plan-card {
-    position: relative;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 24px;
-    padding: 36px 28px;
-    transition: all 0.3s ease;
-  }
-  .plan-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.12); }
-  .plan-card--popular {
-    border-color: rgba(99,102,241,0.4);
-    background: rgba(99,102,241,0.05);
-    box-shadow: 0 0 60px rgba(99,102,241,0.1);
-  }
-  .plan-card__badge {
-    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
-    padding: 6px 20px; background: linear-gradient(135deg, #6366F1, #4F46E5);
-    color: #fff; font-size: 0.75rem; font-weight: 800; border-radius: 9999px;
-    letter-spacing: 0.05em;
-  }
-
-  .plan-card__header { margin-bottom: 28px; }
-  .plan-card__name { font-size: 1.2rem; font-weight: 800; color: var(--color-text-primary); margin-bottom: 12px; }
-  .plan-card__price { display: flex; align-items: baseline; gap: 4px; }
-  .plan-card__amount { font-family: 'DM Mono', monospace; font-size: 3rem; font-weight: 700; color: var(--color-text-primary); }
-  .plan-card__period { font-size: 1rem; color: var(--color-text-muted); }
-  .plan-card__annual { font-size: 0.8rem; color: var(--color-text-muted); margin-top: 6px; }
-
-  .plan-card__features { list-style: none; padding: 0; margin: 0 0 32px; display: flex; flex-direction: column; gap: 12px; }
-  .plan-card__feature { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: rgba(255,255,255,0.7); }
-  .plan-card__feature :global(svg) { color: #10B981; flex-shrink: 0; }
-
-  .plan-card__cta {
-    width: 100%; padding: 14px; border: none; border-radius: 14px;
-    font-size: 1rem; font-weight: 700; cursor: pointer;
-    font-family: 'DM Sans', sans-serif; transition: all 0.2s ease;
-    background: rgba(255,255,255,0.06); color: var(--color-text-primary);
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-  .plan-card__cta:hover { background: rgba(255,255,255,0.1); }
-  .plan-card__cta--primary { background: linear-gradient(135deg, #6366F1, #4F46E5); color: #fff; border: none; box-shadow: 0 4px 20px rgba(99,102,241,0.3); }
-  .plan-card__cta--primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(99,102,241,0.4); }
-  .plan-card__cta--disabled { opacity: 0.5; cursor: default; }
-
-  .pricing__disclaimer { text-align: center; margin-top: 40px; font-size: 0.85rem; color: var(--color-text-muted); }
+  .guarantee { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 16px; color: rgba(255,255,255,0.35); font-size: 0.85rem; }
 </style>

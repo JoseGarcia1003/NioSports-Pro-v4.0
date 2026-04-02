@@ -50,6 +50,10 @@ declare module '$env/static/private' {
 	export const SENTRY_DSN: string;
 	export const ML_API_URL: string;
 	export const ML_API_KEY: string;
+	export const STRIPE_SECRET_KEY: string;
+	export const VITE_STRIPE_PUBLISHABLE_KEY: string;
+	export const STRIPE_PRICE_PRO: string;
+	export const STRIPE_PRICE_ELITE: string;
 	export const ACLOCAL_PATH: string;
 	export const ALLUSERSPROFILE: string;
 	export const APPDATA: string;
@@ -258,6 +262,10 @@ declare module '$env/dynamic/private' {
 		SENTRY_DSN: string;
 		ML_API_URL: string;
 		ML_API_KEY: string;
+		STRIPE_SECRET_KEY: string;
+		VITE_STRIPE_PUBLISHABLE_KEY: string;
+		STRIPE_PRICE_PRO: string;
+		STRIPE_PRICE_ELITE: string;
 		ACLOCAL_PATH: string;
 		ALLUSERSPROFILE: string;
 		APPDATA: string;

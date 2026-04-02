@@ -1,90 +1,133 @@
-// src/routes/api/stripe/webhooks/+server.js
+// src/routes/api/stripe/webhook/+server.js
 import { json } from '@sveltejs/kit';
-import Stripe from 'stripe';
 import { env } from '$env/dynamic/private';
+import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
-const stripe = new Stripe(env.STRIPE_SECRET_KEY || '', { apiVersion: '2024-06-20' });
-const endpointSecret = env.STRIPE_WEBHOOK_SECRET || '';
+const stripe = new Stripe(env.STRIPE_SECRET_KEY);
 
 function getSupabase() {
-  return createClient(env.VITE_SUPABASE_URL || '', env.SUPABASE_SERVICE_ROLE_KEY || '');
+  return createClient(env.VITE_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
 }
 
-function planFromPriceId(priceId) {
-  const proPrices = (env.STRIPE_PRO_PRICE_IDS || '').split(',');
-  const elitePrices = (env.STRIPE_ELITE_PRICE_IDS || '').split(',');
-  if (proPrices.includes(priceId)) return 'pro';
-  if (elitePrices.includes(priceId)) return 'elite';
+function getPlanFromPriceId(priceId) {
+  if (priceId === env.STRIPE_PRICE_PRO) return 'pro';
+  if (priceId === env.STRIPE_PRICE_ELITE) return 'elite';
   return 'free';
 }
 
 export async function POST({ request }) {
   const body = await request.text();
   const sig = request.headers.get('stripe-signature');
+  const webhookSecret = env.STRIPE_WEBHOOK_SECRET;
 
   let event;
+
   try {
-    if (endpointSecret && sig) {
-      event = stripe.webhooks.constructEvent(body, sig, endpointSecret);
+    if (webhookSecret && sig) {
+      event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
     } else {
+      // In development without webhook secret, parse directly
       event = JSON.parse(body);
     }
   } catch (err) {
-    console.error('[Stripe Webhook] Signature verification failed:', err.message);
-    return json({ error: 'Webhook signature verification failed' }, { status: 400 });
+    console.error('[Stripe Webhook] Signature error:', err.message);
+    return json({ error: 'Invalid signature' }, { status: 400 });
   }
 
   const supabase = getSupabase();
 
   try {
     switch (event.type) {
-      case 'customer.subscription.created':
+      case 'checkout.session.completed': {
+        const session = event.data.object;
+        const userId = session.metadata?.userId;
+        const subscriptionId = session.subscription;
+
+        if (userId && subscriptionId) {
+          // Fetch subscription details
+          const sub = await stripe.subscriptions.retrieve(subscriptionId);
+          const priceId = sub.items.data[0]?.price?.id;
+          const plan = getPlanFromPriceId(priceId);
+
+          await supabase
+            .from('user_profiles')
+            .upsert({
+              user_id: userId,
+              plan,
+              subscription_status: 'active',
+              stripe_customer_id: session.customer,
+              stripe_subscription_id: subscriptionId,
+              current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
+              updated_at: new Date().toISOString(),
+            }, { onConflict: 'user_id' });
+
+          console.log(`[Stripe] User ${userId} subscribed to ${plan}`);
+        }
+        break;
+      }
+
       case 'customer.subscription.updated': {
-        const subscription = event.data.object;
-        const userId = subscription.metadata?.userId;
-        if (!userId) break;
+        const sub = event.data.object;
+        const userId = sub.metadata?.userId;
+        const priceId = sub.items.data[0]?.price?.id;
+        const plan = getPlanFromPriceId(priceId);
 
-        const priceId = subscription.items?.data?.[0]?.price?.id;
-        const plan = planFromPriceId(priceId);
-        const isActive = ['active', 'trialing'].includes(subscription.status);
-
-        await supabase.from('user_profiles').upsert({
-          id: userId,
-          plan: isActive ? plan : 'free',
-          stripe_customer_id: subscription.customer,
-          plan_expires_at: subscription.current_period_end
-            ? new Date(subscription.current_period_end * 1000).toISOString()
-            : null,
-        }, { onConflict: 'id' });
-
-        console.log(`[Stripe] User ${userId} → plan: ${plan}, status: ${subscription.status}`);
+        if (userId) {
+          await supabase
+            .from('user_profiles')
+            .upsert({
+              user_id: userId,
+              plan,
+              subscription_status: sub.status === 'active' ? 'active' : sub.status,
+              current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
+              updated_at: new Date().toISOString(),
+            }, { onConflict: 'user_id' });
+        }
         break;
       }
 
       case 'customer.subscription.deleted': {
-        const subscription = event.data.object;
-        const userId = subscription.metadata?.userId;
-        if (!userId) break;
+        const sub = event.data.object;
+        const userId = sub.metadata?.userId;
 
-        await supabase.from('user_profiles').update({
-          plan: 'free',
-          plan_expires_at: null,
-        }).eq('id', userId);
+        if (userId) {
+          await supabase
+            .from('user_profiles')
+            .upsert({
+              user_id: userId,
+              plan: 'free',
+              subscription_status: 'canceled',
+              stripe_subscription_id: null,
+              current_period_end: null,
+              updated_at: new Date().toISOString(),
+            }, { onConflict: 'user_id' });
 
-        console.log(`[Stripe] User ${userId} → plan: free (cancelled)`);
+          console.log(`[Stripe] User ${userId} canceled — downgraded to free`);
+        }
         break;
       }
 
       case 'invoice.payment_failed': {
         const invoice = event.data.object;
-        console.log(`[Stripe] Payment failed for customer: ${invoice.customer}`);
+        const subId = invoice.subscription;
+        if (subId) {
+          const sub = await stripe.subscriptions.retrieve(subId);
+          const userId = sub.metadata?.userId;
+          if (userId) {
+            await supabase
+              .from('user_profiles')
+              .update({ subscription_status: 'past_due', updated_at: new Date().toISOString() })
+              .eq('user_id', userId);
+          }
+        }
         break;
       }
     }
-  } catch (err) {
-    console.error('[Stripe Webhook] Processing error:', err.message);
-  }
 
-  return json({ received: true });
+    return json({ received: true });
+  } catch (err) {
+    console.error('[Stripe Webhook] Processing error:', err);
+    return json({ error: err.message }, { status: 500 });
+  }
 }
