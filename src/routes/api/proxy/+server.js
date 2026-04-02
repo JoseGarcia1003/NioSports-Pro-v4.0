@@ -7,7 +7,7 @@ const API_KEY  = env.BALLDONTLIE_API_KEY || '';
 const ALLOWED_PATHS = ['/games', '/players', '/teams', '/stats', '/season_averages', '/box_scores'];
 
 export async function GET({ url }) {
-  const path   = url.searchParams.get('path') || '/games';
+  const path = url.searchParams.get('path') || url.searchParams.get('endpoint') || '/games';
   const params = url.searchParams.get('params') || '';
 
   if (!ALLOWED_PATHS.some(p => path.startsWith(p))) {
