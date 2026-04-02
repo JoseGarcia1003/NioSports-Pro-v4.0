@@ -1,10 +1,12 @@
 // src/routes/api/predict/+server.js
 // Motor predictivo server-side con Railway ML fallback a heurístico local.
+// Rate limiting por plan via Upstash Redis.
 
 import { json } from '@sveltejs/kit';
 import { predict } from '$lib/engine/predictor.js';
 import { MODEL_VERSION } from '$lib/engine/constants.js';
 import { env } from '$env/dynamic/private';
+import { checkRateLimit } from '$lib/services/ratelimit.js';
 
 const ML_API_URL = env.ML_API_URL || '';
 const ML_API_KEY = env.ML_API_KEY || '';
@@ -34,9 +36,6 @@ function setCache(key, data) {
   cache.set(key, { data, ts: Date.now() });
 }
 
-/**
- * Try Railway FastAPI first, fallback to local heuristic.
- */
 async function predictWithML(body) {
   if (!ML_API_URL) return null;
 
@@ -126,10 +125,49 @@ export async function POST({ request }) {
       return json({ error: 'homeTeam and awayTeam are required' }, { status: 400 });
     }
 
-    // Check cache
+    // ── Rate Limit ─────────────────────────────────────────────────────────
+    const userId = body.userId || 'anonymous';
+    const userPlan = body.plan || 'free';
+
+    // Si está cacheado, no consume cuota
     const cacheKey = getCacheKey(body);
     const cached = getCached(cacheKey);
-    if (cached) return json({ ...cached, cached: true });
+    if (cached) {
+      return json({ ...cached, cached: true }, {
+        headers: {
+          'X-RateLimit-Source': 'cache',
+        },
+      });
+    }
+
+    const rl = await checkRateLimit(userId, userPlan, 'predictions');
+
+    if (!rl.success) {
+      const resetMin = Math.ceil((rl.reset - Date.now()) / 60000);
+      const planLabels = { free: 'Pro ($14.99/mes)', pro: 'Elite ($29.99/mes)', elite: null };
+      const upgradeLabel = planLabels[userPlan];
+
+      return json(
+        {
+          error: 'rate_limited',
+          message: `Alcanzaste el límite de ${rl.limit} predicciones diarias del plan ${userPlan.toUpperCase()}. Se reinicia en ${resetMin} min.`,
+          limit: rl.limit,
+          remaining: 0,
+          reset: rl.reset,
+          upgrade: upgradeLabel ? { label: upgradeLabel, url: '/pricing' } : null,
+        },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': String(rl.limit),
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': String(rl.reset),
+            'Retry-After': String(Math.ceil((rl.reset - Date.now()) / 1000)),
+          },
+        }
+      );
+    }
+    // ───────────────────────────────────────────────────────────────────────
 
     // Try ML API first
     let result = await predictWithML(body);
@@ -167,7 +205,15 @@ export async function POST({ request }) {
     }
 
     setCache(cacheKey, result);
-    return json(result);
+
+    return json(result, {
+      headers: {
+        'X-RateLimit-Limit': String(rl.limit),
+        'X-RateLimit-Remaining': String(rl.remaining),
+        'X-RateLimit-Reset': String(rl.reset),
+      },
+    });
+
   } catch (err) {
     console.error('[API/predict] Error:', err.message);
     return json({ error: 'Prediction failed', details: err.message }, { status: 500 });
