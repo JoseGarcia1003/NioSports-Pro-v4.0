@@ -15,7 +15,6 @@
   </div>
 
   <div class="legal-body">
-
     <section>
       <h2>1. Datos que Recopilamos</h2>
       <p><strong>Datos de cuenta:</strong> email y UID proporcionados por Firebase Authentication al registrarte.</p>
@@ -66,16 +65,15 @@
       <h2>7. Contacto</h2>
       <p>Para consultas de privacidad: <a href="mailto:{email}">{email}</a></p>
     </section>
-
   </div>
 </div>
 
 <style>
   .legal-page { max-width: 720px; margin: 0 auto; padding: 48px 24px; color: #e2e8f0; }
   .legal-header { margin-bottom: 48px; }
-  .back { color: #6366f1; text-decoration: none; font-size: 14px; }
+  .back { color: #6366f1; text-decoration: none; font-size: 14px; display: block; margin-bottom: 20px; }
   .back:hover { color: #818cf8; }
-  h1 { font-size: 36px; font-weight: 800; margin: 16px 0 8px; }
+  h1 { font-size: 36px; font-weight: 800; margin: 0 0 8px; }
   .updated { color: #64748b; font-size: 14px; margin: 0; }
   .legal-body { display: flex; flex-direction: column; gap: 32px; }
   section { border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 32px; }

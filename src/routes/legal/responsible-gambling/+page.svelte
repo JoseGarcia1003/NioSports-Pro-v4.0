@@ -5,14 +5,11 @@
 <div class="legal-page">
   <div class="legal-header">
     <a href="/" class="back">← Volver</a>
-    <div class="warning-banner">
-      ⚠️ Advertencia Importante sobre Apuestas
-    </div>
+    <div class="warning-banner">⚠️ Advertencia Importante sobre Apuestas</div>
     <h1>Juego <span class="accent">Responsable</span></h1>
   </div>
 
   <div class="legal-body">
-
     <div class="highlight-box">
       <p><strong>NioSports Pro es una herramienta de análisis estadístico, NO un sistema garantizado de ganancias.</strong> Las apuestas deportivas conllevan riesgo real de pérdida financiera. Nunca apuestes dinero que no puedas permitirte perder.</p>
     </div>
@@ -53,7 +50,6 @@
         <li>Usuarios menores de 18 años no pueden usar el Servicio</li>
       </ul>
     </section>
-
   </div>
 </div>
 

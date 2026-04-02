@@ -2,7 +2,6 @@
   const lastUpdated = 'Abril 2026';
   const appName = 'NioSports Pro';
   const email = 'joseluisgarciafonseca@gmail.com';
-  const url = 'nio-sports-pro-v4-0.vercel.app';
 </script>
 
 <svelte:head>
@@ -17,7 +16,6 @@
   </div>
 
   <div class="legal-body">
-
     <section>
       <h2>1. Aceptación de los Términos</h2>
       <p>Al acceder y usar {appName} ("el Servicio"), aceptas estar vinculado por estos Términos de Servicio. Si no estás de acuerdo con alguna parte de estos términos, no puedes acceder al Servicio.</p>
@@ -71,16 +69,15 @@
       <h2>7. Contacto</h2>
       <p>Para consultas sobre estos términos: <a href="mailto:{email}">{email}</a></p>
     </section>
-
   </div>
 </div>
 
 <style>
   .legal-page { max-width: 720px; margin: 0 auto; padding: 48px 24px; color: #e2e8f0; }
   .legal-header { margin-bottom: 48px; }
-  .back { color: #6366f1; text-decoration: none; font-size: 14px; }
+  .back { color: #6366f1; text-decoration: none; font-size: 14px; display: block; margin-bottom: 20px; }
   .back:hover { color: #818cf8; }
-  h1 { font-size: 36px; font-weight: 800; margin: 16px 0 8px; }
+  h1 { font-size: 36px; font-weight: 800; margin: 0 0 8px; }
   .updated { color: #64748b; font-size: 14px; margin: 0; }
   .legal-body { display: flex; flex-direction: column; gap: 32px; }
   section { border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 32px; }

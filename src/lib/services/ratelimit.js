@@ -38,12 +38,12 @@ function getLimiter(plan, type) {
 export async function checkRateLimit(userId, plan = 'free', type = 'predictions') {
   try {
     const limiter = getLimiter(plan, type);
-    const result = await limiter.limit(userId);
+    const result  = await limiter.limit(userId);
     return {
-      success: result.success,
-      limit: result.limit,
+      success:   result.success,
+      limit:     result.limit,
       remaining: result.remaining,
-      reset: result.reset,
+      reset:     result.reset,
     };
   } catch (err) {
     console.error('[RateLimit] Upstash error, failing open:', err.message);
