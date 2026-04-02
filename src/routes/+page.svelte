@@ -63,7 +63,7 @@
 
 <svelte:head>
   <title>{$isAuthenticated ? 'Dashboard' : 'Análisis Cuantitativo NBA'} — NioSports Pro</title>
-  <meta name="description" content="NioSports Pro — Análisis cuantitativo de totales NBA con 15+ factores contextuales" />
+  <meta name="description" content="NioSports Pro — Análisis cuantitativo de totales NBA con XGBoost y 26 features" />
 </svelte:head>
 
 {#if $isAuthenticated}
@@ -79,9 +79,15 @@
       </div>
     </header>
 
-    <KPIGrid {kpiData} />
-    <QuickActions />
-    <TodaysGames games={todaysGames} loading={loadingGames} />
+    <div data-tour="kpi">
+      <KPIGrid {kpiData} />
+    </div>
+    <div data-tour="actions">
+      <QuickActions />
+    </div>
+    <div data-tour="games">
+      <TodaysGames games={todaysGames} loading={loadingGames} />
+    </div>
   </div>
 {:else}
   <div class="landing">

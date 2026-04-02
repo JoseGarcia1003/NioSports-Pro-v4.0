@@ -9,6 +9,7 @@
   import BottomNav from '$lib/components/BottomNav.svelte';
   import DemoBanner from '$lib/components/DemoBanner.svelte';
   import ToastContainer from '$lib/components/ToastContainer.svelte';
+  import ProductTour from '$lib/components/ProductTour.svelte';
 
   import { initFirebase } from '$lib/firebase';
   import { authStore, isAuthenticated, authLoading } from '$lib/stores/auth';
@@ -60,6 +61,7 @@
 
     {#if showNav}
       <BottomNav />
+      <ProductTour />
     {/if}
   {/if}
 
@@ -137,7 +139,6 @@
     color: #fff;
   }
 
-  /* Ensure all interactive elements meet 44px touch target */
   :global(button, a, input, select, textarea) {
     min-height: 44px;
   }
@@ -173,7 +174,6 @@
     }
   }
 
-  /* Loading Screen */
   .app-loading {
     min-height: 100vh;
     display: flex;
