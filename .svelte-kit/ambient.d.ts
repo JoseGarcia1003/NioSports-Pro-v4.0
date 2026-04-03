@@ -38,22 +38,22 @@
  * The above values will be the same _even if_ different values for `ENVIRONMENT` or `PUBLIC_BASE_URL` are set at runtime, as they are statically replaced in your code with their build time values.
  */
 declare module '$env/static/private' {
-	export const VITE_SUPABASE_URL: string;
-	export const VITE_SUPABASE_ANON_KEY: string;
-	export const SUPABASE_SERVICE_ROLE_KEY: string;
 	export const BALLDONTLIE_API_KEY: string;
-	export const ODDS_API_KEY: string;
-	export const NS_PROXY_SECRET: string;
-	export const UPSTASH_REDIS_REST_URL: string;
-	export const UPSTASH_REDIS_REST_TOKEN: string;
-	export const CRON_SECRET: string;
-	export const SENTRY_DSN: string;
-	export const ML_API_URL: string;
 	export const ML_API_KEY: string;
-	export const STRIPE_SECRET_KEY: string;
-	export const VITE_STRIPE_PUBLISHABLE_KEY: string;
-	export const STRIPE_PRICE_PRO: string;
+	export const ML_API_URL: string;
+	export const NS_PROXY_SECRET: string;
 	export const STRIPE_PRICE_ELITE: string;
+	export const STRIPE_PRICE_PRO: string;
+	export const STRIPE_SECRET_KEY: string;
+	export const STRIPE_WEBHOOK_SECRET: string;
+	export const UPSTASH_REDIS_REST_TOKEN: string;
+	export const UPSTASH_REDIS_REST_URL: string;
+	export const VERCEL_OIDC_TOKEN: string;
+	export const VITE_STRIPE_PUBLISHABLE_KEY: string;
+	export const CRON_SECRET: string;
+	export const SUPABASE_SERVICE_ROLE_KEY: string;
+	export const VITE_SUPABASE_ANON_KEY: string;
+	export const VITE_SUPABASE_URL: string;
 	export const ACLOCAL_PATH: string;
 	export const ALLUSERSPROFILE: string;
 	export const APPDATA: string;
@@ -195,12 +195,12 @@ declare module '$env/static/private' {
  */
 declare module '$env/static/public' {
 	export const PUBLIC_FIREBASE_API_KEY: string;
+	export const PUBLIC_FIREBASE_APP_ID: string;
 	export const PUBLIC_FIREBASE_AUTH_DOMAIN: string;
 	export const PUBLIC_FIREBASE_DATABASE_URL: string;
+	export const PUBLIC_FIREBASE_MESSAGING_SENDER_ID: string;
 	export const PUBLIC_FIREBASE_PROJECT_ID: string;
 	export const PUBLIC_FIREBASE_STORAGE_BUCKET: string;
-	export const PUBLIC_FIREBASE_MESSAGING_SENDER_ID: string;
-	export const PUBLIC_FIREBASE_APP_ID: string;
 }
 
 /**
@@ -250,22 +250,22 @@ declare module '$env/static/public' {
  */
 declare module '$env/dynamic/private' {
 	export const env: {
-		VITE_SUPABASE_URL: string;
-		VITE_SUPABASE_ANON_KEY: string;
-		SUPABASE_SERVICE_ROLE_KEY: string;
 		BALLDONTLIE_API_KEY: string;
-		ODDS_API_KEY: string;
-		NS_PROXY_SECRET: string;
-		UPSTASH_REDIS_REST_URL: string;
-		UPSTASH_REDIS_REST_TOKEN: string;
-		CRON_SECRET: string;
-		SENTRY_DSN: string;
-		ML_API_URL: string;
 		ML_API_KEY: string;
-		STRIPE_SECRET_KEY: string;
-		VITE_STRIPE_PUBLISHABLE_KEY: string;
-		STRIPE_PRICE_PRO: string;
+		ML_API_URL: string;
+		NS_PROXY_SECRET: string;
 		STRIPE_PRICE_ELITE: string;
+		STRIPE_PRICE_PRO: string;
+		STRIPE_SECRET_KEY: string;
+		STRIPE_WEBHOOK_SECRET: string;
+		UPSTASH_REDIS_REST_TOKEN: string;
+		UPSTASH_REDIS_REST_URL: string;
+		VERCEL_OIDC_TOKEN: string;
+		VITE_STRIPE_PUBLISHABLE_KEY: string;
+		CRON_SECRET: string;
+		SUPABASE_SERVICE_ROLE_KEY: string;
+		VITE_SUPABASE_ANON_KEY: string;
+		VITE_SUPABASE_URL: string;
 		ACLOCAL_PATH: string;
 		ALLUSERSPROFILE: string;
 		APPDATA: string;
@@ -426,12 +426,12 @@ declare module '$env/dynamic/private' {
 declare module '$env/dynamic/public' {
 	export const env: {
 		PUBLIC_FIREBASE_API_KEY: string;
+		PUBLIC_FIREBASE_APP_ID: string;
 		PUBLIC_FIREBASE_AUTH_DOMAIN: string;
 		PUBLIC_FIREBASE_DATABASE_URL: string;
+		PUBLIC_FIREBASE_MESSAGING_SENDER_ID: string;
 		PUBLIC_FIREBASE_PROJECT_ID: string;
 		PUBLIC_FIREBASE_STORAGE_BUCKET: string;
-		PUBLIC_FIREBASE_MESSAGING_SENDER_ID: string;
-		PUBLIC_FIREBASE_APP_ID: string;
 		[key: `PUBLIC_${string}`]: string | undefined;
 	}
 }

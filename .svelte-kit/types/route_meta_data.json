@@ -15,6 +15,12 @@
 	"/api/predict": [
 		"src/routes/api/predict/+server.js"
 	],
+	"/api/proxy": [
+		"src/routes/api/proxy/+server.js"
+	],
+	"/api/public/track-record": [
+		"src/routes/api/public/track-record/+server.js"
+	],
 	"/api/stripe/checkout": [
 		"src/routes/api/stripe/checkout/+server.js"
 	],
@@ -32,6 +38,7 @@
 	"/methodology": [],
 	"/picks": [],
 	"/pricing": [],
+	"/public": [],
 	"/results": [],
 	"/stats": [],
 	"/totales": [],
