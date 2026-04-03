@@ -14,6 +14,8 @@
 
   import { initFirebase } from '$lib/firebase';
   import { authStore, isAuthenticated, authLoading } from '$lib/stores/auth';
+  import { loadSubscription } from '$lib/stores/subscription';
+  import { supabase } from '$lib/supabase/client';
   import { theme } from '$lib/stores/ui';
   import { browser } from '$app/environment';
 
@@ -34,10 +36,13 @@
     });
   });
 
-  $: if (browser && !$authLoading) {
+$: if (browser && !$authLoading) {
     const isPublic = PUBLIC_ROUTES.some(r => $page.url.pathname.startsWith(r));
     if (!$isAuthenticated && !isPublic) goto('/login');
     if ($isAuthenticated && $page.url.pathname === '/login') goto('/');
+    if ($isAuthenticated && $authStore?.uid) {
+      loadSubscription(supabase, $authStore.uid);
+    }
   }
 
   $: isPublicPage = PUBLIC_ROUTES.some(r => $page.url.pathname.startsWith(r));
