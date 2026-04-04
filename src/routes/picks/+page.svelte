@@ -1,9 +1,11 @@
 <script>
+  import { subscription } from '$lib/stores/subscription';
+  import { getMaxPicks } from '$lib/config/plans.js';
   import { onMount } from 'svelte';
   import { userId } from '$lib/stores/auth';
   import { picksStore, picksTotales, teamStats, bankrollStore } from '$lib/stores/data';
   import { toasts } from '$lib/stores/ui';
-  import { Cpu, ClipboardList, Trash2, CheckCircle, XCircle, MinusCircle, RefreshCw, Save, Zap } from 'lucide-svelte';
+  import { Cpu, ClipboardList, Trash2, CheckCircle, XCircle, MinusCircle, RefreshCw, Save, Zap, Lock } from 'lucide-svelte';
   import ConfidenceGauge from '$lib/components/charts/ConfidenceGauge.svelte';
   import { getGamesToday } from '$lib/services/games-service.js';
   import { generateAIPicks, getPicksSummary } from '$lib/services/ai-picks-generator.js';
@@ -61,10 +63,16 @@
   $: pending = picks.filter(p => p.status === 'pending').length;
   $: winRate = (wins + losses) > 0 ? ((wins / (wins + losses)) * 100).toFixed(1) : '—';
 
-  $: visibleAIPicks = aiPicks.filter(pick => {
-    const key = `${pick.homeTeam}-${pick.awayTeam}-${pick.period}-${pick.direction}`;
-    return !savedPickKeys.has(key);
-  });
+  // ── Feature Gating: limit visible picks by plan ──
+  $: userPlan = $subscription.plan || 'free';
+  $: maxPicks = getMaxPicks(userPlan, aiPicks.length);
+  $: allFilteredPicks = aiPicks.filter(pick => {
+      const key = `${pick.gameId}-${pick.period}`;
+      return !savedPickKeys.has(key);
+    });
+  $: visibleAIPicks = allFilteredPicks.slice(0, maxPicks);
+  $: hiddenCount = Math.max(0, allFilteredPicks.length - maxPicks);
+  // ─────────────────────────────────────────────────
 
   $: aiSummary = getPicksSummary(visibleAIPicks);
 
@@ -248,6 +256,19 @@
           </div>
         {/each}
       </div>
+
+      <!-- Upgrade Hint -->
+      {#if hiddenCount > 0}
+        <div class="upgrade-hint">
+          <div class="upgrade-hint__left">
+            <Lock size={18} />
+            <div>
+              <strong>{hiddenCount} picks más</strong> disponibles con el plan {userPlan === 'free' ? 'Pro' : 'Elite'}
+            </div>
+          </div>
+          <a href="/pricing" class="upgrade-hint__btn">Ver planes →</a>
+        </div>
+      {/if}
     {/if}
 
   <!-- MIS PICKS TAB -->
@@ -327,8 +348,8 @@
       <p class="modal__sub">{selectedPick.home_team || selectedPick.localTeam} vs {selectedPick.away_team || selectedPick.awayTeam} — {selectedPick.period} {selectedPick.direction || selectedPick.betType}</p>
 
       <div class="modal__field">
-        <label>Total real (opcional)</label>
-        <input type="number" bind:value={resultActualTotal} placeholder="ej: 228" class="modal__input" />
+        <label for="actual-total">Total real (opcional)</label>
+        <input id="actual-total" type="number" bind:value={resultActualTotal} placeholder="ej: 228" class="modal__input" />
       </div>
 
       <div class="modal__buttons">
@@ -357,7 +378,6 @@
   .page__title { font-family: 'Inter', sans-serif; font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 900; letter-spacing: -0.03em; margin: 8px 0 6px; }
   .page__subtitle { font-size: 0.9rem; color: rgba(255,255,255,0.4); }
 
-  /* Tabs */
   .tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px; }
   .tab { display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 10px; border: 1px solid transparent; background: transparent; color: rgba(255,255,255,0.4); font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
   .tab:hover { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.8); }
@@ -368,7 +388,6 @@
   .demo-banner { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.15); border-radius: 10px; margin-bottom: 20px; font-size: 0.85rem; color: #F59E0B; }
   .demo-banner p { margin: 0; }
 
-  /* AI Summary */
   .ai-summary { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
   .sstat { display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px 20px; min-width: 80px; }
   .sstat__val { font-family: 'DM Mono', monospace; font-size: 1.3rem; font-weight: 800; }
@@ -377,7 +396,6 @@
   .btn-save-all { width: 100%; padding: 14px; background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.2); border-radius: 12px; color: #6366F1; font-size: 0.9rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 16px; transition: all 0.15s; }
   .btn-save-all:hover { background: rgba(99,102,241,0.15); }
 
-  /* AI Pick Cards */
   .ai-list { display: flex; flex-direction: column; gap: 12px; }
   .aicard { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 18px; transition: border-color 0.2s; }
   .aicard:hover { border-color: rgba(99,102,241,0.25); }
@@ -395,13 +413,26 @@
   .aicard__save { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid rgba(99,102,241,0.2); background: rgba(99,102,241,0.08); color: #6366F1; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.15s; }
   .aicard__save:hover { background: rgba(99,102,241,0.15); }
 
-  /* Stats Row */
+  /* ── Upgrade Hint ── */
+  .upgrade-hint {
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    margin-top: 16px; padding: 16px 20px;
+    background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.06));
+    border: 1px solid rgba(99,102,241,0.2); border-radius: 14px;
+  }
+  .upgrade-hint__left { display: flex; align-items: center; gap: 12px; color: rgba(255,255,255,0.7); font-size: 0.9rem; }
+  .upgrade-hint__left strong { color: #a5b4fc; }
+  .upgrade-hint__btn {
+    padding: 8px 20px; background: #6366f1; color: white; border-radius: 8px;
+    font-weight: 700; font-size: 0.85rem; text-decoration: none; transition: background 0.2s;
+  }
+  .upgrade-hint__btn:hover { background: #4f46e5; }
+
   .stats-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
   .st { display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 10px 16px; min-width: 65px; }
   .st__val { font-family: 'DM Mono', monospace; font-size: 1.3rem; font-weight: 800; }
   .st__label { font-size: 0.68rem; color: rgba(255,255,255,0.35); text-transform: uppercase; }
 
-  /* Pick Cards */
   .picks-list { display: flex; flex-direction: column; gap: 10px; }
   .pickcard { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 10px; transition: border-color 0.2s; }
   .pickcard--win { border-left: 3px solid #10B981; }
@@ -427,7 +458,6 @@
   .badge-loss { background: rgba(239,68,68,0.15); color: #EF4444; }
   .badge-push { background: rgba(148,163,184,0.15); color: #94A3B8; }
 
-  /* Shared */
   .green { color: #10B981; }
   .red { color: #EF4444; }
   .indigo { color: #6366F1; }
@@ -443,7 +473,6 @@
   .error-state { text-align: center; padding: 40px; color: #EF4444; }
   .retry-btn { margin-top: 12px; padding: 10px 20px; background: rgba(239,68,68,0.1); color: #EF4444; border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
 
-  /* Modal */
   .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 20px; }
   .modal { background: #111318; border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; padding: 28px 24px; width: 100%; max-width: 380px; }
   .modal__title { font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 800; margin-bottom: 6px; }
@@ -465,5 +494,8 @@
   @media (max-width: 640px) {
     .ai-summary { flex-direction: row; overflow-x: auto; }
     .pickcard__body { flex-direction: column; align-items: flex-start; }
+    .upgrade-hint { flex-direction: column; text-align: center; }
+    .upgrade-hint__left { justify-content: center; }
+    .upgrade-hint__btn { width: 100%; text-align: center; display: block; }
   }
 </style>

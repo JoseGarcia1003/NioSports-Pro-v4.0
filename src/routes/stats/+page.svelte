@@ -1,4 +1,5 @@
 <script>
+  import UpgradeGate from '$lib/components/UpgradeGate.svelte';
   import { onMount } from 'svelte';
   import { userId } from '$lib/stores/auth';
   import { allPicks } from '$lib/stores/data';
@@ -135,6 +136,7 @@
       <p>Registra picks en <a href="/picks">Picks</a> y vuelve aquí para ver tus estadísticas.</p>
     </div>
   {:else}
+  <UpgradeGate feature="fullStats" requiredPlan="elite" title="Estadísticas Avanzadas" description="Accede a CLV tracking, gráficos de profit, win rate por período y ranking de equipos con el plan Elite.">
 
     <!-- KPIs -->
     <div class="kpi-row">
@@ -262,6 +264,7 @@
         </div>
       </div>
     {/if}
+  </UpgradeGate>
   {/if}
 </div>
 

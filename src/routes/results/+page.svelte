@@ -1,6 +1,8 @@
 <script>
   import { onMount } from 'svelte';
   import { allPicks } from '$lib/stores/data';
+  import { subscription } from '$lib/stores/subscription';
+  import { hasFeature } from '$lib/config/plans.js';
   import { BarChart3, TrendingUp, Target, Activity, Download, Filter } from 'lucide-svelte';
   import ProfitCurve from '$lib/components/charts/ProfitCurve.svelte';
   import WinRateBar from '$lib/components/charts/WinRateBar.svelte';
@@ -16,6 +18,7 @@
   onMount(() => { setTimeout(() => loading = false, 300); });
 
   // Data
+  $: showCLV = hasFeature($subscription.plan || 'free', 'clvTracking');
   $: picksArray = $allPicks || [];
   $: resolvedPicks = picksArray.filter(p => p.status === 'win' || p.status === 'loss' || p.result === 'win' || p.result === 'loss' || p.status === 'push');
 
@@ -252,6 +255,7 @@
       </div>
       <span class="kpi__badge">ROI: {parseFloat(roi) >= 0 ? '+' : ''}{roi}%</span>
     </div>
+    {#if showCLV}
     <div class="kpi">
       <div class="kpi__icon"><Activity size={20} /></div>
       <div class="kpi__body">
@@ -260,6 +264,7 @@
       </div>
       <span class="kpi__badge">{avgCLV ? 'Pts vs cierre' : 'Sin datos'}</span>
     </div>
+    {/if}
   </div>
 
   <!-- Filters -->
@@ -293,10 +298,12 @@
       <h2 class="card__title">Win Rate por Período</h2>
       <WinRateBar data={winRateBarData} />
     </div>
+    {#if showCLV}
     <div class="card card--wide">
       <h2 class="card__title">Evolución CLV</h2>
       <CLVEvolution data={clvData} />
     </div>
+    {/if}
     <div class="card">
       <h2 class="card__title">Calibración</h2>
       <CalibrationPlot data={calibrationData} />

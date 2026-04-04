@@ -1,4 +1,5 @@
 <script>
+  import UpgradeGate from '$lib/components/UpgradeGate.svelte';
   import { onMount } from 'svelte';
   import { userId } from '$lib/stores/auth';
   import { bankrollStore, bankrollROI, bankrollPnL, allPicks } from '$lib/stores/data';
@@ -113,6 +114,7 @@
     <div class="loading"><div class="spinner"></div><p>Cargando bankroll...</p></div>
   {:else}
 
+  <UpgradeGate feature="bankroll" requiredPlan="pro" title="Bankroll Management" description="Controla tu bankroll, registra depósitos/retiros y visualiza tu rentabilidad con gráficos profesionales.">
     <!-- KPIs -->
     <div class="kpi-row">
       <div class="kpi kpi--main">
@@ -206,6 +208,7 @@
         </div>
       {/if}
     </div>
+  </UpgradeGate>
   {/if}
 </div>
 
