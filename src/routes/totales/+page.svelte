@@ -5,6 +5,7 @@
   import { toasts } from '$lib/stores/ui';
   import { BarChart3, Home, Plane, AlertTriangle, Settings, Save, X, TrendingUp } from 'lucide-svelte';
   import ConfidenceGauge from '$lib/components/charts/ConfidenceGauge.svelte';
+  import TeamSelector from '$lib/components/TeamSelector.svelte';
   import { MODEL_VERSION } from '$lib/engine/constants.js';
 
   let statsData = null;
@@ -183,10 +184,7 @@
     <div class="selectors">
       <div class="selector selector--home">
         <div class="selector__label"><Home size={14} /> Local</div>
-        <select class="selector__select" bind:value={localTeam}>
-          <option value="">Seleccionar equipo...</option>
-          {#each teams as t}<option value={t}>{t}</option>{/each}
-        </select>
+        <TeamSelector {teams} bind:value={localTeam} placeholder="Seleccionar equipo..." disabled={awayTeam ? [awayTeam] : []} accent="#6366f1" />
         {#if localData}
           <div class="team-stats">
             {#each [['Q1', 'q1Home'], ['HALF', 'halfHome'], ['FULL', 'fullHome']] as [label, key]}
@@ -205,10 +203,7 @@
 
       <div class="selector selector--away">
         <div class="selector__label"><Plane size={14} /> Visitante</div>
-        <select class="selector__select" bind:value={awayTeam}>
-          <option value="">Seleccionar equipo...</option>
-          {#each teams as t}<option value={t} disabled={t === localTeam}>{t}</option>{/each}
-        </select>
+        <TeamSelector {teams} bind:value={awayTeam} placeholder="Seleccionar equipo..." disabled={localTeam ? [localTeam] : []} accent="#ef4444" />
         {#if awayData}
           <div class="team-stats">
             {#each [['Q1', 'q1Away'], ['HALF', 'halfAway'], ['FULL', 'fullAway']] as [label, key]}
@@ -348,9 +343,6 @@
   .selector--home { border-color: rgba(99,102,241,0.2); }
   .selector--away { border-color: rgba(239,68,68,0.2); }
   .selector__label { font-size: 0.78rem; font-weight: 700; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-  .selector__select { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 10px 12px; color: rgba(255,255,255,0.9); font-size: 0.9rem; cursor: pointer; }
-  .selector__select:focus { outline: none; border-color: #6366F1; }
-  .selector__select option { background: #111318; color: #fff; }
 
   .vs { font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 900; color: #6366F1; background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.15); border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; margin-top: 32px; flex-shrink: 0; }
 
