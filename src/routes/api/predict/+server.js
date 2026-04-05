@@ -125,9 +125,17 @@ export async function POST({ request }) {
       return json({ error: 'homeTeam and awayTeam are required' }, { status: 400 });
     }
 
-    // ── Rate Limit ─────────────────────────────────────────────────────────
+// ── Rate Limit ─────────────────────────────────────────────────────────
     const userId = body.userId || 'anonymous';
     const userPlan = body.plan || 'free';
+    const source = body.source || 'unknown';
+
+    // Owner bypass — skip rate limiting entirely
+    const OWNER_IDS = (env.OWNER_USER_IDS || '').split(',').filter(Boolean);
+    const isOwner = OWNER_IDS.includes(userId);
+
+    // Totales calculator doesn't consume picks quota
+    const isTotales = source === 'totales';
 
     // Si está cacheado, no consume cuota
     const cacheKey = getCacheKey(body);
@@ -140,7 +148,11 @@ export async function POST({ request }) {
       });
     }
 
-    const rl = await checkRateLimit(userId, userPlan, 'predictions');
+    // Owner and totales skip rate limiting
+    let rl = { success: true, limit: 999, remaining: 999, reset: 0 };
+    if (!isOwner) {
+      rl = await checkRateLimit(userId, userPlan, isTotales ? 'api' : 'predictions');
+    }
 
     if (!rl.success) {
       const resetMin = Math.ceil((rl.reset - Date.now()) / 60000);

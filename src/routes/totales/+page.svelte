@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { userId } from '$lib/stores/auth';
+  import { subscription } from '$lib/stores/subscription';
   import { teamStats, picksStore } from '$lib/stores/data';
   import { toasts } from '$lib/stores/ui';
   import { BarChart3, Home, Plane, AlertTriangle, Settings, Save, X, TrendingUp } from 'lucide-svelte';
@@ -91,7 +92,7 @@
       try {
         const res = await fetch('/api/predict', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ homeTeam: home, awayTeam: away, line: defLine, period, gameInfo })
+          body: JSON.stringify({ homeTeam: home, awayTeam: away, line: defLine, period, gameInfo, source: 'totales', userId: $userId || 'anonymous', plan: $subscription?.plan || 'free' })
         });
         if (res.ok) results[period] = await res.json();
       } catch (err) { console.error(`[Totales] ${period}:`, err); }
@@ -106,7 +107,8 @@
         body: JSON.stringify({
           homeTeam: { name: localTeam, stats: localData, restDays: localB2B ? 0 : 2, injuries: localInjury ? [{ name: 'Star', type: 'star' }] : [] },
           awayTeam: { name: awayTeam, stats: awayData, restDays: awayB2B ? 0 : 2, injuries: awayInjury ? [{ name: 'Star', type: 'star' }] : [] },
-          line: newLine, period, gameInfo: { arena: localTeam.includes('Nuggets') ? 'Denver' : null }
+          line: newLine, period, gameInfo: { arena: localTeam.includes('Nuggets') ? 'Denver' : null },
+          source: 'totales', userId: $userId || 'anonymous', plan: $subscription?.plan || 'free'
         })
       });
       if (res.ok) return await res.json();
@@ -180,7 +182,6 @@
   {#if loadingStats}
     <div class="loading-state"><div class="spinner"></div><p>Cargando estadísticas...</p></div>
   {:else}
-    <!-- Team Selectors -->
     <div class="selectors">
       <div class="selector selector--home">
         <div class="selector__label"><Home size={14} /> Local</div>
@@ -198,9 +199,7 @@
           </div>
         {/if}
       </div>
-
       <div class="vs">VS</div>
-
       <div class="selector selector--away">
         <div class="selector__label"><Plane size={14} /> Visitante</div>
         <TeamSelector {teams} bind:value={awayTeam} placeholder="Seleccionar equipo..." disabled={localTeam ? [localTeam] : []} accent="#ef4444" />
@@ -220,7 +219,6 @@
     </div>
 
     {#if bothSelected}
-      <!-- Context Factors -->
       <div class="factors">
         <div class="factors__title"><Settings size={14} /> Factores contextuales</div>
         <div class="factors__grid">
@@ -234,11 +232,9 @@
       {#if predictionsLoading}
         <div class="loading-state"><div class="spinner"></div><p>Calculando predicciones...</p></div>
       {:else if predictions}
-        <!-- Predictions -->
         <div class="pred-section">
           <h2 class="pred-section__title">Predicción del Motor</h2>
           <p class="pred-section__sub">{localTeam} (HOME) vs {awayTeam} (AWAY)</p>
-
           <div class="pred-grid">
             {#each [
               { period: 'Q1', label: 'Q1', analysis: analysisQ1, line: lineQ1, setLine: (v) => lineQ1 = v },
@@ -252,31 +248,25 @@
                     <span class="pcard__period">{row.label}</span>
                     <ConfidenceGauge value={a.probabilityPercent || 50} size={56} />
                   </div>
-
                   <div class="pcard__projection">{a.projection ?? '—'}</div>
                   <span class="pcard__proj-label">Proyección</span>
-
                   <div class="pcard__line-row">
                     <span class="pcard__line-label">Línea</span>
                     <input type="number" step="0.5" class="pcard__line-input"
                       value={row.line} on:input={(e) => row.setLine(e.target.value)}
                       placeholder={a.projection} />
                   </div>
-
                   <div class="pcard__edge" class:pos={a.edge > 0} class:neg={a.edge < 0}>
                     Edge: {a.edge > 0 ? '+' : ''}{a.edge?.toFixed?.(1) ?? 0} pts
                   </div>
-
                   <div class="pcard__rec" class:rec-over={a.direction === 'OVER'} class:rec-under={a.direction === 'UNDER'}>
                     <span class="pcard__dir">{a.direction ?? '—'}</span>
                     <span class="pcard__prob">{a.probabilityPercent ?? 50}%</span>
                     <span class="pcard__conf">{a.confidence ?? 'LOW'}</span>
                   </div>
-
                   <div class="pcard__ev" class:pos={a.ev > 0}>
                     EV: {a.evPercent > 0 ? '+' : ''}{a.evPercent ?? 0}%
                   </div>
-
                   <button class="pcard__save" class:save-over={a.direction === 'OVER'} class:save-under={a.direction === 'UNDER'}
                     on:click={() => openSave(row.period, a)}>
                     <Save size={14} /> {a.direction} {a.line}
@@ -296,7 +286,6 @@
   {/if}
 </div>
 
-<!-- Save Modal -->
 {#if saveTarget}
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -329,30 +318,23 @@
 <style>
   .page { max-width: 920px; margin: 0 auto; padding: 60px 24px 120px; }
   @media (max-width: 768px) { .page { padding: 32px 16px 100px; } }
-
   .page__header { margin-bottom: 32px; }
   .page__label { font-size: 0.8rem; font-weight: 700; color: #6366F1; text-transform: uppercase; letter-spacing: 0.15em; }
   .page__title { font-family: 'Inter', sans-serif; font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 900; letter-spacing: -0.03em; margin: 8px 0 6px; }
   .page__subtitle { font-size: 0.9rem; color: rgba(255,255,255,0.4); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .badge-warn { font-size: 0.7rem; background: rgba(245,158,11,0.12); color: #F59E0B; padding: 2px 8px; border-radius: 6px; font-weight: 700; }
   .badge-source { font-size: 0.7rem; background: rgba(99,102,241,0.12); color: #818CF8; padding: 2px 8px; border-radius: 6px; font-weight: 700; }
-
-  /* Selectors */
   .selectors { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
   .selector { flex: 1; min-width: 240px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 18px; }
   .selector--home { border-color: rgba(99,102,241,0.2); }
   .selector--away { border-color: rgba(239,68,68,0.2); }
   .selector__label { font-size: 0.78rem; font-weight: 700; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-
   .vs { font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 900; color: #6366F1; background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.15); border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; margin-top: 32px; flex-shrink: 0; }
-
   .team-stats { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
   .tstat { display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.04); border-radius: 8px; padding: 8px 12px; flex: 1; min-width: 60px; }
   .tstat__val { font-family: 'DM Mono', monospace; font-size: 1.1rem; font-weight: 800; }
   .tstat__label { font-size: 0.65rem; color: rgba(255,255,255,0.35); }
   .tstat__rank { font-size: 0.68rem; font-weight: 700; margin-top: 2px; }
-
-  /* Factors */
   .factors { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 16px 18px; margin-bottom: 24px; }
   .factors__title { font-size: 0.82rem; font-weight: 700; color: rgba(255,255,255,0.5); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
   .factors__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -360,33 +342,24 @@
   .ftoggle { display: flex; align-items: center; gap: 8px; font-size: 0.83rem; cursor: pointer; padding: 8px 10px; border-radius: 8px; transition: background 0.15s; color: rgba(255,255,255,0.7); }
   .ftoggle:hover { background: rgba(255,255,255,0.04); }
   .ftoggle input { accent-color: #6366F1; cursor: pointer; }
-
-  /* Predictions */
   .pred-section { background: rgba(99,102,241,0.04); border: 1px solid rgba(99,102,241,0.15); border-radius: 20px; padding: 28px 22px; }
   .pred-section__title { font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 800; text-align: center; color: #fff; }
   .pred-section__sub { font-size: 0.82rem; color: rgba(255,255,255,0.4); text-align: center; margin: 4px 0 20px; }
-
   .pred-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
   @media (max-width: 640px) { .pred-grid { grid-template-columns: 1fr; } }
-
   .pcard { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; transition: border-color 0.2s; }
   .pcard:hover { border-color: rgba(99,102,241,0.3); }
-
   .pcard__top { display: flex; justify-content: space-between; align-items: center; width: 100%; }
   .pcard__period { font-family: 'Inter', sans-serif; font-size: 0.75rem; font-weight: 800; color: #6366F1; letter-spacing: 0.1em; text-transform: uppercase; }
-
   .pcard__projection { font-family: 'DM Mono', monospace; font-size: 2.2rem; font-weight: 900; line-height: 1; }
   .pcard__proj-label { font-size: 0.65rem; color: rgba(255,255,255,0.35); text-transform: uppercase; margin-top: -4px; }
-
   .pcard__line-row { display: flex; align-items: center; gap: 8px; }
   .pcard__line-label { font-size: 0.7rem; color: rgba(255,255,255,0.4); }
   .pcard__line-input { width: 80px; padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #6366F1; font-family: 'DM Mono', monospace; font-size: 1rem; font-weight: 700; text-align: center; }
   .pcard__line-input:focus { outline: none; border-color: #6366F1; }
-
   .pcard__edge { font-size: 0.8rem; font-weight: 700; color: rgba(255,255,255,0.4); }
   .pos { color: #10B981; }
   .neg { color: #EF4444; }
-
   .pcard__rec { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 12px; border-radius: 10px; width: 100%; }
   .rec-over { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25); }
   .rec-under { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); }
@@ -395,22 +368,16 @@
   .rec-under .pcard__dir { color: #EF4444; }
   .pcard__prob { font-family: 'DM Mono', monospace; font-size: 0.9rem; font-weight: 800; }
   .pcard__conf { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; color: rgba(255,255,255,0.5); }
-
   .pcard__ev { font-size: 0.8rem; font-weight: 700; color: rgba(255,255,255,0.4); }
-
   .pcard__save { width: 100%; padding: 10px; border-radius: 10px; border: none; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.15s; }
   .pcard__save:active { transform: scale(0.96); }
   .save-over { background: rgba(16,185,129,0.12); color: #10B981; border: 1px solid rgba(16,185,129,0.25); }
   .save-under { background: rgba(239,68,68,0.12); color: #EF4444; border: 1px solid rgba(239,68,68,0.25); }
-
   .empty { text-align: center; padding: 64px 20px; color: rgba(255,255,255,0.25); display: flex; flex-direction: column; align-items: center; gap: 16px; }
   .empty p { font-size: 0.95rem; color: rgba(255,255,255,0.4); }
-
   .loading-state { text-align: center; padding: 48px 20px; color: rgba(255,255,255,0.4); display: flex; flex-direction: column; align-items: center; gap: 12px; }
   .spinner { width: 32px; height: 32px; border: 3px solid rgba(99,102,241,0.2); border-top-color: #6366F1; border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* Modal */
   .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 20px; }
   .modal { background: #111318; border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; padding: 26px 22px; width: 100%; max-width: 400px; }
   .modal__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -426,6 +393,5 @@
   .mbtn:disabled { opacity: 0.4; cursor: not-allowed; }
   .mbtn--ghost { background: transparent; border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); }
   .mbtn--save { background: #6366F1; color: #fff; }
-
   @media (max-width: 640px) { .selectors { flex-direction: column; } .vs { align-self: center; margin-top: 0; } }
 </style>
