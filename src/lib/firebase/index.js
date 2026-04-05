@@ -120,12 +120,26 @@ export async function loginWithEmail(email, password) {
 
 export async function registerWithEmail(email, password) {
   const cred = await createUserWithEmailAndPassword(requireAuth(), email, password);
+  // Send welcome email (fire and forget)
+  fetch('/api/email/welcome', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, displayName: email.split('@')[0], secret: 'welcome' }),
+  }).catch(() => {});
   return cred.user;
 }
 
 export async function loginWithGoogle() {
   const provider = new GoogleAuthProvider();
   const cred = await signInWithPopup(requireAuth(), provider);
+  // Send welcome email on first Google login (fire and forget)
+  if (cred._tokenResponse?.isNewUser) {
+    fetch('/api/email/welcome', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: cred.user.email, displayName: cred.user.displayName, secret: 'welcome' }),
+    }).catch(() => {});
+  }
   return cred.user;
 }
 

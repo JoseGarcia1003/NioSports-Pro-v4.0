@@ -26,6 +26,7 @@
     "driver.js": "^1.4.0",
     "firebase": "^10.7.1",
     "lucide-svelte": "^0.577.0",
+    "resend": "^6.10.0",
     "stripe": "^20.4.1"
   },
   "devDependencies": {
