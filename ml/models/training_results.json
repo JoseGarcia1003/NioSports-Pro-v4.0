@@ -1,28 +1,39 @@
 {
-  "trained_at": "2026-03-22T11:04:47.605497",
-  "feature_cols": [
-    "home_total_l5",
-    "home_total_l10",
-    "home_total_l20",
-    "home_home_avg",
-    "home_std",
-    "away_total_l5",
-    "away_total_l10",
-    "away_total_l20",
-    "away_away_avg",
-    "away_std",
-    "total_sum_l5",
-    "total_sum_l10",
-    "total_diff_l5",
-    "home_rest_days",
-    "away_rest_days",
-    "is_b2b_home",
-    "is_b2b_away",
-    "rest_diff",
-    "altitude_ft",
-    "days_into_season"
-  ],
-  "folds": [
+  "results": [
     {
       "fold": 1,
-      "test_season": 
+      "mae": 14.663005032576123,
+      "wr": 0.6216666666666667,
+      "roi": 18.681818181818176,
+      "brier": 0.30269633565618986,
+      "ece": 0.2248197129741372,
+      "wins": 746,
+      "losses": 454,
+      "total": 1200,
+      "base_maes": {
+        "xgboost": 14.949524879455566,
+        "lightgbm": 14.821053210522168,
+        "ridge": 14.575535774230957,
+        "mlp": 15.431780815124512
+      }
+    },
+    {
+      "fold": 2,
+      "mae": 15.033657465705849,
+      "wr": 0.61,
+      "roi": 16.45454545454545,
+      "brier": 0.2892290240005377,
+      "ece": 0.19010456268041032,
+      "wins": 732,
+      "losses": 468,
+      "total": 1200,
+      "base_maes": {
+        "xgboost": 15.30810832977295,
+        "lightgbm": 15.128428558063042,
+        "ridge": 15.033364295959473,
+        "mlp": 15.445947647094727
+      }
+    }
+  ],
+  "version": "4.0.0"
+}
