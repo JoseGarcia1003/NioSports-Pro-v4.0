@@ -94,7 +94,7 @@
     background: none;
     border: none;
     cursor: pointer;
-    color: rgba(255,255,255,0.6);
+    color: var(--color-text-secondary);
     font-size: 18px;
     line-height: 1;
     padding: 0 2px;

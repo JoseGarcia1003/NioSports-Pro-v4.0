@@ -37,10 +37,10 @@
     border: 1px solid rgba(99,102,241,0.2);
     border-radius: 8px; font-size: 12px; font-family: inherit;
   }
-  .rl-bar { width: 72px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 9999px; overflow: hidden; flex-shrink: 0; }
+  .rl-bar { width: 72px; height: 4px; background: var(--color-bg-elevated); border-radius: 9999px; overflow: hidden; flex-shrink: 0; }
   .rl-fill { height: 100%; border-radius: 9999px; transition: width 0.4s ease, background 0.4s ease; }
   .rl-label { white-space: nowrap; font-weight: 500; }
-  .rl-reset { color: #64748b; white-space: nowrap; font-size: 11px; }
+  .rl-reset { color: var(--color-text-muted); white-space: nowrap; font-size: 11px; }
   .rl-upgrade {
     color: #6366f1; font-weight: 600; text-decoration: none;
     white-space: nowrap; padding: 2px 8px;

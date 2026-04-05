@@ -39,21 +39,21 @@
   .final-cta { padding: 100px 32px; background: linear-gradient(180deg, transparent 0%, rgba(99,102,241,0.03) 50%, transparent 100%); }
   .final-cta__content { max-width: 600px; margin: 0 auto; text-align: center; }
   .final-cta__title { font-family: 'Inter', sans-serif; font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 900; margin-bottom: 16px; letter-spacing: -0.02em; }
-  .final-cta__subtitle { font-size: 1.1rem; color: rgba(255,255,255,0.5); margin-bottom: 32px; }
+  .final-cta__subtitle { font-size: 1.1rem; color: var(--color-text-muted); margin-bottom: 32px; }
   .final-cta__buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
 
   :global(.btn--xl) { padding: 18px 40px; font-size: 1.1rem; }
 
-  .footer { border-top: 1px solid rgba(255,255,255,0.06); padding: 60px 32px 40px; }
+  .footer { border-top: 1px solid var(--color-border); padding: 60px 32px 40px; }
   .footer__inner { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 20px; text-align: center; }
   .footer__logo { font-family: 'Inter', sans-serif; font-size: 1.3rem; font-weight: 900; letter-spacing: -0.02em; }
-  .footer__tagline { font-size: 0.9rem; color: rgba(255,255,255,0.4); margin-top: 4px; }
+  .footer__tagline { font-size: 0.9rem; color: var(--color-text-muted); margin-top: 4px; }
   .footer__links { display: flex; gap: 32px; flex-wrap: wrap; justify-content: center; }
-  .footer__links a { font-size: 0.9rem; color: rgba(255,255,255,0.5); text-decoration: none; transition: color 0.2s ease; }
+  .footer__links a { font-size: 0.9rem; color: var(--color-text-muted); text-decoration: none; transition: color 0.2s ease; }
   .footer__links a:hover { color: #6366F1; }
   .footer__links--legal { gap: 24px; }
-  .footer__links--legal a { font-size: 0.8rem; color: rgba(255,255,255,0.35); }
-  .footer__disclaimer { font-size: 0.75rem; color: rgba(255,255,255,0.25); max-width: 500px; line-height: 1.6; }
+  .footer__links--legal a { font-size: 0.8rem; color: var(--color-text-muted); }
+  .footer__disclaimer { font-size: 0.75rem; color: var(--color-text-muted); max-width: 500px; line-height: 1.6; }
 </style>
 ```
 

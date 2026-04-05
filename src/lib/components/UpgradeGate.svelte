@@ -58,9 +58,9 @@
   .gate__overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 10; background: radial-gradient(ellipse at center, rgba(6,9,18,0.95) 0%, rgba(6,9,18,0.8) 100%); border-radius: 16px; }
   .gate__card { text-align: center; padding: 40px 32px; max-width: 400px; }
   .gate__icon { display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.25); border-radius: 16px; color: #6366f1; margin-bottom: 20px; }
-  .gate__title { font-size: 22px; font-weight: 700; color: #ededed; margin: 0 0 8px; }
-  .gate__desc { font-size: 14px; color: rgba(255,255,255,0.55); margin: 0 0 24px; line-height: 1.5; }
+  .gate__title { font-size: 22px; font-weight: 700; color: var(--color-text-primary); margin: 0 0 8px; }
+  .gate__desc { font-size: 14px; color: var(--color-text-muted); margin: 0 0 24px; line-height: 1.5; }
   .gate__btn { display: inline-flex; align-items: center; gap: 8px; background: #6366f1; color: white; padding: 12px 28px; border-radius: 10px; font-weight: 700; font-size: 14px; text-decoration: none; transition: background 0.2s, transform 0.15s; }
   .gate__btn:hover { background: #4f46e5; transform: translateY(-1px); }
-  .gate__hint { font-size: 12px; color: rgba(255,255,255,0.35); margin-top: 12px; }
+  .gate__hint { font-size: 12px; color: var(--color-text-muted); margin-top: 12px; }
 </style>

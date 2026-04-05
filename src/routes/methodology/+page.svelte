@@ -437,8 +437,8 @@
     position: sticky;
     top: 100px;
     height: fit-content;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
     border-radius: 16px;
     padding: 20px 16px;
   }
@@ -447,7 +447,7 @@
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: rgba(255,255,255,0.4);
+    color: var(--color-text-muted);
     margin-bottom: 12px;
     padding-left: 8px;
   }
@@ -460,7 +460,7 @@
     padding: 10px 12px;
     border: none;
     background: transparent;
-    color: rgba(255,255,255,0.45);
+    color: var(--color-text-muted);
     font-size: 0.85rem;
     font-weight: 500;
     text-align: left;
@@ -470,8 +470,8 @@
   }
 
   .sidebar__link:hover {
-    background: rgba(255,255,255,0.05);
-    color: rgba(255,255,255,0.8);
+    background: var(--color-bg-elevated);
+    color: var(--color-text-primary);
   }
 
   .sidebar__link.active {
@@ -501,7 +501,7 @@
   }
 
   .page__subtitle {
-    color: rgba(255,255,255,0.45);
+    color: var(--color-text-muted);
     font-size: 1rem;
     margin-bottom: 16px;
   }
@@ -534,7 +534,7 @@
 
   .section__intro {
     font-size: 1rem;
-    color: rgba(255,255,255,0.5);
+    color: var(--color-text-muted);
     line-height: 1.7;
     margin-bottom: 24px;
   }
@@ -560,8 +560,8 @@
   }
 
   .principle-card {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
     border-radius: 14px;
     padding: 20px;
   }
@@ -574,7 +574,7 @@
 
   .principle-card p {
     font-size: 0.85rem;
-    color: rgba(255,255,255,0.5);
+    color: var(--color-text-muted);
     line-height: 1.5;
     margin: 0;
   }
@@ -589,8 +589,8 @@
   .layer {
     display: flex;
     gap: 20px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
     border-radius: 14px;
     padding: 20px;
   }
@@ -610,38 +610,38 @@
   }
 
   .layer__content h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
-  .layer__content p { font-size: 0.88rem; color: rgba(255,255,255,0.5); line-height: 1.5; margin-bottom: 12px; }
+  .layer__content p { font-size: 0.88rem; color: var(--color-text-muted); line-height: 1.5; margin-bottom: 12px; }
 
   .layer__tags { display: flex; flex-wrap: wrap; gap: 8px; }
-  .tag { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 6px; font-size: 0.72rem; color: rgba(255,255,255,0.5); }
+  .tag { background: var(--color-bg-elevated); border: 1px solid var(--color-border-hover); padding: 4px 10px; border-radius: 6px; font-size: 0.72rem; color: var(--color-text-muted); }
 
-  .formula-card { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 24px; }
+  .formula-card { background: rgba(0,0,0,0.3); border: 1px solid var(--color-border); border-radius: 14px; padding: 24px; }
   .formula-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 16px; }
   .formula { background: rgba(0,0,0,0.4); border-radius: 8px; padding: 16px; overflow-x: auto; }
   .formula code { font-family: 'DM Mono', monospace; font-size: 0.85rem; color: #818CF8; }
-  .formula-note { font-size: 0.82rem; color: rgba(255,255,255,0.4); margin-top: 12px; margin-bottom: 0; }
+  .formula-note { font-size: 0.82rem; color: var(--color-text-muted); margin-top: 12px; margin-bottom: 0; }
 
   .factors-table-wrap { overflow-x: auto; margin-bottom: 20px; }
   .factors-table { width: 100%; border-collapse: collapse; }
   .factors-table th, .factors-table td { padding: 14px 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); }
-  .factors-table th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.4); font-weight: 600; background: rgba(0,0,0,0.2); }
+  .factors-table th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); font-weight: 600; background: rgba(0,0,0,0.2); }
   .factor-name { font-weight: 600; white-space: nowrap; }
   .cell--positive { color: #10B981; font-weight: 600; font-family: 'DM Mono', monospace; }
   .cell--negative { color: #EF4444; font-weight: 600; font-family: 'DM Mono', monospace; }
 
   .info-callout { display: flex; gap: 14px; background: rgba(99,102,241,0.06); border: 1px solid rgba(99,102,241,0.15); border-radius: 12px; padding: 16px 20px; }
-  .info-callout div { margin: 0; font-size: 0.88rem; line-height: 1.5; color: rgba(255,255,255,0.6); }
+  .info-callout div { margin: 0; font-size: 0.88rem; line-height: 1.5; color: var(--color-text-secondary); }
   .info-callout strong { color: #6366F1; }
 
-  .math-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+  .math-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; padding: 24px; margin-bottom: 24px; }
   .math-step { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
   .math-step:last-child { border-bottom: none; }
   .math-step__number { width: 32px; height: 32px; background: rgba(99,102,241,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; color: #6366F1; flex-shrink: 0; }
   .math-step__content h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; font-family: 'DM Mono', monospace; }
-  .math-step__content p { font-size: 0.85rem; color: rgba(255,255,255,0.5); margin: 0; }
+  .math-step__content p { font-size: 0.85rem; color: var(--color-text-muted); margin: 0; }
 
   .std-values { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; }
-  .std-item { background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 6px; font-size: 0.82rem; font-family: 'DM Mono', monospace; }
+  .std-item { background: var(--color-bg-elevated); padding: 6px 12px; border-radius: 6px; font-size: 0.82rem; font-family: 'DM Mono', monospace; }
 
   .example-card { background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.15); border-radius: 16px; padding: 24px; }
   .example-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 16px; }
@@ -652,25 +652,25 @@
   .highlight-over { background: rgba(16,185,129,0.2); padding: 2px 8px; border-radius: 4px; color: #10B981; }
 
   .metrics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-bottom: 28px; }
-  .metric-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 20px; }
+  .metric-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 14px; padding: 20px; }
   .metric-card--highlight { border-color: rgba(99,102,241,0.25); background: rgba(99,102,241,0.04); }
   .metric-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 10px; }
-  .metric-card p { font-size: 0.85rem; color: rgba(255,255,255,0.5); line-height: 1.5; margin-bottom: 12px; }
+  .metric-card p { font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.5; margin-bottom: 12px; }
   .metric-target { font-size: 0.78rem; font-weight: 700; color: #10B981; background: rgba(16,185,129,0.1); padding: 6px 10px; border-radius: 6px; display: inline-block; }
 
-  .validation-note { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 24px; }
+  .validation-note { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 14px; padding: 24px; }
   .validation-note h3 { font-size: 1rem; font-weight: 700; margin-bottom: 16px; }
   .validation-note ul { margin: 0; padding-left: 20px; }
-  .validation-note li { font-size: 0.88rem; color: rgba(255,255,255,0.5); line-height: 1.6; margin-bottom: 8px; }
+  .validation-note li { font-size: 0.88rem; color: var(--color-text-muted); line-height: 1.6; margin-bottom: 8px; }
 
   .limitations-list { display: flex; flex-direction: column; gap: 16px; margin-bottom: 28px; }
-  .limitation-item { display: flex; gap: 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 20px; }
+  .limitation-item { display: flex; gap: 16px; background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 14px; padding: 20px; }
   .limitation-item h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; }
-  .limitation-item p { font-size: 0.85rem; color: rgba(255,255,255,0.5); line-height: 1.5; margin: 0; }
+  .limitation-item p { font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.5; margin: 0; }
 
   .disclaimer-card { background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.15); border-radius: 14px; padding: 24px; }
   .disclaimer-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 12px; color: #EF4444; }
-  .disclaimer-card p { font-size: 0.88rem; line-height: 1.6; margin: 0; color: rgba(255,255,255,0.5); }
+  .disclaimer-card p { font-size: 0.88rem; line-height: 1.6; margin: 0; color: var(--color-text-muted); }
 
   .cta-section { text-align: center; padding: 48px 24px; background: rgba(99,102,241,0.05); border: 1px solid rgba(99,102,241,0.15); border-radius: 20px; }
   .cta-section h2 { font-family: 'Inter', sans-serif; font-size: 1.4rem; font-weight: 800; margin-bottom: 24px; }
@@ -678,7 +678,7 @@
   .btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; border-radius: 12px; font-size: 0.95rem; font-weight: 700; text-decoration: none; transition: transform 0.15s; }
   .btn:hover { transform: translateY(-2px); }
   .btn--primary { background: linear-gradient(135deg, #6366F1, #4F46E5); color: #fff; }
-  .btn--secondary { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
+  .btn--secondary { background: var(--color-bg-card); border: 1px solid var(--color-border); color: var(--color-text-secondary); }
 
   @media (max-width: 900px) {
     .page { grid-template-columns: 1fr; }

@@ -75,6 +75,6 @@
   .avg-label { font-size: 10px; font-family: 'DM Mono', monospace; font-weight: 700; }
   .chart-empty {
     height: 180px; display: flex; align-items: center; justify-content: center;
-    color: rgba(255,255,255,0.3); font-size: 0.85rem;
+    color: var(--color-text-muted); font-size: 0.85rem;
   }
 </style>

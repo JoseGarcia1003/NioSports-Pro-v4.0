@@ -21,9 +21,9 @@
   }
   .tip-popup {
     position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
-    background: #1A1D24; border: 1px solid rgba(255,255,255,0.1);
+    background: #1A1D24; border: 1px solid var(--color-border-hover);
     border-radius: 10px; padding: 10px 14px; font-size: 0.78rem;
-    color: rgba(255,255,255,0.7); line-height: 1.5;
+    color: var(--color-text-secondary); line-height: 1.5;
     width: max-content; max-width: 240px;
     box-shadow: 0 8px 30px rgba(0,0,0,0.4);
     z-index: 100; pointer-events: none;

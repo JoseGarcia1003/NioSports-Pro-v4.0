@@ -184,7 +184,7 @@
   .page__header { text-align: center; margin-bottom: 40px; }
   .page__label { font-size: 0.8rem; font-weight: 700; color: #6366F1; text-transform: uppercase; letter-spacing: 0.15em; }
   .page__title { font-family: 'Inter', sans-serif; font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 900; letter-spacing: -0.03em; margin: 10px 0 8px; }
-  .page__subtitle { font-size: 1rem; color: rgba(255,255,255,0.45); }
+  .page__subtitle { font-size: 1rem; color: var(--color-text-muted); }
 
   .banner { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 12px; margin-bottom: 24px; font-size: 0.9rem; }
   .banner p { margin: 0; }
@@ -194,7 +194,7 @@
   .plans-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px; }
   @media (max-width: 768px) { .plans-grid { grid-template-columns: 1fr; } }
 
-  .plan { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 28px 24px; display: flex; flex-direction: column; position: relative; transition: border-color 0.2s; }
+  .plan { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 20px; padding: 28px 24px; display: flex; flex-direction: column; position: relative; transition: border-color 0.2s; }
   .plan:hover { border-color: rgba(255,255,255,0.12); }
   .plan--popular { border-color: rgba(99,102,241,0.3); background: rgba(99,102,241,0.04); }
   .plan--current { border-color: rgba(16,185,129,0.3); }
@@ -202,18 +202,18 @@
   .plan__popular-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #6366F1; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 4px 14px; border-radius: 20px; }
   .plan__current-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #10B981; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 4px 14px; border-radius: 20px; }
 
-  .plan__header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; color: rgba(255,255,255,0.7); }
+  .plan__header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; color: var(--color-text-secondary); }
   .plan__name { font-family: 'Inter', sans-serif; font-size: 1.2rem; font-weight: 800; }
 
   .plan__price { margin-bottom: 24px; }
   .plan__amount { font-family: 'DM Mono', monospace; font-size: 2.5rem; font-weight: 800; }
-  .plan__period { font-size: 0.9rem; color: rgba(255,255,255,0.4); }
+  .plan__period { font-size: 0.9rem; color: var(--color-text-muted); }
 
   .plan__features { list-style: none; margin: 0 0 24px; padding: 0; display: flex; flex-direction: column; gap: 10px; flex: 1; }
   .plan__features li { display: flex; align-items: center; gap: 10px; font-size: 0.88rem; }
-  .included { color: rgba(255,255,255,0.7); }
+  .included { color: var(--color-text-secondary); }
   .included :global(svg) { color: #10B981; }
-  .excluded { color: rgba(255,255,255,0.25); }
+  .excluded { color: var(--color-text-muted); }
   .excluded :global(svg) { color: rgba(255,255,255,0.15); }
 
   .plan__btn { width: 100%; padding: 14px; border-radius: 12px; border: none; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all 0.15s; }
@@ -224,13 +224,13 @@
   .plan__btn--popular:hover:not(:disabled) { background: #4F46E5; }
 
   .plan__btn:not(.plan__btn--popular):not(.plan__btn--free):not(.plan__btn--current):not(.plan__btn--manage) {
-    background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.1);
+    background: var(--color-bg-elevated); color: var(--color-text-secondary); border: 1px solid var(--color-border-hover);
   }
   .plan__btn:not(.plan__btn--popular):hover:not(:disabled) { background: rgba(255,255,255,0.1); }
 
-  .plan__btn--free, .plan__btn--current { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.3); }
+  .plan__btn--free, .plan__btn--current { background: var(--color-bg-card); color: var(--color-text-muted); }
   .plan__btn--manage { background: rgba(16,185,129,0.12); color: #10B981; border: 1px solid rgba(16,185,129,0.2); }
   .plan__btn--manage:hover:not(:disabled) { background: rgba(16,185,129,0.2); }
 
-  .guarantee { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 16px; color: rgba(255,255,255,0.35); font-size: 0.85rem; }
+  .guarantee { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 16px; color: var(--color-text-muted); font-size: 0.85rem; }
 </style>

@@ -125,7 +125,7 @@
 </div>
 
 <style>
-  .page { max-width: 900px; margin: 0 auto; padding: 48px 24px; color: #e2e8f0; }
+  .page { max-width: 900px; margin: 0 auto; padding: 48px 24px; color: var(--color-text-primary); }
   .hero { text-align: center; margin-bottom: 48px; }
   .hero-badge {
     display: inline-block;
@@ -137,27 +137,27 @@
   }
   h1 { font-size: clamp(28px, 5vw, 48px); font-weight: 800; margin: 0 0 12px; }
   .accent { color: #6366f1; }
-  .subtitle { color: #94a3b8; font-size: 16px; margin: 0; }
+  .subtitle { color: var(--color-text-muted); font-size: 16px; margin: 0; }
   .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 40px; }
   @media (max-width: 600px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
   .kpi {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
     border-radius: 12px; padding: 20px 16px; text-align: center;
   }
   .kpi-value { display: block; font-size: 28px; font-weight: 800; margin-bottom: 4px; }
-  .kpi-label { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+  .kpi-label { font-size: 12px; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
   .green { color: #22c55e; } .red { color: #ef4444; } .yellow { color: #f59e0b; }
   .table-wrap { overflow-x: auto; margin-bottom: 48px; }
   table { width: 100%; border-collapse: collapse; font-size: 14px; }
   th {
-    text-align: left; padding: 10px 12px; color: #64748b;
+    text-align: left; padding: 10px 12px; color: var(--color-text-muted);
     font-weight: 500; font-size: 11px; text-transform: uppercase;
-    letter-spacing: 0.05em; border-bottom: 1px solid rgba(255,255,255,0.06);
+    letter-spacing: 0.05em; border-bottom: 1px solid var(--color-border);
   }
-  td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  td { padding: 12px; border-bottom: 1px solid var(--color-border); }
   tr:hover td { background: rgba(99,102,241,0.04); }
-  .muted { color: #64748b; }
+  .muted { color: var(--color-text-muted); }
   .game { font-weight: 500; }
   .direction.over { color: #6366f1; font-weight: 600; }
   .direction.under { color: #f59e0b; font-weight: 600; }
@@ -168,8 +168,8 @@
   .chip { padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; }
   .chip.green { background: rgba(34,197,94,0.12); color: #22c55e; }
   .chip.red   { background: rgba(239,68,68,0.12); color: #ef4444; }
-  .chip.gray  { background: rgba(100,116,139,0.12); color: #94a3b8; }
-  .empty { text-align: center; color: #64748b; padding: 48px; }
+  .chip.gray  { background: rgba(100,116,139,0.12); color: var(--color-text-muted); }
+  .empty { text-align: center; color: var(--color-text-muted); padding: 48px; }
   .cta-section {
     text-align: center;
     background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.08));
@@ -177,12 +177,12 @@
     border-radius: 16px; padding: 48px 32px;
   }
   .cta-section h2 { font-size: 24px; font-weight: 700; margin: 0 0 12px; }
-  .cta-section p { color: #94a3b8; margin: 0 0 24px; }
+  .cta-section p { color: var(--color-text-muted); margin: 0 0 24px; }
   .cta-btn {
     display: inline-block; background: #6366f1; color: white;
     padding: 12px 32px; border-radius: 8px; font-weight: 700;
     text-decoration: none; transition: background 0.2s ease;
   }
   .cta-btn:hover { background: #4f46e5; }
-  .loading { text-align: center; color: #64748b; padding: 80px 0; }
+  .loading { text-align: center; color: var(--color-text-muted); padding: 80px 0; }
 </style>

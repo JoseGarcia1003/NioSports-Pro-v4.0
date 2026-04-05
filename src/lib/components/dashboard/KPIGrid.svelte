@@ -27,8 +27,8 @@
   @media (max-width: 540px) { .kpis { grid-template-columns: 1fr 1fr; gap: 12px; } }
 
   .kpi-card {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
     border-radius: 20px;
     padding: 24px;
     display: flex;

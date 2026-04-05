@@ -69,19 +69,19 @@
 </div>
 
 <style>
-  .legal-page { max-width: 720px; margin: 0 auto; padding: 48px 24px; color: #e2e8f0; }
+  .legal-page { max-width: 720px; margin: 0 auto; padding: 48px 24px; color: var(--color-text-primary); }
   .legal-header { margin-bottom: 48px; }
   .back { color: #6366f1; text-decoration: none; font-size: 14px; display: block; margin-bottom: 20px; }
   .back:hover { color: #818cf8; }
   h1 { font-size: 36px; font-weight: 800; margin: 0 0 8px; }
-  .updated { color: #64748b; font-size: 14px; margin: 0; }
+  .updated { color: var(--color-text-muted); font-size: 14px; margin: 0; }
   .legal-body { display: flex; flex-direction: column; gap: 32px; }
-  section { border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 32px; }
+  section { border-bottom: 1px solid var(--color-border); padding-bottom: 32px; }
   section:last-child { border-bottom: none; }
   h2 { font-size: 18px; font-weight: 700; color: #f1f5f9; margin: 0 0 12px; }
-  p { color: #94a3b8; line-height: 1.7; margin: 0 0 12px; }
+  p { color: var(--color-text-muted); line-height: 1.7; margin: 0 0 12px; }
   p:last-child { margin-bottom: 0; }
-  ul { color: #94a3b8; line-height: 1.7; padding-left: 20px; margin: 0; }
+  ul { color: var(--color-text-muted); line-height: 1.7; padding-left: 20px; margin: 0; }
   li { margin-bottom: 6px; }
   a { color: #6366f1; }
   strong { color: #f1f5f9; }

@@ -100,7 +100,7 @@
 
 <style>
   :global(.nio-tour) {
-    background: #111318 !important;
+    background: var(--color-bg-elevated) !important;
     border: 1px solid rgba(99, 102, 241, 0.25) !important;
     border-radius: 14px !important;
     color: #E8EAED !important;
@@ -114,12 +114,12 @@
   }
   :global(.nio-tour .driver-popover-description) {
     font-size: 0.88rem !important;
-    color: rgba(255, 255, 255, 0.6) !important;
+    color: var(--color-text-secondary) !important;
     line-height: 1.5 !important;
   }
   :global(.nio-tour .driver-popover-progress-text) {
     font-size: 0.72rem !important;
-    color: rgba(255, 255, 255, 0.3) !important;
+    color: var(--color-text-muted) !important;
   }
   :global(.nio-tour .driver-popover-next-btn),
   :global(.nio-tour .driver-popover-done-btn) {
@@ -133,8 +133,8 @@
   }
   :global(.nio-tour .driver-popover-prev-btn) {
     background: transparent !important;
-    color: rgba(255, 255, 255, 0.5) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: var(--color-text-muted) !important;
+    border: 1px solid var(--color-border-hover) !important;
     border-radius: 8px !important;
     font-weight: 600 !important;
     padding: 8px 16px !important;

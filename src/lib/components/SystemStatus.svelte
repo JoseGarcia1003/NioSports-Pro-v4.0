@@ -216,8 +216,8 @@
     animation: pulse 1.2s ease-in-out infinite;
   }
 
-  .indicator__label  { color: rgba(255,255,255,0.5); font-weight: 600; }
-  .indicator__detail { color: rgba(255,255,255,0.35); }
+  .indicator__label  { color: var(--color-text-muted); font-weight: 600; }
+  .indicator__detail { color: var(--color-text-muted); }
 
   .status-bar__meta {
     display: flex;
@@ -226,13 +226,13 @@
     flex-shrink: 0;
   }
   .status-bar__time {
-    color: rgba(255,255,255,0.25);
+    color: var(--color-text-muted);
     font-size: 0.65rem;
   }
   .status-bar__refresh {
     background: none;
     border: none;
-    color: rgba(255,255,255,0.3);
+    color: var(--color-text-muted);
     cursor: pointer;
     font-size: 0.85rem;
     padding: 2px 4px;
@@ -240,7 +240,7 @@
     transition: color 0.15s;
     line-height: 1;
   }
-  .status-bar__refresh:hover { color: rgba(255,255,255,0.7); }
+  .status-bar__refresh:hover { color: var(--color-text-secondary); }
 
   @keyframes pulse {
     0%, 100% { opacity: 0.3; }

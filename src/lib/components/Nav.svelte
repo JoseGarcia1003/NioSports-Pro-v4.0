@@ -128,7 +128,7 @@
     background: rgba(10,15,28,0.9);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid var(--color-border);
     height: 64px;
     transition: box-shadow 0.3s;
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
@@ -154,9 +154,9 @@
     display: flex; align-items: center; gap: 6px;
     padding: 7px 12px; border-radius: 8px; text-decoration: none;
     font-size: 0.82rem; font-weight: 600;
-    color: rgba(255,255,255,0.55); transition: color 0.15s, background 0.15s; white-space: nowrap;
+    color: var(--color-text-muted); transition: color 0.15s, background 0.15s; white-space: nowrap;
   }
-  .nav__link:hover { color: #fff; background: rgba(255,255,255,0.06); }
+  .nav__link:hover { color: #fff; background: var(--color-bg-elevated); }
   .nav__link--active { color: #6366F1; background: rgba(99,102,241,0.1); }
 
   /* Controls */
@@ -167,9 +167,9 @@
     background: none; border: none; cursor: pointer;
     width: 44px; height: 44px; border-radius: 10px;
     display: flex; align-items: center; justify-content: center;
-    color: rgba(255,255,255,0.6); transition: background 0.15s, color 0.15s;
+    color: var(--color-text-secondary); transition: background 0.15s, color 0.15s;
   }
-  .nav__icon-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+  .nav__icon-btn:hover { background: var(--color-bg-elevated); color: #fff; }
 
   /* User menu */
   .nav__user { position: relative; }
@@ -194,12 +194,12 @@
 
   .nav__user-info { padding: 8px 10px 6px; }
   .nav__user-name { display: block; font-weight: 700; font-size: 0.875rem; color: #fff; }
-  .nav__user-email { display: block; font-size: 0.72rem; color: rgba(255,255,255,0.45); margin-top: 2px; }
+  .nav__user-email { display: block; font-size: 0.72rem; color: var(--color-text-muted); margin-top: 2px; }
   .nav__user-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 6px 0; }
   .nav__user-item {
     display: flex; align-items: center; gap: 8px; width: 100%;
     padding: 10px; background: none; border: none; border-radius: 8px;
-    color: rgba(255,255,255,0.7); font-size: 0.82rem; font-weight: 600;
+    color: var(--color-text-secondary); font-size: 0.82rem; font-weight: 600;
     cursor: pointer; font-family: 'DM Sans', sans-serif;
     transition: background 0.15s;
   }

@@ -116,5 +116,5 @@
   }
   .hero__badge-dot { width: 8px; height: 8px; background: #10B981; border-radius: 50%; box-shadow: 0 0 8px rgba(16,185,129,0.6); }
 
-  .landing { background: #060912; min-height: 100vh; }
+  .landing { background: var(--color-bg-base); min-height: 100vh; }
 </style>

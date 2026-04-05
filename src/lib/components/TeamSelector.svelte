@@ -184,11 +184,11 @@
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
     border-radius: 10px;
     padding: 11px 14px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--color-text-muted);
     font-size: 0.9rem;
     cursor: pointer;
     transition: border-color 0.2s, background 0.2s;
@@ -197,17 +197,17 @@
   }
 
   .dd__trigger:hover {
-    border-color: rgba(255, 255, 255, 0.15);
-    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--color-border-hover);
+    background: var(--color-bg-elevated);
   }
 
   .dd__trigger--open {
     border-color: var(--accent);
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--color-bg-elevated);
   }
 
   .dd__trigger--selected {
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--color-text-primary);
   }
 
   .dd__selected-text {
@@ -227,8 +227,8 @@
     height: 22px;
     border-radius: 6px;
     border: none;
-    background: rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.5);
+    background: var(--color-bg-elevated);
+    color: var(--color-text-muted);
     cursor: pointer;
     transition: background 0.15s;
     padding: 0;
@@ -241,7 +241,7 @@
   }
 
   :global(.dd__chevron) {
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--color-text-muted);
     transition: transform 0.2s ease;
     flex-shrink: 0;
   }
@@ -256,8 +256,8 @@
     top: calc(100% + 6px);
     left: 0;
     right: 0;
-    background: #111318;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border-hover);
     border-radius: 12px;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(99, 102, 241, 0.1);
     z-index: 100;
@@ -275,15 +275,15 @@
     align-items: center;
     gap: 8px;
     padding: 10px 14px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    color: rgba(255, 255, 255, 0.35);
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-muted);
   }
 
   .dd__search {
     flex: 1;
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--color-text-primary);
     font-size: 0.85rem;
     outline: none;
     padding: 0;
@@ -291,7 +291,7 @@
   }
 
   .dd__search::placeholder {
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--color-text-muted);
   }
 
   .dd__list {
@@ -361,14 +361,14 @@
 
   .dd__item-tag {
     font-size: 0.68rem;
-    color: rgba(255, 255, 255, 0.25);
+    color: var(--color-text-muted);
     font-style: italic;
   }
 
   .dd__empty {
     text-align: center;
     padding: 20px;
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--color-text-muted);
     font-size: 0.85rem;
   }
 </style>

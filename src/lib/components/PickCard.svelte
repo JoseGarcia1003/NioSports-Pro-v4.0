@@ -179,7 +179,7 @@
 
 <style>
   .pick-card {
-    background: rgba(255,255,255,0.04);
+    background: var(--color-bg-card);
     border: 1px solid rgba(255,255,255,0.09);
     border-radius: 14px;
     padding: 15px;

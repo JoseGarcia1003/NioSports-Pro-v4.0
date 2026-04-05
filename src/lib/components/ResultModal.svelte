@@ -271,8 +271,8 @@
 
   /* Pick Info */
   .pick-info {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
     border-radius: 12px;
     padding: 14px;
     margin-bottom: 20px;
@@ -292,7 +292,7 @@
   }
 
   .period {
-    color: rgba(255,255,255,0.5);
+    color: var(--color-text-muted);
     font-size: 0.8rem;
   }
 
@@ -342,7 +342,7 @@
     padding: 12px 8px;
     border-radius: 10px;
     border: 1px solid var(--color-border);
-    background: rgba(255,255,255,0.03);
+    background: var(--color-bg-card);
     color: var(--color-text-muted);
     font-size: 0.8rem;
     font-weight: 600;
@@ -351,7 +351,7 @@
   }
 
   .result-btn:hover {
-    background: rgba(255,255,255,0.06);
+    background: var(--color-bg-elevated);
   }
 
   .result-btn--win.active {
@@ -387,7 +387,7 @@
   }
 
   .field__input {
-    background: rgba(255,255,255,0.05);
+    background: var(--color-bg-elevated);
     border: 1px solid var(--color-border);
     border-radius: 10px;
     padding: 12px 14px;
@@ -403,7 +403,7 @@
 
   .field__hint {
     font-size: 0.72rem;
-    color: rgba(255,255,255,0.4);
+    color: var(--color-text-muted);
   }
 
   /* Model Error Info */
@@ -444,7 +444,7 @@
     padding: 12px;
     border-radius: 10px;
     border: 1px solid var(--color-border);
-    background: rgba(255,255,255,0.03);
+    background: var(--color-bg-card);
     color: var(--color-text-muted);
     font-size: 0.85rem;
     font-weight: 600;
@@ -453,7 +453,7 @@
   }
 
   .bet-option:hover {
-    background: rgba(255,255,255,0.06);
+    background: var(--color-bg-elevated);
   }
 
   .bet-option.active {

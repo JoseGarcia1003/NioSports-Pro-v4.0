@@ -391,7 +391,7 @@
   }
 
   .form-input::placeholder {
-    color: #94a3b8;
+    color: var(--color-text-muted);
   }
 
   .form-input:disabled {
@@ -425,7 +425,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    color: #64748b;
+    color: var(--color-text-muted);
     font-size: 0.85rem;
   }
 
@@ -491,8 +491,8 @@
     }
 
     .auth-card {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border-hover);
       box-shadow: none;
     }
 
@@ -501,15 +501,15 @@
     }
 
     .auth-subtitle {
-      color: rgba(255, 255, 255, 0.55);
+      color: var(--color-text-muted);
     }
 
     .auth-tabs {
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--color-bg-elevated);
     }
 
     .auth-tab {
-      color: rgba(255, 255, 255, 0.6);
+      color: var(--color-text-secondary);
     }
 
     .auth-tab--active {
@@ -528,17 +528,17 @@
     }
 
     .form-input {
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--color-border-hover);
+      background: var(--color-bg-elevated);
       color: #ffffff;
     }
 
     .form-input::placeholder {
-      color: rgba(255, 255, 255, 0.3);
+      color: var(--color-text-muted);
     }
 
     .auth-divider {
-      color: rgba(255, 255, 255, 0.35);
+      color: var(--color-text-muted);
     }
 
     .auth-divider::before,
@@ -548,7 +548,7 @@
 
     .btn-google {
       border: 1px solid rgba(255, 255, 255, 0.2);
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--color-bg-elevated);
       color: #ffffff;
     }
 

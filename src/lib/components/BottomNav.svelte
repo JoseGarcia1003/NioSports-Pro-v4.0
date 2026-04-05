@@ -35,7 +35,7 @@
     z-index: 100;
     background: rgba(10, 15, 28, 0.95);
     backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid var(--color-border);
     padding: 6px 8px;
     padding-bottom: max(6px, env(safe-area-inset-bottom));
     justify-content: space-around;
@@ -55,7 +55,7 @@
     min-height: 48px;
     border-radius: 12px;
     text-decoration: none;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--color-text-muted);
     transition: all 0.2s ease;
     -webkit-tap-highlight-color: transparent;
   }

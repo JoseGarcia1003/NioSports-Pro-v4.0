@@ -358,14 +358,14 @@
   .onboarding-skip {
     background: none;
     border: none;
-    color: rgba(255,255,255,0.35);
+    color: var(--color-text-muted);
     cursor: pointer;
     font-size: 0.8rem;
     padding: 4px 8px;
     border-radius: 6px;
     transition: color 0.15s;
   }
-  .onboarding-skip:hover { color: rgba(255,255,255,0.7); }
+  .onboarding-skip:hover { color: var(--color-text-secondary); }
 
   /* Body */
   .onboarding-body { padding: 24px; flex: 1; }
@@ -392,17 +392,17 @@
   }
   .step__intro {
     font-size: 0.875rem;
-    color: rgba(255,255,255,0.7);
+    color: var(--color-text-secondary);
     line-height: 1.6;
     text-align: center;
   }
   .step__note {
     font-size: 0.78rem;
-    color: rgba(255,255,255,0.5);
+    color: var(--color-text-muted);
     text-align: center;
     line-height: 1.5;
     padding: 10px;
-    background: rgba(255,255,255,0.03);
+    background: var(--color-bg-card);
     border-radius: 8px;
   }
 
@@ -422,16 +422,16 @@
   .honesty-card--blue   { background: rgba(96,165,250,0.07); border-color: rgba(96,165,250,0.2); }
   .honesty-card__icon   { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
   .honesty-card strong  { display: block; margin-bottom: 4px; color: #fff; }
-  .honesty-card p       { color: rgba(255,255,255,0.6); margin: 0; }
+  .honesty-card p       { color: var(--color-text-secondary); margin: 0; }
 
   /* Bankroll */
   .bankroll-input-group { display: flex; flex-direction: column; gap: 8px; }
-  .bankroll-label { font-size: 0.85rem; color: rgba(255,255,255,0.7); font-weight: 600; }
+  .bankroll-label { font-size: 0.85rem; color: var(--color-text-secondary); font-weight: 600; }
   .bankroll-field {
     display: flex;
     align-items: center;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.15);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border-hover);
     border-radius: 10px;
     overflow: hidden;
   }
@@ -456,22 +456,22 @@
   .bankroll-error { font-size: 0.75rem; color: #f87171; }
 
   .bankroll-tips {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
     border-radius: 10px;
     padding: 14px;
     font-size: 0.8rem;
   }
-  .bankroll-tips h4 { color: rgba(255,255,255,0.8); margin-bottom: 8px; }
+  .bankroll-tips h4 { color: var(--color-text-primary); margin-bottom: 8px; }
   .bankroll-tips ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
-  .bankroll-tips li { color: rgba(255,255,255,0.55); padding-left: 16px; position: relative; }
+  .bankroll-tips li { color: var(--color-text-muted); padding-left: 16px; position: relative; }
   .bankroll-tips li::before { content: '•'; position: absolute; left: 0; color: #fbbf24; }
   .bankroll-tips strong { color: #fbbf24; }
 
   /* Pick example */
   .pick-example {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border-hover);
     border-radius: 14px;
     padding: 16px;
     display: flex;
@@ -485,7 +485,7 @@
     font-size: 0.8rem;
   }
   .pick-example__teams { font-weight: 700; color: #fff; }
-  .pick-example__period { color: rgba(255,255,255,0.45); font-size: 0.72rem; }
+  .pick-example__period { color: var(--color-text-muted); font-size: 0.72rem; }
 
   .pick-example__main {
     display: flex;
@@ -516,7 +516,7 @@
     background: linear-gradient(90deg, #fbbf24, #34d399);
     border-radius: 4px;
   }
-  .confidence-label { font-size: 0.72rem; color: rgba(255,255,255,0.5); }
+  .confidence-label { font-size: 0.72rem; color: var(--color-text-muted); }
 
   .pick-example__factors {
     display: flex;
@@ -532,7 +532,7 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-    background: rgba(255,255,255,0.03);
+    background: var(--color-bg-card);
     border-radius: 10px;
     padding: 12px 14px;
     font-size: 0.8rem;
@@ -564,8 +564,8 @@
   }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .btn--secondary {
-    background: rgba(255,255,255,0.06);
-    color: rgba(255,255,255,0.6);
+    background: var(--color-bg-elevated);
+    color: var(--color-text-secondary);
   }
   .btn--secondary:hover:not(:disabled) { background: rgba(255,255,255,0.1); }
   .btn--primary {

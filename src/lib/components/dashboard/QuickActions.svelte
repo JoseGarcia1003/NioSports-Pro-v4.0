@@ -47,8 +47,8 @@
   .action-card {
     display: flex; align-items: center; gap: 16px;
     padding: 20px 24px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
     border-radius: 20px;
     text-decoration: none;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -74,8 +74,8 @@
   .action-card__desc { font-size: 0.85rem; color: var(--color-text-muted); }
 
   .action-card__arrow {
-    flex-shrink: 0; color: rgba(255,255,255,0.3);
+    flex-shrink: 0; color: var(--color-text-muted);
     transition: all 0.2s ease;
   }
-  .action-card:hover .action-card__arrow { color: rgba(255,255,255,0.7); transform: translateX(4px); }
+  .action-card:hover .action-card__arrow { color: var(--color-text-secondary); transform: translateX(4px); }
 </style>
