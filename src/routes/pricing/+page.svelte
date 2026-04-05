@@ -178,8 +178,8 @@
 </div>
 
 <style>
-  .page { max-width: 1000px; margin: 0 auto; padding: 60px 24px 120px; }
-  @media (max-width: 768px) { .page { padding: 32px 16px 100px; } }
+  .page { max-width: 1000px; margin: 0 auto; padding: 24px 24px 32px; min-height: calc(100vh - 72px); display: flex; flex-direction: column; justify-content: center; }
+  @media (max-width: 768px) { .page { padding: 16px 16px 80px; justify-content: flex-start; } }
 
   .page__header { text-align: center; margin-bottom: 40px; }
   .page__label { font-size: 0.8rem; font-weight: 700; color: #6366F1; text-transform: uppercase; letter-spacing: 0.15em; }
