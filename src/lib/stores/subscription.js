@@ -33,7 +33,7 @@ export async function loadSubscription(supabase, userId) {
     const { data } = await supabase
       .from('user_profiles')
       .select('plan, subscription_status, stripe_customer_id, stripe_subscription_id, current_period_end')
-      .eq('user_id', userId)
+      .eq('id', userId)
       .maybeSingle();
 
     if (data) {
