@@ -105,8 +105,7 @@
   .hero__title {
     font-family: 'Inter', sans-serif; font-size: clamp(2rem, 5vw, 3rem);
     font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 4px;
-    background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.85) 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    color: var(--color-text-primary);
   }
   .hero__date { font-size: 0.95rem; color: var(--color-text-muted); text-transform: capitalize; margin-bottom: 8px; }
   .hero__badge {

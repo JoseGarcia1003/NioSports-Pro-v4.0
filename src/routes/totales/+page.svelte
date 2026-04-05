@@ -393,5 +393,5 @@
   .mbtn:disabled { opacity: 0.4; cursor: not-allowed; }
   .mbtn--ghost { background: transparent; border: 1px solid var(--color-border-hover); color: var(--color-text-secondary); }
   .mbtn--save { background: #6366F1; color: #fff; }
-  @media (max-width: 640px) { .selectors { flex-direction: column; } .vs { align-self: center; margin-top: 0; } }
+  @media (max-width: 640px) { .selectors { flex-direction: column; align-items: stretch; gap: 12px; } .selector { min-width: 100%; } .vs { align-self: center; margin: -4px 0; } .pred-grid { grid-template-columns: 1fr; } }
 </style>
