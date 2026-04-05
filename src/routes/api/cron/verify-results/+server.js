@@ -152,6 +152,15 @@ export async function GET({ request }) {
       }
     }
 
+// 6. Send results email to subscribers
+    if (resolvedPicks > 0) {
+      const origin = 'https://nio-sports-pro-v4-0.vercel.app';
+      fetch(`${origin}/api/email/results`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${cronSecret}`, 'Content-Type': 'application/json' },
+      }).catch(err => console.warn('[verify-results] Email trigger failed:', err.message));
+    }
+
     return json({
       status: 'ok',
       date: dateStr,

@@ -87,6 +87,16 @@ export async function GET({ request }) {
       }
     }
 
+// Trigger daily picks email to subscribers
+    if (inserted > 0) {
+      const origin = 'https://nio-sports-pro-v4-0.vercel.app';
+      const cronSecret = env.CRON_SECRET || '';
+      fetch(`${origin}/api/email/daily-picks`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${cronSecret}`, 'Content-Type': 'application/json' },
+      }).catch(err => console.warn('[fetch-games] Email trigger failed:', err.message));
+    }
+
     return json({
       success: true,
       date: today,
