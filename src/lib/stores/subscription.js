@@ -30,19 +30,24 @@ export const features = derived(subscription, ($sub) => {
 // Load subscription from Supabase user_profiles
 export async function loadSubscription(supabase, userId) {
   try {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('user_profiles')
-      .select('plan, subscription_status, stripe_customer_id, stripe_subscription_id, current_period_end')
+      .select('*')
       .eq('id', userId)
       .maybeSingle();
+
+    if (error) {
+      console.error('[Subscription] Load error:', error.message);
+      return;
+    }
 
     if (data) {
       subscription.set({
         plan: data.plan || 'free',
-        status: data.subscription_status || 'none',
+        status: data.subscription_status || data.plan_status || (data.plan && data.plan !== 'free' ? 'active' : 'none'),
         stripeCustomerId: data.stripe_customer_id,
         stripeSubscriptionId: data.stripe_subscription_id,
-        currentPeriodEnd: data.current_period_end,
+        currentPeriodEnd: data.current_period_end || data.plan_expires_at,
       });
     }
   } catch (err) {
