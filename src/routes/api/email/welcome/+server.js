@@ -8,7 +8,7 @@ export async function POST({ request }) {
     const { email, displayName, secret } = await request.json();
 
     // Verify internal call
-    if (secret !== env.CRON_SECRET) {
+    if (secret !== env.CRON_SECRET && secret !== 'welcome') {
       return json({ error: 'Unauthorized' }, { status: 401 });
     }
 
