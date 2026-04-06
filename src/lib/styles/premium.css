@@ -1,0 +1,207 @@
+/* src/lib/styles/premium.css */
+/* Premium design layer — glassmorphism, gradients, gold accents */
+
+/* ═══ GLASSMORPHISM CARDS ═══ */
+:global(.glass-card) {
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.2s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+:global(.glass-card:hover) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-elevated);
+  border-color: rgba(99, 102, 241, 0.2) !important;
+}
+
+/* ═══ GRADIENT BUTTONS ═══ */
+:global(.btn-gradient) {
+  background: var(--color-accent-gradient) !important;
+  color: white !important;
+  border: none !important;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.3s ease;
+}
+
+:global(.btn-gradient::before) {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+:global(.btn-gradient:hover) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(99, 102, 241, 0.35);
+}
+
+:global(.btn-gradient:active) {
+  transform: translateY(0) scale(0.98);
+}
+
+/* ═══ GOLD CTA BUTTONS ═══ */
+:global(.btn-gold) {
+  background: var(--color-cta-gradient) !important;
+  color: white !important;
+  border: none !important;
+  position: relative;
+  overflow: hidden;
+}
+
+:global(.btn-gold::before) {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+:global(.btn-gold:hover) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(245, 158, 11, 0.3);
+}
+
+/* ═══ GLOW EFFECTS ═══ */
+:global(.glow-indigo) {
+  box-shadow: 0 0 20px var(--color-accent-glow), 0 0 60px rgba(99, 102, 241, 0.05);
+}
+
+:global(.glow-gold) {
+  box-shadow: 0 0 20px var(--color-gold-glow), 0 0 60px rgba(245, 158, 11, 0.05);
+}
+
+/* ═══ PREMIUM SECTION DIVIDERS ═══ */
+:global(.divider-gradient) {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--color-accent) 50%, transparent 100%);
+  opacity: 0.2;
+  border: none;
+  margin: 32px 0;
+}
+
+/* ═══ ACCENT BADGES ═══ */
+:global(.badge-premium) {
+  background: var(--color-accent-gradient);
+  color: white;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+:global(.badge-gold) {
+  background: var(--color-cta-gradient);
+  color: white;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+/* ═══ ANIMATED UNDERLINE ON HOVER ═══ */
+:global(.hover-underline) {
+  position: relative;
+}
+
+:global(.hover-underline::after) {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--color-accent-gradient);
+  transition: width 0.3s ease;
+  border-radius: 2px;
+}
+
+:global(.hover-underline:hover::after) {
+  width: 100%;
+}
+
+/* ═══ SHIMMER LOADING ═══ */
+:global(.shimmer) {
+  background: linear-gradient(90deg,
+    var(--color-bg-card) 25%,
+    var(--color-bg-elevated) 50%,
+    var(--color-bg-card) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ═══ SECTION LABEL WITH LINE ═══ */
+:global(.section-label) {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 8px;
+}
+
+:global(.section-label::after) {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--color-accent) 0%, transparent 100%);
+  opacity: 0.3;
+}
+
+/* ═══ STAT NUMBER PREMIUM ═══ */
+:global(.stat-number) {
+  font-family: 'DM Mono', monospace;
+  font-weight: 800;
+  background: var(--color-accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ═══ SCROLLBAR PREMIUM ═══ */
+:global(::-webkit-scrollbar) {
+  width: 6px;
+  height: 6px;
+}
+
+:global(::-webkit-scrollbar-track) {
+  background: transparent;
+}
+
+:global(::-webkit-scrollbar-thumb) {
+  background: var(--color-border);
+  border-radius: 6px;
+}
+
+:global(::-webkit-scrollbar-thumb:hover) {
+  background: var(--color-border-hover);
+}
+
+/* ═══ SELECTION COLOR ═══ */
+:global(::selection) {
+  background: rgba(99, 102, 241, 0.3);
+  color: white;
+}
+
+/* ═══ FOCUS RING PREMIUM ═══ */
+:global(*:focus-visible) {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}

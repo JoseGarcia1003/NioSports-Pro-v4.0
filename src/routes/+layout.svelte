@@ -1,4 +1,6 @@
 <script>
+  import CourtBackground from '$lib/components/CourtBackground.svelte';
+  import '$lib/styles/premium.css';
   import { onMount } from 'svelte';
   import { onNavigate } from '$app/navigation';
   import '$lib/styles/tokens.css';
@@ -51,6 +53,7 @@ $: if (browser && !$authLoading) {
 </script>
 
 <div data-theme={$theme} class="app">
+  <CourtBackground />
   {#if $authLoading}
     <div class="app-loading">
       <div class="app-loading__content">
