@@ -85,44 +85,62 @@ $: if (browser && !$authLoading) {
 </div>
 
 <style>
-  :global([data-theme="dark"]) {
-    --color-bg-base: #060912;
-    --color-bg: #0a0f1c;
+:global([data-theme="dark"]) {
+    --color-bg-base: #0c1220;
+    --color-bg: #111827;
     --color-bg-card: rgba(255,255,255,0.04);
-    --color-bg-elevated: rgba(255,255,255,0.06);
+    --color-bg-elevated: rgba(255,255,255,0.07);
     --color-border: rgba(255,255,255,0.08);
-    --color-border-hover: rgba(255,255,255,0.15);
-    --color-text-primary: #ededed;
+    --color-border-hover: rgba(255,255,255,0.16);
+    --color-text-primary: #f1f5f9;
     --color-text-secondary: rgba(255,255,255,0.7);
     --color-text-muted: rgba(255,255,255,0.45);
     --color-accent: #6366F1;
-    --color-accent-hover: #4F46E5;
-    --color-accent-glow: rgba(99,102,241,0.15);
+    --color-accent-hover: #818CF8;
+    --color-accent-glow: rgba(99,102,241,0.2);
+    --color-accent-gradient: linear-gradient(135deg, #6366F1, #8B5CF6);
     --color-cta: #F59E0B;
-    --color-cta-hover: #D97706;
+    --color-cta-hover: #FBBF24;
+    --color-cta-gradient: linear-gradient(135deg, #F59E0B, #F97316);
     --color-success: #10B981;
     --color-warning: #F59E0B;
     --color-error: #EF4444;
+    --color-gold: #F59E0B;
+    --color-gold-glow: rgba(245,158,11,0.15);
+    --shadow-card: 0 2px 12px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.05);
+    --shadow-elevated: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.06);
+    --glass-bg: rgba(17,24,39,0.8);
+    --glass-border: rgba(255,255,255,0.1);
+    --glass-blur: blur(20px);
   }
 
   :global([data-theme="light"]) {
     --color-bg-base: #f8fafc;
     --color-bg: #ffffff;
-    --color-bg-card: rgba(0,0,0,0.02);
-    --color-bg-elevated: rgba(0,0,0,0.04);
-    --color-border: rgba(0,0,0,0.08);
-    --color-border-hover: rgba(0,0,0,0.15);
+    --color-bg-card: rgba(99,102,241,0.03);
+    --color-bg-elevated: rgba(99,102,241,0.05);
+    --color-border: rgba(99,102,241,0.1);
+    --color-border-hover: rgba(99,102,241,0.2);
     --color-text-primary: #0f172a;
     --color-text-secondary: #334155;
     --color-text-muted: #64748b;
     --color-accent: #4F46E5;
-    --color-accent-hover: #4338CA;
-    --color-accent-glow: rgba(79,70,229,0.1);
+    --color-accent-hover: #6366F1;
+    --color-accent-glow: rgba(79,70,229,0.12);
+    --color-accent-gradient: linear-gradient(135deg, #4F46E5, #7C3AED);
     --color-cta: #D97706;
-    --color-cta-hover: #B45309;
+    --color-cta-hover: #F59E0B;
+    --color-cta-gradient: linear-gradient(135deg, #D97706, #EA580C);
     --color-success: #059669;
     --color-warning: #D97706;
     --color-error: #dc2626;
+    --color-gold: #D97706;
+    --color-gold-glow: rgba(217,119,6,0.1);
+    --shadow-card: 0 2px 12px rgba(99,102,241,0.06), 0 0 0 1px rgba(99,102,241,0.08);
+    --shadow-elevated: 0 8px 32px rgba(99,102,241,0.1), 0 0 0 1px rgba(99,102,241,0.1);
+    --glass-bg: rgba(255,255,255,0.85);
+    --glass-border: rgba(99,102,241,0.12);
+    --glass-blur: blur(20px);
   }
 
   :global(*, *::before, *::after) {
