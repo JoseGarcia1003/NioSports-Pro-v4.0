@@ -4,8 +4,7 @@
   import { subscription } from '$lib/stores/subscription';
   import { teamStats, picksStore } from '$lib/stores/data';
   import { toasts } from '$lib/stores/ui';
-  import { BarChart3, Home, Plane, AlertTriangle, Settings, Save, X, TrendingUp } from 'lucide-svelte';
-  import ConfidenceGauge from '$lib/components/charts/ConfidenceGauge.svelte';
+  import { BarChart3, Home, Plane, Settings, Save, X, TrendingUp, BookOpen, ChevronDown } from 'lucide-svelte';
   import TeamSelector from '$lib/components/TeamSelector.svelte';
   import { MODEL_VERSION } from '$lib/engine/constants.js';
 
@@ -18,11 +17,19 @@
   let awayB2B = false;
   let localInjury = false;
   let awayInjury = false;
-  let lineQ1 = '';
-  let lineHalf = '';
-  let lineFull = '';
   let savingPick = false;
   let saveTarget = null;
+  let glossaryOpen = false;
+
+  let dirQ1 = 'OVER';
+  let dirHalf = 'OVER';
+  let dirFull = 'OVER';
+
+  let lineQ1Over = '', lineQ1Under = '';
+  let lineHalfOver = '', lineHalfUnder = '';
+  let lineFullOver = '', lineFullUnder = '';
+
+  let oddsQ1 = '1.91', oddsHalf = '1.91', oddsFull = '1.91';
 
   onMount(async () => {
     try {
@@ -57,9 +64,25 @@
     finally { predictionsLoading = false; }
   }
 
-  $: if (predictions && !lineQ1) lineQ1 = predictions.Q1?.projection?.toFixed(1) || '';
-  $: if (predictions && !lineHalf) lineHalf = predictions.HALF?.projection?.toFixed(1) || '';
-  $: if (predictions && !lineFull) lineFull = predictions.FULL?.projection?.toFixed(1) || '';
+  function roundToHalf(v) { return Math.round(v * 2) / 2; }
+
+  function suggestLines(projection) {
+    const base = roundToHalf(projection);
+    return { over: (base - 2).toFixed(1), under: (base + 2).toFixed(1) };
+  }
+
+  $: if (predictions?.Q1 && !lineQ1Over) {
+    const s = suggestLines(predictions.Q1.projection);
+    lineQ1Over = s.over; lineQ1Under = s.under;
+  }
+  $: if (predictions?.HALF && !lineHalfOver) {
+    const s = suggestLines(predictions.HALF.projection);
+    lineHalfOver = s.over; lineHalfUnder = s.under;
+  }
+  $: if (predictions?.FULL && !lineFullOver) {
+    const s = suggestLines(predictions.FULL.projection);
+    lineFullOver = s.over; lineFullUnder = s.under;
+  }
 
   let analysisQ1 = null, analysisHalf = null, analysisFull = null;
   $: if (predictions?.Q1) analysisQ1 = predictions.Q1;
@@ -73,15 +96,21 @@
       const val = parseFloat(lineValue);
       if (!val || isNaN(val)) return;
       const result = await recalcWithLine(val, period);
-      if (period === 'Q1') analysisQ1 = result;
-      if (period === 'HALF') analysisHalf = result;
-      if (period === 'FULL') analysisFull = result;
-    }, 400);
+      if (result) {
+        if (period === 'Q1') analysisQ1 = result;
+        if (period === 'HALF') analysisHalf = result;
+        if (period === 'FULL') analysisFull = result;
+      }
+    }, 300);
   }
 
-  $: if (lineQ1 && predictions?.Q1) scheduleRecalc('Q1', lineQ1);
-  $: if (lineHalf && predictions?.HALF) scheduleRecalc('HALF', lineHalf);
-  $: if (lineFull && predictions?.FULL) scheduleRecalc('FULL', lineFull);
+  $: activeLineQ1 = dirQ1 === 'OVER' ? lineQ1Over : lineQ1Under;
+  $: activeLineHalf = dirHalf === 'OVER' ? lineHalfOver : lineHalfUnder;
+  $: activeLineFull = dirFull === 'OVER' ? lineFullOver : lineFullUnder;
+
+  $: if (activeLineQ1 && predictions?.Q1) scheduleRecalc('Q1', activeLineQ1);
+  $: if (activeLineHalf && predictions?.HALF) scheduleRecalc('HALF', activeLineHalf);
+  $: if (activeLineFull && predictions?.FULL) scheduleRecalc('FULL', activeLineFull);
 
   async function generatePredictions() {
     const home = { name: localTeam, stats: localData, restDays: localB2B ? 0 : 2, injuries: localInjury ? [{ name: 'Star', type: 'star' }] : [] };
@@ -116,13 +145,77 @@
     return null;
   }
 
-  function resetLines() { lineQ1 = ''; lineHalf = ''; lineFull = ''; }
-  $: if (localTeam || awayTeam) resetLines();
+  function resetAll() {
+    lineQ1Over = ''; lineQ1Under = '';
+    lineHalfOver = ''; lineHalfUnder = '';
+    lineFullOver = ''; lineFullUnder = '';
+    dirQ1 = 'OVER'; dirHalf = 'OVER'; dirFull = 'OVER';
+  }
+  $: if (localTeam || awayTeam) resetAll();
 
-  function openSave(period, analysis) {
-    saveTarget = { period, line: analysis.line, direction: analysis.direction, projection: analysis.projection,
-      probability: analysis.probability, probabilityPercent: analysis.probabilityPercent,
-      confidence: analysis.confidence, ev: analysis.ev, evPercent: analysis.evPercent, edge: analysis.edge };
+  // ═══ VALUE BET CALCULATION ═══
+  function computeValue(analysis, userDir, bookmakerOdds, period) {
+    if (!analysis) return null;
+    const bookOdds = parseFloat(bookmakerOdds) || 1.91;
+
+    let modelProb = analysis.probability || 0.5;
+    if (analysis.direction && analysis.direction !== userDir) {
+      modelProb = 1 - modelProb;
+    }
+
+    const fairOdds = modelProb > 0 ? (1 / modelProb) : 99;
+    const evPct = ((modelProb * bookOdds) - 1) * 100;
+    const edgeHouse = ((bookOdds - fairOdds) / fairOdds) * 100;
+
+    const periodStd = { Q1: 8, HALF: 13, FULL: 18.5 };
+    const std = periodStd[period] || 10;
+    const edgePts = analysis.edge || 0;
+    const zScore = edgePts / std;
+
+    let rating = 0;
+    if (evPct >= 15) rating = 5;
+    else if (evPct >= 10) rating = 4;
+    else if (evPct >= 5) rating = 3;
+    else if (evPct >= 2) rating = 2;
+    else if (evPct >= 0) rating = 1;
+
+    let tier, tierLabel, tierColor, tierEmoji;
+    if (evPct >= 15) { tier = 'elite'; tierLabel = 'ELITE VALUE'; tierColor = '#10B981'; tierEmoji = '🔥'; }
+    else if (evPct >= 8) { tier = 'strong'; tierLabel = 'STRONG VALUE'; tierColor = '#22C55E'; tierEmoji = '💎'; }
+    else if (evPct >= 3) { tier = 'value'; tierLabel = 'VALUE BET'; tierColor = '#84CC16'; tierEmoji = '✨'; }
+    else if (evPct >= 0) { tier = 'neutral'; tierLabel = 'NEUTRAL'; tierColor = '#F59E0B'; tierEmoji = '⚖️'; }
+    else { tier = 'avoid'; tierLabel = 'NO APOSTAR'; tierColor = '#EF4444'; tierEmoji = '🚫'; }
+
+    return {
+      modelProb,
+      modelProbPct: (modelProb * 100).toFixed(0),
+      fairOdds: fairOdds.toFixed(2),
+      bookOdds: bookOdds.toFixed(2),
+      evPct: evPct.toFixed(1),
+      edgeHousePct: edgeHouse.toFixed(1),
+      edgePts: edgePts.toFixed(1),
+      zScore: zScore.toFixed(2),
+      rating,
+      tier, tierLabel, tierColor, tierEmoji,
+    };
+  }
+
+  $: valueQ1 = analysisQ1 ? computeValue(analysisQ1, dirQ1, oddsQ1, 'Q1') : null;
+  $: valueHalf = analysisHalf ? computeValue(analysisHalf, dirHalf, oddsHalf, 'HALF') : null;
+  $: valueFull = analysisFull ? computeValue(analysisFull, dirFull, oddsFull, 'FULL') : null;
+
+  function openSave(period, analysis, value, line, dir) {
+    if (!analysis || !value) return;
+    saveTarget = {
+      period, line: parseFloat(line), direction: dir,
+      projection: analysis.projection,
+      probability: value.modelProb,
+      probabilityPercent: value.modelProbPct,
+      confidence: value.tierLabel,
+      ev: value.evPct, evPercent: value.evPct,
+      edge: parseFloat(value.edgePts),
+      fairOdds: value.fairOdds, bookOdds: value.bookOdds,
+    };
   }
 
   function closeSave() { saveTarget = null; }
@@ -136,9 +229,10 @@
         period: saveTarget.period, direction: saveTarget.direction,
         line: saveTarget.line, bet_line: saveTarget.line,
         projection: saveTarget.projection, probability: saveTarget.probability,
-        confidence: saveTarget.confidence, ev: saveTarget.evPercent,
+        confidence: saveTarget.confidence, ev: parseFloat(saveTarget.evPercent),
         edge: saveTarget.edge, model_version: MODEL_VERSION.version,
-        odds: -110, status: 'pending', source: 'totales',
+        odds: parseFloat(saveTarget.bookOdds) || 1.91,
+        fair_odds: parseFloat(saveTarget.fairOdds), status: 'pending', source: 'totales',
         created_at: new Date().toISOString(),
       });
       toasts.success(`Pick guardado: ${saveTarget.direction} ${saveTarget.line} (${saveTarget.period})`);
@@ -165,19 +259,56 @@
     const n = Object.keys(statsData).length;
     return { rank, color: rank <= Math.ceil(n / 3) ? '#10B981' : rank <= Math.ceil(n * 2 / 3) ? '#F59E0B' : '#EF4444' };
   }
+
+  function handleLineInput(e, period, dir) {
+    let val = parseFloat(e.target.value);
+    if (isNaN(val)) return;
+    val = roundToHalf(val);
+    const v = val.toFixed(1);
+    if (period === 'Q1' && dir === 'OVER') lineQ1Over = v;
+    if (period === 'Q1' && dir === 'UNDER') lineQ1Under = v;
+    if (period === 'HALF' && dir === 'OVER') lineHalfOver = v;
+    if (period === 'HALF' && dir === 'UNDER') lineHalfUnder = v;
+    if (period === 'FULL' && dir === 'OVER') lineFullOver = v;
+    if (period === 'FULL' && dir === 'UNDER') lineFullUnder = v;
+  }
 </script>
 
 <svelte:head><title>Totales — NioSports Pro</title></svelte:head>
 
 <div class="page">
   <header class="page__header">
-    <span class="page__label">Análisis por período</span>
+    <span class="page__label">CALCULADORA PRO — EXPECTED VALUE</span>
     <h1 class="page__title">Totales NBA</h1>
-    <p class="page__subtitle">Motor Predictivo v{MODEL_VERSION.version} — Temporada 2025-26
+    <p class="page__subtitle">
+      Motor Predictivo v{MODEL_VERSION.version} — Temporada 2025-26
       {#if statsError}<span class="badge-warn">Datos demo</span>{/if}
-      {#if predictions?.FULL?.source}<span class="badge-source">{predictions.FULL.source === 'xgboost' ? 'XGBoost ML' : 'Heurístico'}</span>{/if}
+      {#if predictions?.FULL?.source}<span class="badge-source">{predictions.FULL.source === 'ensemble-v4' ? 'Ensemble ML' : predictions.FULL.source === 'xgboost' ? 'XGBoost' : 'Heurístico'}</span>{/if}
     </p>
   </header>
+
+  <button class="glossary-toggle" on:click={() => glossaryOpen = !glossaryOpen} class:open={glossaryOpen}>
+    <BookOpen size={16} />
+    <span>Glosario de términos</span>
+    <ChevronDown size={16} class={glossaryOpen ? 'rot' : ''} />
+  </button>
+
+  {#if glossaryOpen}
+    <div class="glossary">
+      <div class="glossary__grid">
+        <div class="g-item"><h4>Proyección</h4><p>Total estimado por el modelo ML (XGBoost + LightGBM + Ridge + MLP). Combina promedios L5/L10/L20, descanso, back-to-back, altitude y factores contextuales.</p></div>
+        <div class="g-item"><h4>Línea</h4><p>El total que ofrece la casa de apuestas. Siempre se mueve en saltos de 0.5 (ej: 215.5, 216, 216.5).</p></div>
+        <div class="g-item"><h4>Cuota (Decimal)</h4><p>Pago que ofrece la casa. Ej: 1.91 = ganas $0.91 por cada $1 apostado. 2.00 = duplicas tu apuesta.</p></div>
+        <div class="g-item"><h4>Cuota Justa</h4><p>La cuota que <strong>debería</strong> tener según nuestro modelo. Si la casa paga MÁS que la cuota justa → VALUE BET.</p></div>
+        <div class="g-item"><h4>Diferencia (pts)</h4><p>Distancia entre proyección y línea. Ej: Proyección 220, línea 215 → +5 pts (favor OVER).</p></div>
+        <div class="g-item"><h4>Edge vs Casa (%)</h4><p>Cuánto mejor es la cuota real vs la justa. Ej: cuota real 2.05 vs justa 1.85 → +10.8% edge.</p></div>
+        <div class="g-item"><h4>Expected Value (EV)</h4><p>Ganancia esperada por unidad apostada a largo plazo. <strong>+EV = apuesta ganadora</strong> en el largo plazo.</p></div>
+        <div class="g-item"><h4>Z-Score</h4><p>Cuántas desviaciones estándar separan la proyección de la línea. |Z| &gt; 1 = señal fuerte.</p></div>
+        <div class="g-item"><h4>Rating (estrellas)</h4><p>⭐ 0-2% EV · ⭐⭐ 2-5% · ⭐⭐⭐ 5-8% · ⭐⭐⭐⭐ 8-15% · ⭐⭐⭐⭐⭐ +15%</p></div>
+        <div class="g-item"><h4>Clasificación</h4><p>🔥 ELITE (+15% EV) · 💎 STRONG (+8%) · ✨ VALUE (+3%) · ⚖️ NEUTRAL (0-3%) · 🚫 NO APOSTAR (-EV)</p></div>
+      </div>
+    </div>
+  {/if}
 
   {#if loadingStats}
     <div class="loading-state"><div class="spinner"></div><p>Cargando estadísticas...</p></div>
@@ -233,43 +364,108 @@
         <div class="loading-state"><div class="spinner"></div><p>Calculando predicciones...</p></div>
       {:else if predictions}
         <div class="pred-section">
-          <h2 class="pred-section__title">Predicción del Motor</h2>
+          <h2 class="pred-section__title">
+            <TrendingUp size={18} />
+            Calculadora PRO — Expected Value
+          </h2>
           <p class="pred-section__sub">{localTeam} (HOME) vs {awayTeam} (AWAY)</p>
-          <div class="pred-grid">
+
+          <div class="calc-grid">
             {#each [
-              { period: 'Q1', label: 'Q1', analysis: analysisQ1, line: lineQ1, setLine: (v) => lineQ1 = v },
-              { period: 'HALF', label: 'HALF', analysis: analysisHalf, line: lineHalf, setLine: (v) => lineHalf = v },
-              { period: 'FULL', label: 'FULL', analysis: analysisFull, line: lineFull, setLine: (v) => lineFull = v },
+              { period: 'Q1', label: 'Q1', analysis: analysisQ1, value: valueQ1, dir: dirQ1, setDir: (v) => dirQ1 = v, lineOver: lineQ1Over, lineUnder: lineQ1Under, odds: oddsQ1, setOdds: (v) => oddsQ1 = v, std: '8.0' },
+              { period: 'HALF', label: '1H', analysis: analysisHalf, value: valueHalf, dir: dirHalf, setDir: (v) => dirHalf = v, lineOver: lineHalfOver, lineUnder: lineHalfUnder, odds: oddsHalf, setOdds: (v) => oddsHalf = v, std: '13.0' },
+              { period: 'FULL', label: 'FULL', analysis: analysisFull, value: valueFull, dir: dirFull, setDir: (v) => dirFull = v, lineOver: lineFullOver, lineUnder: lineFullUnder, odds: oddsFull, setOdds: (v) => oddsFull = v, std: '18.5' },
             ] as row}
               {@const a = row.analysis}
-              {#if a}
-                <div class="pcard">
-                  <div class="pcard__top">
-                    <span class="pcard__period">{row.label}</span>
-                    <ConfidenceGauge value={a.probabilityPercent || 50} size={56} />
+              {@const v = row.value}
+              {#if a && v}
+                <div class="calc-card">
+                  <div class="calc-card__header">
+                    <span class="calc-card__period">{row.label}:</span>
+                    <span class="calc-card__proj">{a.projection?.toFixed(1) ?? '—'}</span>
                   </div>
-                  <div class="pcard__projection">{a.projection ?? '—'}</div>
-                  <span class="pcard__proj-label">Proyección</span>
-                  <div class="pcard__line-row">
-                    <span class="pcard__line-label">Línea</span>
-                    <input type="number" step="0.5" class="pcard__line-input"
-                      value={row.line} on:input={(e) => row.setLine(e.target.value)}
-                      placeholder={a.projection} />
+
+                  <div class="dir-toggle">
+                    <button class="dir-btn" class:active={row.dir === 'OVER'} class:over={row.dir === 'OVER'} on:click={() => row.setDir('OVER')}>OVER</button>
+                    <button class="dir-btn" class:active={row.dir === 'UNDER'} class:under={row.dir === 'UNDER'} on:click={() => row.setDir('UNDER')}>UNDER</button>
                   </div>
-                  <div class="pcard__edge" class:pos={a.edge > 0} class:neg={a.edge < 0}>
-                    Edge: {a.edge > 0 ? '+' : ''}{a.edge?.toFixed?.(1) ?? 0} pts
+
+                  <div class="input-block">
+                    <label class="input-label">🎯 Línea</label>
+                    <input type="number" step="0.5" min="0"
+                      value={row.dir === 'OVER' ? row.lineOver : row.lineUnder}
+                      on:change={(e) => handleLineInput(e, row.period, row.dir)}
+                      class="input-field" />
                   </div>
-                  <div class="pcard__rec" class:rec-over={a.direction === 'OVER'} class:rec-under={a.direction === 'UNDER'}>
-                    <span class="pcard__dir">{a.direction ?? '—'}</span>
-                    <span class="pcard__prob">{a.probabilityPercent ?? 50}%</span>
-                    <span class="pcard__conf">{a.confidence ?? 'LOW'}</span>
+
+                  <div class="input-block input-block--odds">
+                    <label class="input-label">💰 Cuota (decimal)</label>
+                    <input type="number" step="0.01" min="1"
+                      value={row.odds}
+                      on:input={(e) => row.setOdds(e.target.value)}
+                      class="input-field input-field--odds" />
                   </div>
-                  <div class="pcard__ev" class:pos={a.ev > 0}>
-                    EV: {a.evPercent > 0 ? '+' : ''}{a.evPercent ?? 0}%
+
+                  <div class="metrics">
+                    <div class="metric-row">
+                      <span class="metric-label">Diferencia</span>
+                      <span class="metric-val" class:pos={parseFloat(v.edgePts) > 0} class:neg={parseFloat(v.edgePts) < 0}>
+                        {parseFloat(v.edgePts) > 0 ? '+' : ''}{v.edgePts} pts
+                      </span>
+                    </div>
+                    <div class="metric-row">
+                      <span class="metric-label">SD (±variación)</span>
+                      <span class="metric-val">±{row.std} pts</span>
+                    </div>
+                    <div class="metric-row">
+                      <span class="metric-label">Z-Score</span>
+                      <span class="metric-val" class:pos={parseFloat(v.zScore) > 0} class:neg={parseFloat(v.zScore) < 0}>
+                        {parseFloat(v.zScore) > 0 ? '+' : ''}{v.zScore}
+                      </span>
+                    </div>
                   </div>
-                  <button class="pcard__save" class:save-over={a.direction === 'OVER'} class:save-under={a.direction === 'UNDER'}
-                    on:click={() => openSave(row.period, a)}>
-                    <Save size={14} /> {a.direction} {a.line}
+
+                  <div class="prob-row">
+                    <span class="prob-label">Prob. Ganar</span>
+                    <span class="prob-val" style="color: {v.tierColor}">{v.modelProbPct}%</span>
+                  </div>
+
+                  <div class="fair-odds-row">
+                    <span class="fair-label">Cuota Justa</span>
+                    <span class="fair-val">{v.fairOdds}</span>
+                  </div>
+
+                  <div class="ev-row">
+                    <span class="ev-label">Expected Value</span>
+                    <span class="ev-val" class:pos={parseFloat(v.evPct) > 0} class:neg={parseFloat(v.evPct) < 0}>
+                      {parseFloat(v.evPct) > 0 ? '+' : ''}{v.evPct}%
+                    </span>
+                  </div>
+
+                  <div class="edge-house-row">
+                    <span class="edge-label">Edge vs Casa</span>
+                    <span class="edge-val" class:pos={parseFloat(v.edgeHousePct) > 0} class:neg={parseFloat(v.edgeHousePct) < 0}>
+                      {parseFloat(v.edgeHousePct) > 0 ? '+' : ''}{v.edgeHousePct}%
+                    </span>
+                  </div>
+
+                  <div class="tier-banner" style="background: {v.tierColor}; --glow: {v.tierColor}">
+                    <div class="tier-banner__emoji">{v.tierEmoji}</div>
+                    <div class="tier-banner__label">{v.tierLabel}</div>
+                    <div class="tier-banner__stars">
+                      {#each Array(5) as _, i}
+                        <span class="star" class:filled={i < v.rating}>★</span>
+                      {/each}
+                    </div>
+                  </div>
+
+                  <button class="save-btn"
+                    class:save-btn--over={row.dir === 'OVER'}
+                    class:save-btn--under={row.dir === 'UNDER'}
+                    disabled={parseFloat(v.evPct) < 0}
+                    on:click={() => openSave(row.period, a, v, row.dir === 'OVER' ? row.lineOver : row.lineUnder, row.dir)}>
+                    <Save size={14} />
+                    Guardar {row.dir} {row.dir === 'OVER' ? row.lineOver : row.lineUnder}
                   </button>
                 </div>
               {/if}
@@ -299,11 +495,10 @@
         <div class="summary-row"><span>Partido</span><strong>{localTeam} vs {awayTeam}</strong></div>
         <div class="summary-row"><span>Período</span><strong class="indigo">{saveTarget.period}</strong></div>
         <div class="summary-row"><span>Apuesta</span><strong class="indigo">{saveTarget.direction} {saveTarget.line}</strong></div>
-        <div class="summary-row"><span>Proyección</span><strong>{saveTarget.projection}</strong></div>
+        <div class="summary-row"><span>Cuota</span><strong>{saveTarget.bookOdds} (justa: {saveTarget.fairOdds})</strong></div>
         <div class="summary-row"><span>Probabilidad</span><strong>{saveTarget.probabilityPercent}%</strong></div>
-        <div class="summary-row"><span>Confianza</span><strong>{saveTarget.confidence}</strong></div>
-        <div class="summary-row"><span>EV</span><strong class:pos={saveTarget.ev > 0} class:neg={saveTarget.ev < 0}>{saveTarget.evPercent > 0 ? '+' : ''}{saveTarget.evPercent}%</strong></div>
-        <div class="summary-row"><span>Edge</span><strong>{saveTarget.edge > 0 ? '+' : ''}{saveTarget.edge} pts</strong></div>
+        <div class="summary-row"><span>Rating</span><strong>{saveTarget.confidence}</strong></div>
+        <div class="summary-row"><span>EV</span><strong class:pos={parseFloat(saveTarget.evPercent) > 0} class:neg={parseFloat(saveTarget.evPercent) < 0}>{parseFloat(saveTarget.evPercent) > 0 ? '+' : ''}{saveTarget.evPercent}%</strong></div>
       </div>
       <div class="modal__actions">
         <button class="mbtn mbtn--ghost" on:click={closeSave} disabled={savingPick}>Cancelar</button>
@@ -316,82 +511,136 @@
 {/if}
 
 <style>
-  .page { max-width: 920px; margin: 0 auto; padding: 60px 24px 120px; }
+  .page { max-width: 1200px; margin: 0 auto; padding: 60px 24px 120px; position: relative; z-index: 1; }
   @media (max-width: 768px) { .page { padding: 32px 16px 100px; } }
-  .page__header { margin-bottom: 32px; }
-  .page__label { font-size: 0.8rem; font-weight: 700; color: #6366F1; text-transform: uppercase; letter-spacing: 0.15em; }
-  .page__title { font-family: 'Inter', sans-serif; font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 900; letter-spacing: -0.03em; margin: 8px 0 6px; }
+
+  .page__header { margin-bottom: 24px; }
+  .page__label { font-size: 0.75rem; font-weight: 800; color: var(--color-accent, #6366F1); text-transform: uppercase; letter-spacing: 0.15em; }
+  .page__title { font-family: 'Inter', sans-serif; font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 900; letter-spacing: -0.03em; margin: 8px 0 6px; color: var(--color-text-primary); }
   .page__subtitle { font-size: 0.9rem; color: var(--color-text-muted); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .badge-warn { font-size: 0.7rem; background: rgba(245,158,11,0.12); color: #F59E0B; padding: 2px 8px; border-radius: 6px; font-weight: 700; }
   .badge-source { font-size: 0.7rem; background: rgba(99,102,241,0.12); color: #818CF8; padding: 2px 8px; border-radius: 6px; font-weight: 700; }
+
+  .glossary-toggle { display: flex; align-items: center; gap: 10px; width: 100%; padding: 14px 18px; background: var(--glass-bg, var(--color-bg-card)); backdrop-filter: var(--glass-blur, blur(12px)); border: 1px solid var(--glass-border, var(--color-border)); border-radius: 12px; color: var(--color-text-primary); font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-bottom: 12px; }
+  .glossary-toggle:hover { border-color: var(--color-accent, #6366F1); background: var(--color-accent-glow, rgba(99,102,241,0.08)); }
+  .glossary-toggle span { flex: 1; text-align: left; }
+  :global(.glossary-toggle svg.rot) { transform: rotate(180deg); transition: transform 0.3s; }
+  .glossary { background: var(--glass-bg, var(--color-bg-card)); backdrop-filter: var(--glass-blur, blur(12px)); border: 1px solid var(--color-accent, #6366F1); border-radius: 14px; padding: 20px; margin-bottom: 20px; animation: slideDown 0.3s ease; }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+  .glossary__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .g-item h4 { font-size: 0.85rem; font-weight: 800; color: var(--color-accent, #6366F1); margin-bottom: 4px; }
+  .g-item p { font-size: 0.78rem; color: var(--color-text-secondary); line-height: 1.5; }
+
   .selectors { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
-  .selector { flex: 1; min-width: 240px; background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; padding: 18px; }
-  .selector--home { border-color: rgba(99,102,241,0.2); }
-  .selector--away { border-color: rgba(239,68,68,0.2); }
+  .selector { flex: 1; min-width: 240px; background: var(--glass-bg, var(--color-bg-card)); backdrop-filter: var(--glass-blur, blur(12px)); border: 1px solid var(--glass-border, var(--color-border)); border-radius: 16px; padding: 18px; box-shadow: var(--shadow-card); }
+  .selector--home { border-color: rgba(99,102,241,0.25); }
+  .selector--away { border-color: rgba(239,68,68,0.25); }
   .selector__label { font-size: 0.78rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-  .vs { font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 900; color: #6366F1; background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.15); border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; margin-top: 32px; flex-shrink: 0; }
+  .vs { font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 900; color: var(--color-accent, #6366F1); background: var(--color-accent-glow, rgba(99,102,241,0.1)); border: 1px solid rgba(99,102,241,0.2); border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; margin-top: 32px; flex-shrink: 0; }
   .team-stats { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
   .tstat { display: flex; flex-direction: column; align-items: center; background: var(--color-bg-card); border-radius: 8px; padding: 8px 12px; flex: 1; min-width: 60px; }
-  .tstat__val { font-family: 'DM Mono', monospace; font-size: 1.1rem; font-weight: 800; }
+  .tstat__val { font-family: 'DM Mono', monospace; font-size: 1.1rem; font-weight: 800; color: var(--color-text-primary); }
   .tstat__label { font-size: 0.65rem; color: var(--color-text-muted); }
   .tstat__rank { font-size: 0.68rem; font-weight: 700; margin-top: 2px; }
-  .factors { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 14px; padding: 16px 18px; margin-bottom: 24px; }
+
+  .factors { background: var(--glass-bg, var(--color-bg-card)); backdrop-filter: var(--glass-blur, blur(12px)); border: 1px solid var(--glass-border, var(--color-border)); border-radius: 14px; padding: 16px 18px; margin-bottom: 24px; }
   .factors__title { font-size: 0.82rem; font-weight: 700; color: var(--color-text-muted); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
   .factors__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   @media (max-width: 500px) { .factors__grid { grid-template-columns: 1fr; } }
   .ftoggle { display: flex; align-items: center; gap: 8px; font-size: 0.83rem; cursor: pointer; padding: 8px 10px; border-radius: 8px; transition: background 0.15s; color: var(--color-text-secondary); }
-  .ftoggle:hover { background: var(--color-bg-card); }
-  .ftoggle input { accent-color: #6366F1; cursor: pointer; }
-  .pred-section { background: rgba(99,102,241,0.04); border: 1px solid rgba(99,102,241,0.15); border-radius: 20px; padding: 28px 22px; }
-  .pred-section__title { font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 800; text-align: center; color: #fff; }
-  .pred-section__sub { font-size: 0.82rem; color: var(--color-text-muted); text-align: center; margin: 4px 0 20px; }
-  .pred-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-  @media (max-width: 640px) { .pred-grid { grid-template-columns: 1fr; } }
-  .pcard { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; padding: 20px 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; transition: border-color 0.2s; }
-  .pcard:hover { border-color: rgba(99,102,241,0.3); }
-  .pcard__top { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-  .pcard__period { font-family: 'Inter', sans-serif; font-size: 0.75rem; font-weight: 800; color: #6366F1; letter-spacing: 0.1em; text-transform: uppercase; }
-  .pcard__projection { font-family: 'DM Mono', monospace; font-size: 2.2rem; font-weight: 900; line-height: 1; }
-  .pcard__proj-label { font-size: 0.65rem; color: var(--color-text-muted); text-transform: uppercase; margin-top: -4px; }
-  .pcard__line-row { display: flex; align-items: center; gap: 8px; }
-  .pcard__line-label { font-size: 0.7rem; color: var(--color-text-muted); }
-  .pcard__line-input { width: 80px; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--color-border-hover); background: var(--color-bg-elevated); color: #6366F1; font-family: 'DM Mono', monospace; font-size: 1rem; font-weight: 700; text-align: center; }
-  .pcard__line-input:focus { outline: none; border-color: #6366F1; }
-  .pcard__edge { font-size: 0.8rem; font-weight: 700; color: var(--color-text-muted); }
-  .pos { color: #10B981; }
-  .neg { color: #EF4444; }
-  .pcard__rec { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 12px; border-radius: 10px; width: 100%; }
-  .rec-over { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25); }
-  .rec-under { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); }
-  .pcard__dir { font-size: 1rem; font-weight: 900; }
-  .rec-over .pcard__dir { color: #10B981; }
-  .rec-under .pcard__dir { color: #EF4444; }
-  .pcard__prob { font-family: 'DM Mono', monospace; font-size: 0.9rem; font-weight: 800; }
-  .pcard__conf { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted); }
-  .pcard__ev { font-size: 0.8rem; font-weight: 700; color: var(--color-text-muted); }
-  .pcard__save { width: 100%; padding: 10px; border-radius: 10px; border: none; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.15s; }
-  .pcard__save:active { transform: scale(0.96); }
-  .save-over { background: rgba(16,185,129,0.12); color: #10B981; border: 1px solid rgba(16,185,129,0.25); }
-  .save-under { background: rgba(239,68,68,0.12); color: #EF4444; border: 1px solid rgba(239,68,68,0.25); }
+  .ftoggle:hover { background: var(--color-bg-elevated); }
+  .ftoggle input { accent-color: var(--color-accent, #6366F1); cursor: pointer; }
+
+  .pred-section { background: linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(139,92,246,0.05) 100%); backdrop-filter: var(--glass-blur, blur(12px)); border: 1px solid rgba(99,102,241,0.2); border-radius: 20px; padding: 28px 22px; box-shadow: var(--shadow-elevated); }
+  .pred-section__title { display: flex; align-items: center; justify-content: center; gap: 10px; font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 800; text-align: center; color: var(--color-text-primary); }
+  .pred-section__sub { font-size: 0.82rem; color: var(--color-text-muted); text-align: center; margin: 4px 0 24px; }
+
+  .calc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 900px) { .calc-grid { grid-template-columns: 1fr; } }
+
+  .calc-card { background: var(--color-bg, #fff); border: 1px solid var(--color-border); border-radius: 16px; padding: 18px 16px; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--shadow-card); transition: transform 0.2s, box-shadow 0.3s; }
+  .calc-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-elevated); }
+
+  :global([data-theme="dark"]) .calc-card { background: rgba(255,255,255,0.02); }
+
+  .calc-card__header { text-align: center; padding-bottom: 8px; border-bottom: 1px solid var(--color-border); }
+  .calc-card__period { font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 800; color: var(--color-text-primary); }
+  .calc-card__proj { font-family: 'DM Mono', monospace; font-size: 1rem; font-weight: 800; color: var(--color-accent, #6366F1); margin-left: 6px; }
+
+  .dir-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .dir-btn { padding: 10px; border-radius: 8px; border: 2px solid var(--color-border); background: var(--color-bg-elevated); color: var(--color-text-muted); font-size: 0.85rem; font-weight: 800; cursor: pointer; transition: all 0.2s; letter-spacing: 0.05em; }
+  .dir-btn:hover { border-color: var(--color-border-hover); }
+  .dir-btn.active.over { background: linear-gradient(135deg, #10B981, #059669); border-color: #10B981; color: white; box-shadow: 0 4px 14px rgba(16,185,129,0.3); }
+  .dir-btn.active.under { background: linear-gradient(135deg, #EF4444, #DC2626); border-color: #EF4444; color: white; box-shadow: 0 4px 14px rgba(239,68,68,0.3); }
+
+  .input-block { display: flex; flex-direction: column; gap: 4px; }
+  .input-label { font-size: 0.72rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .input-field { padding: 10px 12px; border-radius: 8px; border: 1px solid var(--color-border-hover); background: var(--color-bg-elevated); color: var(--color-text-primary); font-family: 'DM Mono', monospace; font-size: 1.05rem; font-weight: 700; text-align: center; width: 100%; }
+  .input-field:focus { outline: none; border-color: var(--color-accent, #6366F1); box-shadow: 0 0 0 3px var(--color-accent-glow, rgba(99,102,241,0.15)); }
+  .input-block--odds .input-field--odds, .input-block--odds .input-field { color: #F59E0B; border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.04); }
+  .input-block--odds .input-field:focus { border-color: #F59E0B; box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+
+  .metrics { background: var(--color-bg-elevated); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .metric-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; }
+  .metric-label { color: var(--color-text-muted); }
+  .metric-val { font-family: 'DM Mono', monospace; font-weight: 700; color: var(--color-text-primary); }
+
+  .prob-row, .fair-odds-row, .ev-row, .edge-house-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-radius: 8px; font-size: 0.82rem; }
+  .prob-row { background: rgba(99,102,241,0.06); }
+  .fair-odds-row { background: var(--color-bg-elevated); }
+  .ev-row { background: rgba(16,185,129,0.06); }
+  .edge-house-row { background: rgba(99,102,241,0.04); }
+
+  .prob-label, .fair-label, .ev-label, .edge-label { color: var(--color-text-secondary); font-weight: 600; }
+  .prob-val, .fair-val, .ev-val, .edge-val { font-family: 'DM Mono', monospace; font-weight: 800; font-size: 0.95rem; }
+  .fair-val { color: var(--color-text-primary); }
+
+  .pos { color: #10B981 !important; }
+  .neg { color: #EF4444 !important; }
+
+  .tier-banner { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 16px 12px; border-radius: 12px; color: white; box-shadow: 0 4px 16px var(--glow); position: relative; overflow: hidden; }
+  .tier-banner::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent 60%); pointer-events: none; }
+  .tier-banner__emoji { font-size: 1.8rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+  .tier-banner__label { font-size: 0.85rem; font-weight: 900; letter-spacing: 0.08em; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+  .tier-banner__stars { display: flex; gap: 2px; }
+  .star { color: rgba(255,255,255,0.35); font-size: 0.85rem; }
+  .star.filled { color: #FCD34D; text-shadow: 0 0 4px rgba(252,211,77,0.6); }
+
+  .save-btn { padding: 12px; border-radius: 10px; border: none; font-size: 0.85rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
+  .save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .save-btn:not(:disabled):hover { transform: translateY(-1px); }
+  .save-btn:active { transform: scale(0.97); }
+  .save-btn--over { background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(16,185,129,0.08)); color: #10B981; border: 1px solid rgba(16,185,129,0.3); }
+  .save-btn--under { background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(239,68,68,0.08)); color: #EF4444; border: 1px solid rgba(239,68,68,0.3); }
+  .save-btn--over:not(:disabled):hover { box-shadow: 0 4px 14px rgba(16,185,129,0.25); }
+  .save-btn--under:not(:disabled):hover { box-shadow: 0 4px 14px rgba(239,68,68,0.25); }
+
   .empty { text-align: center; padding: 64px 20px; color: var(--color-text-muted); display: flex; flex-direction: column; align-items: center; gap: 16px; }
   .empty p { font-size: 0.95rem; color: var(--color-text-muted); }
   .loading-state { text-align: center; padding: 48px 20px; color: var(--color-text-muted); display: flex; flex-direction: column; align-items: center; gap: 12px; }
-  .spinner { width: 32px; height: 32px; border: 3px solid rgba(99,102,241,0.2); border-top-color: #6366F1; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  .spinner { width: 32px; height: 32px; border: 3px solid var(--color-accent-glow, rgba(99,102,241,0.2)); border-top-color: var(--color-accent, #6366F1); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 20px; }
-  .modal { background: var(--color-bg-elevated); border: 1px solid var(--color-border-hover); border-radius: 18px; padding: 26px 22px; width: 100%; max-width: 400px; }
+
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .modal { background: var(--color-bg-elevated); border: 1px solid var(--color-border-hover); border-radius: 18px; padding: 26px 22px; width: 100%; max-width: 440px; box-shadow: var(--shadow-elevated); }
   .modal__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-  .modal__head h3 { font-family: 'Inter', sans-serif; font-size: 1.05rem; font-weight: 800; }
+  .modal__head h3 { font-family: 'Inter', sans-serif; font-size: 1.05rem; font-weight: 800; color: var(--color-text-primary); }
   .modal__x { background: none; border: none; color: var(--color-text-muted); cursor: pointer; padding: 4px; }
   .modal__body { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
   .summary-row { display: flex; justify-content: space-between; font-size: 0.88rem; }
   .summary-row span { color: var(--color-text-muted); }
-  .summary-row strong { font-weight: 700; }
-  .indigo { color: #6366F1; }
+  .summary-row strong { font-weight: 700; color: var(--color-text-primary); }
+  .indigo { color: var(--color-accent, #6366F1) !important; }
   .modal__actions { display: flex; gap: 10px; justify-content: flex-end; }
   .mbtn { padding: 10px 20px; border-radius: 10px; border: none; font-size: 0.85rem; font-weight: 700; cursor: pointer; }
   .mbtn:disabled { opacity: 0.4; cursor: not-allowed; }
   .mbtn--ghost { background: transparent; border: 1px solid var(--color-border-hover); color: var(--color-text-secondary); }
-  .mbtn--save { background: #6366F1; color: #fff; }
-  @media (max-width: 640px) { .selectors { flex-direction: column; align-items: stretch; gap: 12px; } .selector { min-width: 100%; } .vs { align-self: center; margin: -4px 0; } .pred-grid { grid-template-columns: 1fr; } }
+  .mbtn--save { background: var(--color-accent, #6366F1); color: #fff; }
+
+  @media (max-width: 640px) {
+    .selectors { flex-direction: column; align-items: stretch; gap: 12px; }
+    .selector { min-width: 100%; }
+    .vs { align-self: center; margin: -4px 0; }
+    .calc-grid { grid-template-columns: 1fr; }
+  }
 </style>
