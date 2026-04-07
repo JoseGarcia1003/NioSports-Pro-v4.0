@@ -4,8 +4,9 @@
   import { subscription } from '$lib/stores/subscription';
   import { teamStats, picksStore } from '$lib/stores/data';
   import { toasts } from '$lib/stores/ui';
-  import { BarChart3, Home, Plane, Settings, Save, X, TrendingUp, BookOpen, ChevronDown, Layers } from 'lucide-svelte';
+  import { BarChart3, Home, Plane, Settings, Save, X, TrendingUp, HelpCircle, Layers } from 'lucide-svelte';
   import TeamSelector from '$lib/components/TeamSelector.svelte';
+  import ConfidenceGauge from '$lib/components/charts/ConfidenceGauge.svelte';
   import { MODEL_VERSION } from '$lib/engine/constants.js';
 
   let statsData = null;
@@ -19,9 +20,8 @@
   let awayInjury = false;
   let savingPick = false;
   let saveTarget = null;
-  let glossaryOpen = false;
+  let glossaryModal = false;
 
-  // Direction + lines + odds + parlay selection per period
   let dirQ1 = 'OVER', dirHalf = 'OVER', dirFull = 'OVER';
   let lineQ1Over = '', lineQ1Under = '';
   let lineHalfOver = '', lineHalfUnder = '';
@@ -106,9 +106,7 @@
   }
   $: if (localTeam || awayTeam) resetAll();
 
-  // ═══ LOCAL PROBABILITY COMPUTATION (normal CDF) ═══
   function normalCDF(z) {
-    // Approximation of standard normal CDF
     const t = 1 / (1 + 0.2316419 * Math.abs(z));
     const d = 0.3989423 * Math.exp(-z * z / 2);
     let p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
@@ -125,7 +123,6 @@
     const periodStd = { Q1: 8, HALF: 13, FULL: 18.5 };
     const std = periodStd[period] || 10;
 
-    // Compute probability LOCALLY — no dependency on API direction
     const z = (projection - line) / std;
     const probOver = normalCDF(z);
     const modelProb = userDir === 'OVER' ? probOver : (1 - probOver);
@@ -135,7 +132,6 @@
     const evPct = ((modelProb * bookOdds) - 1) * 100;
     const edgeHouse = ((bookOdds - fairOdds) / fairOdds) * 100;
 
-    // Difference: OVER benefits from projection > line (+), UNDER from line > projection (+)
     const rawDiff = projection - line;
     const edgePts = userDir === 'OVER' ? rawDiff : -rawDiff;
     const zScore = userDir === 'OVER' ? z : -z;
@@ -207,7 +203,6 @@
     finally { savingPick = false; }
   }
 
-  // ═══ PARLAY LOGIC ═══
   $: selectedParlayPicks = [
     parlayQ1 && valueQ1 ? { period: 'Q1', analysis: predictions?.Q1, value: valueQ1, dir: dirQ1, line: dirQ1 === 'OVER' ? lineQ1Over : lineQ1Under, odds: oddsQ1 } : null,
     parlayHalf && valueHalf ? { period: 'HALF', analysis: predictions?.HALF, value: valueHalf, dir: dirHalf, line: dirHalf === 'OVER' ? lineHalfOver : lineHalfUnder, odds: oddsHalf } : null,
@@ -292,13 +287,21 @@
 
 <div class="page">
   <header class="page__header">
-    <span class="page__label">CALCULADORA PRO — EXPECTED VALUE</span>
-    <h1 class="page__title">Totales NBA</h1>
-    <p class="page__subtitle">
-      Motor v{MODEL_VERSION.version}
-      {#if statsError}<span class="badge-warn">Demo</span>{/if}
-      {#if predictions?.FULL?.source}<span class="badge-source">{predictions.FULL.source === 'ensemble-v4' ? 'Ensemble ML' : 'ML'}</span>{/if}
-    </p>
+    <div class="page__header-top">
+      <div>
+        <span class="page__label">CALCULADORA PRO — EXPECTED VALUE</span>
+        <h1 class="page__title">Totales NBA</h1>
+        <p class="page__subtitle">
+          Motor v{MODEL_VERSION.version}
+          {#if statsError}<span class="badge-warn">Demo</span>{/if}
+          {#if predictions?.FULL?.source}<span class="badge-source">{predictions.FULL.source === 'ensemble-v4' ? 'Ensemble ML' : 'ML'}</span>{/if}
+        </p>
+      </div>
+      <button class="help-btn" on:click={() => glossaryModal = true} aria-label="Glosario">
+        <HelpCircle size={18} />
+        <span>Ayuda</span>
+      </button>
+    </div>
   </header>
 
   {#if loadingStats}
@@ -342,24 +345,23 @@
 
     {#if bothSelected}
       <div class="factors">
-        <div class="factors__title"><Settings size={13} /> Factores</div>
+        <div class="factors__title"><Settings size={13} /> Factores contextuales</div>
         <div class="factors__grid">
           <label class="ftoggle"><input type="checkbox" bind:checked={localB2B} /><span>{localTeam} B2B</span></label>
           <label class="ftoggle"><input type="checkbox" bind:checked={awayB2B} /><span>{awayTeam} B2B</span></label>
-          <label class="ftoggle"><input type="checkbox" bind:checked={localInjury} /><span>{localTeam} sin star</span></label>
-          <label class="ftoggle"><input type="checkbox" bind:checked={awayInjury} /><span>{awayTeam} sin star</span></label>
+          <label class="ftoggle"><input type="checkbox" bind:checked={localInjury} /><span>{localTeam} sin estrella</span></label>
+          <label class="ftoggle"><input type="checkbox" bind:checked={awayInjury} /><span>{awayTeam} sin estrella</span></label>
         </div>
       </div>
 
       {#if predictionsLoading}
-        <div class="loading-state"><div class="spinner"></div><p>Calculando...</p></div>
+        <div class="loading-state"><div class="spinner"></div><p>Calculando predicciones...</p></div>
       {:else if predictions}
         <div class="pred-section">
-          <h2 class="pred-section__title">
-            <TrendingUp size={16} />
-            Calculadora PRO
-          </h2>
-          <p class="pred-section__sub">{localTeam} vs {awayTeam}</p>
+          <div class="pred-section__header">
+            <h2 class="pred-section__title"><TrendingUp size={18} /> Predicción del Motor</h2>
+            <p class="pred-section__sub">{localTeam} (HOME) vs {awayTeam} (AWAY)</p>
+          </div>
 
           <div class="calc-grid">
             {#each [
@@ -370,32 +372,41 @@
               {@const a = row.analysis}
               {@const v = row.value}
               {#if a && v}
-                <div class="calc-card" class:calc-card--parlay-selected={row.parlay}>
-                  <div class="calc-card__header">
-                    <div class="calc-card__period-wrap">
-                      <span class="calc-card__period">{row.label}</span>
-                      <span class="calc-card__proj">{a.projection?.toFixed(1) ?? '—'}</span>
-                    </div>
-                    <label class="parlay-toggle" title="Añadir a combinada">
+                <div class="pcard" class:pcard--parlay={row.parlay}>
+                  <!-- Top: period label + parlay checkbox -->
+                  <div class="pcard__top">
+                    <span class="pcard__period">{row.label}</span>
+                    <label class="parlay-chk" title="Añadir a combinada">
                       <input type="checkbox" checked={row.parlay} on:change={(e) => row.setParlay(e.target.checked)} />
-                      <Layers size={14} />
+                      <Layers size={13} />
                     </label>
                   </div>
 
+                  <!-- Hero: big projection + gauge -->
+                  <div class="pcard__hero">
+                    <div class="pcard__proj-wrap">
+                      <span class="pcard__proj">{a.projection?.toFixed(1) ?? '—'}</span>
+                      <span class="pcard__proj-label">Proyección</span>
+                    </div>
+                    <ConfidenceGauge value={parseFloat(v.modelProbPct)} size={52} />
+                  </div>
+
+                  <!-- OVER/UNDER toggle -->
                   <div class="dir-toggle">
                     <button class="dir-btn" class:active={row.dir === 'OVER'} class:over={row.dir === 'OVER'} on:click={() => row.setDir('OVER')}>OVER</button>
                     <button class="dir-btn" class:active={row.dir === 'UNDER'} class:under={row.dir === 'UNDER'} on:click={() => row.setDir('UNDER')}>UNDER</button>
                   </div>
 
-                  <div class="input-row">
-                    <div class="input-col">
+                  <!-- Line + Odds inline -->
+                  <div class="inputs-row">
+                    <div class="input-block">
                       <label class="input-label">🎯 Línea</label>
                       <input type="number" step="0.5" min="0"
                         value={row.dir === 'OVER' ? row.lineOver : row.lineUnder}
                         on:change={(e) => handleLineInput(e, row.period, row.dir)}
                         class="input-field" />
                     </div>
-                    <div class="input-col">
+                    <div class="input-block">
                       <label class="input-label">💰 Cuota</label>
                       <input type="number" step="0.01" min="1"
                         value={row.odds}
@@ -404,48 +415,38 @@
                     </div>
                   </div>
 
-                  <div class="metrics">
-                    <div class="mrow">
-                      <span>Dif.</span>
-                      <span class="mval" class:pos={parseFloat(v.edgePts) > 0} class:neg={parseFloat(v.edgePts) < 0}>{parseFloat(v.edgePts) > 0 ? '+' : ''}{v.edgePts}</span>
+                  <!-- Elegant metric strip -->
+                  <div class="metric-strip">
+                    <div class="metric-strip__item">
+                      <span class="metric-strip__label">Dif</span>
+                      <span class="metric-strip__val" class:pos={parseFloat(v.edgePts) > 0} class:neg={parseFloat(v.edgePts) < 0}>{parseFloat(v.edgePts) > 0 ? '+' : ''}{v.edgePts}</span>
                     </div>
-                    <div class="mrow">
-                      <span>SD</span>
-                      <span class="mval">±{v.std}</span>
+                    <div class="metric-strip__item">
+                      <span class="metric-strip__label">Z</span>
+                      <span class="metric-strip__val" class:pos={parseFloat(v.zScore) > 0} class:neg={parseFloat(v.zScore) < 0}>{parseFloat(v.zScore) > 0 ? '+' : ''}{v.zScore}</span>
                     </div>
-                    <div class="mrow">
-                      <span>Z</span>
-                      <span class="mval" class:pos={parseFloat(v.zScore) > 0} class:neg={parseFloat(v.zScore) < 0}>{parseFloat(v.zScore) > 0 ? '+' : ''}{v.zScore}</span>
+                    <div class="metric-strip__item">
+                      <span class="metric-strip__label">Justa</span>
+                      <span class="metric-strip__val">{v.fairOdds}</span>
                     </div>
-                  </div>
-
-                  <div class="kpi-rows">
-                    <div class="kpi-row kpi-row--prob">
-                      <span>Prob.</span>
-                      <span class="kpi-val" style="color: {v.tierColor}">{v.modelProbPct}%</span>
-                    </div>
-                    <div class="kpi-row">
-                      <span>Justa</span>
-                      <span class="kpi-val">{v.fairOdds}</span>
-                    </div>
-                    <div class="kpi-row kpi-row--ev">
-                      <span>EV</span>
-                      <span class="kpi-val" class:pos={parseFloat(v.evPct) > 0} class:neg={parseFloat(v.evPct) < 0}>{parseFloat(v.evPct) > 0 ? '+' : ''}{v.evPct}%</span>
-                    </div>
-                    <div class="kpi-row">
-                      <span>Edge</span>
-                      <span class="kpi-val" class:pos={parseFloat(v.edgeHousePct) > 0} class:neg={parseFloat(v.edgeHousePct) < 0}>{parseFloat(v.edgeHousePct) > 0 ? '+' : ''}{v.edgeHousePct}%</span>
+                    <div class="metric-strip__item metric-strip__item--ev">
+                      <span class="metric-strip__label">EV</span>
+                      <span class="metric-strip__val" class:pos={parseFloat(v.evPct) > 0} class:neg={parseFloat(v.evPct) < 0}>{parseFloat(v.evPct) > 0 ? '+' : ''}{v.evPct}%</span>
                     </div>
                   </div>
 
-                  <div class="tier-banner" style="background: {v.tierColor}; --glow: {v.tierColor}">
+                  <!-- Tier banner -->
+                  <div class="tier-banner" style="background: linear-gradient(135deg, {v.tierColor}, {v.tierColor}dd); --glow: {v.tierColor}">
                     <span class="tier-banner__emoji">{v.tierEmoji}</span>
-                    <span class="tier-banner__label">{v.tierLabel}</span>
-                    <div class="tier-banner__stars">
-                      {#each Array(5) as _, i}<span class="star" class:filled={i < v.rating}>★</span>{/each}
+                    <div class="tier-banner__content">
+                      <span class="tier-banner__label">{v.tierLabel}</span>
+                      <div class="tier-banner__stars">
+                        {#each Array(5) as _, i}<span class="star" class:filled={i < v.rating}>★</span>{/each}
+                      </div>
                     </div>
                   </div>
 
+                  <!-- Save button -->
                   <button class="save-btn"
                     class:save-btn--over={row.dir === 'OVER'}
                     class:save-btn--under={row.dir === 'UNDER'}
@@ -463,11 +464,12 @@
           {#if selectedParlayPicks.length >= 2 && parlayStats}
             <div class="parlay-bar" class:parlay-bar--value={parlayStats.isValue}>
               <div class="parlay-bar__info">
-                <Layers size={16} />
-                <strong>Combinada {selectedParlayPicks.length} legs</strong>
-                <span>Cuota: <b>{parlayStats.combinedOdds}</b></span>
-                <span>Prob: <b>{parlayStats.combinedProbPct}%</b></span>
-                <span>EV: <b class:pos={parlayStats.isValue} class:neg={!parlayStats.isValue}>{parlayStats.isValue ? '+' : ''}{parlayStats.evPct}%</b></span>
+                <div class="parlay-bar__title"><Layers size={16} /> Combinada {selectedParlayPicks.length} legs</div>
+                <div class="parlay-bar__stats">
+                  <span>Cuota <b>{parlayStats.combinedOdds}</b></span>
+                  <span>Prob <b>{parlayStats.combinedProbPct}%</b></span>
+                  <span>EV <b class:pos={parlayStats.isValue} class:neg={!parlayStats.isValue}>{parlayStats.isValue ? '+' : ''}{parlayStats.evPct}%</b></span>
+                </div>
               </div>
               <button class="parlay-bar__save" on:click={() => parlayModal = true}>
                 <Save size={14} /> Guardar Combinada
@@ -482,32 +484,33 @@
         <p>Selecciona ambos equipos para ver la predicción del modelo</p>
       </div>
     {/if}
-
-    <!-- Glosario al final -->
-    <button class="glossary-toggle" on:click={() => glossaryOpen = !glossaryOpen} class:open={glossaryOpen}>
-      <BookOpen size={15} />
-      <span>Glosario de términos</span>
-      <ChevronDown size={15} class={glossaryOpen ? 'rot' : ''} />
-    </button>
-
-    {#if glossaryOpen}
-      <div class="glossary">
-        <div class="glossary__grid">
-          <div class="g-item"><h4>Proyección</h4><p>Total estimado por el modelo ML. Combina promedios L5/L10/L20, descanso, B2B y factores contextuales.</p></div>
-          <div class="g-item"><h4>Línea</h4><p>Total que ofrece la casa. Siempre en saltos de 0.5 (215.5, 216, 216.5).</p></div>
-          <div class="g-item"><h4>Cuota (Decimal)</h4><p>Pago de la casa. Ej: 1.91 = ganas $0.91 por cada $1. 2.00 = duplicas tu apuesta.</p></div>
-          <div class="g-item"><h4>Cuota Justa</h4><p>Cuota que <strong>debería</strong> tener según el modelo. Si la casa paga MÁS → VALUE BET.</p></div>
-          <div class="g-item"><h4>Diferencia (pts)</h4><p>Distancia entre proyección y línea, ajustada al lado elegido (OVER/UNDER).</p></div>
-          <div class="g-item"><h4>Edge vs Casa (%)</h4><p>Cuánto mejor es la cuota real vs la justa. Ej: 2.05 vs 1.85 → +10.8%.</p></div>
-          <div class="g-item"><h4>Expected Value (EV)</h4><p>Ganancia esperada por unidad a largo plazo. <strong>+EV = ganadora</strong> en el largo plazo.</p></div>
-          <div class="g-item"><h4>Z-Score</h4><p>Desviaciones estándar que separan proyección de línea. |Z| &gt; 1 = señal fuerte.</p></div>
-          <div class="g-item"><h4>Rating</h4><p>⭐ 0-2% · ⭐⭐ 2-5% · ⭐⭐⭐ 5-8% · ⭐⭐⭐⭐ 8-15% · ⭐⭐⭐⭐⭐ +15%</p></div>
-          <div class="g-item"><h4>Clasificación</h4><p>🔥 ELITE (+15%) · 💎 STRONG (+8%) · ✨ VALUE (+3%) · ⚖️ NEUTRAL · 🚫 NO APOSTAR (-EV)</p></div>
-        </div>
-      </div>
-    {/if}
   {/if}
 </div>
+
+<!-- Glossary modal -->
+{#if glossaryModal}
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
+  <div class="overlay" on:click|self={() => glossaryModal = false}>
+    <div class="modal modal--wide" role="dialog" aria-modal="true" tabindex="-1">
+      <div class="modal__head">
+        <h3><HelpCircle size={18} /> Glosario de términos</h3>
+        <button class="modal__x" on:click={() => glossaryModal = false} aria-label="Cerrar"><X size={18} /></button>
+      </div>
+      <div class="modal__body glossary-body">
+        <div class="g-item"><h4>Proyección</h4><p>Total estimado por el modelo ML. Combina promedios L5/L10/L20, descanso, back-to-back, altitude y factores contextuales.</p></div>
+        <div class="g-item"><h4>Línea</h4><p>El total que ofrece la casa de apuestas. Siempre en saltos de 0.5 (215.5, 216, 216.5).</p></div>
+        <div class="g-item"><h4>Cuota (Decimal)</h4><p>Pago de la casa. Ej: 1.91 = ganas $0.91 por cada $1. 2.00 = duplicas tu apuesta.</p></div>
+        <div class="g-item"><h4>Cuota Justa</h4><p>Cuota que <strong>debería</strong> tener según el modelo. Si la casa paga MÁS → VALUE BET.</p></div>
+        <div class="g-item"><h4>Diferencia (Dif)</h4><p>Distancia entre proyección y línea, ajustada al lado elegido (OVER/UNDER).</p></div>
+        <div class="g-item"><h4>Z-Score</h4><p>Desviaciones estándar que separan proyección de línea. |Z| &gt; 1 = señal fuerte.</p></div>
+        <div class="g-item"><h4>Expected Value (EV)</h4><p>Ganancia esperada por unidad a largo plazo. <strong>+EV = ganadora</strong> a largo plazo. Fórmula: (prob × cuota) − 1.</p></div>
+        <div class="g-item"><h4>Rating (estrellas)</h4><p>⭐ 0-2% · ⭐⭐ 2-5% · ⭐⭐⭐ 5-8% · ⭐⭐⭐⭐ 8-15% · ⭐⭐⭐⭐⭐ +15%</p></div>
+        <div class="g-item g-item--wide"><h4>Clasificación</h4><p>🔥 <strong>ELITE VALUE</strong> (+15% EV) — Máxima prioridad, apuesta con 3-5% bankroll<br>💎 <strong>STRONG VALUE</strong> (+8% EV) — Excelente oportunidad<br>✨ <strong>VALUE BET</strong> (+3% EV) — Buena apuesta<br>⚖️ <strong>NEUTRAL</strong> (0-3% EV) — Marginal, evaluar con cuidado<br>🚫 <strong>NO APOSTAR</strong> (-EV) — La casa tiene ventaja matemática</p></div>
+      </div>
+    </div>
+  </div>
+{/if}
 
 <!-- Single pick save modal -->
 {#if saveTarget}
@@ -571,15 +574,19 @@
 {/if}
 
 <style>
-  .page { max-width: 1100px; margin: 0 auto; padding: 40px 20px 100px; position: relative; z-index: 1; }
-  @media (max-width: 768px) { .page { padding: 24px 14px 90px; } }
+  .page { max-width: 900px; margin: 0 auto; padding: 48px 20px 100px; position: relative; z-index: 1; }
+  @media (max-width: 768px) { .page { padding: 28px 14px 90px; } }
 
-  .page__header { margin-bottom: 18px; }
-  .page__label { font-size: 0.7rem; font-weight: 800; color: var(--color-accent, #6366F1); text-transform: uppercase; letter-spacing: 0.15em; }
-  .page__title { font-family: 'Inter', sans-serif; font-size: clamp(1.6rem, 3.5vw, 2.2rem); font-weight: 900; letter-spacing: -0.03em; margin: 6px 0 4px; color: var(--color-text-primary); }
-  .page__subtitle { font-size: 0.82rem; color: var(--color-text-muted); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .badge-warn { font-size: 0.65rem; background: rgba(245,158,11,0.12); color: #F59E0B; padding: 2px 7px; border-radius: 5px; font-weight: 700; }
-  .badge-source { font-size: 0.65rem; background: rgba(99,102,241,0.12); color: #818CF8; padding: 2px 7px; border-radius: 5px; font-weight: 700; }
+  .page__header { margin-bottom: 20px; }
+  .page__header-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .page__label { font-size: 0.72rem; font-weight: 800; color: var(--color-accent, #6366F1); text-transform: uppercase; letter-spacing: 0.15em; }
+  .page__title { font-family: 'Inter', sans-serif; font-size: clamp(1.7rem, 4vw, 2.3rem); font-weight: 900; letter-spacing: -0.03em; margin: 6px 0 4px; color: var(--color-text-primary); }
+  .page__subtitle { font-size: 0.85rem; color: var(--color-text-muted); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .badge-warn { font-size: 0.66rem; background: rgba(245,158,11,0.12); color: #F59E0B; padding: 2px 7px; border-radius: 5px; font-weight: 700; }
+  .badge-source { font-size: 0.66rem; background: rgba(99,102,241,0.12); color: #818CF8; padding: 2px 7px; border-radius: 5px; font-weight: 700; }
+
+  .help-btn { display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 10px; border: 1px solid var(--color-border); background: var(--glass-bg, var(--color-bg-card)); backdrop-filter: var(--glass-blur, blur(12px)); color: var(--color-text-secondary); font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
+  .help-btn:hover { border-color: var(--color-accent, #6366F1); color: var(--color-accent, #6366F1); background: var(--color-accent-glow, rgba(99,102,241,0.08)); }
 
   .selectors { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
   .selector { flex: 1; min-width: 220px; background: var(--glass-bg, var(--color-bg-card)); backdrop-filter: var(--glass-blur, blur(12px)); border: 1px solid var(--glass-border, var(--color-border)); border-radius: 14px; padding: 14px; box-shadow: var(--shadow-card); }
@@ -597,129 +604,139 @@
   .factors__title { font-size: 0.75rem; font-weight: 700; color: var(--color-text-muted); margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
   .factors__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
   @media (max-width: 500px) { .factors__grid { grid-template-columns: 1fr; } }
-  .ftoggle { display: flex; align-items: center; gap: 6px; font-size: 0.76rem; cursor: pointer; padding: 6px 8px; border-radius: 6px; transition: background 0.15s; color: var(--color-text-secondary); }
+  .ftoggle { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; cursor: pointer; padding: 6px 8px; border-radius: 6px; transition: background 0.15s; color: var(--color-text-secondary); }
   .ftoggle:hover { background: var(--color-bg-elevated); }
   .ftoggle input { accent-color: var(--color-accent, #6366F1); cursor: pointer; }
 
-  .pred-section { background: linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(139,92,246,0.05) 100%); backdrop-filter: var(--glass-blur, blur(12px)); border: 1px solid rgba(99,102,241,0.2); border-radius: 16px; padding: 18px 14px; box-shadow: var(--shadow-elevated); }
-  .pred-section__title { display: flex; align-items: center; justify-content: center; gap: 8px; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 800; text-align: center; color: var(--color-text-primary); }
-  .pred-section__sub { font-size: 0.74rem; color: var(--color-text-muted); text-align: center; margin: 2px 0 14px; }
+  .pred-section { background: linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(139,92,246,0.05) 100%); backdrop-filter: var(--glass-blur, blur(12px)); border: 1px solid rgba(99,102,241,0.2); border-radius: 18px; padding: 22px 18px; box-shadow: var(--shadow-elevated); }
+  .pred-section__header { text-align: center; margin-bottom: 18px; }
+  .pred-section__title { display: flex; align-items: center; justify-content: center; gap: 8px; font-family: 'Inter', sans-serif; font-size: 1.05rem; font-weight: 800; color: var(--color-text-primary); }
+  .pred-section__sub { font-size: 0.78rem; color: var(--color-text-muted); margin-top: 4px; }
 
-  .calc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  @media (max-width: 820px) { .calc-grid { grid-template-columns: 1fr; } }
+  .calc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  @media (max-width: 800px) { .calc-grid { grid-template-columns: 1fr; } }
 
-  .calc-card { background: var(--color-bg, #fff); border: 1px solid var(--color-border); border-radius: 12px; padding: 12px 11px; display: flex; flex-direction: column; gap: 7px; box-shadow: var(--shadow-card); transition: transform 0.2s, box-shadow 0.3s, border-color 0.2s; }
-  .calc-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-elevated); }
-  .calc-card--parlay-selected { border-color: var(--color-accent, #6366F1); box-shadow: 0 0 0 2px rgba(99,102,241,0.2); }
-  :global([data-theme="dark"]) .calc-card { background: rgba(255,255,255,0.02); }
+  /* CARD */
+  .pcard { background: var(--color-bg, #fff); border: 1px solid var(--color-border); border-radius: 14px; padding: 14px 13px; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--shadow-card); transition: transform 0.25s, box-shadow 0.3s, border-color 0.2s; position: relative; }
+  .pcard:hover { transform: translateY(-3px); box-shadow: var(--shadow-elevated); border-color: rgba(99,102,241,0.25); }
+  .pcard--parlay { border-color: var(--color-accent, #6366F1); box-shadow: 0 0 0 2px rgba(99,102,241,0.15), var(--shadow-elevated); }
+  :global([data-theme="dark"]) .pcard { background: rgba(255,255,255,0.025); }
 
-  .calc-card__header { display: flex; align-items: center; justify-content: space-between; padding-bottom: 6px; border-bottom: 1px solid var(--color-border); }
-  .calc-card__period-wrap { display: flex; align-items: baseline; gap: 6px; }
-  .calc-card__period { font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 800; color: var(--color-text-primary); }
-  .calc-card__proj { font-family: 'DM Mono', monospace; font-size: 0.85rem; font-weight: 800; color: var(--color-accent, #6366F1); }
+  .pcard__top { display: flex; justify-content: space-between; align-items: center; }
+  .pcard__period { font-family: 'Inter', sans-serif; font-size: 0.75rem; font-weight: 800; color: var(--color-accent, #6366F1); letter-spacing: 0.1em; text-transform: uppercase; background: var(--color-accent-glow, rgba(99,102,241,0.1)); padding: 3px 10px; border-radius: 20px; }
 
-  .parlay-toggle { display: flex; align-items: center; gap: 4px; cursor: pointer; padding: 4px 6px; border-radius: 5px; color: var(--color-text-muted); transition: color 0.15s, background 0.15s; }
-  .parlay-toggle:hover { background: var(--color-accent-glow, rgba(99,102,241,0.1)); color: var(--color-accent, #6366F1); }
-  .parlay-toggle input { accent-color: var(--color-accent, #6366F1); cursor: pointer; width: 13px; height: 13px; }
+  .parlay-chk { display: flex; align-items: center; gap: 4px; cursor: pointer; padding: 4px 7px; border-radius: 6px; color: var(--color-text-muted); transition: all 0.15s; background: var(--color-bg-elevated); }
+  .parlay-chk:hover { background: var(--color-accent-glow, rgba(99,102,241,0.1)); color: var(--color-accent, #6366F1); }
+  .parlay-chk input { accent-color: var(--color-accent, #6366F1); cursor: pointer; width: 12px; height: 12px; }
 
-  .dir-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
-  .dir-btn { padding: 7px; border-radius: 6px; border: 2px solid var(--color-border); background: var(--color-bg-elevated); color: var(--color-text-muted); font-size: 0.72rem; font-weight: 800; cursor: pointer; transition: all 0.2s; letter-spacing: 0.04em; }
+  /* HERO: big projection + gauge */
+  .pcard__hero { display: flex; justify-content: space-between; align-items: center; padding: 6px 4px 8px; border-bottom: 1px solid var(--color-border); }
+  .pcard__proj-wrap { display: flex; flex-direction: column; align-items: flex-start; }
+  .pcard__proj { font-family: 'DM Mono', monospace; font-size: 2rem; font-weight: 900; line-height: 1; color: var(--color-text-primary); letter-spacing: -0.02em; }
+  .pcard__proj-label { font-size: 0.62rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-top: 3px; }
+
+  /* OVER/UNDER toggle */
+  .dir-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .dir-btn { padding: 9px; border-radius: 8px; border: 2px solid var(--color-border); background: var(--color-bg-elevated); color: var(--color-text-muted); font-size: 0.78rem; font-weight: 800; cursor: pointer; transition: all 0.2s; letter-spacing: 0.05em; }
   .dir-btn:hover { border-color: var(--color-border-hover); }
-  .dir-btn.active.over { background: linear-gradient(135deg, #10B981, #059669); border-color: #10B981; color: white; box-shadow: 0 3px 10px rgba(16,185,129,0.3); }
-  .dir-btn.active.under { background: linear-gradient(135deg, #EF4444, #DC2626); border-color: #EF4444; color: white; box-shadow: 0 3px 10px rgba(239,68,68,0.3); }
+  .dir-btn.active.over { background: linear-gradient(135deg, #10B981, #059669); border-color: #10B981; color: white; box-shadow: 0 4px 12px rgba(16,185,129,0.35); }
+  .dir-btn.active.under { background: linear-gradient(135deg, #EF4444, #DC2626); border-color: #EF4444; color: white; box-shadow: 0 4px 12px rgba(239,68,68,0.35); }
 
-  .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-  .input-col { display: flex; flex-direction: column; gap: 3px; }
-  .input-label { font-size: 0.6rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
-  .input-field { padding: 7px 8px; border-radius: 6px; border: 1px solid var(--color-border-hover); background: var(--color-bg-elevated); color: var(--color-text-primary); font-family: 'DM Mono', monospace; font-size: 0.88rem; font-weight: 700; text-align: center; width: 100%; }
+  /* Line + Odds inline */
+  .inputs-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .input-block { display: flex; flex-direction: column; gap: 3px; }
+  .input-label { font-size: 0.62rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .input-field { padding: 8px 10px; border-radius: 7px; border: 1px solid var(--color-border-hover); background: var(--color-bg-elevated); color: var(--color-text-primary); font-family: 'DM Mono', monospace; font-size: 0.92rem; font-weight: 700; text-align: center; width: 100%; }
   .input-field:focus { outline: none; border-color: var(--color-accent, #6366F1); box-shadow: 0 0 0 2px var(--color-accent-glow, rgba(99,102,241,0.15)); }
   .input-field--odds { color: #F59E0B; border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.04); }
   .input-field--odds:focus { border-color: #F59E0B; box-shadow: 0 0 0 2px rgba(245,158,11,0.15); }
 
-  .metrics { background: var(--color-bg-elevated); border-radius: 7px; padding: 6px 9px; display: flex; justify-content: space-between; gap: 4px; }
-  .mrow { display: flex; flex-direction: column; align-items: center; flex: 1; gap: 1px; }
-  .mrow > span:first-child { font-size: 0.58rem; color: var(--color-text-muted); text-transform: uppercase; font-weight: 600; }
-  .mval { font-family: 'DM Mono', monospace; font-weight: 800; font-size: 0.76rem; color: var(--color-text-primary); }
-
-  .kpi-rows { display: flex; flex-direction: column; gap: 3px; }
-  .kpi-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 9px; border-radius: 6px; font-size: 0.72rem; }
-  .kpi-row span:first-child { color: var(--color-text-secondary); font-weight: 600; }
-  .kpi-row { background: var(--color-bg-elevated); }
-  .kpi-row--prob { background: rgba(99,102,241,0.06); }
-  .kpi-row--ev { background: rgba(16,185,129,0.06); }
-  .kpi-val { font-family: 'DM Mono', monospace; font-weight: 800; font-size: 0.82rem; color: var(--color-text-primary); }
+  /* Elegant metric strip */
+  .metric-strip { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--color-bg-elevated); border-radius: 10px; padding: 8px 4px; }
+  .metric-strip__item { display: flex; flex-direction: column; align-items: center; gap: 2px; position: relative; }
+  .metric-strip__item:not(:last-child)::after { content: ''; position: absolute; right: 0; top: 20%; bottom: 20%; width: 1px; background: var(--color-border); }
+  .metric-strip__label { font-size: 0.58rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .metric-strip__val { font-family: 'DM Mono', monospace; font-size: 0.84rem; font-weight: 800; color: var(--color-text-primary); }
+  .metric-strip__item--ev .metric-strip__val { font-size: 0.9rem; }
 
   .pos { color: #10B981 !important; }
   .neg { color: #EF4444 !important; }
 
-  .tier-banner { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 10px; border-radius: 8px; color: white; box-shadow: 0 3px 10px var(--glow); position: relative; overflow: hidden; }
-  .tier-banner::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent 60%); pointer-events: none; }
-  .tier-banner__emoji { font-size: 1.1rem; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3)); }
-  .tier-banner__label { font-size: 0.7rem; font-weight: 900; letter-spacing: 0.05em; text-shadow: 0 1px 1px rgba(0,0,0,0.2); }
+  /* Tier banner */
+  .tier-banner { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: white; box-shadow: 0 4px 14px var(--glow); position: relative; overflow: hidden; }
+  .tier-banner::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%); pointer-events: none; }
+  .tier-banner__emoji { font-size: 1.5rem; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3)); flex-shrink: 0; }
+  .tier-banner__content { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; position: relative; }
+  .tier-banner__label { font-size: 0.74rem; font-weight: 900; letter-spacing: 0.06em; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
   .tier-banner__stars { display: flex; gap: 1px; }
-  .star { color: rgba(255,255,255,0.35); font-size: 0.65rem; }
+  .star { color: rgba(255,255,255,0.35); font-size: 0.72rem; }
   .star.filled { color: #FCD34D; text-shadow: 0 0 3px rgba(252,211,77,0.6); }
 
-  .save-btn { padding: 8px; border-radius: 7px; border: none; font-size: 0.74rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; transition: all 0.2s; }
+  /* Save button */
+  .save-btn { padding: 9px; border-radius: 8px; border: none; font-size: 0.78rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; transition: all 0.2s; margin-top: 2px; }
   .save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .save-btn:not(:disabled):hover { transform: translateY(-1px); }
   .save-btn:active { transform: scale(0.97); }
   .save-btn--over { background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(16,185,129,0.08)); color: #10B981; border: 1px solid rgba(16,185,129,0.3); }
   .save-btn--under { background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(239,68,68,0.08)); color: #EF4444; border: 1px solid rgba(239,68,68,0.3); }
+  .save-btn--over:not(:disabled):hover { box-shadow: 0 4px 14px rgba(16,185,129,0.25); }
+  .save-btn--under:not(:disabled):hover { box-shadow: 0 4px 14px rgba(239,68,68,0.25); }
 
   /* Parlay bar */
-  .parlay-bar { margin-top: 14px; padding: 12px 16px; background: var(--color-bg-elevated); border: 1px solid var(--color-accent, #6366F1); border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; box-shadow: 0 4px 16px rgba(99,102,241,0.15); }
-  .parlay-bar--value { border-color: #10B981; box-shadow: 0 4px 16px rgba(16,185,129,0.2); }
-  .parlay-bar__info { display: flex; align-items: center; gap: 14px; color: var(--color-text-primary); font-size: 0.82rem; flex-wrap: wrap; }
-  .parlay-bar__info strong { color: var(--color-text-primary); }
-  .parlay-bar__info b { font-family: 'DM Mono', monospace; font-weight: 800; }
-  .parlay-bar__save { padding: 9px 16px; border-radius: 8px; border: none; background: linear-gradient(135deg, #6366F1, #8B5CF6); color: white; font-weight: 800; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: transform 0.15s; }
-  .parlay-bar__save:hover { transform: translateY(-1px); }
+  .parlay-bar { margin-top: 16px; padding: 14px 18px; background: linear-gradient(135deg, var(--color-bg-elevated), var(--color-bg-card)); border: 1px solid var(--color-accent, #6366F1); border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; box-shadow: 0 6px 20px rgba(99,102,241,0.2); }
+  .parlay-bar--value { border-color: #10B981; box-shadow: 0 6px 20px rgba(16,185,129,0.25); }
+  .parlay-bar__info { display: flex; flex-direction: column; gap: 6px; }
+  .parlay-bar__title { display: flex; align-items: center; gap: 6px; font-size: 0.88rem; font-weight: 800; color: var(--color-text-primary); }
+  .parlay-bar__stats { display: flex; gap: 16px; font-size: 0.78rem; color: var(--color-text-muted); }
+  .parlay-bar__stats b { font-family: 'DM Mono', monospace; font-weight: 800; color: var(--color-text-primary); margin-left: 4px; }
+  .parlay-bar__save { padding: 10px 18px; border-radius: 9px; border: none; background: linear-gradient(135deg, #6366F1, #8B5CF6); color: white; font-weight: 800; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: transform 0.15s, box-shadow 0.3s; }
+  .parlay-bar__save:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(99,102,241,0.35); }
 
-  /* Glosario */
-  .glossary-toggle { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 16px; background: var(--glass-bg, var(--color-bg-card)); backdrop-filter: var(--glass-blur, blur(12px)); border: 1px solid var(--glass-border, var(--color-border)); border-radius: 10px; color: var(--color-text-secondary); font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 24px; }
-  .glossary-toggle:hover { border-color: var(--color-accent, #6366F1); background: var(--color-accent-glow, rgba(99,102,241,0.08)); color: var(--color-text-primary); }
-  .glossary-toggle span { flex: 1; text-align: left; }
-  :global(.glossary-toggle svg.rot) { transform: rotate(180deg); transition: transform 0.3s; }
-  .glossary { background: var(--glass-bg, var(--color-bg-card)); backdrop-filter: var(--glass-blur, blur(12px)); border: 1px solid var(--color-accent, #6366F1); border-radius: 12px; padding: 16px; margin-top: 8px; animation: slideDown 0.3s ease; }
-  @keyframes slideDown { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
-  .glossary__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
-  .g-item h4 { font-size: 0.78rem; font-weight: 800; color: var(--color-accent, #6366F1); margin-bottom: 3px; }
-  .g-item p { font-size: 0.72rem; color: var(--color-text-secondary); line-height: 1.5; }
-
-  .empty { text-align: center; padding: 48px 20px; color: var(--color-text-muted); display: flex; flex-direction: column; align-items: center; gap: 14px; }
-  .empty p { font-size: 0.88rem; color: var(--color-text-muted); }
+  .empty { text-align: center; padding: 56px 20px; color: var(--color-text-muted); display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .empty p { font-size: 0.92rem; color: var(--color-text-muted); }
   .loading-state { text-align: center; padding: 40px 20px; color: var(--color-text-muted); display: flex; flex-direction: column; align-items: center; gap: 10px; }
   .spinner { width: 30px; height: 30px; border: 3px solid var(--color-accent-glow, rgba(99,102,241,0.2)); border-top-color: var(--color-accent, #6366F1); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 20px; }
-  .modal { background: var(--color-bg-elevated); border: 1px solid var(--color-border-hover); border-radius: 16px; padding: 22px 20px; width: 100%; max-width: 440px; box-shadow: var(--shadow-elevated); }
+  /* Modals */
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(6px); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 20px; animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal { background: var(--color-bg-elevated); border: 1px solid var(--color-border-hover); border-radius: 16px; padding: 22px 20px; width: 100%; max-width: 440px; box-shadow: var(--shadow-elevated); animation: modalIn 0.3s ease; }
+  .modal--wide { max-width: 640px; }
+  @keyframes modalIn { from { opacity: 0; transform: scale(0.96) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
   .modal__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
   .modal__head h3 { display: flex; align-items: center; gap: 8px; font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 800; color: var(--color-text-primary); }
-  .modal__x { background: none; border: none; color: var(--color-text-muted); cursor: pointer; padding: 4px; }
+  .modal__x { background: none; border: none; color: var(--color-text-muted); cursor: pointer; padding: 4px; border-radius: 6px; transition: all 0.15s; }
+  .modal__x:hover { background: var(--color-bg-card); color: var(--color-text-primary); }
   .modal__body { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
-  .summary-row { display: flex; justify-content: space-between; font-size: 0.84rem; }
+  .glossary-body { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; max-height: 60vh; overflow-y: auto; }
+  @media (max-width: 560px) { .glossary-body { grid-template-columns: 1fr; } }
+  .g-item { padding: 10px 12px; background: var(--color-bg-card); border-radius: 8px; border-left: 3px solid var(--color-accent, #6366F1); }
+  .g-item--wide { grid-column: 1 / -1; }
+  .g-item h4 { font-size: 0.82rem; font-weight: 800; color: var(--color-accent, #6366F1); margin-bottom: 4px; }
+  .g-item p { font-size: 0.74rem; color: var(--color-text-secondary); line-height: 1.55; }
+
+  .summary-row { display: flex; justify-content: space-between; font-size: 0.86rem; }
   .summary-row span { color: var(--color-text-muted); }
   .summary-row strong { font-weight: 700; color: var(--color-text-primary); }
   .indigo { color: var(--color-accent, #6366F1) !important; }
   .divider { height: 1px; background: var(--color-border); margin: 4px 0; }
-  .leg { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; padding: 6px 10px; background: var(--color-bg-card); border-radius: 6px; }
+  .leg { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; padding: 7px 10px; background: var(--color-bg-card); border-radius: 7px; }
   .leg__num { font-family: 'DM Mono', monospace; font-weight: 800; color: var(--color-accent, #6366F1); }
   .leg__period { color: var(--color-text-primary); }
   .leg__bet { flex: 1; font-weight: 700; }
   .leg__odds { font-family: 'DM Mono', monospace; color: #F59E0B; font-weight: 800; }
   .modal__actions { display: flex; gap: 8px; justify-content: flex-end; }
-  .mbtn { padding: 9px 18px; border-radius: 8px; border: none; font-size: 0.82rem; font-weight: 700; cursor: pointer; }
+  .mbtn { padding: 10px 20px; border-radius: 8px; border: none; font-size: 0.84rem; font-weight: 700; cursor: pointer; }
   .mbtn:disabled { opacity: 0.4; cursor: not-allowed; }
   .mbtn--ghost { background: transparent; border: 1px solid var(--color-border-hover); color: var(--color-text-secondary); }
-  .mbtn--save { background: var(--color-accent, #6366F1); color: #fff; }
+  .mbtn--save { background: linear-gradient(135deg, #6366F1, #8B5CF6); color: #fff; }
 
   @media (max-width: 640px) {
     .selectors { flex-direction: column; align-items: stretch; gap: 10px; }
     .selector { min-width: 100%; }
     .vs { align-self: center; margin: -4px 0; }
     .calc-grid { grid-template-columns: 1fr; }
-    .parlay-bar__info { font-size: 0.75rem; gap: 10px; }
+    .parlay-bar__stats { font-size: 0.72rem; gap: 10px; }
   }
 </style>
