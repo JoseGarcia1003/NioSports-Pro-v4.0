@@ -2,9 +2,9 @@
   import { onMount } from 'svelte';
   import { userId } from '$lib/stores/auth';
   import { subscription } from '$lib/stores/subscription';
-  import { teamStats, picksStore } from '$lib/stores/data';
+  import { teamStats, picksStore, bankrollStore } from '$lib/stores/data';
   import { toasts } from '$lib/stores/ui';
-  import { BarChart3, Home, Plane, Settings, Save, X, TrendingUp, HelpCircle, Layers } from 'lucide-svelte';
+  import { BarChart3, Home, Plane, Settings, Save, X, TrendingUp, BookOpen, Layers, AlertTriangle, Wallet } from 'lucide-svelte';
   import TeamSelector from '$lib/components/TeamSelector.svelte';
   import ConfidenceGauge from '$lib/components/charts/ConfidenceGauge.svelte';
   import { MODEL_VERSION } from '$lib/engine/constants.js';
@@ -29,6 +29,16 @@
   let oddsQ1 = '1.91', oddsHalf = '1.91', oddsFull = '1.91';
   let parlayQ1 = false, parlayHalf = false, parlayFull = false;
   let parlayModal = false;
+
+  // Single pick stake
+  let singleWillBet = false;
+  let singleStake = '';
+
+  // Parlay stake
+  let parlayWillBet = false;
+  let parlayStake = '';
+
+  $: bankrollBalance = $bankrollStore?.current || 0;
 
   onMount(async () => {
     try {
@@ -179,13 +189,20 @@
       edge: parseFloat(value.edgePts),
       fairOdds: value.fairOdds, bookOdds: value.bookOdds,
     };
+    singleWillBet = false;
+    singleStake = '';
   }
-  function closeSave() { saveTarget = null; }
+  function closeSave() { saveTarget = null; singleWillBet = false; singleStake = ''; }
+
+  $: singleStakeNum = parseFloat(singleStake) || 0;
+  $: singleInsufficient = singleWillBet && singleStakeNum > bankrollBalance;
+  $: singleStakeValid = singleWillBet ? (singleStakeNum > 0 && !singleInsufficient) : true;
 
   async function handleSavePick() {
-    if (!saveTarget || !$userId) return;
+    if (!saveTarget || !$userId || !singleStakeValid) return;
     savingPick = true;
     try {
+      const stake = singleWillBet ? singleStakeNum : 0;
       await picksStore.save({
         user_id: $userId, home_team: localTeam, away_team: awayTeam,
         period: saveTarget.period, direction: saveTarget.direction,
@@ -195,11 +212,27 @@
         edge: saveTarget.edge, model_version: MODEL_VERSION.version,
         odds: parseFloat(saveTarget.bookOdds) || 1.91,
         fair_odds: parseFloat(saveTarget.fairOdds), status: 'pending', source: 'totales',
-        created_at: new Date().toISOString(),
+        stake, created_at: new Date().toISOString(),
       });
-      toasts.success(`Pick guardado: ${saveTarget.direction} ${saveTarget.line} (${saveTarget.period})`);
+
+      // Deduct from bankroll if betting
+      if (singleWillBet && stake > 0) {
+        await bankrollStore.addTransaction({
+          user_id: $userId,
+          amount: -stake,
+          type: 'bet_placed',
+          description: `${saveTarget.direction} ${saveTarget.line} (${saveTarget.period}) — ${localTeam} vs ${awayTeam}`,
+          created_at: new Date().toISOString(),
+        });
+        toasts.success(`Pick guardado y $${stake.toFixed(2)} apostado. Balance: $${(bankrollBalance - stake).toFixed(2)}`);
+      } else {
+        toasts.success(`Pick guardado: ${saveTarget.direction} ${saveTarget.line} (${saveTarget.period})`);
+      }
       closeSave();
-    } catch { toasts.error('No se pudo guardar el pick.'); }
+    } catch (err) {
+      console.error('[Totales] Save error:', err);
+      toasts.error('No se pudo guardar el pick.');
+    }
     finally { savingPick = false; }
   }
 
@@ -223,11 +256,30 @@
     };
   })() : null;
 
+  function openParlayModal() {
+    parlayModal = true;
+    parlayWillBet = false;
+    parlayStake = '';
+  }
+  function closeParlayModal() {
+    parlayModal = false;
+    parlayWillBet = false;
+    parlayStake = '';
+  }
+
+  $: parlayStakeNum = parseFloat(parlayStake) || 0;
+  $: parlayInsufficient = parlayWillBet && parlayStakeNum > bankrollBalance;
+  $: parlayPotentialWin = parlayStats ? (parlayStakeNum * parseFloat(parlayStats.combinedOdds)).toFixed(2) : '0.00';
+  $: parlayStakeValid = parlayWillBet ? (parlayStakeNum > 0 && !parlayInsufficient) : true;
+
   async function saveParlay() {
-    if (!$userId || selectedParlayPicks.length < 2 || !parlayStats) return;
+    if (!$userId || selectedParlayPicks.length < 2 || !parlayStats || !parlayStakeValid) return;
     savingPick = true;
     try {
       const parlayId = `parlay_${Date.now()}`;
+      const stake = parlayWillBet ? parlayStakeNum : 0;
+      const stakePerLeg = stake / selectedParlayPicks.length;
+
       for (const p of selectedParlayPicks) {
         await picksStore.save({
           user_id: $userId, home_team: localTeam, away_team: awayTeam,
@@ -240,14 +292,34 @@
           status: 'pending', source: 'totales-parlay',
           parlay_id: parlayId, parlay_legs: selectedParlayPicks.length,
           parlay_combined_odds: parseFloat(parlayStats.combinedOdds),
+          stake: stakePerLeg,
           created_at: new Date().toISOString(),
         });
       }
-      toasts.success(`Combinada de ${selectedParlayPicks.length} legs guardada (cuota ${parlayStats.combinedOdds})`);
-      parlayModal = false;
+
+      if (parlayWillBet && stake > 0) {
+        await bankrollStore.addTransaction({
+          user_id: $userId,
+          amount: -stake,
+          type: 'parlay_placed',
+          description: `Combinada ${selectedParlayPicks.length} legs @ ${parlayStats.combinedOdds} — ${localTeam} vs ${awayTeam}`,
+          created_at: new Date().toISOString(),
+        });
+        toasts.success(`Combinada guardada y $${stake.toFixed(2)} apostado. Balance: $${(bankrollBalance - stake).toFixed(2)}`);
+      } else {
+        toasts.success(`Combinada de ${selectedParlayPicks.length} legs guardada (cuota ${parlayStats.combinedOdds})`);
+      }
+      closeParlayModal();
       parlayQ1 = false; parlayHalf = false; parlayFull = false;
-    } catch { toasts.error('No se pudo guardar la combinada.'); }
+    } catch (err) {
+      console.error('[Totales] Parlay error:', err);
+      toasts.error('No se pudo guardar la combinada.');
+    }
     finally { savingPick = false; }
+  }
+
+  function fillMaxStake(setter) {
+    setter(bankrollBalance.toFixed(2));
   }
 
   function getDemoStats() {
@@ -298,8 +370,8 @@
         </p>
       </div>
       <button class="help-btn" on:click={() => glossaryModal = true} aria-label="Glosario">
-        <HelpCircle size={18} />
-        <span>Ayuda</span>
+        <BookOpen size={18} />
+        <span>Glosario</span>
       </button>
     </div>
   </header>
@@ -372,8 +444,9 @@
               {@const a = row.analysis}
               {@const v = row.value}
               {#if a && v}
-                <div class="pcard" class:pcard--parlay={row.parlay}>
-                  <!-- Top: period label + parlay checkbox -->
+                <div class="pcard" class:pcard--parlay={row.parlay} style="--tier-color: {v.tierColor}">
+                  <div class="pcard__glow"></div>
+
                   <div class="pcard__top">
                     <span class="pcard__period">{row.label}</span>
                     <label class="parlay-chk" title="Añadir a combinada">
@@ -382,22 +455,19 @@
                     </label>
                   </div>
 
-                  <!-- Hero: big projection + gauge -->
                   <div class="pcard__hero">
                     <div class="pcard__proj-wrap">
                       <span class="pcard__proj">{a.projection?.toFixed(1) ?? '—'}</span>
                       <span class="pcard__proj-label">Proyección</span>
                     </div>
-                    <ConfidenceGauge value={parseFloat(v.modelProbPct)} size={52} />
+                    <ConfidenceGauge value={parseFloat(v.modelProbPct)} size={56} />
                   </div>
 
-                  <!-- OVER/UNDER toggle -->
                   <div class="dir-toggle">
                     <button class="dir-btn" class:active={row.dir === 'OVER'} class:over={row.dir === 'OVER'} on:click={() => row.setDir('OVER')}>OVER</button>
                     <button class="dir-btn" class:active={row.dir === 'UNDER'} class:under={row.dir === 'UNDER'} on:click={() => row.setDir('UNDER')}>UNDER</button>
                   </div>
 
-                  <!-- Line + Odds inline -->
                   <div class="inputs-row">
                     <div class="input-block">
                       <label class="input-label">🎯 Línea</label>
@@ -415,7 +485,6 @@
                     </div>
                   </div>
 
-                  <!-- Elegant metric strip -->
                   <div class="metric-strip">
                     <div class="metric-strip__item">
                       <span class="metric-strip__label">Dif</span>
@@ -435,8 +504,8 @@
                     </div>
                   </div>
 
-                  <!-- Tier banner -->
                   <div class="tier-banner" style="background: linear-gradient(135deg, {v.tierColor}, {v.tierColor}dd); --glow: {v.tierColor}">
+                    <div class="tier-banner__shimmer"></div>
                     <span class="tier-banner__emoji">{v.tierEmoji}</span>
                     <div class="tier-banner__content">
                       <span class="tier-banner__label">{v.tierLabel}</span>
@@ -446,7 +515,6 @@
                     </div>
                   </div>
 
-                  <!-- Save button -->
                   <button class="save-btn"
                     class:save-btn--over={row.dir === 'OVER'}
                     class:save-btn--under={row.dir === 'UNDER'}
@@ -460,7 +528,6 @@
             {/each}
           </div>
 
-          <!-- Parlay summary bar -->
           {#if selectedParlayPicks.length >= 2 && parlayStats}
             <div class="parlay-bar" class:parlay-bar--value={parlayStats.isValue}>
               <div class="parlay-bar__info">
@@ -471,7 +538,7 @@
                   <span>EV <b class:pos={parlayStats.isValue} class:neg={!parlayStats.isValue}>{parlayStats.isValue ? '+' : ''}{parlayStats.evPct}%</b></span>
                 </div>
               </div>
-              <button class="parlay-bar__save" on:click={() => parlayModal = true}>
+              <button class="parlay-bar__save" on:click={openParlayModal}>
                 <Save size={14} /> Guardar Combinada
               </button>
             </div>
@@ -494,7 +561,7 @@
   <div class="overlay" on:click|self={() => glossaryModal = false}>
     <div class="modal modal--wide" role="dialog" aria-modal="true" tabindex="-1">
       <div class="modal__head">
-        <h3><HelpCircle size={18} /> Glosario de términos</h3>
+        <h3><BookOpen size={18} /> Glosario de términos</h3>
         <button class="modal__x" on:click={() => glossaryModal = false} aria-label="Cerrar"><X size={18} /></button>
       </div>
       <div class="modal__body glossary-body">
@@ -504,9 +571,9 @@
         <div class="g-item"><h4>Cuota Justa</h4><p>Cuota que <strong>debería</strong> tener según el modelo. Si la casa paga MÁS → VALUE BET.</p></div>
         <div class="g-item"><h4>Diferencia (Dif)</h4><p>Distancia entre proyección y línea, ajustada al lado elegido (OVER/UNDER).</p></div>
         <div class="g-item"><h4>Z-Score</h4><p>Desviaciones estándar que separan proyección de línea. |Z| &gt; 1 = señal fuerte.</p></div>
-        <div class="g-item"><h4>Expected Value (EV)</h4><p>Ganancia esperada por unidad a largo plazo. <strong>+EV = ganadora</strong> a largo plazo. Fórmula: (prob × cuota) − 1.</p></div>
+        <div class="g-item"><h4>Expected Value (EV)</h4><p>Ganancia esperada por unidad a largo plazo. <strong>+EV = ganadora</strong>. Fórmula: (prob × cuota) − 1.</p></div>
         <div class="g-item"><h4>Rating (estrellas)</h4><p>⭐ 0-2% · ⭐⭐ 2-5% · ⭐⭐⭐ 5-8% · ⭐⭐⭐⭐ 8-15% · ⭐⭐⭐⭐⭐ +15%</p></div>
-        <div class="g-item g-item--wide"><h4>Clasificación</h4><p>🔥 <strong>ELITE VALUE</strong> (+15% EV) — Máxima prioridad, apuesta con 3-5% bankroll<br>💎 <strong>STRONG VALUE</strong> (+8% EV) — Excelente oportunidad<br>✨ <strong>VALUE BET</strong> (+3% EV) — Buena apuesta<br>⚖️ <strong>NEUTRAL</strong> (0-3% EV) — Marginal, evaluar con cuidado<br>🚫 <strong>NO APOSTAR</strong> (-EV) — La casa tiene ventaja matemática</p></div>
+        <div class="g-item g-item--wide"><h4>Clasificación</h4><p>🔥 <strong>ELITE VALUE</strong> (+15% EV) — Máxima prioridad, apuesta con 3-5% bankroll<br>💎 <strong>STRONG VALUE</strong> (+8% EV) — Excelente oportunidad<br>✨ <strong>VALUE BET</strong> (+3% EV) — Buena apuesta<br>⚖️ <strong>NEUTRAL</strong> (0-3% EV) — Marginal<br>🚫 <strong>NO APOSTAR</strong> (-EV) — La casa tiene ventaja</p></div>
       </div>
     </div>
   </div>
@@ -528,12 +595,47 @@
         <div class="summary-row"><span>Apuesta</span><strong class="indigo">{saveTarget.direction} {saveTarget.line}</strong></div>
         <div class="summary-row"><span>Cuota</span><strong>{saveTarget.bookOdds} (justa: {saveTarget.fairOdds})</strong></div>
         <div class="summary-row"><span>Probabilidad</span><strong>{saveTarget.probabilityPercent}%</strong></div>
-        <div class="summary-row"><span>Rating</span><strong>{saveTarget.confidence}</strong></div>
         <div class="summary-row"><span>EV</span><strong class:pos={parseFloat(saveTarget.evPercent) > 0} class:neg={parseFloat(saveTarget.evPercent) < 0}>{parseFloat(saveTarget.evPercent) > 0 ? '+' : ''}{saveTarget.evPercent}%</strong></div>
+
+        <div class="bet-section">
+          <label class="bet-toggle">
+            <input type="checkbox" bind:checked={singleWillBet} />
+            <span>💵 ¿Apostarás dinero real?</span>
+          </label>
+
+          {#if singleWillBet}
+            <div class="bet-stake">
+              <div class="bet-stake__balance">
+                <Wallet size={14} />
+                Balance: <strong>${bankrollBalance.toFixed(2)}</strong>
+              </div>
+              <div class="bet-stake__input-row">
+                <input type="number" step="0.01" min="0" max={bankrollBalance}
+                  bind:value={singleStake}
+                  placeholder="0.00"
+                  class="bet-stake__input"
+                  class:bet-stake__input--error={singleInsufficient} />
+                <button type="button" class="bet-stake__max" on:click={() => singleStake = bankrollBalance.toFixed(2)}>MAX</button>
+              </div>
+              {#if singleInsufficient}
+                <div class="bet-warning">
+                  <AlertTriangle size={14} />
+                  Saldo insuficiente. Tu balance es ${bankrollBalance.toFixed(2)}.
+                </div>
+              {:else if singleStakeNum > 0}
+                <div class="bet-info">
+                  Ganancia potencial: <strong class="pos">${(singleStakeNum * parseFloat(saveTarget.bookOdds)).toFixed(2)}</strong> · Balance restante: <strong>${(bankrollBalance - singleStakeNum).toFixed(2)}</strong>
+                </div>
+              {/if}
+            </div>
+          {/if}
+        </div>
       </div>
       <div class="modal__actions">
         <button class="mbtn mbtn--ghost" on:click={closeSave} disabled={savingPick}>Cancelar</button>
-        <button class="mbtn mbtn--save" on:click={handleSavePick} disabled={savingPick}>{savingPick ? 'Guardando...' : 'Guardar'}</button>
+        <button class="mbtn mbtn--save" on:click={handleSavePick} disabled={savingPick || !singleStakeValid}>
+          {savingPick ? 'Guardando...' : (singleWillBet ? 'Guardar y Apostar' : 'Guardar')}
+        </button>
       </div>
     </div>
   </div>
@@ -543,11 +645,11 @@
 {#if parlayModal && parlayStats}
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <!-- svelte-ignore a11y-no-static-element-interactions -->
-  <div class="overlay" on:click|self={() => parlayModal = false}>
+  <div class="overlay" on:click|self={closeParlayModal}>
     <div class="modal" role="dialog" aria-modal="true" tabindex="-1">
       <div class="modal__head">
         <h3><Layers size={18} /> Combinada {selectedParlayPicks.length} legs</h3>
-        <button class="modal__x" on:click={() => parlayModal = false} aria-label="Cerrar"><X size={18} /></button>
+        <button class="modal__x" on:click={closeParlayModal} aria-label="Cerrar"><X size={18} /></button>
       </div>
       <div class="modal__body">
         <div class="summary-row"><span>Partido</span><strong>{localTeam} vs {awayTeam}</strong></div>
@@ -561,13 +663,48 @@
         {/each}
         <div class="divider"></div>
         <div class="summary-row"><span>Cuota combinada</span><strong class="indigo">{parlayStats.combinedOdds}</strong></div>
-        <div class="summary-row"><span>Cuota justa</span><strong>{parlayStats.fairCombined}</strong></div>
         <div class="summary-row"><span>Probabilidad</span><strong>{parlayStats.combinedProbPct}%</strong></div>
         <div class="summary-row"><span>EV</span><strong class:pos={parlayStats.isValue} class:neg={!parlayStats.isValue}>{parlayStats.isValue ? '+' : ''}{parlayStats.evPct}%</strong></div>
+
+        <div class="bet-section">
+          <label class="bet-toggle">
+            <input type="checkbox" bind:checked={parlayWillBet} />
+            <span>💵 ¿Apostarás dinero real?</span>
+          </label>
+
+          {#if parlayWillBet}
+            <div class="bet-stake">
+              <div class="bet-stake__balance">
+                <Wallet size={14} />
+                Balance: <strong>${bankrollBalance.toFixed(2)}</strong>
+              </div>
+              <div class="bet-stake__input-row">
+                <input type="number" step="0.01" min="0" max={bankrollBalance}
+                  bind:value={parlayStake}
+                  placeholder="0.00"
+                  class="bet-stake__input"
+                  class:bet-stake__input--error={parlayInsufficient} />
+                <button type="button" class="bet-stake__max" on:click={() => parlayStake = bankrollBalance.toFixed(2)}>MAX</button>
+              </div>
+              {#if parlayInsufficient}
+                <div class="bet-warning">
+                  <AlertTriangle size={14} />
+                  Saldo insuficiente. Tu balance es ${bankrollBalance.toFixed(2)}.
+                </div>
+              {:else if parlayStakeNum > 0}
+                <div class="bet-info">
+                  Ganancia potencial: <strong class="pos">${parlayPotentialWin}</strong> · Balance restante: <strong>${(bankrollBalance - parlayStakeNum).toFixed(2)}</strong>
+                </div>
+              {/if}
+            </div>
+          {/if}
+        </div>
       </div>
       <div class="modal__actions">
-        <button class="mbtn mbtn--ghost" on:click={() => parlayModal = false} disabled={savingPick}>Cancelar</button>
-        <button class="mbtn mbtn--save" on:click={saveParlay} disabled={savingPick}>{savingPick ? 'Guardando...' : 'Guardar Combinada'}</button>
+        <button class="mbtn mbtn--ghost" on:click={closeParlayModal} disabled={savingPick}>Cancelar</button>
+        <button class="mbtn mbtn--save" on:click={saveParlay} disabled={savingPick || !parlayStakeValid}>
+          {savingPick ? 'Guardando...' : (parlayWillBet ? 'Guardar y Apostar' : 'Guardar Combinada')}
+        </button>
       </div>
     </div>
   </div>
@@ -616,34 +753,34 @@
   .calc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
   @media (max-width: 800px) { .calc-grid { grid-template-columns: 1fr; } }
 
-  /* CARD */
-  .pcard { background: var(--color-bg, #fff); border: 1px solid var(--color-border); border-radius: 14px; padding: 14px 13px; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--shadow-card); transition: transform 0.25s, box-shadow 0.3s, border-color 0.2s; position: relative; }
+  .pcard { background: var(--color-bg, #fff); border: 1px solid var(--color-border); border-radius: 14px; padding: 14px 13px; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--shadow-card); transition: transform 0.25s, box-shadow 0.3s, border-color 0.2s; position: relative; overflow: hidden; }
   .pcard:hover { transform: translateY(-3px); box-shadow: var(--shadow-elevated); border-color: rgba(99,102,241,0.25); }
   .pcard--parlay { border-color: var(--color-accent, #6366F1); box-shadow: 0 0 0 2px rgba(99,102,241,0.15), var(--shadow-elevated); }
   :global([data-theme="dark"]) .pcard { background: rgba(255,255,255,0.025); }
 
-  .pcard__top { display: flex; justify-content: space-between; align-items: center; }
-  .pcard__period { font-family: 'Inter', sans-serif; font-size: 0.75rem; font-weight: 800; color: var(--color-accent, #6366F1); letter-spacing: 0.1em; text-transform: uppercase; background: var(--color-accent-glow, rgba(99,102,241,0.1)); padding: 3px 10px; border-radius: 20px; }
+  /* Subtle tier glow on card corner */
+  .pcard__glow { position: absolute; top: -60px; right: -60px; width: 140px; height: 140px; border-radius: 50%; background: radial-gradient(circle, var(--tier-color, #6366F1)33, transparent 70%); opacity: 0; transition: opacity 0.5s ease; pointer-events: none; filter: blur(15px); }
+  .pcard:hover .pcard__glow { opacity: 1; }
+
+  .pcard__top { display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 1; }
+  .pcard__period { font-family: 'Inter', sans-serif; font-size: 0.72rem; font-weight: 800; color: var(--color-accent, #6366F1); letter-spacing: 0.1em; text-transform: uppercase; background: var(--color-accent-glow, rgba(99,102,241,0.1)); padding: 4px 12px; border-radius: 20px; }
 
   .parlay-chk { display: flex; align-items: center; gap: 4px; cursor: pointer; padding: 4px 7px; border-radius: 6px; color: var(--color-text-muted); transition: all 0.15s; background: var(--color-bg-elevated); }
   .parlay-chk:hover { background: var(--color-accent-glow, rgba(99,102,241,0.1)); color: var(--color-accent, #6366F1); }
   .parlay-chk input { accent-color: var(--color-accent, #6366F1); cursor: pointer; width: 12px; height: 12px; }
 
-  /* HERO: big projection + gauge */
-  .pcard__hero { display: flex; justify-content: space-between; align-items: center; padding: 6px 4px 8px; border-bottom: 1px solid var(--color-border); }
+  .pcard__hero { display: flex; justify-content: space-between; align-items: center; padding: 6px 4px 10px; border-bottom: 1px solid var(--color-border); position: relative; z-index: 1; }
   .pcard__proj-wrap { display: flex; flex-direction: column; align-items: flex-start; }
-  .pcard__proj { font-family: 'DM Mono', monospace; font-size: 2rem; font-weight: 900; line-height: 1; color: var(--color-text-primary); letter-spacing: -0.02em; }
-  .pcard__proj-label { font-size: 0.62rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-top: 3px; }
+  .pcard__proj { font-family: 'DM Mono', monospace; font-size: 2.1rem; font-weight: 900; line-height: 1; color: var(--color-text-primary); letter-spacing: -0.02em; }
+  .pcard__proj-label { font-size: 0.62rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-top: 4px; }
 
-  /* OVER/UNDER toggle */
-  .dir-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .dir-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; position: relative; z-index: 1; }
   .dir-btn { padding: 9px; border-radius: 8px; border: 2px solid var(--color-border); background: var(--color-bg-elevated); color: var(--color-text-muted); font-size: 0.78rem; font-weight: 800; cursor: pointer; transition: all 0.2s; letter-spacing: 0.05em; }
   .dir-btn:hover { border-color: var(--color-border-hover); }
-  .dir-btn.active.over { background: linear-gradient(135deg, #10B981, #059669); border-color: #10B981; color: white; box-shadow: 0 4px 12px rgba(16,185,129,0.35); }
-  .dir-btn.active.under { background: linear-gradient(135deg, #EF4444, #DC2626); border-color: #EF4444; color: white; box-shadow: 0 4px 12px rgba(239,68,68,0.35); }
+  .dir-btn.active.over { background: linear-gradient(135deg, #10B981, #059669); border-color: #10B981; color: white; box-shadow: 0 4px 14px rgba(16,185,129,0.4); }
+  .dir-btn.active.under { background: linear-gradient(135deg, #EF4444, #DC2626); border-color: #EF4444; color: white; box-shadow: 0 4px 14px rgba(239,68,68,0.4); }
 
-  /* Line + Odds inline */
-  .inputs-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .inputs-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; position: relative; z-index: 1; }
   .input-block { display: flex; flex-direction: column; gap: 3px; }
   .input-label { font-size: 0.62rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
   .input-field { padding: 8px 10px; border-radius: 7px; border: 1px solid var(--color-border-hover); background: var(--color-bg-elevated); color: var(--color-text-primary); font-family: 'DM Mono', monospace; font-size: 0.92rem; font-weight: 700; text-align: center; width: 100%; }
@@ -651,38 +788,37 @@
   .input-field--odds { color: #F59E0B; border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.04); }
   .input-field--odds:focus { border-color: #F59E0B; box-shadow: 0 0 0 2px rgba(245,158,11,0.15); }
 
-  /* Elegant metric strip */
-  .metric-strip { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--color-bg-elevated); border-radius: 10px; padding: 8px 4px; }
-  .metric-strip__item { display: flex; flex-direction: column; align-items: center; gap: 2px; position: relative; }
+  .metric-strip { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--color-bg-elevated); border-radius: 10px; padding: 9px 4px; position: relative; z-index: 1; }
+  .metric-strip__item { display: flex; flex-direction: column; align-items: center; gap: 3px; position: relative; }
   .metric-strip__item:not(:last-child)::after { content: ''; position: absolute; right: 0; top: 20%; bottom: 20%; width: 1px; background: var(--color-border); }
   .metric-strip__label { font-size: 0.58rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
-  .metric-strip__val { font-family: 'DM Mono', monospace; font-size: 0.84rem; font-weight: 800; color: var(--color-text-primary); }
-  .metric-strip__item--ev .metric-strip__val { font-size: 0.9rem; }
+  .metric-strip__val { font-family: 'DM Mono', monospace; font-size: 0.86rem; font-weight: 800; color: var(--color-text-primary); }
+  .metric-strip__item--ev .metric-strip__val { font-size: 0.92rem; }
 
   .pos { color: #10B981 !important; }
   .neg { color: #EF4444 !important; }
 
-  /* Tier banner */
-  .tier-banner { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: white; box-shadow: 0 4px 14px var(--glow); position: relative; overflow: hidden; }
-  .tier-banner::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%); pointer-events: none; }
-  .tier-banner__emoji { font-size: 1.5rem; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3)); flex-shrink: 0; }
-  .tier-banner__content { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; position: relative; }
-  .tier-banner__label { font-size: 0.74rem; font-weight: 900; letter-spacing: 0.06em; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+  /* Premium tier banner with shimmer */
+  .tier-banner { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-radius: 10px; color: white; box-shadow: 0 4px 18px var(--glow), 0 0 0 1px rgba(255,255,255,0.1) inset; position: relative; overflow: hidden; z-index: 1; }
+  .tier-banner::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.22) 0%, transparent 50%); pointer-events: none; }
+  .tier-banner__shimmer { position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent); animation: shimmer 3.5s ease-in-out infinite; }
+  @keyframes shimmer { 0% { left: -100%; } 60%, 100% { left: 200%; } }
+  .tier-banner__emoji { font-size: 1.55rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4)); flex-shrink: 0; position: relative; z-index: 1; }
+  .tier-banner__content { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; position: relative; z-index: 1; }
+  .tier-banner__label { font-size: 0.76rem; font-weight: 900; letter-spacing: 0.08em; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
   .tier-banner__stars { display: flex; gap: 1px; }
-  .star { color: rgba(255,255,255,0.35); font-size: 0.72rem; }
-  .star.filled { color: #FCD34D; text-shadow: 0 0 3px rgba(252,211,77,0.6); }
+  .star { color: rgba(255,255,255,0.35); font-size: 0.74rem; }
+  .star.filled { color: #FCD34D; text-shadow: 0 0 4px rgba(252,211,77,0.7); }
 
-  /* Save button */
-  .save-btn { padding: 9px; border-radius: 8px; border: none; font-size: 0.78rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; transition: all 0.2s; margin-top: 2px; }
+  .save-btn { padding: 10px; border-radius: 8px; border: none; font-size: 0.78rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; transition: all 0.2s; margin-top: 2px; position: relative; z-index: 1; }
   .save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .save-btn:not(:disabled):hover { transform: translateY(-1px); }
   .save-btn:active { transform: scale(0.97); }
-  .save-btn--over { background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(16,185,129,0.08)); color: #10B981; border: 1px solid rgba(16,185,129,0.3); }
-  .save-btn--under { background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(239,68,68,0.08)); color: #EF4444; border: 1px solid rgba(239,68,68,0.3); }
-  .save-btn--over:not(:disabled):hover { box-shadow: 0 4px 14px rgba(16,185,129,0.25); }
-  .save-btn--under:not(:disabled):hover { box-shadow: 0 4px 14px rgba(239,68,68,0.25); }
+  .save-btn--over { background: linear-gradient(135deg, rgba(16,185,129,0.18), rgba(16,185,129,0.08)); color: #10B981; border: 1px solid rgba(16,185,129,0.35); }
+  .save-btn--under { background: linear-gradient(135deg, rgba(239,68,68,0.18), rgba(239,68,68,0.08)); color: #EF4444; border: 1px solid rgba(239,68,68,0.35); }
+  .save-btn--over:not(:disabled):hover { box-shadow: 0 4px 14px rgba(16,185,129,0.3); }
+  .save-btn--under:not(:disabled):hover { box-shadow: 0 4px 14px rgba(239,68,68,0.3); }
 
-  /* Parlay bar */
   .parlay-bar { margin-top: 16px; padding: 14px 18px; background: linear-gradient(135deg, var(--color-bg-elevated), var(--color-bg-card)); border: 1px solid var(--color-accent, #6366F1); border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; box-shadow: 0 6px 20px rgba(99,102,241,0.2); }
   .parlay-bar--value { border-color: #10B981; box-shadow: 0 6px 20px rgba(16,185,129,0.25); }
   .parlay-bar__info { display: flex; flex-direction: column; gap: 6px; }
@@ -693,7 +829,7 @@
   .parlay-bar__save:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(99,102,241,0.35); }
 
   .empty { text-align: center; padding: 56px 20px; color: var(--color-text-muted); display: flex; flex-direction: column; align-items: center; gap: 14px; }
-  .empty p { font-size: 0.92rem; color: var(--color-text-muted); }
+  .empty p { font-size: 0.92rem; }
   .loading-state { text-align: center; padding: 40px 20px; color: var(--color-text-muted); display: flex; flex-direction: column; align-items: center; gap: 10px; }
   .spinner { width: 30px; height: 30px; border: 3px solid var(--color-accent-glow, rgba(99,102,241,0.2)); border-top-color: var(--color-accent, #6366F1); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -701,7 +837,7 @@
   /* Modals */
   .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(6px); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 20px; animation: fadeIn 0.2s ease; }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-  .modal { background: var(--color-bg-elevated); border: 1px solid var(--color-border-hover); border-radius: 16px; padding: 22px 20px; width: 100%; max-width: 440px; box-shadow: var(--shadow-elevated); animation: modalIn 0.3s ease; }
+  .modal { background: var(--color-bg-elevated); border: 1px solid var(--color-border-hover); border-radius: 16px; padding: 22px 20px; width: 100%; max-width: 460px; box-shadow: var(--shadow-elevated); animation: modalIn 0.3s ease; max-height: 90vh; overflow-y: auto; }
   .modal--wide { max-width: 640px; }
   @keyframes modalIn { from { opacity: 0; transform: scale(0.96) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
   .modal__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
@@ -726,8 +862,33 @@
   .leg__period { color: var(--color-text-primary); }
   .leg__bet { flex: 1; font-weight: 700; }
   .leg__odds { font-family: 'DM Mono', monospace; color: #F59E0B; font-weight: 800; }
+
+  /* Bet section */
+  .bet-section { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--color-border); }
+  .bet-toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px 12px; border-radius: 9px; background: var(--color-bg-card); border: 1px solid var(--color-border); transition: all 0.2s; }
+  .bet-toggle:hover { border-color: var(--color-accent, #6366F1); background: var(--color-accent-glow, rgba(99,102,241,0.06)); }
+  .bet-toggle input { accent-color: var(--color-accent, #6366F1); cursor: pointer; width: 16px; height: 16px; }
+  .bet-toggle span { font-size: 0.86rem; font-weight: 700; color: var(--color-text-primary); }
+
+  .bet-stake { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; animation: slideDown 0.25s ease; }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+  .bet-stake__balance { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--color-text-muted); }
+  .bet-stake__balance strong { color: var(--color-text-primary); font-family: 'DM Mono', monospace; font-weight: 800; }
+  .bet-stake__input-row { display: flex; gap: 6px; align-items: stretch; }
+  .bet-stake__input { flex: 1; padding: 11px 14px; border-radius: 9px; border: 2px solid var(--color-border-hover); background: var(--color-bg-elevated); color: var(--color-text-primary); font-family: 'DM Mono', monospace; font-size: 1.1rem; font-weight: 800; text-align: center; transition: all 0.2s; }
+  .bet-stake__input:focus { outline: none; border-color: var(--color-accent, #6366F1); box-shadow: 0 0 0 3px var(--color-accent-glow, rgba(99,102,241,0.15)); }
+  .bet-stake__input--error { border-color: #EF4444; background: rgba(239,68,68,0.06); color: #EF4444; }
+  .bet-stake__input--error:focus { box-shadow: 0 0 0 3px rgba(239,68,68,0.15); }
+  .bet-stake__max { padding: 0 14px; border-radius: 9px; border: 1px solid var(--color-accent, #6366F1); background: var(--color-accent-glow, rgba(99,102,241,0.1)); color: var(--color-accent, #6366F1); font-size: 0.74rem; font-weight: 800; cursor: pointer; transition: all 0.15s; letter-spacing: 0.05em; }
+  .bet-stake__max:hover { background: var(--color-accent, #6366F1); color: white; }
+
+  .bet-warning { display: flex; align-items: center; gap: 6px; padding: 9px 12px; border-radius: 8px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #EF4444; font-size: 0.78rem; font-weight: 600; }
+  .bet-info { padding: 9px 12px; border-radius: 8px; background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); color: var(--color-text-secondary); font-size: 0.76rem; }
+  .bet-info strong { font-family: 'DM Mono', monospace; font-weight: 800; color: var(--color-text-primary); }
+  .bet-info strong.pos { color: #10B981; }
+
   .modal__actions { display: flex; gap: 8px; justify-content: flex-end; }
-  .mbtn { padding: 10px 20px; border-radius: 8px; border: none; font-size: 0.84rem; font-weight: 700; cursor: pointer; }
+  .mbtn { padding: 10px 20px; border-radius: 9px; border: none; font-size: 0.84rem; font-weight: 700; cursor: pointer; }
   .mbtn:disabled { opacity: 0.4; cursor: not-allowed; }
   .mbtn--ghost { background: transparent; border: 1px solid var(--color-border-hover); color: var(--color-text-secondary); }
   .mbtn--save { background: linear-gradient(135deg, #6366F1, #8B5CF6); color: #fff; }
