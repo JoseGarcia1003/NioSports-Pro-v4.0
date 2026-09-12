@@ -1,4 +1,6 @@
 <script>
+  import { authenticatedFetch } from '$lib/services/authenticated-fetch.js';
+
   import { page } from '$app/stores';
   import { userId } from '$lib/stores/auth';
   import { subscription } from '$lib/stores/subscription';
@@ -58,7 +60,7 @@
 
     loading = plan.id;
     try {
-      const res = await fetch('/api/stripe/checkout', {
+      const res = await authenticatedFetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -84,7 +86,7 @@
     if (!$userId) return;
     loading = 'manage';
     try {
-      const res = await fetch('/api/stripe/portal', {
+      const res = await authenticatedFetch('/api/stripe/portal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: $userId }),

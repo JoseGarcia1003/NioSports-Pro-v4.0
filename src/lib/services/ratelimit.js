@@ -46,8 +46,8 @@ export async function checkRateLimit(userId, plan = 'free', type = 'predictions'
       reset:     result.reset,
     };
   } catch (err) {
-    console.error('[RateLimit] Upstash error, failing open:', err.message);
-    return { success: true, limit: 999, remaining: 999, reset: 0 };
+    console.error('[RateLimit] Upstash error, request denied:', err.message);
+    return { success: false, unavailable: true, limit: 0, remaining: 0, reset: 0 };
   }
 }
 

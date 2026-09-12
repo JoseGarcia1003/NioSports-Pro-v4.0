@@ -16,15 +16,15 @@
 
   import { initFirebase } from '$lib/firebase';
   import { authStore, isAuthenticated, authLoading } from '$lib/stores/auth';
-  import { loadSubscription } from '$lib/stores/subscription';
-  import { supabase } from '$lib/supabase/client';
+  import { loadSubscription, resetSubscription } from '$lib/stores/subscription';
   import { theme } from '$lib/stores/ui';
   import { browser } from '$app/environment';
 
   const PUBLIC_ROUTES = ['/login', '/register', '/forgot-password'];
+  let subscriptionUser = null;
 
   onMount(async () => {
-  await initFirebase();
+  try { await initFirebase(); } catch { authStore.setUser(null); authStore.setError('No se pudo iniciar la autenticación'); }
   document.documentElement.setAttribute('data-theme', $theme);
   });
 
@@ -39,11 +39,15 @@
   });
 
 $: if (browser && !$authLoading) {
-    const isPublic = PUBLIC_ROUTES.some(r => $page.url.pathname.startsWith(r));
+    const isPublic = $page.url.pathname === '/' || $page.url.pathname === '/bankroll' || PUBLIC_ROUTES.some(r => $page.url.pathname.startsWith(r));
     if (!$isAuthenticated && !isPublic) goto('/login');
     if ($isAuthenticated && $page.url.pathname === '/login') goto('/');
-    if ($isAuthenticated && $authStore?.uid) {
-      loadSubscription(supabase, $authStore.uid);
+    if ($isAuthenticated && $authStore.userId !== subscriptionUser) {
+      subscriptionUser = $authStore.userId;
+      loadSubscription();
+    } else if (!$isAuthenticated && subscriptionUser) {
+      subscriptionUser = null;
+      resetSubscription();
     }
   }
 

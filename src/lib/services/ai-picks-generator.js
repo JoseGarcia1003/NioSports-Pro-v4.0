@@ -1,3 +1,4 @@
+import { authenticatedFetch } from '$lib/services/authenticated-fetch.js';
 // src/lib/services/ai-picks-generator.js
 // ════════════════════════════════════════════════════════════════
 // Generador automático de picks usando el Engine v2.0
@@ -63,7 +64,7 @@ async function generatePrediction(game, period, teamStats) {
   }
 
   try {
-    const res = await fetch('/api/predict', {
+    const res = await authenticatedFetch('/api/predict', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

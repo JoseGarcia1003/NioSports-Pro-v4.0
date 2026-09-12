@@ -1,8 +1,10 @@
+import { getEntitlements } from '$lib/server/entitlements.js';
 // src/routes/api/predict/+server.js
 // Motor predictivo server-side con Railway ML fallback a heurístico local.
 // Rate limiting por plan via Upstash Redis.
 
-import { json } from '@sveltejs/kit';
+import { json, isHttpError } from '@sveltejs/kit';
+import { requireIdentity } from '$lib/server/identity.js';
 import { predict } from '$lib/engine/predictor.js';
 import { MODEL_VERSION } from '$lib/engine/constants.js';
 import { env } from '$env/dynamic/private';
@@ -109,6 +111,7 @@ async function predictWithML(body) {
       };
     }
   } catch (err) {
+    if (isHttpError(err)) throw err;
     console.warn('[API/predict] ML API unavailable, using fallback:', err.message);
   }
 
@@ -117,6 +120,7 @@ async function predictWithML(body) {
 
 /** @type {import('@sveltejs/kit').RequestHandler} */
 export async function POST({ request }) {
+  const identity = await requireIdentity(request);
   try {
     const body = await request.json();
     const { homeTeam, awayTeam } = body;
@@ -126,34 +130,10 @@ export async function POST({ request }) {
     }
 
 // ── Rate Limit ─────────────────────────────────────────────────────────
-    const userId = body.userId || 'anonymous';
-    const userPlan = body.plan || 'free';
-    const source = body.source || 'unknown';
-
-    // Owner bypass — skip rate limiting entirely
-    const OWNER_IDS = (env.OWNER_USER_IDS || '').split(',').filter(Boolean);
-    const isOwner = OWNER_IDS.includes(userId);
-
-    // Totales calculator doesn't consume picks quota
-    const isTotales = source === 'totales';
-
-    // Si está cacheado, no consume cuota
-    const cacheKey = getCacheKey(body);
-    const cached = getCached(cacheKey);
-    if (cached) {
-      return json({ ...cached, cached: true }, {
-        headers: {
-          'X-RateLimit-Source': 'cache',
-        },
-      });
-    }
-
-    // Owner and totales skip rate limiting
-    let rl = { success: true, limit: 999, remaining: 999, reset: 0 };
-    if (!isOwner) {
-      rl = await checkRateLimit(userId, userPlan, isTotales ? 'api' : 'predictions');
-    }
-
+    const { plan: userPlan } = await getEntitlements(identity.uid);
+    const rl = await checkRateLimit(identity.uid, userPlan, 'predictions');
+    if (rl.unavailable) return json({ error: 'Quota service unavailable' }, { status: 503 });
+    const cacheKey = JSON.stringify({ uid: identity.uid, model: MODEL_VERSION.version, input: body });
     if (!rl.success) {
       const resetMin = Math.ceil((rl.reset - Date.now()) / 60000);
       const planLabels = { free: 'Pro ($14.99/mes)', pro: 'Elite ($29.99/mes)', elite: null };
@@ -171,7 +151,8 @@ export async function POST({ request }) {
         {
           status: 429,
           headers: {
-            'X-RateLimit-Limit': String(rl.limit),
+            'Cache-Control': 'no-store',
+        'X-RateLimit-Limit': String(rl.limit),
             'X-RateLimit-Remaining': '0',
             'X-RateLimit-Reset': String(rl.reset),
             'Retry-After': String(Math.ceil((rl.reset - Date.now()) / 1000)),
@@ -180,6 +161,9 @@ export async function POST({ request }) {
       );
     }
     // ───────────────────────────────────────────────────────────────────────
+
+    const cached = getCached(cacheKey);
+    if (cached) return json({ ...cached, cached: true }, { headers: { 'Cache-Control': 'no-store' } });
 
     // Try ML API first
     let result = await predictWithML(body);
@@ -220,6 +204,7 @@ export async function POST({ request }) {
 
     return json(result, {
       headers: {
+        'Cache-Control': 'no-store',
         'X-RateLimit-Limit': String(rl.limit),
         'X-RateLimit-Remaining': String(rl.remaining),
         'X-RateLimit-Reset': String(rl.reset),
@@ -227,6 +212,7 @@ export async function POST({ request }) {
     });
 
   } catch (err) {
+    if (isHttpError(err)) throw err;
     console.error('[API/predict] Error:', err.message);
     return json({ error: 'Prediction failed', details: err.message }, { status: 500 });
   }

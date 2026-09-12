@@ -1,15 +1,19 @@
+import { getEntitlements } from '$lib/server/entitlements.js';
+import { checkRateLimit } from '$lib/services/ratelimit.js';
 // src/routes/api/predict-batch/+server.js
 // ════════════════════════════════════════════════════════════════
 // Genera predicciones para múltiples partidos en una sola llamada.
 // Usado por cron jobs y la página de picks.
 // ════════════════════════════════════════════════════════════════
 
-import { json } from '@sveltejs/kit';
+import { json, isHttpError } from '@sveltejs/kit';
+import { requireIdentity } from '$lib/server/identity.js';
 import { predict } from '$lib/engine/predictor.js';
 import { MODEL_VERSION } from '$lib/engine/constants.js';
 
 /** @type {import('@sveltejs/kit').RequestHandler} */
 export async function POST({ request }) {
+  const identity = await requireIdentity(request);
   try {
     const { games, teamStats, periods = ['Q1', 'HALF', 'FULL'] } = await request.json();
 
@@ -17,6 +21,14 @@ export async function POST({ request }) {
       return json({ error: 'games array is required' }, { status: 400 });
     }
 
+    if (games.length > 15 || !Array.isArray(periods) || periods.length > 3 || periods.some(p => !['FULL','HALF','Q1'].includes(p))) {
+      return json({ error: 'Invalid batch size or periods' }, { status: 400 });
+    }
+    const { plan } = await getEntitlements(identity.uid);
+    if (plan !== 'elite') return json({ error: 'Elite subscription required' }, { status: 403 });
+    const quota = await checkRateLimit(identity.uid, plan, 'predictions');
+    if (quota.unavailable) return json({ error: 'Quota service unavailable' }, { status: 503 });
+    if (!quota.success) return json({ error: 'rate_limited' }, { status: 429 });
     const results = [];
 
     for (const game of games) {
@@ -69,6 +81,7 @@ export async function POST({ request }) {
             topFactors: prediction.topFactors,
           };
         } catch (err) {
+    if (isHttpError(err)) throw err;
           console.error(`[predict-batch] Error for ${game.homeTeam} vs ${game.awayTeam} ${period}:`, err.message);
         }
       }
@@ -90,6 +103,7 @@ export async function POST({ request }) {
       generatedAt: new Date().toISOString(),
     });
   } catch (err) {
+    if (isHttpError(err)) throw err;
     console.error('[API/predict-batch] Error:', err.message);
     return json({ error: 'Batch prediction failed', details: err.message }, { status: 500 });
   }

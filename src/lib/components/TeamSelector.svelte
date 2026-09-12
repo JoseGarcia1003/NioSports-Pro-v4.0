@@ -78,12 +78,14 @@
   <button class="dd__trigger" class:dd__trigger--open={open} class:dd__trigger--selected={!!value} on:click={toggle} type="button">
     {#if value}
       <span class="dd__selected-text">{value}</span>
-      <button class="dd__clear" on:click={clear} type="button" aria-label="Limpiar selección"><X size={14} /></button>
+
     {:else}
       <span class="dd__placeholder">{placeholder}</span>
     {/if}
     <ChevronDown size={16} class="dd__chevron {open ? 'dd__chevron--open' : ''}" />
   </button>
+
+  {#if value}<button class="dd__clear" on:click={clear} type="button" aria-label="Limpiar selección"><X size={14} /></button>{/if}
 
   {#if open}
     <div class="dd__dropdown" bind:this={dropdownEl}>
@@ -100,7 +102,7 @@
             {@const isSelected = team === value}
             {@const isHighlighted = i === highlightIndex}
             <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <div class="dd__item" class:dd__item--disabled={isDisabled} class:dd__item--selected={isSelected} class:dd__item--highlighted={isHighlighted} on:click={() => select(team)} role="option" aria-selected={isSelected} aria-disabled={isDisabled}>
+            <div class="dd__item" class:dd__item--disabled={isDisabled} class:dd__item--selected={isSelected} class:dd__item--highlighted={isHighlighted} on:click={() => select(team)} tabindex={isDisabled ? -1 : 0} on:keydown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); select(team); } }} role="option" aria-selected={isSelected} aria-disabled={isDisabled}>
               <span class="dd__item-name">{team}</span>
               {#if isSelected}<span class="dd__item-check">✓</span>{/if}
               {#if isDisabled}<span class="dd__item-tag">Ya seleccionado</span>{/if}
@@ -122,7 +124,7 @@
   .dd__selected-text { font-weight: 600; flex: 1; }
   .dd__placeholder { flex: 1; }
 
-  .dd__clear { display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; border: none; background: var(--color-bg-card); color: var(--color-text-muted); cursor: pointer; transition: background 0.15s; padding: 0; min-height: auto; }
+  .dd__clear { position: absolute; top: 14px; right: 38px; display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; border: none; background: var(--color-bg-card); color: var(--color-text-muted); cursor: pointer; transition: background 0.15s; padding: 0; min-height: auto; }
   .dd__clear:hover { background: rgba(239, 68, 68, 0.2); color: #f87171; }
 
   :global(.dd__chevron) { color: var(--color-text-muted); transition: transform 0.2s ease; flex-shrink: 0; }

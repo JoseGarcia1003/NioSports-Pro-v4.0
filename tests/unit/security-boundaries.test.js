@@ -66,9 +66,11 @@ describe('Stripe webhook boundary', () => {
   });
   it('returns 500 for failed database writes so Stripe can retry', async () => {
     const failure = vi.fn().mockRejectedValue(new Error('fixture write failure'));
-    state.createClient.mockReturnValue({ from: () => ({ upsert: () => ({ throwOnError: failure }) }) });
+    state.env.VITE_SUPABASE_URL = 'https://fixture.test';
+    state.env.SUPABASE_SERVICE_ROLE_KEY = 'fixture';
+    state.createClient.mockReturnValue({ rpc: async () => ({ error: new Error('fixture failure') }) });
     const body = JSON.stringify({ id: 'evt_fixture', type: 'customer.subscription.deleted',
-      data: { object: { metadata: { userId: 'fixture-user' } } } });
+      data: { object: { id: 'sub_fixture', customer: 'cus_fixture', status: 'canceled', metadata: { userId: 'fixture-user' } } } });
     const signature = Stripe.webhooks.generateTestHeaderString({ payload: body, secret: 'whsec_fixture' });
     const response = await invoke(body, signature);
     expect(response.status).toBe(500);

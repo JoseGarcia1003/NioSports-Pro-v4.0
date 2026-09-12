@@ -1,4 +1,6 @@
 <script>
+  import { authenticatedFetch } from '$lib/services/authenticated-fetch.js';
+
   import { onMount } from 'svelte';
   import { userId } from '$lib/stores/auth';
   import { subscription } from '$lib/stores/subscription';
@@ -97,7 +99,7 @@
     const results = {};
     for (const [period, defLine] of [['Q1', 55], ['HALF', 110], ['FULL', 220]]) {
       try {
-        const res = await fetch('/api/predict', {
+        const res = await authenticatedFetch('/api/predict', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ homeTeam: home, awayTeam: away, line: defLine, period, gameInfo, source: 'totales', userId: $userId || 'anonymous', plan: $subscription?.plan || 'free' })
         });
@@ -470,15 +472,15 @@
 
                   <div class="inputs-row">
                     <div class="input-block">
-                      <label class="input-label">🎯 Línea</label>
-                      <input type="number" step="0.5" min="0"
+                      <label for={`line-${row.period}`} class="input-label">🎯 Línea</label>
+                      <input id={`line-${row.period}`} type="number" step="0.5" min="0"
                         value={row.dir === 'OVER' ? row.lineOver : row.lineUnder}
                         on:change={(e) => handleLineInput(e, row.period, row.dir)}
                         class="input-field" />
                     </div>
                     <div class="input-block">
-                      <label class="input-label">💰 Cuota</label>
-                      <input type="number" step="0.01" min="1"
+                      <label for={`odds-${row.period}`} class="input-label">💰 Cuota</label>
+                      <input id={`odds-${row.period}`} type="number" step="0.01" min="1"
                         value={row.odds}
                         on:input={(e) => row.setOdds(e.target.value)}
                         class="input-field input-field--odds" />

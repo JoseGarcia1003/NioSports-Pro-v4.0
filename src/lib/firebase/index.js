@@ -53,7 +53,8 @@ export function initFirebase() {
   const config = getFirebaseConfig();
 
   if (!config.apiKey) {
-    console.error('[Firebase] Falta PUBLIC_FIREBASE_API_KEY');
+    authStore.setUser(null);
+    authStore.setError('Autenticación no configurada');
     firebaseStatus.set('error');
     return;
   }
@@ -87,6 +88,7 @@ export function initFirebase() {
     },
     (error) => {
       console.error('[Firebase] Auth error:', error);
+      authStore.setUser(null);
       authStore.setError(error.message);
       firebaseStatus.set('error');
     }

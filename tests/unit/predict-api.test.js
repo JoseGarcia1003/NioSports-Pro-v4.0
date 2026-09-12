@@ -1,3 +1,6 @@
+vi.mock('$lib/server/identity.js', () => ({ requireIdentity: vi.fn(async () => ({ uid: 'verified-user' })) }));
+vi.mock('$lib/server/entitlements.js', () => ({ getEntitlements: vi.fn(async () => ({ plan: 'free' })) }));
+vi.mock('$lib/services/ratelimit.js', () => ({ checkRateLimit: vi.fn(async () => ({ success: true, limit: 5, remaining: 4, reset: 0 })) }));
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock the engine before importing

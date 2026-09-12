@@ -1,3 +1,4 @@
+import { authenticatedFetch } from '$lib/services/authenticated-fetch.js';
 // src/lib/stores/data.js
 // ════════════════════════════════════════════════════════════════
 // Stores de datos del usuario — backed by Supabase.
@@ -179,20 +180,17 @@ export const bankrollStore = {
   async loadForUser(userId) {
     if (!userId) return;
     try {
-      const [profile, rawHistory] = await Promise.all([
-        getUserProfile(userId),
-        getBankrollHistory(userId, 100),
-      ]);
-
-      // ✅ FIX: garantiza array en history
-      const history = toArray(rawHistory);
-      const initial = profile?.initial_bankroll || 0;
-      const totalPnL = history.reduce((sum, tx) => sum + (tx.amount || 0), 0);
-
+      const response = await authenticatedFetch('/api/bankroll');
+      if (!response.ok) throw new Error('Bankroll unavailable');
+      const result = await response.json();
+      const wallet = result.wallet || {};
       _bankroll.set({
-        current:  initial + totalPnL,
-        initial,
-        history,
+        current: Number(wallet.available_minor || 0) / 100,
+        initial: (Number(wallet.deposited_minor || 0) - Number(wallet.withdrawn_minor || 0)) / 100,
+        profit: Number(wallet.profit_minor || 0) / 100,
+        reserved: Number(wallet.reserved_minor || 0) / 100,
+        settledStake: Number(wallet.settled_stake_minor || 0) / 100,
+        history: result.entries.map(e => ({ ...e, type: e.kind, amount: e.delta_minor / 100, balance: e.balance_minor / 100 })),
         lastSync: new Date().toISOString(),
       });
     } catch (err) {
@@ -203,14 +201,7 @@ export const bankrollStore = {
   /** Add a transaction to Supabase and update store */
   async addTransaction(transaction) {
     try {
-      const saved = await addBankrollTransaction(transaction);
-      _bankroll.update(b => ({
-        ...b,
-        current:  b.current + (transaction.amount || 0),
-        history:  [saved, ...toArray(b.history)],
-        lastSync: new Date().toISOString(),
-      }));
-      return saved;
+      throw new Error('Registra movimientos y liquida tickets desde el nuevo panel de bankroll.');
     } catch (err) {
       console.error('[data.js] Error adding transaction:', err);
       throw err;
@@ -223,12 +214,8 @@ export const bankrollStore = {
   }
 };
 
-export const bankrollROI = derived(_bankroll, $b => {
-  if (!$b.initial || $b.initial === 0) return 0;
-  return (($b.current - $b.initial) / $b.initial * 100).toFixed(1);
-});
-
-export const bankrollPnL = derived(_bankroll, $b => $b.current - $b.initial);
+export const bankrollROI = derived(_bankroll, b => b.settledStake > 0 ? ((b.profit || 0) / b.settledStake * 100).toFixed(1) : null);
+export const bankrollPnL = derived(_bankroll, b => b.profit ?? null);
 
 // ── AI Picks de hoy ──────────────────────────────────────────
 const _aiPicksToday     = writable([]);

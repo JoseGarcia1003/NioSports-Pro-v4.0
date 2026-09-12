@@ -59,7 +59,39 @@ modificó facturación ni se efectuó ningún pago.
 No se han ejecutado operaciones sobre datos reales ni enviado correos/pagos.
 Stripe/Supabase/proveedores reales y migraciones: no verificables con estas pruebas.
 
-## Pendientes críticos; este bloque no certifica producción
+## Segunda entrega: identidad, contabilidad y panel (12 septiembre 2026)
+
+Implementados un panel adaptable de bank, API autenticada con Firebase JWT
+RS256 y permisos comerciales obtenidos exclusivamente del servidor. Stripe
+registra eventos duraderos y descarta duplicados y eventos anteriores; las
+escrituras comerciales del perfil dejan de estar autorizadas al cliente.
+
+La migración `20260912154104_identity_billing_ledger.sql` añade wallets, tickets
+y ledger. Operaciones atómicas con bloqueo por usuario y clave idempotente:
+aportación, retiro, reserva y liquidación manual win/loss/push/void. El saldo
+incluye todo el historial; la tabla muestra los últimos 100 movimientos.
+Depósitos no cuentan como beneficio; ROI usa stake resuelto. No realiza
+transferencias ni apuestas. El modo demo es explícito y de solo lectura.
+
+Verificación local: 228 pruebas de la suite y 7 pruebas adicionales de API
+aprobadas. Svelte: cero errores y advertencias. PostgreSQL embebido PGlite
+ejecuta esquema y migración reales para probar invariantes y permisos; no
+equivale a prueba concurrente de varias conexiones del servicio remoto.
+Navegador: panel visible; detectado y corregido desbordamiento horizontal en
+390 px. Sin credenciales locales, el login y datos reales no están verificados.
+
+Activación pendiente: configurar variables de `.env.example`, integrar Firebase
+como proveedor externo de Supabase y rol authenticated, verificar firmas con
+credenciales de staging y aplicar migración junto con la nueva aplicación.
+No se aplicó esta migración a producción: revoca escrituras del cliente antiguo.
+Los saldos heredados no se importan automáticamente; requieren conciliación.
+Las compensaciones de errores manuales y revocación Firebase aún faltan.
+GitHub Actions sigue bloqueado por facturación; no se ha pagado ni desplegado.
+La instalación informa 54 vulnerabilidades de dependencias, pendientes de
+auditoría y actualización compatible. Las predicciones no están calibradas ni
+certificadas: aún quedan features por defecto y validación de fuentes/ML.
+
+## Pendientes críticos restantes; este bloque no certifica producción
 
 1. Verificar identidad Firebase en servidor y aplicar permisos de servidor en
    predict, predict-batch, checkout, portal y acceso Supabase/RLS.
