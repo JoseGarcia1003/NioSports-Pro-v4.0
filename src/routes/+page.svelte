@@ -11,18 +11,22 @@
   import TodaysGames from '$lib/components/dashboard/TodaysGames.svelte';
 
   // Landing components
-  import LandingHero from '$lib/components/landing/LandingHero.svelte';
-  import LandingFeatures from '$lib/components/landing/LandingFeatures.svelte';
-  import LandingFooter from '$lib/components/landing/LandingFooter.svelte';
+  import LandingExperience from '$lib/components/landing/LandingExperience.svelte';
+
+
 
   let todaysGames = [];
   let loadingGames = true;
+  let gamesError = false;
 
-  onMount(async () => {
-    if ($isAuthenticated) {
-      await loadDashboardData();
-    }
-  });
+  let mounted = false;
+  let dashboardStarted = false;
+  onMount(() => { mounted = true; });
+  $: if (mounted && $isAuthenticated && !dashboardStarted) {
+    dashboardStarted = true;
+    loadDashboardData();
+  }
+  $: if (!$isAuthenticated) dashboardStarted = false;
 
   async function loadDashboardData() {
     loadingGames = true;
@@ -32,6 +36,8 @@
       await loadTodaysGames();
     } catch (err) {
       console.error('[Home] Error cargando datos:', err);
+      gamesError = true;
+      todaysGames = [];
     } finally {
       loadingGames = false;
     }
@@ -41,20 +47,15 @@
     try {
       const today = new Date().toISOString().split('T')[0];
       const res = await fetch(`/api/proxy?endpoint=/games&dates[]=${today}`);
+      if (!res.ok) throw new Error('Partidos no disponibles');
       const json = await res.json();
+      if (!Array.isArray(json.data)) throw new Error('Respuesta inválida');
       todaysGames = json.data || [];
-      if (todaysGames.length === 0) todaysGames = getDemoGames();
+      gamesError = false;
     } catch {
-      todaysGames = getDemoGames();
+      todaysGames = [];
+      gamesError = true;
     }
-  }
-
-  function getDemoGames() {
-    return [
-      { id: 'demo1', home_team: { full_name: 'Los Angeles Lakers', abbreviation: 'LAL' }, visitor_team: { full_name: 'Boston Celtics', abbreviation: 'BOS' }, status: '19:30' },
-      { id: 'demo2', home_team: { full_name: 'Golden State Warriors', abbreviation: 'GSW' }, visitor_team: { full_name: 'Miami Heat', abbreviation: 'MIA' }, status: '21:00' },
-      { id: 'demo3', home_team: { full_name: 'Denver Nuggets', abbreviation: 'DEN' }, visitor_team: { full_name: 'Phoenix Suns', abbreviation: 'PHX' }, status: '22:30' },
-    ];
   }
 
   $: kpiData = calculateUserKPIs($picksTotales || []);
@@ -63,7 +64,7 @@
 
 <svelte:head>
   <title>{$isAuthenticated ? 'Dashboard' : 'Análisis Cuantitativo NBA'} — NioSports Pro</title>
-  <meta name="description" content="NioSports Pro — Análisis cuantitativo de totales NBA con XGBoost y 26 features" />
+  <meta name="description" content="NioSports Pro — Explora el análisis NBA y el control personal de bank. Capital, exposición y resultados en perspectiva." />
 </svelte:head>
 
 {#if $isAuthenticated}
@@ -75,7 +76,7 @@
       </div>
       <div class="hero__badge">
         <div class="hero__badge-dot"></div>
-        <span>Modelo v{MODEL_VERSION.version} activo</span>
+        <span>Motor v{MODEL_VERSION.version} · Estimaciones</span>
       </div>
     </header>
 
@@ -86,14 +87,14 @@
       <QuickActions />
     </div>
     <div data-tour="games">
-      <TodaysGames games={todaysGames} loading={loadingGames} />
+      <TodaysGames games={todaysGames} loading={loadingGames} unavailable={gamesError} />
     </div>
   </div>
 {:else}
   <div class="landing">
-    <LandingHero />
-    <LandingFeatures />
-    <LandingFooter />
+    <LandingExperience />
+
+
   </div>
 {/if}
 

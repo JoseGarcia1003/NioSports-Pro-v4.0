@@ -134,3 +134,22 @@ no se eliminaron datos de usuarios con esta limpieza.
 La mejora comprobable es una base más ordenada, un panel nuevo y barreras contra
 errores concretos. No corresponde presentarla aún como plataforma terminada,
 financieramente operativa o líder en precisión deportiva.
+
+## Ampliación: nueva presentación pública
+
+Se reemplazó la portada por una presentación adaptable con una nueva jerarquía
+visual, acceso directo al bank de ejemplo y tres vistas interactivas: capital,
+análisis y registro. La portada deja de mostrar un pick ficticio con 78% de
+confianza sin identificarlo como ejemplo. Las cifras de la nueva presentación
+se identifican como simuladas, y las preguntas frecuentes explican el alcance.
+
+El inicio autenticado ya no sustituye una consulta vacía o fallida por partidos
+ficticios. Distingue una consulta fallida de una fecha sin partidos. Se corrigió
+también el inicio de carga cuando la autenticación termina después de montar
+la página.
+
+Verificación de esta ampliación: 250 pruebas en una única ejecución completa;
+Svelte cero errores y advertencias. Portada comprobada visualmente en escritorio
+y a 390 px, vistas de análisis y registro probadas y enlace al bank verificado.
+No supone despliegue público ni validación de cuentas reales. El resto del
+producto todavía necesita unificar diseño y completar el flujo operativo.

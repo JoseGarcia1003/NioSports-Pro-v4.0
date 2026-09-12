@@ -2,6 +2,7 @@
   import Skeleton from '$lib/components/Skeleton.svelte';
   export let games = [];
   export let loading = true;
+  export let unavailable = false;
 </script>
 
 <section class="games">
@@ -19,6 +20,8 @@
       <Skeleton variant="card" height="180px" />
       <Skeleton variant="card" height="180px" />
     </div>
+  {:else if unavailable}
+    <div class="games__empty" role="alert"><p>No pudimos consultar los partidos. Recarga la página para reintentar.</p></div>
   {:else if games.length === 0}
     <div class="games__empty">
       <p>No hay partidos programados para hoy</p>
