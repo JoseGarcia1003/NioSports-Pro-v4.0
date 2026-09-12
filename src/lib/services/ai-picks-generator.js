@@ -45,23 +45,7 @@ async function generatePrediction(game, period, teamStats) {
 
   let marketLine = game.lines?.[period];
   
-  if (!marketLine) {
-    const home = teamStats[homeTeam];
-    const away = teamStats[awayTeam];
-    const periodKeys = {
-      Q1: { home: 'q1Home', away: 'q1Away' },
-      HALF: { home: 'halfHome', away: 'halfAway' },
-      FULL: { home: 'fullHome', away: 'fullAway' },
-    };
-    const keys = periodKeys[period];
-    const homeVal = home[keys.home] || home[period.toLowerCase()] || 0;
-    const awayVal = away[keys.away] || away[period.toLowerCase()] || 0;
-    if (homeVal && awayVal) {
-      marketLine = Math.round((homeVal + awayVal) * 2) / 2;
-    } else {
-      return null;
-    }
-  }
+  if (!Number.isFinite(marketLine) || marketLine <= 0 || game.isDemo) return null;
 
   try {
     const res = await authenticatedFetch('/api/predict', {

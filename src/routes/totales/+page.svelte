@@ -51,8 +51,8 @@
       teamStats.set(statsData);
     } catch {
       statsError = true;
-      statsData = getDemoStats();
-      teamStats.set(statsData);
+      statsData = null;
+      teamStats.set({});
     } finally { loadingStats = false; }
   });
 
@@ -367,7 +367,7 @@
         <h1 class="page__title">Totales NBA</h1>
         <p class="page__subtitle">
           Motor v{MODEL_VERSION.version}
-          {#if statsError}<span class="badge-warn">Demo</span>{/if}
+          {#if statsError}<span class="badge-warn">Datos no disponibles</span>{/if}
           {#if predictions?.FULL?.source}<span class="badge-source">{predictions.FULL.source === 'ensemble-v4' ? 'Ensemble ML' : 'ML'}</span>{/if}
         </p>
       </div>
@@ -380,6 +380,8 @@
 
   {#if loadingStats}
     <div class="loading-state"><div class="spinner"></div><p>Cargando estadísticas...</p></div>
+  {:else if statsError}
+    <div class="loading-state" role="alert"><AlertTriangle size={28} /><p>No pudimos cargar las estadísticas. No se generan predicciones con datos de ejemplo. Recarga la página para reintentar.</p></div>
   {:else}
     <div class="selectors">
       <div class="selector selector--home">
@@ -460,7 +462,7 @@
                   <div class="pcard__hero">
                     <div class="pcard__proj-wrap">
                       <span class="pcard__proj">{a.projection?.toFixed(1) ?? '—'}</span>
-                      <span class="pcard__proj-label">Proyección</span>
+                      <span class="pcard__proj-label">{a.source === 'heuristic-local' ? 'Estimación heurística' : 'Proyección del modelo'}</span>
                     </div>
                     <ConfidenceGauge value={parseFloat(v.modelProbPct)} size={56} />
                   </div>
@@ -567,7 +569,7 @@
         <button class="modal__x" on:click={() => glossaryModal = false} aria-label="Cerrar"><X size={18} /></button>
       </div>
       <div class="modal__body glossary-body">
-        <div class="g-item"><h4>Proyección</h4><p>Total estimado por el modelo ML. Combina promedios L5/L10/L20, descanso, back-to-back, altitude y factores contextuales.</p></div>
+        <div class="g-item"><h4>Proyección</h4><p>Estimación del motor indicado en la tarjeta. El cálculo heurístico usa promedios disponibles y ajustes contextuales; no equivale a una probabilidad calibrada ni a un resultado garantizado.</p></div>
         <div class="g-item"><h4>Línea</h4><p>El total que ofrece la casa de apuestas. Siempre en saltos de 0.5 (215.5, 216, 216.5).</p></div>
         <div class="g-item"><h4>Cuota (Decimal)</h4><p>Pago de la casa. Ej: 1.91 = ganas $0.91 por cada $1. 2.00 = duplicas tu apuesta.</p></div>
         <div class="g-item"><h4>Cuota Justa</h4><p>Cuota que <strong>debería</strong> tener según el modelo. Si la casa paga MÁS → VALUE BET.</p></div>

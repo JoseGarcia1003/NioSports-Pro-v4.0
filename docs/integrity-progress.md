@@ -93,6 +93,19 @@ certificadas: aún quedan features por defecto y validación de fuentes/ML.
 
 ## Pendientes críticos restantes; este bloque no certifica producción
 
+Actualización de integridad predictiva: API individual y batch rechazan períodos,
+líneas o estadísticas inválidas; batch devuelve motivos de abstención. El
+generador automático ya no inventa líneas ni publica juegos marcados demo.
+El contrato remoto exige ventanas históricas explícitas, dispersión y descanso;
+sin ellas utiliza la heurística identificada. También rechaza respuestas ML
+no finitas o incompatibles con la línea solicitada. Totales deja de sustituir
+fallos de carga por estadísticas demo y distingue estimación heurística de ML.
+Pruebas: suite completa 248 aprobadas, más dos nuevas comprobaciones de API
+(abstención y plan/usuario falsificados) aprobadas; Svelte cero errores/avisos.
+Todavía falta verificar procedencia y antigüedad de datos, eliminar las líneas
+sugeridas del simulador Totales, calibración temporal y el contrato real del
+proveedor ML. La presencia de campos no certifica su autenticidad.
+
 1. Verificar identidad Firebase en servidor y aplicar permisos de servidor en
    predict, predict-batch, checkout, portal y acceso Supabase/RLS.
 2. Stripe: registro duradero de event IDs, exclusión de duplicados, orden temporal,
