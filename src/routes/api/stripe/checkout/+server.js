@@ -4,13 +4,15 @@ import { env } from '$env/dynamic/private';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
-const stripe = new Stripe(env.STRIPE_SECRET_KEY);
+
 
 function getSupabase() {
   return createClient(env.VITE_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
 }
 
 export async function POST({ request }) {
+  if (!env.STRIPE_SECRET_KEY) return json({ error: "Billing unavailable" }, { status: 503 });
+  const stripe = new Stripe(env.STRIPE_SECRET_KEY);
   try {
     const { priceId, userId, userEmail } = await request.json();
 

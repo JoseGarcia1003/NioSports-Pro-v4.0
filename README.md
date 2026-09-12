@@ -1,5 +1,13 @@
 # ⚽ NioSports Pro v4.0
 
+Estado técnico y límites comprobados: [correcciones de integridad](docs/integrity-progress.md).
+El proyecto todavía no está certificado para producción ni como modelo predictivo validado.
+
+Para desarrollo, copiar `env.example` a `.env.local`, instalar con `npm ci` y
+ejecutar `npm run check`, `npm run test:unit` y `npm run build`.
+Las pruebas usan fixtures; no requieren ni validan pagos o datos deportivos reales.
+Los secretos de cron y webhook son obligatorios para habilitar esos endpoints.
+
 Sistema inteligente de análisis deportivo y predicción de resultados basado en modelos matemáticos, estadísticos y técnicas de machine learning.
 
 ---

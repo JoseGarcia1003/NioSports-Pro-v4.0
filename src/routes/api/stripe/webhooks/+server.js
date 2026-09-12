@@ -4,7 +4,7 @@ import { env } from '$env/dynamic/private';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
-const stripe = new Stripe(env.STRIPE_SECRET_KEY);
+
 
 function getSupabase() {
   return createClient(env.VITE_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
@@ -17,27 +17,27 @@ function getPlanFromPriceId(priceId) {
 }
 
 export async function POST({ request }) {
+  if (!env.STRIPE_SECRET_KEY || !env.STRIPE_WEBHOOK_SECRET) {
+    return json({ error: "Webhook unavailable" }, { status: 503 });
+  }
+  const stripe = new Stripe(env.STRIPE_SECRET_KEY);
   const body = await request.text();
   const sig = request.headers.get('stripe-signature');
   const webhookSecret = env.STRIPE_WEBHOOK_SECRET;
 
+  if (!sig) return json({ error: "Missing signature" }, { status: 400 });
+
   let event;
 
   try {
-    if (webhookSecret && sig) {
-      event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
-    } else {
-      // In development without webhook secret, parse directly
-      event = JSON.parse(body);
-    }
+    event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
   } catch (err) {
     console.error('[Stripe Webhook] Signature error:', err.message);
     return json({ error: 'Invalid signature' }, { status: 400 });
   }
 
-  const supabase = getSupabase();
-
   try {
+    const supabase = getSupabase();
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object;
@@ -60,7 +60,7 @@ export async function POST({ request }) {
               stripe_subscription_id: subscriptionId,
               current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
               updated_at: new Date().toISOString(),
-            }, { onConflict: 'user_id' });
+            }, { onConflict: 'user_id' }).throwOnError();
 
           console.log(`[Stripe] User ${userId} subscribed to ${plan}`);
         }
@@ -82,7 +82,7 @@ export async function POST({ request }) {
               subscription_status: sub.status === 'active' ? 'active' : sub.status,
               current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
               updated_at: new Date().toISOString(),
-            }, { onConflict: 'user_id' });
+            }, { onConflict: 'user_id' }).throwOnError();
         }
         break;
       }
@@ -101,7 +101,7 @@ export async function POST({ request }) {
               stripe_subscription_id: null,
               current_period_end: null,
               updated_at: new Date().toISOString(),
-            }, { onConflict: 'user_id' });
+            }, { onConflict: 'user_id' }).throwOnError();
 
           console.log(`[Stripe] User ${userId} canceled — downgraded to free`);
         }
@@ -118,7 +118,7 @@ export async function POST({ request }) {
             await supabase
               .from('user_profiles')
               .update({ subscription_status: 'past_due', updated_at: new Date().toISOString() })
-              .eq('user_id', userId);
+              .eq('user_id', userId).throwOnError();
           }
         }
         break;
@@ -128,6 +128,6 @@ export async function POST({ request }) {
     return json({ received: true });
   } catch (err) {
     console.error('[Stripe Webhook] Processing error:', err);
-    return json({ error: err.message }, { status: 500 });
+    return json({ error: 'Webhook processing failed' }, { status: 500 });
   }
 }

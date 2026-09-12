@@ -5,12 +5,14 @@ import { sendWelcomeEmail } from '$lib/services/email.js';
 
 export async function POST({ request }) {
   try {
-    const { email, displayName, secret } = await request.json();
+    const authHeader = request.headers.get("authorization");
 
     // Verify internal call
-    if (secret !== env.CRON_SECRET && secret !== 'welcome') {
+    if (!env.CRON_SECRET || authHeader !== `Bearer ${env.CRON_SECRET}`) {
       return json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const { email, displayName } = await request.json();
 
     if (!email) {
       return json({ error: 'Email required' }, { status: 400 });

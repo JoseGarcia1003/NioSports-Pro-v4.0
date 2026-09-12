@@ -11,7 +11,7 @@ function getSupabase() {
 export async function POST({ request }) {
   try {
     const authHeader = request.headers.get('authorization');
-    if (authHeader !== `Bearer ${env.CRON_SECRET}`) {
+    if (!env.CRON_SECRET || authHeader !== `Bearer ${env.CRON_SECRET}`) {
       return json({ error: 'Unauthorized' }, { status: 401 });
     }
 

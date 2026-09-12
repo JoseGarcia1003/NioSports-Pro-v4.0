@@ -15,12 +15,26 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('[Supabase] Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    // We use Firebase Auth, not Supabase Auth
-    autoRefreshToken: false,
-    persistSession: false,
-    detectSessionInUrl: false,
+let client;
+function getClient() {
+  if (!supabaseUrl || !supabaseAnonKey) throw new Error("Supabase is not configured");
+  if (!client) client = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      // We use Firebase Auth, not Supabase Auth
+      autoRefreshToken: false,
+      persistSession: false,
+      detectSessionInUrl: false,
+    },
+  });
+  return client;
+}
+
+// Builds need no credentials; actual data access fails explicitly if unconfigured.
+export const supabase = new Proxy({}, {
+  get(_target, key) {
+    const instance = getClient();
+    const value = Reflect.get(instance, key);
+    return typeof value === 'function' ? value.bind(instance) : value;
   },
 });
 

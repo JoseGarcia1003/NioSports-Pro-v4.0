@@ -27,7 +27,7 @@ function toShortName(fullName) {
 export async function GET({ request }) {
   // Verify cron secret
   const authHeader = request.headers.get('authorization');
-  if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
+  if (!CRON_SECRET || authHeader !== `Bearer ${CRON_SECRET}`) {
     return json({ error: 'Unauthorized' }, { status: 401 });
   }
 

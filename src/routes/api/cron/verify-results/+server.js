@@ -1,176 +1,59 @@
-// src/routes/api/cron/verify-results/+server.js
-// Verifies prediction results and calculates CLV for resolved picks.
-// Cron: runs daily at 10:00 UTC (after all games from previous night finish).
-
+// Resolve only explicitly mapped NBA FULL totals. Quarter/half scores require another result contract.
 import { json } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
 import { createClient } from '@supabase/supabase-js';
-
-const BDL_API_KEY = env.BALLDONTLIE_API_KEY || '';
-
-function getSupabase() {
-  return createClient(env.VITE_SUPABASE_URL || '', env.SUPABASE_SERVICE_ROLE_KEY || '');
-}
+import { settleNbaTotal } from '$lib/engine/settlement.js';
 
 export async function GET({ request }) {
-  const authHeader = request.headers.get('authorization');
-  const cronSecret = env.CRON_SECRET || '';
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (!env.CRON_SECRET || request.headers.get('authorization') !== 'Bearer ' + env.CRON_SECRET) {
     return json({ error: 'Unauthorized' }, { status: 401 });
   }
-
-  const supabase = getSupabase();
-
-  // Get yesterday's date
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  const dateStr = yesterday.toISOString().split('T')[0];
-
+  if (!env.BALLDONTLIE_API_KEY) return json({ error: 'Results provider unavailable' }, { status: 503 });
+  const date = new Date();
+  date.setUTCDate(date.getUTCDate() - 1);
+  const dateStr = date.toISOString().slice(0, 10);
   try {
-    // 1. Fetch final scores from BallDontLie
-    let games = [];
-    if (BDL_API_KEY) {
-      const res = await fetch(
-        `https://api.balldontlie.io/v1/games?dates[]=${dateStr}&per_page=15`,
-        { headers: { Authorization: `Bearer ${BDL_API_KEY}` } }
-      );
-
-      if (res.ok) {
-        const data = await res.json();
-        games = (data.data || []).filter(g => g.status === 'Final');
-        console.log(`[verify-results] ${games.length} final games for ${dateStr}`);
-      }
-    }
-
-    let resolvedPicks = 0;
-    let clvCalculated = 0;
-
-    for (const game of games) {
-      const actualTotal = game.home_team_score + game.visitor_team_score;
-
-      // 2. Find pending picks for this game date
-      const { data: picks } = await supabase
-        .from('picks')
-        .select('*')
-        .eq('status', 'pending')
-        .gte('created_at', `${dateStr}T00:00:00`)
-        .lte('created_at', `${dateStr}T23:59:59`);
-
-      if (!picks || picks.length === 0) continue;
-
-      for (const pick of picks) {
-        // Match pick to game (by team names if available)
-        const pickLine = pick.line || pick.bet_line || 0;
-        const pickDirection = pick.direction || 'OVER';
-
-        // Determine result
-        let result;
-        if (pickDirection === 'OVER') {
-          result = actualTotal > pickLine ? 'win' : actualTotal < pickLine ? 'loss' : 'push';
-        } else {
-          result = actualTotal < pickLine ? 'win' : actualTotal > pickLine ? 'loss' : 'push';
-        }
-
-        // 3. Calculate CLV from odds_snapshots
-        let clvPoints = null;
-        let closingLine = null;
-
-        // Get closing line for this game
-        const { data: closingSnap } = await supabase
-          .from('odds_snapshots')
-          .select('total_line')
-          .eq('game_date', dateStr)
-          .eq('snapshot_type', 'closing')
-          .eq('period', 'FULL')
-          .order('captured_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (closingSnap) {
-          closingLine = closingSnap.total_line;
-
-          // CLV = closing_line - bet_line (for OVER)
-          // CLV = bet_line - closing_line (for UNDER)
-          if (pickDirection === 'OVER') {
-            clvPoints = closingLine - pickLine;
-          } else {
-            clvPoints = pickLine - closingLine;
-          }
-          clvCalculated++;
-        }
-
-        // 4. Update pick with result and CLV
-        const updates = {
-          status: result,
-          result: result,
-          actual_total: actualTotal,
-          closing_line: closingLine,
-          clv_points: clvPoints,
-          resolved_at: new Date().toISOString(),
-        };
-
-        await supabase
-          .from('picks')
-          .update(updates)
-          .eq('id', pick.id);
-
-        resolvedPicks++;
-      }
-    }
-
-    // 5. Also resolve predictions table
-    for (const game of games) {
-      const actualTotal = game.home_team_score + game.visitor_team_score;
-
-      const { data: preds } = await supabase
-        .from('predictions')
-        .select('*')
-        .eq('source', 'live')
-        .is('result', null);
-
-      if (!preds) continue;
-
-      for (const pred of preds) {
-        const predLine = pred.line || 0;
-        const predDirection = pred.direction || 'OVER';
-
-        let result;
-        if (predDirection === 'OVER') {
-          result = actualTotal > predLine ? 'win' : actualTotal < predLine ? 'loss' : 'push';
-        } else {
-          result = actualTotal < predLine ? 'win' : actualTotal > predLine ? 'loss' : 'push';
-        }
-
-        await supabase
-          .from('predictions')
-          .update({
-            result,
-            actual_total: actualTotal,
-            resolved_at: new Date().toISOString(),
-          })
-          .eq('id', pred.id);
-      }
-    }
-
-// 6. Send results email to subscribers
-    if (resolvedPicks > 0) {
-      const origin = 'https://nio-sports-pro-v4-0.vercel.app';
-      fetch(`${origin}/api/email/results`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${cronSecret}`, 'Content-Type': 'application/json' },
-      }).catch(err => console.warn('[verify-results] Email trigger failed:', err.message));
-    }
-
-    return json({
-      status: 'ok',
-      date: dateStr,
-      games_found: games.length,
-      picks_resolved: resolvedPicks,
-      clv_calculated: clvCalculated,
+    const response = await fetch('https://api.balldontlie.io/v1/games?dates[]=' + dateStr + '&per_page=100', {
+      headers: { Authorization: env.BALLDONTLIE_API_KEY }, signal: AbortSignal.timeout(10000),
     });
-
-  } catch (err) {
-    console.error('[verify-results] Error:', err);
-    return json({ error: err.message }, { status: 500 });
+    if (!response.ok) throw new Error('Results provider request failed');
+    const payload = await response.json();
+    if (!Array.isArray(payload.data)) throw new Error('Invalid results payload');
+    const supabase = createClient(env.VITE_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+    let resolvedPicks = 0;
+    let resolvedPredictions = 0;
+    for (const game of payload.data) {
+      if (game.status !== 'Final' || !game.id) continue;
+      const { data: mappedGames } = await supabase.from('games').select('id,external_id')
+        .eq('external_id', String(game.id)).eq('date', dateStr).throwOnError();
+      // Ambiguous mappings must never select the first game.
+      if (mappedGames?.length !== 1) continue;
+      const mapped = mappedGames[0];
+      for (const table of ['picks', 'predictions']) {
+        let query = supabase.from(table).select('*').eq('game_id', mapped.id).eq('period', 'FULL');
+        query = table === 'picks' ? query.eq('status', 'pending') : query.eq('source', 'live').is('result', null);
+        const { data: rows } = await query.throwOnError();
+        for (const row of rows || []) {
+          const settlement = settleNbaTotal(row, mapped, game);
+          if (!settlement) continue;
+          // CLV is unknown until a verified pre-event closing snapshot exists.
+          const updates = table === 'picks' ? {
+            status: settlement.outcome, actual_total: settlement.actualTotal,
+            closing_line: null, clv: null, resolved_at: new Date().toISOString(),
+          } : { result: settlement.outcome, actual_total: settlement.actualTotal };
+          let write = supabase.from(table).update(updates).eq('id', row.id).eq('game_id', mapped.id);
+          // Conditional update prevents duplicate resolution on retries/concurrent cron runs.
+          write = table === 'picks' ? write.eq('status', 'pending') : write.is('result', null);
+          const { data: changed } = await write.select('id').throwOnError();
+          if (table === 'picks') resolvedPicks += changed?.length || 0;
+          else resolvedPredictions += changed?.length || 0;
+        }
+      }
+    }
+    return json({ status: 'ok', date: dateStr, picks_resolved: resolvedPicks,
+      predictions_resolved: resolvedPredictions, clv_calculated: 0 });
+  } catch (error) {
+    console.error('[verify-results]', error);
+    return json({ error: 'Result verification failed' }, { status: 500 });
   }
 }
