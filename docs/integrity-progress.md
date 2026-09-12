@@ -50,6 +50,12 @@ Vercel falla al crear el enlace `.vercel/output/functions/index.func` con
 El empaquetado completo no está verificado; debe comprobarse en Linux/CI o
 en Windows con permisos para enlaces simbólicos. No equivale a build aprobado.
 
+GitHub Actions, ejecución `34660552667` del PR #1: el job no se inició.
+La anotación de GitHub indica: "The job was not started because your account
+is locked due to a billing issue." No hay pasos ejecutados ni logs de pruebas.
+Es necesario resolver la facturación de la cuenta para validar en CI; no se
+modificó facturación ni se efectuó ningún pago.
+
 No se han ejecutado operaciones sobre datos reales ni enviado correos/pagos.
 Stripe/Supabase/proveedores reales y migraciones: no verificables con estas pruebas.
 
