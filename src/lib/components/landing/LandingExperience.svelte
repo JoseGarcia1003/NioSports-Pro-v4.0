@@ -7,13 +7,13 @@
 <div class="experience">
   <nav aria-label="Navegación de presentación" class="masthead">
     <a class="brand" href="/" aria-label="NioSports Pro, inicio"><span class="mark">N↗</span><span>nio<span class="brand-light">sports</span><small>PRO</small></span></a>
-    <div class="nav-links"><a href="#producto">El producto</a><a href="#metodo">Cómo funciona</a></div>
+    <div class="nav-links"><a href="/tennis?demo=1">Tenis Lab ↗</a><a href="#producto">El producto</a><a href="#metodo">Cómo funciona</a></div>
     <a class="sign-in" href="/login">Entrar <ArrowUpRight size={15}/></a>
   </nav>
 
   <section class="hero" aria-labelledby="landing-title">
     <div class="hero-copy">
-      <p class="eyebrow"><span class="status-dot"></span> NBA ANALYTICS & BANKROLL</p>
+      <p class="eyebrow"><span class="status-dot"></span> NBA + TENNIS / BANKROLL</p>
       <h1 id="landing-title">El juego cambia.<br/>Tu criterio<br/><em>marca la diferencia.</em></h1>
       <p class="intro">Una perspectiva más clara del partido y de tu capital. Explora el análisis NBA y lleva el control de cada decisión.</p>
       <div class="hero-actions"><a class="primary" href="/bankroll?demo=1">Explorar el producto <ArrowUpRight size={19}/></a><a class="text-link" href="#metodo">Conocer el enfoque <ArrowRight size={16}/></a></div>

@@ -4,6 +4,7 @@
 
 <nav class="bnav">
   <div class="bnav__scroll">
+    <a href="/tennis" class="bnav__tab" class:active={$page.url.pathname.startsWith('/tennis')}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M5 5c8 1 13 6 14 14M5 19C6 11 11 6 19 5"/></svg><span>Tenis</span></a>
     <a href="/" class="bnav__tab" class:active={$page.url.pathname === '/'}>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
       <span>Inicio</span>

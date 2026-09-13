@@ -39,7 +39,7 @@
   });
 
 $: if (browser && !$authLoading) {
-    const isPublic = $page.url.pathname === '/' || $page.url.pathname === '/bankroll' || PUBLIC_ROUTES.some(r => $page.url.pathname.startsWith(r));
+    const isPublic = $page.url.pathname === '/' || $page.url.pathname === '/bankroll' || $page.url.pathname === '/tennis' || PUBLIC_ROUTES.some(r => $page.url.pathname.startsWith(r));
     if (!$isAuthenticated && !isPublic) goto('/login');
     if ($isAuthenticated && $page.url.pathname === '/login') goto('/');
     if ($isAuthenticated && $authStore.userId !== subscriptionUser) {

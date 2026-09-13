@@ -11,6 +11,7 @@
 
   const NAV_LINKS = [
     { href: '/',         label: 'Inicio',      icon: Home },
+    { href: '/tennis', label: 'Tenis', icon: Trophy },
     { href: '/totales',  label: 'Totales',     icon: BarChart3 },
     { href: '/picks',    label: 'Picks',       icon: Cpu },
     { href: '/bankroll', label: 'Bankroll',    icon: Wallet },
