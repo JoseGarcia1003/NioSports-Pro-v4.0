@@ -153,3 +153,15 @@ forma aislada los permisos del cliente antiguo. Deben resolverse al coordinar
 la migración de identidad y el despliegue. Ver [diagnóstico de RLS desactivado](https://supabase.com/docs/guides/database/database-linter?lint=0013_rls_disabled_in_public).
 El aviso informativo de RLS sin políticas en tenis es intencional: solo el servidor
 accede, con privilegios explícitos y sin acceso de clientes.
+
+## Fichas individuales — 13 de septiembre de 2026
+
+La comparación de un encuentro permite abrir el nombre de cada jugador. La nueva ficha presenta temporada actual (año UTC), victorias y derrotas, distribución por superficie, estadísticas de saque disponibles, último informe físico y próximos partidos recibidos. Cada rival del historial tiene un enlace a su propia ficha.
+
+El historial muestra hasta 30 registros recientes, con filtro de superficie sobre esa muestra. Retiros y partidos sin disputar están identificados y excluidos de los totales de partidos completos. La mejor superficie es la de mayor porcentaje observado con al menos cinco partidos; no equivale a una ventaja predictiva. Los registros posteriores al corte de información se excluyen. No se rellenan estadísticas ausentes ni se interpreta la ausencia de informes médicos como buena salud.
+
+La API `GET /api/tennis?player=<id>` comparte la autenticación y la fuente del calendario. La demostración conserva su instante de datos entre fichas y está separada del proveedor real. No requiere cambios adicionales en la base de datos ni almacena ejemplos como información real.
+
+Validación: 305 pruebas aprobadas y revisión Svelte sin errores ni advertencias. La conexión al proveedor de pago, la validación predictiva con resultados reales y la publicación en producción siguen siendo pasos pendientes.
+
+Comprobación visual de esta entrega: navegación calendario → ficha → rival → calendario, filtro de superficie y pantalla de 390 px sin desplazamiento horizontal. La compilación genera los paquetes de cliente y servidor, pero el empaquetado final de Vercel vuelve a fallar en Windows por permisos para crear un enlace simbólico (EPERM). No se considera una compilación de producción aprobada ni un despliegue realizado.

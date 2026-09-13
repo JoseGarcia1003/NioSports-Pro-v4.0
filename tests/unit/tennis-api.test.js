@@ -23,3 +23,15 @@ it('rejects invalid or future demo anchors',async()=>{
   expect((await GET(event('demo=1&demoAt=invalid'))).status).toBe(400);
   expect((await GET(event(`demo=1&demoAt=${encodeURIComponent(new Date(Date.now()+3600000).toISOString())}`))).status).toBe(400);
 });
+it('provides a public demo player profile anchored to the same dataset',async()=>{
+ const calendar=await (await GET(event('demo=1'))).json();
+ const response=await GET(event(`demo=1&player=${calendar.players[0].id}&demoAt=${encodeURIComponent(calendar.fetchedAt)}`));
+ const body=await response.json();expect(response.status).toBe(200);expect(body.profile.player).toEqual(calendar.players[0]);expect(body.fetchedAt).toBe(calendar.fetchedAt);expect(response.headers.get('Cache-Control')).toBe('no-store');expect(latestTennis).not.toHaveBeenCalled();
+});
+it('rejects absent players and ambiguous detail requests',async()=>{
+ expect((await GET(event('demo=1&player=missing'))).status).toBe(404);
+ expect((await GET(event('demo=1&player=demo-p0&match=demo-m0'))).status).toBe(400);
+});
+it('protects real player profiles before accessing the database',async()=>{
+ await expect(GET(event('player=demo-p0'))).rejects.toMatchObject({status:401});expect(latestTennis).not.toHaveBeenCalled();
+});

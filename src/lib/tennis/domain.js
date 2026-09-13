@@ -66,6 +66,24 @@ export function validateDataset(data, { now = Date.now(), allowDemo = false } = 
   return data;
 }
 
+export function playerProfile(data, playerId, now = Date.now()) {
+  const player = data.players.find(p => p.id === playerId);
+  if (!player) return null;
+  const cutoff = Math.min(now, Date.parse(data.fetchedAt));
+  const asOf = new Date(cutoff).toISOString();
+  const season = new Date(cutoff).getUTCFullYear();
+  const history = data.history.filter(h => (h.a === playerId || h.b === playerId) && Date.parse(h.endedAt) < cutoff && Date.parse(h.observedAt) <= cutoff)
+    .sort((a, b) => Date.parse(b.endedAt) - Date.parse(a.endedAt) || a.id.localeCompare(b.id));
+  const recent = history.slice(0, 30);
+  const upcoming = data.matches.filter(m => (m.a === playerId || m.b === playerId) && m.status === 'scheduled' && Date.parse(m.startAt) > now)
+    .sort((a, b) => Date.parse(a.startAt) - Date.parse(b.startAt));
+  const ids = new Set([playerId, ...recent.flatMap(h => [h.a, h.b]), ...upcoming.flatMap(m => [m.a, m.b])]);
+  return { player, season, asOf, summary: playerSummary(playerId, history, { startAt: asOf }, cutoff), recent, upcoming,
+    players: data.players.filter(p => ids.has(p.id)),
+    injury: data.injuries.filter(r => r.playerId === playerId && Date.parse(r.publishedAt) <= cutoff).sort((a,b) => Date.parse(b.publishedAt)-Date.parse(a.publishedAt))[0] ?? null,
+    serviceStats: (data.playerStats || []).filter(s => s.playerId === playerId && s.season === season && Date.parse(s.asOf) <= cutoff) };
+}
+
 export function playerSummary(playerId, history, match, cutoff) {
   const rows=history.filter(h=>h.id!==match.id && h.status==='completed' && Date.parse(h.endedAt)<cutoff && Date.parse(h.observedAt)<=cutoff && (h.a===playerId||h.b===playerId)).sort((a,b)=>Date.parse(b.endedAt)-Date.parse(a.endedAt));
   const year=new Date(match.startAt).getUTCFullYear();

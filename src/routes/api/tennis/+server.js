@@ -2,7 +2,7 @@ import { json, isHttpError } from '@sveltejs/kit';
 import { requireIdentity } from '$lib/server/identity.js';
 import { latestTennis, recordTennisAnalysis } from '$lib/server/tennis-feed.js';
 import { demoDataset } from '$lib/tennis/demo.js';
-import { calendarDays, dateKey, analyzeMatch } from '$lib/tennis/domain.js';
+import { calendarDays, dateKey, analyzeMatch, playerProfile } from '$lib/tennis/domain.js';
 const reply=(data,status=200)=>json(data,{status,headers:{'Cache-Control':'no-store'}});
 
 export async function GET({url,request}) {
@@ -21,6 +21,13 @@ export async function GET({url,request}) {
     const data=snapshot.payload;
     const metadata={isDemo:demo,provider:data.provider,fetchedAt:data.fetchedAt,coverage:data.coverage,timezone,days,stale:now-Date.parse(data.fetchedAt)>6*3600000,snapshotId:snapshot.id};
     const matchId=url.searchParams.get('match');
+    const playerId=url.searchParams.get('player');
+    if(playerId && matchId)return reply({error:'Consulta un jugador o un partido a la vez.'},400);
+    if(playerId){
+      const profile=playerProfile(data,playerId,now);
+      if(!profile)return reply({error:'Jugador no encontrado.'},404);
+      return reply({...metadata,profile});
+    }
     if(matchId){
       const match=data.matches.find(m=>m.id===matchId);
       if(!match)return reply({error:'Partido no encontrado.'},404);
