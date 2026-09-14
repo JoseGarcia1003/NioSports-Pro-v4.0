@@ -501,7 +501,6 @@
     letter-spacing: 0.05em;
   }
   .over  { background: rgba(52,211,153,0.15); color: #34d399; }
-  .under { background: rgba(248,113,113,0.15); color: #f87171; }
   .pick-example__line { font-family: 'DM Mono', monospace; font-size: 1.4rem; font-weight: 700; color: #fff; }
 
   .confidence-bar {

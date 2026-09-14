@@ -28,7 +28,7 @@
     error = '';
     try {
       await loginWithEmail(email, password);
-      goto('/');
+      goto('/today');
     } catch (e) {
       error = friendlyError(e.code);
     } finally {
@@ -50,7 +50,7 @@
     try {
       await registerWithEmail(email, password);
       toasts.success('¡Cuenta creada! Bienvenido a NioSports Pro.');
-      goto('/');
+      goto('/today');
     } catch (e) {
       error = friendlyError(e.code);
     } finally {
@@ -63,7 +63,7 @@
     error = '';
     try {
       await loginWithGoogle();
-      goto('/');
+      goto('/today');
     } catch (e) {
       if (e.code !== 'auth/popup-closed-by-user') {
         error = friendlyError(e.code);
@@ -119,7 +119,7 @@
   <title>Iniciar Sesión — NioSports Pro</title>
   <meta
     name="description"
-    content="Accede a tu cuenta de NioSports Pro para ver tus picks y análisis NBA."
+    content="Accede a tu cuenta de NioSports Pro para explorar deportes, análisis y tu bankroll."
   />
 </svelte:head>
 
@@ -128,7 +128,7 @@
     <div class="auth-logo">
       <img src="/icons/icon-192.png" alt="NioSports" width="60" height="60" />
       <h1 class="auth-title">NioSports <span>PRO</span></h1>
-      <p class="auth-subtitle">Sistema predictivo NBA profesional</p>
+      <p class="auth-subtitle">Tus deportes, tus análisis, tu control. Empieza gratis.</p>
     </div>
 
     {#if mode !== 'forgot'}

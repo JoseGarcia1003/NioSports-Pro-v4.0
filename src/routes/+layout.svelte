@@ -1,6 +1,7 @@
 <script>
   import CourtBackground from '$lib/components/CourtBackground.svelte';
   import '$lib/styles/premium.css';
+  import '$lib/styles/product.css';
   import { onMount } from 'svelte';
   import { onNavigate } from '$app/navigation';
   import '$lib/styles/tokens.css';
@@ -12,19 +13,19 @@
   import BottomNav from '$lib/components/BottomNav.svelte';
   import DemoBanner from '$lib/components/DemoBanner.svelte';
   import ToastContainer from '$lib/components/ToastContainer.svelte';
-  import ProductTour from '$lib/components/ProductTour.svelte';
+
 
   import { initFirebase } from '$lib/firebase';
   import { authStore, isAuthenticated, authLoading } from '$lib/stores/auth';
-  import { loadSubscription } from '$lib/stores/subscription';
-  import { supabase } from '$lib/supabase/client';
+  import { loadSubscription, resetSubscription } from '$lib/stores/subscription';
   import { theme } from '$lib/stores/ui';
   import { browser } from '$app/environment';
 
   const PUBLIC_ROUTES = ['/login', '/register', '/forgot-password'];
+  let subscriptionUser = null;
 
   onMount(async () => {
-  await initFirebase();
+  try { await initFirebase(); } catch { authStore.setUser(null); authStore.setError('No se pudo iniciar la autenticación'); }
   document.documentElement.setAttribute('data-theme', $theme);
   });
 
@@ -39,11 +40,15 @@
   });
 
 $: if (browser && !$authLoading) {
-    const isPublic = PUBLIC_ROUTES.some(r => $page.url.pathname.startsWith(r));
+    const isPublic = ['/today','/sports','/sports/nba','/predictions','/account','/pricing','/methodology','/public'].includes($page.url.pathname) || $page.url.pathname.startsWith('/legal/') || $page.url.pathname === '/' || $page.url.pathname === '/bankroll' || $page.url.pathname === '/tennis' || /^\/tennis\/player\/[^/]+\/?$/.test($page.url.pathname) || PUBLIC_ROUTES.some(r => $page.url.pathname.startsWith(r));
     if (!$isAuthenticated && !isPublic) goto('/login');
-    if ($isAuthenticated && $page.url.pathname === '/login') goto('/');
-    if ($isAuthenticated && $authStore?.uid) {
-      loadSubscription(supabase, $authStore.uid);
+    if ($isAuthenticated && ['/', '/login'].includes($page.url.pathname)) goto('/today');
+    if ($isAuthenticated && $authStore.userId !== subscriptionUser) {
+      subscriptionUser = $authStore.userId;
+      loadSubscription();
+    } else if (!$isAuthenticated && subscriptionUser) {
+      subscriptionUser = null;
+      resetSubscription();
     }
   }
 
@@ -80,7 +85,7 @@ $: if (browser && !$authLoading) {
 
     {#if showNav}
       <BottomNav />
-      <ProductTour />
+
     {/if}
   {/if}
 

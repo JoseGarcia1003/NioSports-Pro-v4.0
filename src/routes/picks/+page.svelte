@@ -64,14 +64,11 @@
   $: winRate = (wins + losses) > 0 ? ((wins / (wins + losses)) * 100).toFixed(1) : '—';
 
   // ── Feature Gating: limit visible picks by plan ──
-  $: userPlan = $subscription.plan || 'free';
+  $: userPlan = ['active','trialing'].includes($subscription.status) ? $subscription.plan : 'free';
   $: maxPicks = getMaxPicks(userPlan, aiPicks.length);
-  $: allFilteredPicks = aiPicks.filter(pick => {
-      const key = `${pick.gameId}-${pick.period}`;
-      return !savedPickKeys.has(key);
-    });
-  $: visibleAIPicks = allFilteredPicks.slice(0, maxPicks);
-  $: hiddenCount = Math.max(0, allFilteredPicks.length - maxPicks);
+  // Select entitlement before hiding saved rows: saving cannot unlock the next FREE pick.
+  $: visibleAIPicks = aiPicks.slice(0, maxPicks);
+  $: hiddenCount = Math.max(0, aiPicks.length - maxPicks);
   // ─────────────────────────────────────────────────
 
   $: aiSummary = getPicksSummary(visibleAIPicks);
@@ -164,12 +161,12 @@
   }
 </script>
 
-<svelte:head><title>Picks del Modelo — NioSports Pro</title></svelte:head>
+<svelte:head><title>Pronósticos NBA — NioSports Pro</title></svelte:head>
 
 <div class="page">
   <header class="page__header">
     <span class="page__label">Motor predictivo</span>
-    <h1 class="page__title">Picks del Modelo</h1>
+    <h1 class="page__title">Pronósticos NBA</h1>
     <p class="page__subtitle">v{MODEL_VERSION.version} — Análisis cuantitativo de totales NBA</p>
   </header>
 

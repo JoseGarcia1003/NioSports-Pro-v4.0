@@ -7,18 +7,11 @@
   import { browser } from '$app/environment';
   import { onMount, onDestroy } from 'svelte';
   import Logo from '$lib/components/Logo.svelte';
-  import { Home, BarChart3, Cpu, Wallet, TrendingUp, Gem, Trophy, ClipboardList, Sun, Moon, LogOut } from 'lucide-svelte';
+  import { Home, BarChart3, Cpu, Wallet, TrendingUp, Gem, Trophy, ClipboardList, User, Sun, Moon, LogOut } from 'lucide-svelte';
 
-  const NAV_LINKS = [
-    { href: '/',         label: 'Inicio',      icon: Home },
-    { href: '/totales',  label: 'Totales',     icon: BarChart3 },
-    { href: '/picks',    label: 'Picks',       icon: Cpu },
-    { href: '/bankroll', label: 'Bankroll',    icon: Wallet },
-    { href: '/stats',    label: 'Stats',       icon: TrendingUp },
-    { href: '/pricing',  label: 'Precios',     icon: Gem },
-    { href: '/results',  label: 'Resultados',  icon: Trophy },
-    { href: '/tracking', label: 'Tracking',    icon: ClipboardList },
-  ];
+  import { PRIMARY_NAV, navActive } from '$lib/product/navigation.js';
+  const icons={Home,Cpu,Trophy,Wallet,User};
+  const NAV_LINKS=PRIMARY_NAV.map(item=>({...item,icon:icons[item.icon]}));
 
   let scrolled = false;
   let userMenuOpen = false;
@@ -58,7 +51,7 @@
 
   function isActive(href) {
     const path = $page.url.pathname;
-    return href === '/' ? path === '/' : path.startsWith(href);
+    return navActive(NAV_LINKS.find(item=>item.href===href),path);
   }
 </script>
 
@@ -66,14 +59,14 @@
 
 <nav class="nav" class:nav--scrolled={scrolled} aria-label="Navegación principal">
   <div class="nav__inner">
-    <a href="/" class="nav__brand" aria-label="NioSports Pro — Ir al inicio">
+    <a href="/today" class="nav__brand" aria-label="NioSports Pro — Ir al inicio">
       <Logo size={32} showText={true} />
     </a>
 
     <!-- Desktop nav links - hidden on mobile (BottomNav handles it) -->
     <ul class="nav__links" role="list">
       {#each NAV_LINKS as link}
-        {@const active = isActive(link.href)}
+        {@const active = navActive(link,$page.url.pathname)}
         <li role="none">
           <a href={link.href} class="nav__link" class:nav__link--active={active}
              aria-current={active ? 'page' : undefined}>
@@ -104,7 +97,7 @@
                 <span class="nav__user-email">{$currentUser.email}</span>
               {/if}
             </div>
-            <hr class="nav__user-divider" />
+            <a href="/account" class="nav__user-item" role="menuitem" on:click={closeUserMenu}>Mi cuenta y suscripción</a><hr class="nav__user-divider" />
             <button class="nav__user-item" role="menuitem" on:click={handleLogout}>
               <LogOut size={14} /> Cerrar sesión
             </button>
@@ -125,6 +118,7 @@
   .skip-link:focus { top: 0; }
 
   .nav {
+    --color-text-muted: #b5c0d3; --color-text-secondary: #e0e6f0; --color-bg-elevated: #253045;
     background: rgba(10,15,28,0.9);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
@@ -157,7 +151,7 @@
     color: var(--color-text-muted); transition: color 0.15s, background 0.15s; white-space: nowrap;
   }
   .nav__link:hover { color: #fff; background: var(--color-bg-elevated); }
-  .nav__link--active { color: #6366F1; background: rgba(99,102,241,0.1); }
+  .nav__link--active { color: #b6dd94; background: rgba(169,216,134,0.1); }
 
   /* Controls */
   .nav__controls {

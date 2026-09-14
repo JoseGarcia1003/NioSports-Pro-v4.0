@@ -1,4 +1,6 @@
 <script>
+  import { authenticatedFetch } from '$lib/services/authenticated-fetch.js';
+
   import { onMount } from 'svelte';
   import { userId } from '$lib/stores/auth';
   import { subscription } from '$lib/stores/subscription';
@@ -49,8 +51,8 @@
       teamStats.set(statsData);
     } catch {
       statsError = true;
-      statsData = getDemoStats();
-      teamStats.set(statsData);
+      statsData = null;
+      teamStats.set({});
     } finally { loadingStats = false; }
   });
 
@@ -97,7 +99,7 @@
     const results = {};
     for (const [period, defLine] of [['Q1', 55], ['HALF', 110], ['FULL', 220]]) {
       try {
-        const res = await fetch('/api/predict', {
+        const res = await authenticatedFetch('/api/predict', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ homeTeam: home, awayTeam: away, line: defLine, period, gameInfo, source: 'totales', userId: $userId || 'anonymous', plan: $subscription?.plan || 'free' })
         });
@@ -365,7 +367,7 @@
         <h1 class="page__title">Totales NBA</h1>
         <p class="page__subtitle">
           Motor v{MODEL_VERSION.version}
-          {#if statsError}<span class="badge-warn">Demo</span>{/if}
+          {#if statsError}<span class="badge-warn">Datos no disponibles</span>{/if}
           {#if predictions?.FULL?.source}<span class="badge-source">{predictions.FULL.source === 'ensemble-v4' ? 'Ensemble ML' : 'ML'}</span>{/if}
         </p>
       </div>
@@ -378,6 +380,8 @@
 
   {#if loadingStats}
     <div class="loading-state"><div class="spinner"></div><p>Cargando estadísticas...</p></div>
+  {:else if statsError}
+    <div class="loading-state" role="alert"><AlertTriangle size={28} /><p>No pudimos cargar las estadísticas. No se generan predicciones con datos de ejemplo. Recarga la página para reintentar.</p></div>
   {:else}
     <div class="selectors">
       <div class="selector selector--home">
@@ -458,7 +462,7 @@
                   <div class="pcard__hero">
                     <div class="pcard__proj-wrap">
                       <span class="pcard__proj">{a.projection?.toFixed(1) ?? '—'}</span>
-                      <span class="pcard__proj-label">Proyección</span>
+                      <span class="pcard__proj-label">{a.source === 'heuristic-local' ? 'Estimación heurística' : 'Proyección del modelo'}</span>
                     </div>
                     <ConfidenceGauge value={parseFloat(v.modelProbPct)} size={56} />
                   </div>
@@ -470,15 +474,15 @@
 
                   <div class="inputs-row">
                     <div class="input-block">
-                      <label class="input-label">🎯 Línea</label>
-                      <input type="number" step="0.5" min="0"
+                      <label for={`line-${row.period}`} class="input-label">🎯 Línea</label>
+                      <input id={`line-${row.period}`} type="number" step="0.5" min="0"
                         value={row.dir === 'OVER' ? row.lineOver : row.lineUnder}
                         on:change={(e) => handleLineInput(e, row.period, row.dir)}
                         class="input-field" />
                     </div>
                     <div class="input-block">
-                      <label class="input-label">💰 Cuota</label>
-                      <input type="number" step="0.01" min="1"
+                      <label for={`odds-${row.period}`} class="input-label">💰 Cuota</label>
+                      <input id={`odds-${row.period}`} type="number" step="0.01" min="1"
                         value={row.odds}
                         on:input={(e) => row.setOdds(e.target.value)}
                         class="input-field input-field--odds" />
@@ -565,7 +569,7 @@
         <button class="modal__x" on:click={() => glossaryModal = false} aria-label="Cerrar"><X size={18} /></button>
       </div>
       <div class="modal__body glossary-body">
-        <div class="g-item"><h4>Proyección</h4><p>Total estimado por el modelo ML. Combina promedios L5/L10/L20, descanso, back-to-back, altitude y factores contextuales.</p></div>
+        <div class="g-item"><h4>Proyección</h4><p>Estimación del motor indicado en la tarjeta. El cálculo heurístico usa promedios disponibles y ajustes contextuales; no equivale a una probabilidad calibrada ni a un resultado garantizado.</p></div>
         <div class="g-item"><h4>Línea</h4><p>El total que ofrece la casa de apuestas. Siempre en saltos de 0.5 (215.5, 216, 216.5).</p></div>
         <div class="g-item"><h4>Cuota (Decimal)</h4><p>Pago de la casa. Ej: 1.91 = ganas $0.91 por cada $1. 2.00 = duplicas tu apuesta.</p></div>
         <div class="g-item"><h4>Cuota Justa</h4><p>Cuota que <strong>debería</strong> tener según el modelo. Si la casa paga MÁS → VALUE BET.</p></div>

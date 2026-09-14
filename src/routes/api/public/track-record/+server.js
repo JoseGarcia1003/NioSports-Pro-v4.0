@@ -2,13 +2,12 @@ import { json } from '@sveltejs/kit';
 import { createClient } from '@supabase/supabase-js';
 import { env } from '$env/dynamic/private';
 
-const supabase = createClient(
-  env.VITE_SUPABASE_URL || '',
-  env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
-
 export async function GET() {
   try {
+    const supabase = createClient(
+      env.VITE_SUPABASE_URL || '',
+      env.SUPABASE_SERVICE_ROLE_KEY || ''
+    );
     const since = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
 
     const { data: picks, error } = await supabase

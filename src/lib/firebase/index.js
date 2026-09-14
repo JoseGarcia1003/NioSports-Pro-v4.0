@@ -22,15 +22,7 @@ import {
   off
 } from 'firebase/database';
 
-import {
-  PUBLIC_FIREBASE_API_KEY,
-  PUBLIC_FIREBASE_AUTH_DOMAIN,
-  PUBLIC_FIREBASE_DATABASE_URL,
-  PUBLIC_FIREBASE_PROJECT_ID,
-  PUBLIC_FIREBASE_STORAGE_BUCKET,
-  PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  PUBLIC_FIREBASE_APP_ID
-} from '$env/static/public';
+import { env } from '$env/dynamic/public';
 
 import { authStore } from '$lib/stores/auth';
 import { loadUserData, clearUserData } from '$lib/stores/data';
@@ -44,13 +36,13 @@ let _unsubscribeAuth = null;
 
 function getFirebaseConfig() {
   return {
-    apiKey: PUBLIC_FIREBASE_API_KEY,
-    authDomain: PUBLIC_FIREBASE_AUTH_DOMAIN,
-    databaseURL: PUBLIC_FIREBASE_DATABASE_URL,
-    projectId: PUBLIC_FIREBASE_PROJECT_ID,
-    storageBucket: PUBLIC_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-    appId: PUBLIC_FIREBASE_APP_ID
+    apiKey: env.PUBLIC_FIREBASE_API_KEY,
+    authDomain: env.PUBLIC_FIREBASE_AUTH_DOMAIN,
+    databaseURL: env.PUBLIC_FIREBASE_DATABASE_URL,
+    projectId: env.PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: env.PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: env.PUBLIC_FIREBASE_APP_ID
   };
 }
 
@@ -61,7 +53,8 @@ export function initFirebase() {
   const config = getFirebaseConfig();
 
   if (!config.apiKey) {
-    console.error('[Firebase] Falta PUBLIC_FIREBASE_API_KEY');
+    authStore.setUser(null);
+    authStore.setError('Autenticación no configurada');
     firebaseStatus.set('error');
     return;
   }
@@ -95,6 +88,7 @@ export function initFirebase() {
     },
     (error) => {
       console.error('[Firebase] Auth error:', error);
+      authStore.setUser(null);
       authStore.setError(error.message);
       firebaseStatus.set('error');
     }
@@ -120,26 +114,13 @@ export async function loginWithEmail(email, password) {
 
 export async function registerWithEmail(email, password) {
   const cred = await createUserWithEmailAndPassword(requireAuth(), email, password);
-  // Send welcome email (fire and forget)
-  fetch('/api/email/welcome', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, displayName: email.split('@')[0], secret: 'welcome' }),
-  }).catch(() => {});
+  // Welcome email delivery belongs to an authenticated server-side registration hook.
   return cred.user;
 }
 
 export async function loginWithGoogle() {
   const provider = new GoogleAuthProvider();
   const cred = await signInWithPopup(requireAuth(), provider);
-  // Send welcome email on first Google login (fire and forget)
-  if (cred._tokenResponse?.isNewUser) {
-    fetch('/api/email/welcome', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: cred.user.email, displayName: cred.user.displayName, secret: 'welcome' }),
-    }).catch(() => {});
-  }
   return cred.user;
 }
 

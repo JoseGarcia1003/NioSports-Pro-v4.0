@@ -1,0 +1,77 @@
+<script>
+  import { onMount } from 'svelte';
+  import { userId } from '$lib/stores/auth.js';
+  import { authenticatedFetch } from '$lib/services/authenticated-fetch.js';
+  let data=null, loading=true, failure='', success='', demo=false, mounted=false, activeUser;
+  let type='deposit', amount='', odds='1.91', note='', saving=false, requestKey, requestBody;
+  const money=v=>new Intl.NumberFormat('es-EC',{style:'currency',currency:'USD'}).format(Number(v||0)/100);
+  const labels={deposit:'Capital añadido',withdraw:'Capital retirado',stake:'Stake reservado',settle:'Ticket liquidado'};
+  const example={wallet:{available_minor:128450,reserved_minor:7500,deposited_minor:120000,withdrawn_minor:0,profit_minor:15950,settled_stake_minor:17500},entryCount:6,
+    entries:[['stake',-7500,128450,'Lakers · Total del partido'],['settle',19100,135950,'Celtics · Ticket ganado'],['stake',-10000,116850,'Celtics · Total del partido'],['settle',14350,126850,'Nuggets · Ticket ganado'],['stake',-7500,112500,'Nuggets · Total del partido'],['deposit',120000,120000,'Capital de ejemplo']].map((e,i)=>({id:6-i,kind:e[0],delta_minor:e[1],balance_minor:e[2],note:e[3],created_at:`2026-09-${String(10-i).padStart(2,'0')}T12:00:00Z`})),
+    tickets:[{id:'demo',stake_minor:7500,odds:1.91,note:'Lakers · Total del partido'}]};
+  onMount(()=>{mounted=true;if(new URLSearchParams(location.search).get('demo')==='1')showDemo();});
+  $: if(mounted&&$userId!==activeUser){activeUser=$userId;if(!demo)load();}
+  $: w=data?.wallet||{};
+  $: available=Number(w.available_minor||0);
+  $: reserved=Number(w.reserved_minor||0);
+  $: profit=Number(w.profit_minor||0);
+  $: capital=Number(w.deposited_minor||0)-Number(w.withdrawn_minor||0);
+  $: roi=Number(w.settled_stake_minor)>0?(profit/Number(w.settled_stake_minor)*100).toFixed(1)+'%':'—';
+  $: exposure=available+reserved>0?Math.round(reserved/(available+reserved)*100):0;
+  $: series=[...(data?.entries||[])].reverse().map(e=>Number(e.balance_minor));
+  $: low=Math.min(...series,available)*.95;
+  $: high=Math.max(...series,available,low+1)*1.05;
+  $: points=series.map((v,i)=>`${20+i*760/Math.max(1,series.length-1)},${175-(v-low)/(high-low)*150}`).join(' ');
+  function showDemo(){demo=true;data=example;failure='';loading=false;}
+  async function load(){
+    demo=false;data=null;failure='';loading=true;
+    if(!$userId){loading=false;return;}
+    const uid=$userId;
+    try{const res=await authenticatedFetch('/api/bankroll');const body=await res.json();if(!res.ok)throw new Error(body.error||'Registro no disponible');if(uid===$userId&&!demo)data=body;}
+    catch(e){if(uid===$userId&&!demo)failure=e.message;}finally{loading=false;}
+  }
+  async function transact(body){
+    if(demo||saving)return;const uid=$userId;saving=true;failure='';success='';
+    const encoded=JSON.stringify(body);if(encoded!==requestBody){requestKey=crypto.randomUUID();requestBody=encoded;}
+    try{const res=await authenticatedFetch('/api/bankroll',{method:'POST',headers:{'Content-Type':'application/json','Idempotency-Key':requestKey},body:encoded});const result=await res.json();if(!res.ok)throw new Error(result.error||'No se pudo registrar');if(uid!==$userId||demo)return;data=result;requestKey=null;requestBody=null;amount='';note='';success='Movimiento registrado. Saldo actualizado.';}
+    catch(e){if(uid===$userId&&!demo)failure=e.message;}finally{saving=false;}
+  }
+  function submit(){if(!/^\d+(\.\d{1,2})?$/.test(amount)||Number(amount)<=0){failure='Introduce un importe positivo con máximo dos decimales.';return;}transact({type,amountMinor:Math.round(Number(amount)*100),odds:type==='stake'?Number(odds):null,note});}
+</script>
+
+<div class="workspace">
+  <header><div><span class="eyebrow">● TU CENTRO DE CONTROL</span><h1>Tu capital.<br/><em>Tus decisiones.</em></h1><p>Entiende tu exposición. Registra cada movimiento. Mide resultados.</p></div><div class="header-tools"><span class="badge">{demo?'Vista de ejemplo':'Registro personal · USD'}</span><button on:click={load} disabled={loading||saving} aria-label="Actualizar bankroll">↻ Actualizar</button></div></header>
+  {#if demo}<aside class="demo"><strong>DEMO · DATOS SIMULADOS</strong><span>Ejemplo visual de lectura. No representa rendimiento real.</span><button on:click={load}>Volver a mi cuenta →</button></aside>{/if}
+  {#if failure}<div class="message error" role="alert">{failure}<button on:click={load} disabled={saving}>Reintentar carga</button></div>{/if}
+  {#if success}<div class="message" role="status">{success}</div>{/if}
+  {#if loading}<div class="empty" role="status"><h2>Consultando tu registro…</h2><p>El saldo se obtiene de la contabilidad del servidor.</p></div>
+  {:else if !data}<div class="empty"><span class="symbol">↗</span><h2>{$userId?'Tu registro todavía no está disponible':'Un lugar para cada movimiento'}</h2><p>{$userId?'No mostramos un saldo inventado cuando no podemos verificar los datos.':'Inicia sesión para consultar tu capital y registrar tus tickets.'}</p><div>{#if !$userId}<a class="primary" href="/login">Iniciar sesión</a>{/if}<button on:click={showDemo}>Explorar ejemplo visual →</button></div></div>
+  {:else}
+    <section class="metrics" aria-label="Resumen de capital">
+      <article class="balance"><span class="eyebrow">◈ SALDO DISPONIBLE</span><div class="big">{money(available)}</div><footer>Patrimonio total <strong>{money(available+reserved)}</strong></footer></article>
+      <article><span class="eyebrow">◷ COMPROMETIDO</span><div class="number">{money(reserved)}</div><p>{data.tickets.length} tickets pendientes</p><div class="meter"><span style={`width:${exposure}%`}></span></div><small>{exposure}% del patrimonio reservado</small></article>
+      <article><span class="eyebrow">↗ BENEFICIO NETO</span><div class="number" class:negative={profit<0} class:positive={profit>=0}>{profit>0?'+':''}{money(profit)}</div><p>Solo resultados liquidados</p><footer>ROI sobre stake resuelto <strong>{roi}</strong></footer></article>
+      <article><span class="eyebrow">⇣ CAPITAL NETO</span><div class="number">{money(capital)}</div><p>Aportaciones menos retiros</p><footer>Los depósitos no son beneficio</footer></article>
+    </section>
+    <div class="grid">
+      <section class="panel chart"><div class="panel-head"><div><span class="eyebrow">PERSPECTIVA</span><h2>Evolución del saldo</h2></div><small>Últimos {series.length} movimientos</small></div>
+        {#if series.length>1}<svg viewBox="0 0 800 210" role="img" aria-label="Evolución del saldo disponible, incluye aportaciones y retiros"><defs><linearGradient id="bank-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#65e2b5" stop-opacity=".24"/><stop offset="100%" stop-color="#65e2b5" stop-opacity="0"/></linearGradient></defs><path d="M20 45H780M20 110H780M20 175H780" stroke="#ffffff0e" fill="none"/><polygon points={`20,200 ${points} 780,200`} fill="url(#bank-area)"/><polyline {points} stroke="#65e2b5" stroke-width="3" fill="none" stroke-linejoin="round"/></svg><small>Saldo disponible, no curva de rentabilidad. Incluye aportaciones, retiros y reservas.</small>{:else}<div class="quiet">La evolución aparecerá después de dos movimientos.</div>{/if}
+      </section>
+      <section class="panel form-panel"><span class="eyebrow">REGISTRO MANUAL</span><h2>Añadir movimiento</h2><p>Control personal. No mueve dinero ni envía apuestas.</p><form on:submit|preventDefault={submit}>
+        <label for="bank-type">Tipo de movimiento</label><select id="bank-type" bind:value={type} disabled={demo||saving}><option value="deposit">Aportar capital</option><option value="withdraw">Registrar retiro</option><option value="stake">Reservar stake de un ticket</option></select>
+        <label for="bank-amount">Importe · USD</label><input id="bank-amount" bind:value={amount} inputmode="decimal" placeholder="0.00" required disabled={demo||saving}/>
+        {#if type==='stake'}<label for="bank-odds">Cuota decimal aceptada</label><input id="bank-odds" type="number" min="1.0001" max="1000" step=".0001" bind:value={odds} required disabled={demo||saving}/>{/if}
+        <label for="bank-note">Nota · opcional</label><input id="bank-note" bind:value={note} maxlength="500" placeholder="Referencia del movimiento" disabled={demo||saving}/><button class="primary" type="submit" disabled={demo||saving}>{saving?'Registrando…':'+ Registrar movimiento'}</button>
+      </form></section>
+      <section class="panel pending"><span class="eyebrow">EXPOSICIÓN ABIERTA</span><h2>Tickets pendientes <span class="count">{data.tickets.length}</span></h2>{#each data.tickets as ticket(ticket.id)}<div class="ticket"><div><strong>{ticket.note||'Ticket manual'}</strong><p>{money(ticket.stake_minor)} de stake · Cuota {Number(ticket.odds).toFixed(2)}</p><small>Resultado manual de tu registro personal</small></div><div class="ticket-actions">{#each [['win','Ganado'],['loss','Perdido'],['push','Push'],['void','Anulado']] as outcome}<button disabled={demo||saving} on:click={()=>transact({type:'settle',amountMinor:0,ticketId:ticket.id,outcome:outcome[0],note:`Resultado manual: ${outcome[1]}`})}>{outcome[1]}</button>{/each}</div></div>{:else}<div class="quiet">Sin capital comprometido. Tus próximos tickets aparecerán aquí.</div>{/each}</section>
+      <section class="panel history"><div class="panel-head"><div><span class="eyebrow">TRAZABILIDAD</span><h2>Registro de movimientos</h2></div><small>{data.entryCount} registros en total</small></div><div class="scroll"><table><thead><tr><th>Movimiento</th><th>Fecha</th><th class="right">Importe</th><th class="right">Saldo posterior</th></tr></thead><tbody>{#each data.entries as entry(entry.id)}<tr><td><strong>{labels[entry.kind]||entry.kind}</strong><small class="row-note">{entry.note||'Sin nota'}</small></td><td><small>{new Date(entry.created_at).toLocaleDateString('es-EC')}</small></td><td class="right" class:positive={entry.delta_minor>0} class:negative={entry.delta_minor<0}>{entry.delta_minor>0?'+':''}{money(entry.delta_minor)}</td><td class="right">{money(entry.balance_minor)}</td></tr>{:else}<tr><td colspan="4" class="quiet">Tu registro comienza con la primera aportación.</td></tr>{/each}</tbody></table></div><small>Se muestran hasta 100 registros. Los saldos incluyen todos los movimientos, sin límite de historial.</small></section>
+    </div>
+  {/if}
+</div>
+
+<style>
+  .panel{min-width:0}.row-note{max-width:280px;overflow:hidden;text-overflow:ellipsis}
+  .workspace{max-width:1360px;margin:auto;padding:40px 28px 90px;color:#eaf2ee;font-family:Inter,system-ui,sans-serif}header{display:flex;justify-content:space-between;align-items:center;gap:24px;margin-bottom:30px}.eyebrow{font-size:9px;letter-spacing:1.7px;font-weight:700;color:#91a59d}h1{font-size:46px;line-height:1.1;letter-spacing:-2px;margin:14px 0}h1 em{color:#65e2b5;font-style:normal}p{color:#8b9d96;font-size:12px;line-height:1.7}small{font-size:10px;color:#81978a;line-height:1.6}.header-tools{display:flex;gap:12px;align-items:center}.badge{border:1px solid #65e2b52b;border-radius:30px;padding:10px 12px;color:#99c6b5;font-size:10px}button,a.primary{cursor:pointer;font:inherit;display:inline-flex;justify-content:center;align-items:center;color:#dce8e2;background:#16251f;border:1px solid #344139;border-radius:8px;padding:10px 14px;font-size:12px;text-decoration:none}button:hover{border-color:#65e2b5}button:disabled{opacity:.45;cursor:not-allowed}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #65e2b5;outline-offset:3px}.demo,.message{display:flex;align-items:center;gap:16px;padding:14px 18px;border-radius:10px;margin-bottom:20px;font-size:12px;line-height:1.6}.demo{background:#c39b3612;border:1px solid #c39b3638;color:#e8ca86}.demo button{margin-left:auto}.message{background:#65e2b518;color:#65e2b5}.error{background:#ef6e7214;color:#ffb1b4}.metrics{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:14px;margin-bottom:24px}.metrics article{padding:23px;border:1px solid #ffffff10;border-radius:13px;background:#111c18}.metrics .balance{background:linear-gradient(135deg,#17372b,#14291f);border-color:#65e2b53b}.big{font-size:40px;font-weight:650;letter-spacing:-1.6px;margin:20px 0;color:#eafff5;font-variant-numeric:tabular-nums}.number{font-size:28px;letter-spacing:-1px;font-weight:600;margin:22px 0 9px;font-variant-numeric:tabular-nums}.metrics p{font-size:10px;margin:0}footer{display:flex;justify-content:space-between;gap:10px;font-size:10px;border-top:1px solid #ffffff0d;padding-top:14px;color:#8fa39a;margin-top:22px}.meter{height:3px;background:#ffffff10;margin:15px 0 7px;border-radius:3px}.meter span{display:block;height:100%;background:#d6be75}.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px}.panel{background:#101a16;border:1px solid #ffffff10;border-radius:13px;padding:24px}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:16px}h2{font-size:17px;font-weight:550;letter-spacing:-.35px;margin:10px 0 20px}.chart svg{width:100%;margin:15px 0;overflow:visible}.form-panel{grid-column:2;grid-row:1 / span 2}.form-panel h2{margin-bottom:7px}form{display:flex;flex-direction:column;gap:9px;margin-top:24px}label{font-size:11px;margin-top:8px;color:#b1c1b9}input,select{width:100%;box-sizing:border-box;border:1px solid #ffffff15;background:#0b1410;color:#e4efe8;border-radius:7px;padding:13px;font:inherit;font-size:12px}input::placeholder{color:#61796b}.primary{background:#65e2b5!important;border-color:#65e2b5!important;color:#092018!important;font-weight:700!important;padding:13px!important}form .primary{margin-top:14px}.pending{grid-column:1}.count{font-size:11px;color:#96b3a3;background:#ffffff08;padding:3px 8px;margin-left:8px;border-radius:5px}.ticket{display:flex;justify-content:space-between;gap:14px;border-top:1px solid #ffffff09;padding:18px 0 5px}.ticket strong{font-size:13px;font-weight:500}.ticket-actions{display:flex;align-items:center;gap:5px;flex-wrap:wrap}.ticket-actions button{font-size:10px;padding:7px 8px}.history{grid-column:1 / -1}.scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap;margin-bottom:15px}th{text-align:left;font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:1px;color:#7e9688;padding:15px 10px;border-bottom:1px solid #ffffff12}td{padding:17px 10px;border-bottom:1px solid #ffffff09;font-variant-numeric:tabular-nums}td strong{font-size:12px;font-weight:500}.row-note{display:block;margin-top:6px}.right{text-align:right}.positive{color:#65e2b5}.negative{color:#ee9a99}.quiet{padding:35px 0;color:#80968a;font-size:12px}.empty{padding:65px 25px;text-align:center;border:1px solid #ffffff12;border-radius:15px;background:#111c18}.empty h2{font-size:24px;margin:18px 0}.empty button{margin:16px 8px}.symbol{font-size:40px;color:#65e2b5}
+  @media(max-width:1050px){.metrics{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.form-panel{grid-column:auto;grid-row:auto}.pending,.history{grid-column:auto}.header-tools{flex-direction:column;align-items:flex-end}}
+  @media(max-width:620px){.workspace{padding:25px 16px 90px}h1{font-size:34px}header{align-items:flex-start}.badge{display:none}.metrics{gap:9px}.metrics article{padding:16px}.big{font-size:30px}.number{font-size:23px}.eyebrow{font-size:8px}.panel{padding:18px}.demo{flex-direction:column;align-items:flex-start;gap:6px}.demo button{margin:0}.ticket{flex-direction:column}.panel-head{align-items:flex-start}}
+</style>

@@ -212,7 +212,7 @@
 </script>
 
 <svelte:head>
-  <title>Track Record — NioSports Pro</title>
+  <title>Mis resultados — NioSports Pro</title>
   <meta name="description" content="Track record público y verificable de NioSports Pro. Resultados con CLV tracking." />
 </svelte:head>
 
@@ -220,8 +220,8 @@
   <header class="page__header">
     <div>
       <span class="page__label">Transparencia total</span>
-      <h1 class="page__title">Track Record</h1>
-      <p class="page__subtitle">Resultados verificables del Motor Predictivo v3.0</p>
+      <h1 class="page__title">Mis resultados</h1>
+      <p class="page__subtitle">Historial y evolución de las selecciones registradas</p>
     </div>
     <button class="btn-export" on:click={downloadCSV} disabled={filteredPicks.length === 0}>
       <Download size={16} />
