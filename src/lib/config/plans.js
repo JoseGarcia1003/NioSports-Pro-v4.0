@@ -8,10 +8,10 @@ export const PLANS = {
     price: 0,
     priceId: null,
     features: {
-      maxPicksPercent: 0.1,    // 1 pick = ~10% of daily picks (minimum 1)
-      bankroll: false,
-      fullStats: false,
-      fullDashboard: false,
+      maxPicksPercent: 0,      // FREE receives exactly one available selection
+      bankroll: true,
+      fullStats: true,
+      fullDashboard: true,
       clvTracking: false,
       csvExport: false,
       totalesCalculator: true,
@@ -25,9 +25,9 @@ export const PLANS = {
     price: 14.99,
     priceId: 'price_1THmDIRpBJAbdxQYuJBENDs5',
     features: {
-      maxPicksPercent: 0.7,    // 70% of daily picks
+      maxPicksPercent: 1,      // Paid plans see all available selections
       bankroll: true,
-      fullStats: false,
+      fullStats: true,
       fullDashboard: true,
       clvTracking: false,
       csvExport: true,
@@ -62,8 +62,8 @@ export function getPlanByPriceId(priceId) {
 
 // Calculate max picks for a plan given total available today
 export function getMaxPicks(plan, totalAvailable) {
-  const pct = PLANS[plan]?.features?.maxPicksPercent ?? 0.1;
-  return Math.max(1, Math.round(totalAvailable * pct));
+  const available = Number.isSafeInteger(totalAvailable) && totalAvailable > 0 ? totalAvailable : 0;
+  return ['pro', 'elite'].includes(plan) ? available : Math.min(1, available);
 }
 
 // Check if a feature is available for a plan

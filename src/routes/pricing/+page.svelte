@@ -1,6 +1,7 @@
 <script>
   import { authenticatedFetch } from '$lib/services/authenticated-fetch.js';
 
+  import { goto } from '$app/navigation';
   import { page } from '$app/stores';
   import { userId } from '$lib/stores/auth';
   import { subscription } from '$lib/stores/subscription';
@@ -12,17 +13,17 @@
 
   $: success = $page.url.searchParams.get('success') === 'true';
   $: canceled = $page.url.searchParams.get('canceled') === 'true';
-  $: currentPlan = $subscription.plan || 'free';
+  $: currentPlan = $userId && !['loading','unavailable'].includes($subscription.status) ? $subscription.plan : null;
 
   const planList = [
     {
       ...PLANS.free,
       icon: Shield,
       highlights: [
-        { text: 'Calculadora de totales', included: true },
-        { text: '1 pick AI por día', included: true },
-        { text: 'Módulo Bankroll', included: false },
-        { text: 'Estadísticas completas', included: false },
+        { text: 'Deportes y calculadora de totales', included: true },
+        { text: '1 selección Premium diaria · en preparación', included: true },
+        { text: 'Bankroll personal', included: true },
+        { text: 'Estadísticas de tus resultados', included: true },
         { text: 'CLV Tracking', included: false },
         { text: 'Exportar CSV', included: false },
       ]
@@ -31,8 +32,8 @@
       ...PLANS.pro,
       icon: Zap,
       highlights: [
-        { text: 'Calculadora de totales', included: true },
-        { text: '70% picks AI del día', included: true },
+        { text: 'Deportes y calculadora de totales', included: true },
+        { text: 'Todos los pronósticos disponibles', included: true },
         { text: 'Módulo Bankroll', included: true },
         { text: 'Dashboard completo', included: true },
         { text: 'Exportar CSV', included: true },
@@ -43,18 +44,18 @@
       ...PLANS.elite,
       icon: Crown,
       highlights: [
-        { text: 'Calculadora de totales', included: true },
-        { text: '100% picks AI del día', included: true },
+        { text: 'Deportes y calculadora de totales', included: true },
+        { text: 'Todos los pronósticos disponibles', included: true },
         { text: 'Módulo Bankroll', included: true },
         { text: 'Dashboard + Stats completas', included: true },
         { text: 'CLV Tracking avanzado', included: true },
-        { text: 'Exportar CSV + Prioridad', included: true },
+        { text: 'Exportar CSV', included: true },
       ]
     }
   ];
 
   async function handleCheckout(plan) {
-    if (!$userId) { toasts.error('Inicia sesión primero.'); return; }
+    if (!$userId) { goto('/login'); return; }
     if (!plan.priceId) return;
     if (currentPlan === plan.id) return;
 
@@ -104,14 +105,14 @@
 <div class="page">
   <header class="page__header">
     <span class="page__label">Planes y precios</span>
-    <h1 class="page__title">Elige tu plan</h1>
-    <p class="page__subtitle">Análisis cuantitativo NBA con XGBoost v3.0</p>
+    <h1 class="page__title">Empieza gratis. Amplía tu análisis.</h1>
+    <p class="page__subtitle">Todos los deportes disponibles en FREE. Premium amplía los análisis y las herramientas.</p>
   </header>
 
   {#if success}
     <div class="banner banner--success">
       <Check size={20} />
-      <p>Suscripción activada correctamente. Disfruta de NioSports Pro.</p>
+      <p>Has vuelto del proceso de pago. El acceso se actualiza cuando el servidor confirma tu suscripción.</p>
     </div>
   {/if}
 
@@ -127,7 +128,7 @@
       {@const isCurrent = currentPlan === plan.id}
       {@const isPopular = plan.id === 'pro'}
       <div class="plan" class:plan--popular={isPopular} class:plan--current={isCurrent}>
-        {#if isPopular}<div class="plan__popular-badge">Más popular</div>{/if}
+        {#if isPopular}<div class="plan__popular-badge">Análisis ampliado</div>{/if}
         {#if isCurrent}<div class="plan__current-badge">Tu plan actual</div>{/if}
 
         <div class="plan__header">
@@ -147,7 +148,7 @@
 
         <ul class="plan__features">
           {#each plan.highlights as feat}
-            <li class:included={feat.included} class:excluded={!feat.included}>
+            <li aria-label={`${feat.included?"Incluido":"No incluido"}: ${feat.text}`} class:included={feat.included} class:excluded={!feat.included}>
               {#if feat.included}<Check size={16} />{:else}<X size={16} />{/if}
               <span>{feat.text}</span>
             </li>
@@ -163,7 +164,7 @@
             <button class="plan__btn plan__btn--current" disabled>Plan actual</button>
           {/if}
         {:else if plan.price === 0}
-          <button class="plan__btn plan__btn--free" disabled>Incluido</button>
+          <a class="plan__btn plan__btn--free" href="/today">Explorar gratis</a>
         {:else}
           <button class="plan__btn" class:plan__btn--popular={isPopular} on:click={() => handleCheckout(plan)} disabled={loading === plan.id}>
             {loading === plan.id ? 'Redirigiendo...' : `Suscribirme a ${plan.name}`}
@@ -175,7 +176,7 @@
 
   <div class="guarantee">
     <Shield size={20} />
-    <p>Cancela cuando quieras. Sin contratos. Cambio de plan instantáneo.</p>
+    <p>Gestiona tu suscripción desde Cuenta. Revisa las condiciones antes de contratar.</p>
   </div>
 </div>
 

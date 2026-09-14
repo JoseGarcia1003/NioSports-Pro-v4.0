@@ -7,7 +7,7 @@
 <div class="experience">
   <nav aria-label="Navegación de presentación" class="masthead">
     <a class="brand" href="/" aria-label="NioSports Pro, inicio"><span class="mark">N↗</span><span>nio<span class="brand-light">sports</span><small>PRO</small></span></a>
-    <div class="nav-links"><a href="/tennis?demo=1">Tenis Lab ↗</a><a href="#producto">El producto</a><a href="#metodo">Cómo funciona</a></div>
+    <div class="nav-links"><a href="/sports">Deportes ↗</a><a href="#producto">El producto</a><a href="#metodo">Cómo funciona</a></div>
     <a class="sign-in" href="/login">Entrar <ArrowUpRight size={15}/></a>
   </nav>
 
@@ -15,9 +15,9 @@
     <div class="hero-copy">
       <p class="eyebrow"><span class="status-dot"></span> NBA + TENNIS / BANKROLL</p>
       <h1 id="landing-title">El juego cambia.<br/>Tu criterio<br/><em>marca la diferencia.</em></h1>
-      <p class="intro">Una perspectiva más clara del partido y de tu capital. Explora el análisis NBA y lleva el control de cada decisión.</p>
-      <div class="hero-actions"><a class="primary" href="/bankroll?demo=1">Explorar el producto <ArrowUpRight size={19}/></a><a class="text-link" href="#metodo">Conocer el enfoque <ArrowRight size={16}/></a></div>
-      <p class="caption"><Check size={14}/> Demo sin registro · Datos de ejemplo identificados</p>
+      <p class="intro">Una perspectiva más clara del partido y de tu capital. Explora NBA y tenis, revisa la evidencia y lleva el control de cada decisión.</p>
+      <div class="hero-actions"><a class="primary" href="/today">Explorar el producto <ArrowUpRight size={19}/></a><a class="text-link" href="#metodo">Conocer el enfoque <ArrowRight size={16}/></a></div>
+      <p class="caption"><Check size={14}/> Explora sin registro · Ejemplos siempre identificados</p>
     </div>
 
     <div class="preview" id="producto">
@@ -64,7 +64,7 @@
     <details><summary>¿NioSports guarda o mueve mi dinero?<ChevronDown size={18}/></summary><p>No. El bank es un registro personal de capital y tickets. No custodia fondos, no realiza transferencias y no envía apuestas a terceros.</p></details>
   </div></section>
 
-  <footer><div class="footer-cta"><p class="eyebrow">EMPIEZA POR EXPLORAR</p><h2>Una visión más clara.<br/>Un siguiente paso.</h2><a class="primary" href="/bankroll?demo=1">Ver el nuevo bank <ArrowUpRight size={19}/></a></div><div class="footer-base"><span>NioSports Pro</span><p>Análisis NBA y registro personal de bank · Versión en desarrollo</p><a href="#landing-title">Volver arriba ↑</a></div></footer>
+  <footer><div class="footer-cta"><p class="eyebrow">EMPIEZA POR EXPLORAR</p><h2>Una visión más clara.<br/>Un siguiente paso.</h2><a class="primary" href="/bankroll?demo=1">Ver el nuevo bank <ArrowUpRight size={19}/></a></div><div class="footer-base"><span>NioSports Pro</span><p>Análisis deportivo y registro personal de bank · Versión en desarrollo</p><a href="#landing-title">Volver arriba ↑</a></div></footer>
 </div>
 
 <style>

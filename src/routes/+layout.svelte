@@ -1,6 +1,7 @@
 <script>
   import CourtBackground from '$lib/components/CourtBackground.svelte';
   import '$lib/styles/premium.css';
+  import '$lib/styles/product.css';
   import { onMount } from 'svelte';
   import { onNavigate } from '$app/navigation';
   import '$lib/styles/tokens.css';
@@ -12,7 +13,7 @@
   import BottomNav from '$lib/components/BottomNav.svelte';
   import DemoBanner from '$lib/components/DemoBanner.svelte';
   import ToastContainer from '$lib/components/ToastContainer.svelte';
-  import ProductTour from '$lib/components/ProductTour.svelte';
+
 
   import { initFirebase } from '$lib/firebase';
   import { authStore, isAuthenticated, authLoading } from '$lib/stores/auth';
@@ -39,9 +40,9 @@
   });
 
 $: if (browser && !$authLoading) {
-    const isPublic = $page.url.pathname === '/' || $page.url.pathname === '/bankroll' || $page.url.pathname === '/tennis' || /^\/tennis\/player\/[^/]+\/?$/.test($page.url.pathname) || PUBLIC_ROUTES.some(r => $page.url.pathname.startsWith(r));
+    const isPublic = ['/today','/sports','/sports/nba','/predictions','/account','/pricing','/methodology','/public'].includes($page.url.pathname) || $page.url.pathname.startsWith('/legal/') || $page.url.pathname === '/' || $page.url.pathname === '/bankroll' || $page.url.pathname === '/tennis' || /^\/tennis\/player\/[^/]+\/?$/.test($page.url.pathname) || PUBLIC_ROUTES.some(r => $page.url.pathname.startsWith(r));
     if (!$isAuthenticated && !isPublic) goto('/login');
-    if ($isAuthenticated && $page.url.pathname === '/login') goto('/');
+    if ($isAuthenticated && ['/', '/login'].includes($page.url.pathname)) goto('/today');
     if ($isAuthenticated && $authStore.userId !== subscriptionUser) {
       subscriptionUser = $authStore.userId;
       loadSubscription();
@@ -84,7 +85,7 @@ $: if (browser && !$authLoading) {
 
     {#if showNav}
       <BottomNav />
-      <ProductTour />
+
     {/if}
   {/if}
 
