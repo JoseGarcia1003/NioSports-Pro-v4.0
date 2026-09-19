@@ -586,6 +586,11 @@
   @media (prefers-reduced-motion: reduce) {
     .stagger > *,
     .hover-lift,
+    .hover-lift:hover,
+    .hover-scale:hover,
+    .card-interactive:hover,
+    .active-press:active,
+    .press:active,
     .pulse-glow,
     .skeleton,
     .slide-in,

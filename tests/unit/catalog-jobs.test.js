@@ -1,0 +1,12 @@
+import { beforeEach,it,expect,vi } from 'vitest';
+import { env } from '$env/dynamic/private';
+vi.mock('$lib/server/catalog.js',()=>({publishTennisEdition:vi.fn(),withdrawEntry:vi.fn()}));
+import { publishTennisEdition,withdrawEntry } from '$lib/server/catalog.js';
+import { POST as publish } from '../../src/routes/api/catalog/publish/+server.js';
+import { POST as withdraw } from '../../src/routes/api/catalog/withdraw/+server.js';
+const event=(body,authorization='Bearer test-secret')=>({request:new Request('http://localhost/api/catalog',{method:'POST',headers:{authorization,'content-type':'application/json'},body:JSON.stringify(body)})});
+beforeEach(()=>{vi.clearAllMocks();env.CRON_SECRET='test-secret';});
+it.each([publish,withdraw])('protects publication and withdrawal before touching storage',async handler=>{for(const credential of ['', 'Bearer wrong','Bearer '+'x'.repeat(5000)])await expect(handler(event({},credential))).rejects.toMatchObject({status:401});expect(publishTennisEdition).not.toHaveBeenCalled();expect(withdrawEntry).not.toHaveBeenCalled();});
+it('missing job configuration cannot authorize even matching empty credentials',async()=>{env.CRON_SECRET='';await expect(publish(event({},'Bearer '))).rejects.toMatchObject({status:401});});
+it('no provider candidates means no published edition',async()=>{publishTennisEdition.mockResolvedValue(null);const response=await publish(event({}));expect(await response.json()).toEqual({published:false,day:null,count:0});expect(response.headers.get('cache-control')).toContain('no-store');});
+it('withdrawal requires bounded input and returns no private analyses',async()=>{expect((await withdraw(event({reason:'x'.repeat(5000)}))).status).toBe(400);expect(withdrawEntry).not.toHaveBeenCalled();withdrawEntry.mockResolvedValue({withdrawals:[{entry_id:'one'}],payload:{secret:'private'}});const response=await withdraw(event({day:'2026-09-14',entryId:'one',reason:'Source corrected'}));expect(await response.json()).toEqual({withdrawn:true});expect(withdrawEntry).toHaveBeenCalledWith('2026-09-14','one','Source corrected');});

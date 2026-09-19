@@ -1,0 +1,18 @@
+import { beforeEach,it,expect,vi } from 'vitest';
+import { error } from '@sveltejs/kit';
+vi.mock('$lib/server/identity.js',()=>({requireIdentity:vi.fn()}));
+vi.mock('$lib/server/entitlements.js',()=>({getEntitlements:vi.fn()}));
+vi.mock('$lib/server/catalog.js',()=>({readEdition:vi.fn()}));
+import { requireIdentity } from '$lib/server/identity.js';
+import { getEntitlements } from '$lib/server/entitlements.js';
+import { readEdition } from '$lib/server/catalog.js';
+import { GET } from '../../src/routes/api/catalog/+server.js';
+import { demoEdition } from '../../src/lib/catalog/demo.js';
+const event=authorization=>({request:new Request('http://localhost/api/catalog?plan=elite',authorization?{headers:{authorization}}:{})});
+beforeEach(()=>{vi.clearAllMocks();requireIdentity.mockImplementation(()=>{throw error(401,'Unauthorized');});});
+it('empty catalog is distinct from storage failure',async()=>{readEdition.mockResolvedValue(null);let response=await GET(event());expect((await response.json()).published).toBe(false);readEdition.mockRejectedValue(new Error());response=await GET(event());expect(response.status).toBe(503);});
+it('no cache is allowed even for public previews',async()=>{readEdition.mockResolvedValue(null);const response=await GET(event());expect(response.headers.get('cache-control')).toContain('no-store');expect(response.headers.get('vary')).toBe('Authorization');expect(getEntitlements).not.toHaveBeenCalled();});
+it('invalid token fails before any database access regardless of plan query',async()=>{await expect(GET(event('Bearer invalid'))).rejects.toMatchObject({status:401});expect(readEdition).not.toHaveBeenCalled();});
+it('demo uses fictional data without accessing accounts or storage',async()=>{const response=await GET({...event(),url:new URL('http://localhost/api/catalog?demo=1')});const body=await response.json();expect(body.isDemo).toBe(true);expect(body.entries.filter(e=>e.analysis)).toHaveLength(2);expect(readEdition).not.toHaveBeenCalled();expect(getEntitlements).not.toHaveBeenCalled();});
+it('verified server entitlements decide access despite client plan claims',async()=>{const payload={...demoEdition(),isDemo:false};readEdition.mockResolvedValue({payload,withdrawals:[]});requireIdentity.mockResolvedValue({uid:'verified-user'});getEntitlements.mockResolvedValue({plan:'free'});let body=await (await GET(event('Bearer valid'))).json();expect(getEntitlements).toHaveBeenCalledWith('verified-user');expect(body.entries.filter(e=>e.tier==='premium'&&e.analysis)).toHaveLength(1);getEntitlements.mockResolvedValue({plan:'pro'});body=await (await GET(event('Bearer valid'))).json();expect(body.entries.every(e=>e.analysis)).toBe(true);});
+it('entitlement failure never returns private analyses',async()=>{readEdition.mockResolvedValue({payload:{...demoEdition(),isDemo:false},withdrawals:[]});requireIdentity.mockResolvedValue({uid:'user'});getEntitlements.mockRejectedValue(new Error('database offline'));const response=await GET(event('Bearer valid'));expect(response.status).toBe(503);expect(await response.text()).not.toContain('selection');});

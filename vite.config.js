@@ -30,21 +30,19 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+        importScripts: ['/sw-cache-cleanup.js'],
+        navigateFallback: null,
         runtimeCaching: [
+          {
+            // Identity changes must never reuse a previous account's response.
+            urlPattern: ({ url, request }) => url.pathname.startsWith('/api/') || request.headers.has('authorization'),
+            handler: 'NetworkOnly',
+            options: { fetchOptions: { cache: 'no-store' } },
+          },
           {
             urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com/,
             handler: 'CacheFirst',
             options: { cacheName: 'google-fonts', expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 } },
-          },
-          {
-            urlPattern: /\/api\/predict/,
-            handler: 'NetworkFirst',
-            options: { cacheName: 'predictions', expiration: { maxEntries: 50, maxAgeSeconds: 60 * 5 } },
-          },
-          {
-            urlPattern: /\/data\//,
-            handler: 'StaleWhileRevalidate',
-            options: { cacheName: 'nba-data', expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 } },
           },
         ],
       },

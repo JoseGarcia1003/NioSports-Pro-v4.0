@@ -1,6 +1,7 @@
 import { createRemoteJWKSet, jwtVerify } from 'jose';
 import { error } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
+import { env as publicEnv } from '$env/dynamic/public';
 
 const keys = createRemoteJWKSet(new URL('https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com'));
 
@@ -20,7 +21,11 @@ export async function verifyFirebaseToken(token, projectId, keySet = keys) {
 export async function requireIdentity(request) {
   const match = /^Bearer ([^\s]+)$/i.exec(request.headers.get('authorization') || '');
   if (!match || match[1].length > 16384) error(401, 'Authentication required');
-  const projectId = env.FIREBASE_PROJECT_ID;
+  const privateProjectId = env.FIREBASE_PROJECT_ID?.trim();
+  const publicProjectId = publicEnv.PUBLIC_FIREBASE_PROJECT_ID?.trim();
+  // Browser and server must verify identities from the same Firebase project.
+  if (privateProjectId && publicProjectId && privateProjectId !== publicProjectId) error(503, 'Authentication unavailable');
+  const projectId = privateProjectId || publicProjectId;
   if (!projectId) error(503, 'Authentication unavailable');
   try { return await verifyFirebaseToken(match[1], projectId); }
   catch { error(401, 'Invalid or expired session'); }

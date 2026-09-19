@@ -15,8 +15,9 @@ create table public.billing_events (
 );
 alter table public.billing_accounts enable row level security;
 alter table public.billing_events enable row level security;
-revoke all on public.billing_accounts, public.billing_events from public, anon, authenticated;
-grant all on public.billing_accounts, public.billing_events to service_role;
+revoke all on public.billing_accounts, public.billing_events from public, anon, authenticated, service_role;
+grant select,insert,update on public.billing_accounts to service_role;
+grant select,insert on public.billing_events to service_role;
 
 create function public.billing_apply_event(p_id text, p_type text, p_created bigint,
   p_user text, p_customer text, p_subscription text, p_plan text, p_status text, p_end timestamptz)
@@ -45,13 +46,6 @@ begin
 end $$;
 revoke all on function public.billing_apply_event(text,text,bigint,text,text,text,text,text,timestamptz) from public, anon, authenticated;
 grant execute on function public.billing_apply_event(text,text,bigint,text,text,text,text,text,timestamptz) to service_role;
-
--- Preferences are editable; legacy commercial/balance columns are not.
-revoke insert, update, delete on public.user_profiles from anon, authenticated;
-grant insert(id,email,display_name,experience_level,default_odds,onboarding_done,theme,updated_at)
-  on public.user_profiles to authenticated;
-grant update(email,display_name,experience_level,default_odds,onboarding_done,theme,updated_at)
-  on public.user_profiles to authenticated;
 
 create table public.bankroll_wallets (
   user_id text primary key,
@@ -82,8 +76,9 @@ create index tickets_user on public.bankroll_tickets(user_id,created_at desc);
 alter table public.bankroll_wallets enable row level security;
 alter table public.bankroll_tickets enable row level security;
 alter table public.ledger_entries enable row level security;
-revoke all on public.bankroll_wallets,public.bankroll_tickets,public.ledger_entries from public,anon,authenticated;
-grant all on public.bankroll_wallets,public.bankroll_tickets,public.ledger_entries to service_role;
+revoke all on public.bankroll_wallets,public.bankroll_tickets,public.ledger_entries from public,anon,authenticated,service_role;
+grant select,insert,update on public.bankroll_wallets,public.bankroll_tickets to service_role;
+grant select,insert on public.ledger_entries to service_role;
 grant usage,select on sequence public.ledger_entries_id_seq to service_role;
 
 create function public.bankroll_snapshot(p_user text) returns jsonb
@@ -146,5 +141,3 @@ begin
 end $$;
 revoke all on function public.bankroll_snapshot(text),public.bankroll_apply(text,text,text,bigint,text,numeric,text,text) from public,anon,authenticated;
 grant execute on function public.bankroll_snapshot(text),public.bankroll_apply(text,text,text,bigint,text,numeric,text,text) to service_role;
--- Legacy client accounting is read-only after the new ledger is enabled.
-revoke insert,update,delete on public.bankroll_transactions from anon,authenticated;

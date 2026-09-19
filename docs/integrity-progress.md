@@ -66,7 +66,7 @@ RS256 y permisos comerciales obtenidos exclusivamente del servidor. Stripe
 registra eventos duraderos y descarta duplicados y eventos anteriores; las
 escrituras comerciales del perfil dejan de estar autorizadas al cliente.
 
-La migración `20260912154104_identity_billing_ledger.sql` añade wallets, tickets
+La migración `20260919225143_identity_billing_ledger.sql` añade wallets, tickets
 y ledger. Operaciones atómicas con bloqueo por usuario y clave idempotente:
 aportación, retiro, reserva y liquidación manual win/loss/push/void. El saldo
 incluye todo el historial; la tabla muestra los últimos 100 movimientos.

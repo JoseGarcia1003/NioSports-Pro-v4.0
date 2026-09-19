@@ -35,20 +35,11 @@ export const handleError = Sentry.handleErrorWithSentry(
 export async function handle({ event, resolve }) {
   const response = await resolve(event);
 
-  // Add CSP that allows Supabase, Firebase, Railway, and other required services
-  response.headers.set(
-    'Content-Security-Policy',
-    [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "font-src 'self' https://fonts.gstatic.com",
-      "img-src 'self' data: blob: https://*.googleusercontent.com",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.firebaseio.com wss://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://api.balldontlie.io https://*.railway.app https://*.ingest.sentry.io",
-      "frame-src 'self' https://*.firebaseapp.com",
-      "worker-src 'self' blob:",
-    ].join('; ')
-  );
+  // SvelteKit owns CSP and its per-response nonces (see svelte.config.js).
+  // API responses can depend on identity even when their URL stays the same.
+  if (event.url.pathname.startsWith('/api/')) {
+    response.headers.set('Cache-Control', 'private, no-store');
+  }
 
   return response;
 }

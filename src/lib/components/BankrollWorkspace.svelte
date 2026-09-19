@@ -47,6 +47,7 @@
   {#if loading}<div class="empty" role="status"><h2>Consultando tu registro…</h2><p>El saldo se obtiene de la contabilidad del servidor.</p></div>
   {:else if !data}<div class="empty"><span class="symbol">↗</span><h2>{$userId?'Tu registro todavía no está disponible':'Un lugar para cada movimiento'}</h2><p>{$userId?'No mostramos un saldo inventado cuando no podemos verificar los datos.':'Inicia sesión para consultar tu capital y registrar tus tickets.'}</p><div>{#if !$userId}<a class="primary" href="/login">Iniciar sesión</a>{/if}<button on:click={showDemo}>Explorar ejemplo visual →</button></div></div>
   {:else}
+    {#if !demo && !data.wallet}<aside class="demo"><strong>Nuevo registro contable</strong><span>Aún no has registrado movimientos aquí. Los saldos e historiales del sistema anterior se conservan por separado y no se han importado automáticamente.</span></aside>{/if}
     <section class="metrics" aria-label="Resumen de capital">
       <article class="balance"><span class="eyebrow">◈ SALDO DISPONIBLE</span><div class="big">{money(available)}</div><footer>Patrimonio total <strong>{money(available+reserved)}</strong></footer></article>
       <article><span class="eyebrow">◷ COMPROMETIDO</span><div class="number">{money(reserved)}</div><p>{data.tickets.length} tickets pendientes</p><div class="meter"><span style={`width:${exposure}%`}></span></div><small>{exposure}% del patrimonio reservado</small></article>

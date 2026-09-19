@@ -1,71 +1,62 @@
 # Punto de control — leer antes de continuar
 
-Actualizado: 14 de septiembre de 2026. Trabajo EN CURSO. El usuario pidió preservar explícitamente el progreso y retomar desde aquí cuando diga «Continúa».
+Actualizado: 19 de septiembre de 2026. Rama `codex/security-integrity`. Repositorio `JoseGarcia1003/NioSports-Pro-v4.0`, PR #1. Mandato: mejorar producto real, tipografía, fluidez, diseño y fiabilidad con autonomía; retomar desde este archivo, sin reiniciar la auditoría. Plan completo: EXCELLENCE_PLAN.md.
 
-## Objetivo y preferencias
+## Estado de esta entrega
 
-Mejorar NioSports Pro hasta un producto pulido, fiable y verificable: NBA, tenis, pronósticos y bankroll. Prioridad expresa a tipografía, pesos, elegancia, móvil y fluidez. No solicitar permiso por cambios técnicos ya autorizados. No inventar datos ni afirmar perfección. Consultar EXCELLENCE_PLAN.md.
+Implementación terminada y pruebas aprobadas; pendiente comprobar el despliegue del nuevo commit. El anterior punto de control sí se guardó en GitHub en `07ffce4d`. Nunca confundir los cambios nuevos con la producción main, que no se ha promovido.
 
-## Ubicación y publicación comprobadas
+Cambios preparados para guardar:
+- Catálogo diario persistente con autorización real: FREE abre una selección Premium fija y Pro/Elite vigentes todas; el contenido bloqueado no viaja al cliente. Ediciones inmutables, procedencia y retirada con motivo. Publicador inicial de tenis tras sync. Demo explícita sin almacenamiento real.
+- Pantalla Pronósticos renovada: tipografía DM Sans coherente, jerarquía y pesos definidos, selección gratuita destacada, probabilidad separada de evidencia, estados vacíos útiles, controles de 44 px, claro/oscuro, foco y movimiento reducido. Tokens y CSS compartidos mejoran páginas del producto.
+- NBA: esperar generación asíncrona, cancelar solicitudes obsoletas, evitar descansos/lesiones/cuotas inventadas, abstenerse si faltan líneas, proteger guardado y coherencia de resultados.
+- Datos por sesión: logout/cambio de cuenta limpia stores inmediatamente; respuestas y mutaciones tardías no restauran datos antiguos.
+- Identidad: usar FIREBASE_PROJECT_ID o PUBLIC_FIREBASE_PROJECT_ID; rechazar discrepancias; firma, emisor y audiencia siguen verificándose.
+- CSP centralizada en SvelteKit conservando nonce; APIs no-store y fuera de caché persistente; actualización del SW limpia cachés de predicciones antiguas.
+- CI Node24 ejecuta check, pruebas y build sin entregar secretos de producción al build de PR.
+- Bankroll avisa que es un registro nuevo y que no se importó automáticamente el historial antiguo.
 
-- Repositorio: subcarpeta `niosports` dentro del proyecto de trabajo.
-- Rama: `codex/security-integrity`.
-- Remoto: https://github.com/JoseGarcia1003/NioSports-Pro-v4.0
-- PR de revisión: https://github.com/JoseGarcia1003/NioSports-Pro-v4.0/pull/1
-- Último commit remoto verificado al crear este punto: `15a794c9bda613644b67982d57f0c51c5074f378` (reorganización multideporte).
-- Preview de ese commit, READY confirmado: https://nio-sports-pro-v4-0-amqnvu5jz-niosports-pros-projects.vercel.app
-- La producción principal seguía en `e9b2522d`. No afirmar que main tiene las mejoras ni que esta preview contiene cambios posteriores.
-- Vercel sí genera previews al hacer push. El EPERM de empaquetado local Windows no implica fallo de compilación remota.
+## Verificación completada
 
-## Cambios nuevos escritos, aún por integrar y guardar en Git
+- Suite completa: 429 pruebas en 27 archivos, todas aprobadas (`tests-verification.log`, 19 septiembre).
+- `npm run check`: 0 errores y 0 advertencias.
+- Git diff sin errores de espacios; avisos CRLF habituales de Windows.
+- Diseño del catálogo anterior a la última pasada tipográfica: probado en navegador, 390 px sin overflow, filtros, detalle y tema claro. Falta comprobación visual de la pasada final y del despliegue.
+- No afirmar login/Stripe/ingesta pagada real probados: faltan validación de entorno y proveedor.
 
-- Catálogo: `src/lib/catalog/`, `src/lib/server/catalog.js`, `src/lib/server/job-secret.js`, `src/routes/api/catalog/`.
-- Interfaz: `DailyCatalog.svelte`, página Pronósticos; textos de Hoy y Precios para edición disponible.
-- FREE recibe una selección Premium fija por fecha; Pro/Elite verificados reciben todas. El servidor no envía los análisis bloqueados. Fallos de identidad o permisos no abren acceso.
-- Edición inmutable con procedencia y hora de corte. Retirada append-only con motivo, sin reemplazar el premio diario.
-- Publicación inicial de tenis tras sincronización verificada, con hasta 200 candidatos. No hay todavía publicador NBA ni retirada automática por cambios del proveedor.
-- Demo pública y claramente ficticia en `/predictions?demo=1`, aislada de almacenamiento y cuentas.
-- Documentación operativa: `docs/daily-catalog.md`.
-- Agente NBA trabaja en generador asíncrono, cancelación, eliminación de supuestos inventados y guardado; no se debe dar por terminado hasta recibir su informe y pruebas.
+## Base de datos REAL — ya aplicado, NO repetir
 
-## Pruebas comprobadas en esta entrega
+Supabase `degwzrlbjqezngduvxtj`:
+- 20260913040750 tennis_workspace
+- 20260913040915 tennis_immutable_grants
+- 20260914151620 daily_prediction_catalog
+- 20260919225143 identity_billing_ledger
+- 20260919225153 legacy_row_security
+- 20260919225419 fixed_trigger_search_path
 
-- Catálogo dominio/API/base de datos: 23 pruebas aprobadas, `catalog-tests.log`.
-- Operaciones de publicación/retirada: 5 pruebas aprobadas, `catalog-job-tests.log`.
-- `npm run check`: 0 errores y 0 advertencias tras estas modificaciones.
-- Navegador local: demo con tres tarjetas, una Premium abierta, una bloqueada y una FREE; expansión de evidencia; filtro NBA sin resultados; móvil 390 px sin desbordamiento; tema claro; sin errores JS en esa revisión.
-- Suite anterior completa: 315 pruebas. NO sumar automáticamente ni afirmar que la suite nueva completa pasó hasta ejecutarla.
-- Compilación y nueva preview de esta entrega: pendientes.
+Se verificó remoto: 0 tablas públicas con RLS desactivada; anónimos no leen perfiles/picks; deportes públicos legibles pero no editables; usuario no cambia su plan, sí preferencias; servidor inserta ledger pero no lo actualiza ni borra. Las migraciones conservaron datos antiguos. Ledger y billing nuevos no migran automáticamente saldos ni suscripciones antiguas. La advertencia de función search_path se corrigió; confirmar asesor final si falta. Las notas RLS sin políticas de las tablas exclusivas de servidor son cierre intencional a clientes.
 
-## Base de datos remota
+## Coordinación
 
-Proyecto Supabase `degwzrlbjqezngduvxtj`.
-
-- Migraciones de tenis aplicadas: `20260913040750_tennis_workspace`, `20260913040915_tennis_immutable_grants`.
-- Catálogo aplicado y verificado: `20260914151620_daily_prediction_catalog`.
-- `prediction_editions` y `prediction_withdrawals`: RLS activo; anon y authenticated sin SELECT; service_role con INSERT, sin UPDATE ni DELETE. No se insertaron ejemplos.
-- `20260912154104_identity_billing_ledger.sql` seguía pendiente. Contiene tablas/RPC aditivos y un bloque de cambio de permisos de perfiles antiguos. Revisar compatibilidad antes de aplicar completa; no confundir tests PGlite con migración remota.
-- Auditoría de RLS/tablas antiguas y compatibilidad Firebase en curso. No afirmar que está resuelta.
-
-## Coordinación activa (reconsultar al retomar)
-
-- `/root/deployment_quality`: package/lock, svelte/vite config, CI, vercel.json, hooks.server.js. Corregir build Windows con adapter-node explícito, conservar build Vercel real, consolidar CSP y eliminar caché persistente de APIs privadas. Sin commits ni despliegue propio.
-- `/root/nba_integrity`: generador NBA, ruta picks, pick-actions y tests; ampliado a `src/lib/stores/data.js` para impedir respuestas tardías tras logout/cambio de usuario. Sin commits.
-- `/root/security_audit`: solo lectura Supabase/configuración; espera conclusiones sobre RLS y migración billing/ledger. No autorizar DDL a partir de un informe incompleto.
+No hay tarea pendiente que dependa de un agente. Los trabajos previos de release_checks, session_isolation y visual_typography están incorporados en archivos. Algunos agentes finalizaron por límite después de escribir; raíz verificó la suite conjunta y terminó la migración RLS y sus pruebas. No volver a delegar ni rehacer su trabajo automáticamente.
 
 ## Siguiente acción exacta
 
-1. Comprobar Git y agentes; guardar este punto de control y el plan con commit/push verificables. No incluir archivos parcialmente editados de agentes por accidente.
-2. Integrar informes y cambios de los agentes. Revisar diffs, especialmente sesión/identidad, CSP y caché. Resolver auditoría remota con migraciones probadas sin borrar historial.
-3. Ejecutar suite completa y check. Corregir fallos. El test `tennis-feed.test.js` importa sync; revisar efecto de la nueva publicación enlazada al sync.
-4. Completar build local/CI según resultados del agente, commit/push de implementación y comprobar preview READY del SHA exacto.
-5. Verificar interfaz y API en esa preview; abrir al usuario el enlace comprobado. Actualizar este archivo con SHA, pruebas, estado remoto y siguiente tarea visual.
-6. Seguir con tipografía y sistema visual de EXCELLENCE_PLAN, sin pedir otra autorización técnica.
+1. Guardar los archivos completos y este punto de control con commit/push. Verificar SHA remoto. Si ya ocurrió, avanzar al paso 2.
+2. Comprobar despliegue Vercel del SHA exacto. Proyecto prj_En6HSxmihlQTsxgxW53Z6klKzcMB, team team_YUpxoMdWKSgksacyR0qJ2NPX. No deducir fallo remoto por EPERM local Windows. Build remoto previo sí funcionaba.
+3. Verificar nueva pantalla `/predictions?demo=1`, filtro, argumentos, móvil y temas; revisar `/today`, `/tennis?demo=1`, `/bankroll?demo=1`, errores JS y respuesta API real. Corregir y repetir sólo lo necesario.
+4. Actualizar este punto con SHA y URL realmente comprobados; entregar enlace visible al usuario, distinguiendo preview de main.
+5. Continuar siguiente entrega de diseño y rendimiento con criterios del plan.
 
-## Precauciones para reanudar
+## Pendientes de producto, no ocultarlos
 
-- Un servidor de desarrollo pudo quedar abierto en 127.0.0.1:5173. Comprobar salud antes de arrancar otro. Los identificadores de procesos/pestañas no son persistentes.
-- No ejecutar build y verificación del dev server simultáneamente si comparten .svelte-kit.
-- Los tests usan mocks y PGlite; las cuentas y suscripciones reales siguen por validar.
-- Tenis necesita proveedor/credencial y adaptación. No prometer todas las competiciones reales mientras no exista cobertura comprobada.
-- No se pueden garantizar cambios no escritos antes de una interrupción abrupta. Git, archivos, historial de migraciones y despliegues son las fuentes de verdad.
+- Proveedor tenis pagado/contrato: sin él no hay cobertura real garantizada. Motor experimental sin calibración ni rentabilidad demostradas.
+- Catálogo: falta publicador NBA, retiradas automáticas ante cambios del proveedor y programación de ingestión. Edición es previa con hora de corte.
+- NBA real: las líneas/cuotas y credenciales deben conectarse; abstenerse es correcto mientras falten.
+- Validar sesión real, Firebase Third-Party Auth en Supabase y suscripción real de prueba. No importar privilegios desde campos antiguos sin validación Stripe.
+- Migración reconciliada de saldos/historial legacy al nuevo ledger pendiente; no recalcular ni borrar registros reales por suposiciones.
+- Lanzamiento main pendiente de estos flujos. Tener preview no significa producción promovida.
+
+## Entorno
+
+Windows PowerShell. Repo en subcarpeta niosports. Tests de esbuild pueden necesitar ejecución fuera del sandbox. Los procesos y pestañas anteriores pueden no existir. Comprobar servidor antes de iniciar otro. Evitar build y dev simultáneos sobre .svelte-kit. No se guardan secretos en estos documentos.

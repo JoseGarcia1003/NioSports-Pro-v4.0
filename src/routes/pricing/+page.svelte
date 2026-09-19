@@ -21,7 +21,7 @@
       icon: Shield,
       highlights: [
         { text: 'Deportes y calculadora de totales', included: true },
-        { text: '1 selección Premium diaria · en preparación', included: true },
+        { text: '1 selección Premium por edición publicada', included: true },
         { text: 'Bankroll personal', included: true },
         { text: 'Estadísticas de tus resultados', included: true },
         { text: 'CLV Tracking', included: false },

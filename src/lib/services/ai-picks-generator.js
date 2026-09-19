@@ -1,217 +1,160 @@
 import { authenticatedFetch } from '$lib/services/authenticated-fetch.js';
-// src/lib/services/ai-picks-generator.js
-// ════════════════════════════════════════════════════════════════
-// Generador automático de picks usando el Engine v2.0
-// Analiza todos los partidos del día y selecciona los mejores
-// ════════════════════════════════════════════════════════════════
+import { calculateEV } from '$lib/engine/probability.js';
 
-// Motor ejecuta server-side — llamamos al API /api/predict
-import { MODEL_VERSION, CONFIDENCE_THRESHOLDS, BETTING } from '$lib/engine/constants.js';
+const PERIODS = ['Q1', 'HALF', 'FULL'];
+const positive = value => Number.isFinite(value) && value > 0;
+const abortIfNeeded = signal => { if (signal?.aborted) throw new DOMException('Carga cancelada.', 'AbortError'); };
 
-/**
- * Configuración del generador de picks IA
- */
-const AI_CONFIG = {
-  // Mínimo EV% para considerar un pick
-  MIN_EV_PERCENT: 2.0,
-  
-  // Mínimo edge en puntos
-  MIN_EDGE: 1.5,
-  
-  // Máximo picks por día (para no saturar)
-  MAX_PICKS_PER_DAY: 8,
-  
-  // Prioridad de períodos (Q1 y HALF tienen más valor según backtesting)
-  PERIOD_PRIORITY: {
-    Q1: 1.2,    // 66% win rate en backtesting
-    HALF: 1.1,  // 64% win rate
-    FULL: 1.0,  // 53% win rate
-  },
-  
-  // Solo incluir confianza MEDIUM o HIGH
-  MIN_CONFIDENCE: 'LOW', // Cambiado porque el backtesting mostró buen rendimiento en LOW también
-};
+function completeStats(stats, period, venue) {
+  if (!stats || typeof stats !== 'object') return false;
+  const key = period.toLowerCase();
+  const keys = [key, `${key}${venue}`, `${key}Last5`, `${key}Last10`, `${key}Season`];
+  if (keys.some(k => stats[k] !== undefined && !positive(stats[k]))) return false;
+  return positive(stats[key]) || positive(stats[`${key}${venue}`]) ||
+    [`${key}Last5`, `${key}Last10`, `${key}Season`].every(k => positive(stats[k]));
+}
 
-/**
- * Genera predicción para un partido llamando al API server-side
- */
-async function generatePrediction(game, period, teamStats) {
-  const homeTeam = game.homeTeam;
-  const awayTeam = game.awayTeam;
-  
-  if (!teamStats[homeTeam] || !teamStats[awayTeam]) {
-    return null;
+function teamContext(game, side) {
+  const context = game.context?.[side];
+  const result = {};
+  if (Number.isInteger(context?.restDays) && context.restDays >= 0 && context.restDays <= 60) result.restDays = context.restDays;
+  if (Array.isArray(context?.injuries) && context.injuries.every(i =>
+    typeof i?.name === 'string' && i.name.trim() && ['star', 'starter', 'rotation'].includes(i.type))) {
+    result.injuries = context.injuries.map(({ name, type }) => ({ name, type }));
   }
+  return result;
+}
 
-  let marketLine = game.lines?.[period];
-  
-  if (!Number.isFinite(marketLine) || marketLine <= 0 || game.isDemo) return null;
+function upcoming(game, now) {
+  if (!game || game.id == null || game.isDemo || game.isFinal || game.isLive ||
+    /final|cancel|postpon|suspend|in.progress|live/i.test(game.status || '') ||
+    game.homeScore > 0 || game.awayScore > 0) return false;
+  if (typeof game.homeTeam !== 'string' || typeof game.awayTeam !== 'string' ||
+    !game.homeTeam.trim() || !game.awayTeam.trim() || game.homeTeam.trim().toLowerCase() === game.awayTeam.trim().toLowerCase()) return false;
+  if (game.startAt != null && (!Number.isFinite(Date.parse(game.startAt)) || Date.parse(game.startAt) <= now)) return false;
+  return true;
+}
 
-  try {
-    const res = await authenticatedFetch('/api/predict', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        homeTeam: { name: homeTeam, stats: teamStats[homeTeam], restDays: 2, injuries: [] },
-        awayTeam: { name: awayTeam, stats: teamStats[awayTeam], restDays: 2, injuries: [] },
-        line: marketLine,
-        period,
-        gameInfo: { arena: homeTeam === 'Nuggets' ? 'Denver' : null },
-      })
-    });
-    if (!res.ok) return null;
-    const prediction = await res.json();
-
-    return {
-      ...prediction,
-      gameId: game.id,
-      homeTeam,
-      awayTeam,
-      homeTeamFull: game.homeTeamFull,
-      awayTeamFull: game.awayTeamFull,
+async function generatePrediction(game, period, teamStats, signal) {
+  const { homeTeam, awayTeam } = game;
+  const marketLine = game.lines?.[period];
+  if (!positive(marketLine) || !completeStats(teamStats[homeTeam], period, 'Home') ||
+    !completeStats(teamStats[awayTeam], period, 'Away')) return null;
+  abortIfNeeded(signal);
+  const homeContext = teamContext(game, 'home');
+  const awayContext = teamContext(game, 'away');
+  const response = await authenticatedFetch('/api/predict', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(20000)]) : AbortSignal.timeout(20000),
+    body: JSON.stringify({
+      homeTeam: { name: homeTeam, stats: teamStats[homeTeam], ...homeContext },
+      awayTeam: { name: awayTeam, stats: teamStats[awayTeam], ...awayContext },
+      line: marketLine,
       period,
-      marketLine,
-      gameTime: game.time,
-      isDemo: game.isDemo || false,
-    };
-  } catch (error) {
-    console.error(`Error generating prediction for ${homeTeam} vs ${awayTeam}:`, error);
-    return null;
+      gameInfo: typeof game.arena === 'string' ? { arena: game.arena } : {},
+    }),
+  });
+  abortIfNeeded(signal);
+  if (!response.ok) {
+    const message = response.status === 429 ? 'Alcanzaste el límite de análisis de tu plan. Inténtalo cuando se renueve.' :
+      [401, 403].includes(response.status) ? 'Tu sesión no permite continuar. Inicia sesión de nuevo.' :
+      'El servicio de análisis no está disponible. Inténtalo de nuevo.';
+    throw new Error(message);
   }
+  const prediction = await response.json();
+  abortIfNeeded(signal);
+  if (!prediction || !positive(prediction.projection) || prediction.line !== marketLine || prediction.period !== period ||
+    !Number.isFinite(prediction.edge) || Math.abs(prediction.edge - (prediction.projection - marketLine)) > 0.11 ||
+    !Number.isFinite(prediction.probability) || prediction.probability < 0 || prediction.probability > 1 ||
+    !['OVER', 'UNDER'].includes(prediction.direction) ||
+    !['HIGH', 'MEDIUM', 'LOW'].includes(prediction.confidence) ||
+    typeof prediction.modelVersion !== 'string' || !prediction.modelVersion.trim() ||
+    (prediction.direction === 'OVER' ? prediction.edge < 0 : prediction.edge > 0)) {
+    throw new Error('El servicio devolvió un análisis inconsistente. No se publicaron resultados.');
+  }
+
+  // The API's legacy EV assumes -110. Only use an observed price for this selection.
+  const quote = game.odds?.[period]?.[prediction.direction];
+  const odds = Number.isFinite(quote) && Math.abs(quote) >= 100 ? quote : null;
+  const valuation = odds === null ? { ev: null, evPercent: null } : calculateEV(prediction.probability, odds);
+  return {
+    ...prediction,
+    ev: valuation.ev,
+    evPercent: valuation.evPercent,
+    odds,
+    isValueBet: odds !== null && valuation.evPercent > 0,
+    probabilityPercent: Math.round(prediction.probability * 1000) / 10,
+    gameId: game.id,
+    homeTeam,
+    awayTeam,
+    homeTeamFull: game.homeTeamFull,
+    awayTeamFull: game.awayTeamFull,
+    period,
+    marketLine,
+    gameTime: game.time,
+    gameDate: game.date,
+    isDemo: false,
+    missingContext: [
+      ...(homeContext.restDays === undefined || awayContext.restDays === undefined ? ['Descanso sin verificar'] : []),
+      ...(homeContext.injuries === undefined || awayContext.injuries === undefined ? ['Lesiones sin verificar'] : []),
+      ...(odds === null ? ['Cuota no disponible: EV sin calcular'] : []),
+    ],
+  };
 }
 
-/**
- * Calcula score de valor para ordenar picks
- * Combina EV, edge, confianza y prioridad de período
- */
-function calculateValueScore(pick) {
-  const evScore = pick.evPercent || 0;
-  const edgeScore = Math.abs(pick.edge || 0) * 2;
-  const confidenceMultiplier = 
-    pick.confidence === 'HIGH' ? 1.5 :
-    pick.confidence === 'MEDIUM' ? 1.2 : 1.0;
-  const periodMultiplier = AI_CONFIG.PERIOD_PRIORITY[pick.period] || 1.0;
-  
-  return (evScore + edgeScore) * confidenceMultiplier * periodMultiplier;
-}
-
-/**
- * Genera los mejores picks del día
- * @param {Array} games - Lista de partidos del día
- * @param {Object} teamStats - Estadísticas de equipos
- * @param {Object} options - Opciones adicionales
- * @returns {Array} - Lista de picks ordenados por valor
- */
+/** Experimental analyses, not a calibrated daily betting catalogue. */
 export async function generateAIPicks(games, teamStats, options = {}) {
-  const {
-    maxPicks = AI_CONFIG.MAX_PICKS_PER_DAY,
-    minEV = AI_CONFIG.MIN_EV_PERCENT,
-    minEdge = AI_CONFIG.MIN_EDGE,
-    periods = ['Q1', 'HALF', 'FULL'],
-  } = options;
-
+  const { maxPicks = 8, minEV = 2, minEdge = 1.5, periods = PERIODS, signal, now = Date.now() } = options;
+  abortIfNeeded(signal);
+  if (!Array.isArray(games) || !teamStats || typeof teamStats !== 'object' ||
+    !Number.isSafeInteger(maxPicks) || maxPicks <= 0 || !Number.isFinite(minEV) || minEV < 0 ||
+    !Number.isFinite(minEdge) || minEdge < 0 || !Array.isArray(periods)) return [];
+  const supportedPeriods = [...new Set(periods.filter(p => PERIODS.includes(p)))];
   const allPicks = [];
-
-  // Generar predicciones para cada partido y período
+  const seen = new Set();
   for (const game of games) {
-    // Saltar juegos que ya terminaron
-    if (game.isFinal) continue;
-
-    for (const period of periods) {
-      const prediction = await generatePrediction(game, period, teamStats);
-      
+    abortIfNeeded(signal);
+    if (!upcoming(game, now) || seen.has(String(game.id))) continue;
+    seen.add(String(game.id));
+    for (const period of supportedPeriods) {
+      const prediction = await generatePrediction(game, period, teamStats, signal);
       if (!prediction) continue;
-
-      // Filtrar por criterios mínimos
-      const absEdge = Math.abs(prediction.edge || 0);
-      const evPercent = prediction.evPercent || 0;
-      
-      // Incluir si tiene EV positivo O edge significativo
-      if (evPercent >= minEV || absEdge >= minEdge) {
-        allPicks.push({
-          ...prediction,
-          valueScore: calculateValueScore(prediction),
-          generatedAt: new Date().toISOString(),
-          modelVersion: MODEL_VERSION.version,
-        });
-      }
+      const edge = Math.abs(prediction.edge);
+      // A negative EV cannot be rescued by a large difference in points.
+      const qualifies = prediction.odds === null ? edge >= minEdge : prediction.evPercent >= minEV && edge >= minEdge;
+      if (qualifies) allPicks.push({ ...prediction, valueScore: edge, generatedAt: prediction.generatedAt || new Date(now).toISOString() });
     }
   }
-
-  // Ordenar por value score (mayor primero)
-  allPicks.sort((a, b) => b.valueScore - a.valueScore);
-
-  // Limitar cantidad de picks
-  const topPicks = allPicks.slice(0, maxPicks);
-
-  // Agregar ranking
-  return topPicks.map((pick, index) => ({
-    ...pick,
-    rank: index + 1,
-    isTopPick: index === 0,
-    isFeatured: index < 3,
-  }));
+  abortIfNeeded(signal);
+  allPicks.sort((a, b) => b.valueScore - a.valueScore || String(a.gameId).localeCompare(String(b.gameId)) || a.period.localeCompare(b.period));
+  return allPicks.slice(0, Math.min(maxPicks, 100)).map((pick, index) => ({ ...pick, rank: index + 1, isTopPick: index === 0, isFeatured: index < 3 }));
 }
 
-/**
- * Agrupa picks por partido
- */
 export function groupPicksByGame(picks) {
-  const grouped = {};
-  
-  for (const pick of picks) {
-    const key = `${pick.homeTeam}-${pick.awayTeam}`;
-    if (!grouped[key]) {
-      grouped[key] = {
-        homeTeam: pick.homeTeam,
-        awayTeam: pick.awayTeam,
-        homeTeamFull: pick.homeTeamFull,
-        awayTeamFull: pick.awayTeamFull,
-        gameTime: pick.gameTime,
-        picks: [],
-      };
-    }
-    grouped[key].picks.push(pick);
+  const grouped = new Map();
+  for (const pick of picks || []) {
+    const key = pick.gameId ?? `${pick.gameDate}:${pick.homeTeam}:${pick.awayTeam}`;
+    if (!grouped.has(key)) grouped.set(key, { homeTeam: pick.homeTeam, awayTeam: pick.awayTeam,
+      homeTeamFull: pick.homeTeamFull, awayTeamFull: pick.awayTeamFull, gameTime: pick.gameTime, picks: [] });
+    grouped.get(key).picks.push(pick);
   }
-  
-  return Object.values(grouped);
+  return [...grouped.values()];
 }
 
-/**
- * Obtiene resumen de picks del día
- */
 export function getPicksSummary(picks) {
-  if (!picks || picks.length === 0) {
-    return {
-      total: 0,
-      byPeriod: {},
-      byDirection: {},
-      byConfidence: {},
-      avgEV: 0,
-      avgEdge: 0,
-    };
-  }
-
-  const byPeriod = { Q1: 0, HALF: 0, FULL: 0 };
-  const byDirection = { OVER: 0, UNDER: 0 };
-  const byConfidence = { HIGH: 0, MEDIUM: 0, LOW: 0 };
+  const rows = Array.isArray(picks) ? picks : [];
+  const result = { total: rows.length, byPeriod: {}, byDirection: {}, byConfidence: {}, avgEV: null, avgEdge: 0, priced: 0 };
   let totalEV = 0;
   let totalEdge = 0;
-
-  for (const pick of picks) {
-    byPeriod[pick.period] = (byPeriod[pick.period] || 0) + 1;
-    byDirection[pick.direction] = (byDirection[pick.direction] || 0) + 1;
-    byConfidence[pick.confidence] = (byConfidence[pick.confidence] || 0) + 1;
-    totalEV += pick.evPercent || 0;
-    totalEdge += Math.abs(pick.edge || 0);
+  for (const pick of rows) {
+    for (const [bucket, field] of [['byPeriod', 'period'], ['byDirection', 'direction'], ['byConfidence', 'confidence']]) {
+      result[bucket][pick[field]] = (result[bucket][pick[field]] || 0) + 1;
+    }
+    if (Number.isFinite(pick.evPercent)) { totalEV += pick.evPercent; result.priced++; }
+    if (Number.isFinite(pick.edge)) totalEdge += Math.abs(pick.edge);
   }
-
-  return {
-    total: picks.length,
-    byPeriod,
-    byDirection,
-    byConfidence,
-    avgEV: Math.round(totalEV / picks.length * 10) / 10,
-    avgEdge: Math.round(totalEdge / picks.length * 10) / 10,
-  };
+  result.avgEV = result.priced ? Math.round(totalEV / result.priced * 10) / 10 : null;
+  result.avgEdge = rows.length ? Math.round(totalEdge / rows.length * 10) / 10 : 0;
+  return result;
 }

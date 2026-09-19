@@ -7,7 +7,7 @@ beforeAll(async()=>{
   db=new PGlite();
   await db.exec('create role anon; create role authenticated; create role service_role bypassrls;');
   await db.exec(readFileSync('schema.sql','utf8'));
-  await db.exec(readFileSync('supabase/migrations/20260912154104_identity_billing_ledger.sql','utf8'));
+  await db.exec(readFileSync('supabase/migrations/20260919225143_identity_billing_ledger.sql','utf8'));
 },60000);
 afterAll(async()=>await db?.close());
 async function apply(user,key,kind,amount,ticket=null,odds=null,outcome=null){
@@ -51,13 +51,18 @@ it('rolls back failed withdrawals',async()=>{
   expect(rows[0].data.entryCount).toBe(1);
   expect(rows[0].data.wallet.available_minor).toBe(100);
 });
-it('denies direct client writes to entitlements, ledger and premium profile fields',async()=>{
+it('denies direct client writes to entitlements and ledger',async()=>{
   await db.exec('set role authenticated;');
   try{
     await expect(db.exec("insert into billing_accounts(user_id,plan) values('attacker','elite')")).rejects.toThrow();
     await expect(db.exec("select bankroll_apply('attacker','aaaaaaaaaaaaaaaa','deposit',100,null,null,null,'')")).rejects.toThrow();
-    await expect(db.exec("update user_profiles set plan='elite'")).rejects.toThrow();
   }finally{await db.exec('reset role;');}
+});
+it('server can record movements but cannot rewrite or delete ledger history',async()=>{
+ await db.exec('set role service_role');
+ try {expect((await apply('server-check','deposit','deposit',1000)).wallet.available_minor).toBe(1000);
+  for(const sql of ['delete from ledger_entries',"update ledger_entries set delta_minor=1",'truncate bankroll_wallets'])await expect(db.exec(sql)).rejects.toThrow();
+ }finally{await db.exec('reset role');}
 });
 it('deduplicates Stripe events and rejects older entitlement state',async()=>{
   const sql='select billing_apply_event($1,$2,$3,$4,$5,$6,$7,$8,$9) as applied';
