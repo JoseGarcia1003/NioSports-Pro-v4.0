@@ -6,7 +6,9 @@ Actualizado: 20 de septiembre de 2026. Rama `codex/security-integrity`. Reposito
 
 Implementación principal guardada en GitHub en `fd1a4410e3bdebbb447a038db28c1376fde5a453`. Vercel confirmó READY para ese SHA: https://nio-sports-pro-v4-0-bljqfcapu-niosports-pros-projects.vercel.app. La vista previa requiere sesión Vercel o acceso temporal autorizado. La producción main no se ha promovido.
 
-Corrección adicional terminada: Nav y Logo respetan el tema claro, visitantes ven «Iniciar sesión» en lugar de un menú de sesión inexistente, botón de cuenta de 44 px y etiqueta accesible. `npm run check` pasó con 0 errores/advertencias después de estos cambios. Guardar esta corrección junto con este punto de control y verificar su despliegue; no repetir la entrega principal ni las migraciones.
+Corrección Nav/Logo guardada y desplegada en `cfe08c466b309695413a5ce6f22086c6a79d58c8`: https://nio-sports-pro-v4-0-o1m6jww90-niosports-pros-projects.vercel.app (READY). Nav y Logo respetan el tema claro, visitantes ven «Iniciar sesión», botón de cuenta de 44 px y etiqueta accesible. Revisado en navegador remoto. No repetir la entrega principal ni las migraciones.
+
+La revisión detectó bajo contraste del bankroll en tema claro. Se sustituyeron sus colores fijos por variables para ambos temas, DM Sans, textos auxiliares mayores, cifras alineadas y controles de 44 px. Cambio sólo de presentación en BankrollWorkspace.svelte. `npm run check` aprobado con 0 errores y 0 advertencias. Guardar y comprobar esta corrección en la siguiente preview.
 
 Cambios de la entrega principal ya guardados:
 - Catálogo diario persistente con autorización real: FREE abre una selección Premium fija y Pro/Elite vigentes todas; el contenido bloqueado no viaja al cliente. Ediciones inmutables, procedencia y retirada con motivo. Publicador inicial de tenis tras sync. Demo explícita sin almacenamiento real.
@@ -24,7 +26,8 @@ Cambios de la entrega principal ya guardados:
 - `npm run check`: 0 errores y 0 advertencias.
 - Git diff sin errores de espacios; avisos CRLF habituales de Windows.
 - Preview fd1a4410: catálogo final abrió y respondió al filtro NBA (vacío), restablecer y desplegar evidencia. Se comprobó DM Sans y 390 px sin desbordamiento horizontal, temas claro/oscuro. Tenis demo respondió a Femenino + Mañana con dos encuentros del día siguiente. No son datos reales. La captura completa de navegador tiene artefactos de composición; preferir captura de viewport.
-- Pendiente validar la corrección adicional de navegación, restantes anchuras 360/768/1440, Hoy, Bankroll y API real. Consola capturó fallos de Google en el login de Vercel anterior; no atribuirlos a NioSports. Filtrar logs desde la navegación de la app.
+- Preview cfe08c46: navegación anónima y tema claro corregidos; catálogo sin overflow a 360/768/1440 px, bankroll a 390 px. Hoy muestra ausencia de fuente NBA y requisito de sesión tenis; catálogo real respondió sin edición publicada, sin sustituirla por ejemplos. Sin errores/warnings de consola de la app en estas rutas (filtrados desde 16:28 UTC del 20 septiembre). Falta revisar visualmente la nueva corrección de colores de Bankroll.
+- GitHub Actions 35522610659 no inicia el job: la página de ejecución confirma bloqueo de cuenta por facturación. Es independiente de los créditos Codex. No se cambió facturación ni se pagó. Vercel sí compila; no afirmar CI GitHub verde.
 - No afirmar login/Stripe/ingesta pagada real probados: faltan validación de entorno y proveedor.
 
 ## Base de datos REAL — ya aplicado, NO repetir
@@ -45,7 +48,7 @@ No hay tarea pendiente que dependa de un agente. Los trabajos previos de release
 
 ## Siguiente acción exacta
 
-1. Guardar la corrección adicional Nav/Logo y este punto con commit/push. Verificar SHA remoto. Si ya ocurrió, avanzar al paso 2.
+1. Guardar la corrección de contraste del bankroll y este punto (check aprobado; Nav/Logo ya está guardado). Verificar SHA remoto. Si ya ocurrió, avanzar al paso 2.
 2. Comprobar despliegue Vercel del SHA exacto. Proyecto prj_En6HSxmihlQTsxgxW53Z6klKzcMB, team team_YUpxoMdWKSgksacyR0qJ2NPX. No deducir fallo remoto por EPERM local Windows. Build remoto previo sí funcionaba.
 3. Verificar nueva pantalla `/predictions?demo=1`, filtro, argumentos, móvil y temas; revisar `/today`, `/tennis?demo=1`, `/bankroll?demo=1`, errores JS y respuesta API real. Corregir y repetir sólo lo necesario.
 4. Actualizar este punto con SHA y URL realmente comprobados; entregar enlace visible al usuario, distinguiendo preview de main.
@@ -62,4 +65,4 @@ No hay tarea pendiente que dependa de un agente. Los trabajos previos de release
 
 ## Entorno
 
-Windows PowerShell. Repo en subcarpeta niosports. Tests de esbuild pueden necesitar ejecución fuera del sandbox. Los procesos y pestañas anteriores pueden no existir. Comprobar servidor antes de iniciar otro. Evitar build y dev simultáneos sobre .svelte-kit. No se guardan secretos en estos documentos.
+Windows PowerShell. Repo en subcarpeta niosports. Tests de esbuild pueden necesitar ejecución fuera del sandbox. Los procesos y pestañas anteriores pueden no existir. Comprobar servidor antes de iniciar otro. El dev local tardó mucho y se detuvo; validar preferentemente en preview remota. Evitar build y dev simultáneos sobre .svelte-kit. No se guardan secretos en estos documentos.
