@@ -2,12 +2,12 @@
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import { theme } from '$lib/stores/ui';
-  import { currentUser, authStore } from '$lib/stores/auth';
+  import { currentUser } from '$lib/stores/auth';
   import { logout } from '$lib/firebase';
   import { browser } from '$app/environment';
   import { onMount, onDestroy } from 'svelte';
   import Logo from '$lib/components/Logo.svelte';
-  import { Home, BarChart3, Cpu, Wallet, TrendingUp, Gem, Trophy, ClipboardList, User, Sun, Moon, LogOut } from 'lucide-svelte';
+  import { Home, Cpu, Wallet, Trophy, User, Sun, Moon, LogOut } from 'lucide-svelte';
 
   import { PRIMARY_NAV, navActive } from '$lib/product/navigation.js';
   const icons={Home,Cpu,Trophy,Wallet,User};
@@ -49,10 +49,6 @@
   $: userName = $currentUser?.displayName ?? $currentUser?.email?.split('@')[0] ?? 'Usuario';
   $: userInitial = (userName[0] ?? 'U').toUpperCase();
 
-  function isActive(href) {
-    const path = $page.url.pathname;
-    return navActive(NAV_LINKS.find(item=>item.href===href),path);
-  }
 </script>
 
 <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
@@ -83,9 +79,10 @@
         {#if $theme === 'dark'}<Sun size={18} />{:else}<Moon size={18} />{/if}
       </button>
 
+      {#if $currentUser}
       <div class="nav__user">
         <button class="nav__avatar" on:click|stopPropagation={toggleUserMenu}
-                aria-expanded={userMenuOpen}>
+                aria-label={`Opciones de ${userName}`} aria-expanded={userMenuOpen}>
           {userInitial}
         </button>
 
@@ -104,6 +101,9 @@
           </div>
         {/if}
       </div>
+      {:else}
+        <a class="nav__login" href="/login">Iniciar sesión</a>
+      {/if}
     </div>
   </div>
 </nav>
@@ -119,6 +119,8 @@
 
   .nav {
     --color-text-muted: #b5c0d3; --color-text-secondary: #e0e6f0; --color-bg-elevated: #253045;
+    --nav-text: #f1f5f9; --nav-surface: #0f1729; --nav-accent: #b6dd94; --nav-active-bg: rgba(169,216,134,0.1);
+    --logo-text-color: var(--nav-text);
     background: rgba(10,15,28,0.9);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
@@ -128,6 +130,13 @@
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   }
   .nav--scrolled { box-shadow: 0 4px 24px rgba(0,0,0,0.4); }
+  :global([data-theme="light"]) .nav {
+    --color-text-muted: #526277; --color-text-secondary: #334155; --color-bg-elevated: #edf1f6;
+    --nav-text: #0f172a; --nav-surface: #fff; --nav-accent: #315f28; --nav-active-bg: #e7f0e2;
+    background: rgba(248,250,252,.96);
+  }
+  :global([data-theme="light"]) .nav--scrolled { box-shadow: 0 4px 18px rgba(23,43,71,.08); }
+  .nav :is(button, a):focus-visible { outline: 2px solid var(--nav-accent); outline-offset: 3px; }
 
   .nav__inner {
     max-width: 1200px; margin: 0 auto; height: 100%;
@@ -150,8 +159,8 @@
     font-size: 0.82rem; font-weight: 600;
     color: var(--color-text-muted); transition: color 0.15s, background 0.15s; white-space: nowrap;
   }
-  .nav__link:hover { color: #fff; background: var(--color-bg-elevated); }
-  .nav__link--active { color: #b6dd94; background: rgba(169,216,134,0.1); }
+  .nav__link:hover { color: var(--nav-text); background: var(--color-bg-elevated); }
+  .nav__link--active { color: var(--nav-accent); background: var(--nav-active-bg); }
 
   /* Controls */
   .nav__controls {
@@ -163,12 +172,14 @@
     display: flex; align-items: center; justify-content: center;
     color: var(--color-text-secondary); transition: background 0.15s, color 0.15s;
   }
-  .nav__icon-btn:hover { background: var(--color-bg-elevated); color: #fff; }
+  .nav__icon-btn:hover { background: var(--color-bg-elevated); color: var(--nav-text); }
+  .nav__login { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 12px; border: 1px solid var(--color-border); border-radius: 10px; color: var(--nav-text); font-size: 13px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+  .nav__login:hover { background: var(--color-bg-elevated); }
 
   /* User menu */
   .nav__user { position: relative; }
   .nav__avatar {
-    width: 38px; height: 38px; border-radius: 50%;
+    width: 44px; height: 44px; border-radius: 50%;
     background: linear-gradient(135deg, #6366F1, #4F46E5);
     color: #fff; font-weight: 800; font-size: 0.85rem;
     border: none; cursor: pointer;
@@ -179,17 +190,17 @@
 
   .nav__user-menu {
     position: absolute; top: calc(100% + 8px); right: 0;
-    min-width: 200px; background: #0f1729;
-    border: 1px solid rgba(255,255,255,0.12); border-radius: 12px;
+    min-width: 200px; max-width: min(320px, calc(100vw - 40px)); background: var(--nav-surface);
+    border: 1px solid var(--color-border); border-radius: 12px;
     padding: 8px; box-shadow: 0 16px 40px rgba(0,0,0,0.5); z-index: 1000;
     animation: menuIn 0.15s ease;
   }
   @keyframes menuIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; } }
 
   .nav__user-info { padding: 8px 10px 6px; }
-  .nav__user-name { display: block; font-weight: 700; font-size: 0.875rem; color: #fff; }
-  .nav__user-email { display: block; font-size: 0.72rem; color: var(--color-text-muted); margin-top: 2px; }
-  .nav__user-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 6px 0; }
+  .nav__user-name { display: block; font-weight: 700; font-size: 0.875rem; color: var(--nav-text); overflow-wrap: anywhere; }
+  .nav__user-email { display: block; font-size: 0.72rem; color: var(--color-text-muted); margin-top: 2px; overflow-wrap: anywhere; }
+  .nav__user-divider { border: none; border-top: 1px solid var(--color-border); margin: 6px 0; }
   .nav__user-item {
     display: flex; align-items: center; gap: 8px; width: 100%;
     padding: 10px; background: none; border: none; border-radius: 8px;
@@ -197,7 +208,7 @@
     cursor: pointer; font-family: 'DM Sans', sans-serif;
     transition: background 0.15s;
   }
-  .nav__user-item:hover { background: rgba(255,255,255,0.07); color: #fff; }
+  .nav__user-item:hover { background: var(--color-bg-elevated); color: var(--nav-text); }
 
   /* Hide desktop links on mobile — BottomNav handles navigation */
   @media (max-width: 768px) {

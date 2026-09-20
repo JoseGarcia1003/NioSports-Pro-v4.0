@@ -30,10 +30,10 @@
     line-height: 1;
   }
   .logo__name {
-    font-family: 'Inter', -apple-system, sans-serif;
+    font-family: var(--font-sans, 'DM Sans', sans-serif);
     font-size: 0.95rem;
     font-weight: 800;
-    color: #fff;
+    color: var(--logo-text-color, #fff);
     letter-spacing: -0.02em;
   }
   .logo__tag {

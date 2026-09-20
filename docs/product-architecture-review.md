@@ -2,6 +2,8 @@
 
 Entrega del 13 de septiembre de 2026. Este informe distingue los cambios implementados de las dependencias que todavía impiden considerar el producto listo para vender sin reservas.
 
+Actualización del 20 de septiembre: este documento conserva la evaluación histórica del 13. El catálogo persistente, la autorización de acceso y el endurecimiento de permisos ya se implementaron posteriormente. Consultar [el punto de control actual](WORK_STATE.md) y [el catálogo diario](daily-catalog.md) para el estado vigente y las verificaciones.
+
 ## Decisión principal
 
 Después del login se abre **Hoy**. Su orden es: contexto personal y plan, agenda recibida de NBA y tenis, acceso al análisis gratuito, directorio de deportes, seguimiento personal y comparación de planes. El visitante también puede explorar esta pantalla sin crear una cuenta; los datos privados y las APIs autenticadas conservan su protección.
