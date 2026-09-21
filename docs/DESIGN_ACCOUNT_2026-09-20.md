@@ -16,7 +16,7 @@ El propietario rechazó la entrega anterior por verse genérica, plana y sin ide
 
 ## Verificación
 
-Pendiente de completar con la vista previa final. `npm run check` ya pasó con 0 errores y 0 advertencias. Pruebas de comportamiento del formulario en ejecución. Revisar 360/390/768/1440 px, ambos temas, rutas, foco, ayuda y formulario, sin enviar correos ni crear cuentas reales.
+21 de septiembre: 444 pruebas de dominio/servidor y 5 del formulario aprobadas. Las pruebas de UI usan Svelte en modo navegador y las de servidor conservan sus módulos Node (incluido Stripe). npm run test:unit ejecuta ambos grupos. Check: 0 errores y 0 advertencias. Primera preview 8912ab5e: Vercel READY, qyftc5egf. Cuenta revisada en escritorio/móvil, ambos temas y ayuda. Acceso a 360/390/768/1440 px sin desbordamiento; registro, recuperación, mostrar contraseña y validación nativa comprobados sin efectos externos. Consola sin errores/warnings. Falta registrar el SHA y la comprobación de los ajustes finales: textos mayores, barra inferior verde, franja bajo nav eliminada y palabras separadas correctamente en móvil.
 
 ## Límites
 

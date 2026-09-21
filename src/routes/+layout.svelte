@@ -197,7 +197,7 @@ $: if (browser && !$authLoading) {
   }
 
   .app-main--with-nav {
-    padding-top: 72px;
+    padding-top: 64px;
   }
 
   .app-main--with-bottom {

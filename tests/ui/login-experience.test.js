@@ -13,7 +13,7 @@ vi.mock('$lib/stores/ui', async () => {
 beforeEach(() => { vi.resetAllMocks(); });
 afterEach(cleanup);
 
-describe('account access form', () => {
+describe('account access form in the browser runtime', () => {
   it('uses the native form and sends one login while a request is pending', async () => {
     let finish;
     loginWithEmail.mockImplementation(() => new Promise(resolve => { finish = resolve; }));

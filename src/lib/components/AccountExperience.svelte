@@ -1,5 +1,17 @@
 <script>
-  import { ArrowUpRight, ArrowRight, Wallet, ChartNoAxesCombined, History, ShieldCheck, Sun, Moon, Check, ChevronRight, UserRound, CircleHelp, Fingerprint } from 'lucide-svelte';
+  import ArrowUpRight from 'lucide-svelte/icons/arrow-up-right';
+  import ArrowRight from 'lucide-svelte/icons/arrow-right';
+  import Wallet from 'lucide-svelte/icons/wallet';
+  import ChartNoAxesCombined from 'lucide-svelte/icons/chart-no-axes-combined';
+  import History from 'lucide-svelte/icons/history';
+  import ShieldCheck from 'lucide-svelte/icons/shield-check';
+  import Sun from 'lucide-svelte/icons/sun';
+  import Moon from 'lucide-svelte/icons/moon';
+  import Check from 'lucide-svelte/icons/check';
+  import ChevronRight from 'lucide-svelte/icons/chevron-right';
+  import UserRound from 'lucide-svelte/icons/user-round';
+  import CircleHelp from 'lucide-svelte/icons/circle-help';
+  import Fingerprint from 'lucide-svelte/icons/fingerprint';
   import { currentUser, isAuthenticated } from '$lib/stores/auth.js';
   import { subscription } from '$lib/stores/subscription.js';
   import { theme } from '$lib/stores/ui.js';
