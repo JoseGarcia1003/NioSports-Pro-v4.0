@@ -4,6 +4,8 @@ Actualizado: 20 de septiembre de 2026. Rama `codex/security-integrity`. Reposito
 
 ## Estado de esta entrega
 
+Adicional solicitado tras mostrar la entrega: aislamiento del estado propio del bankroll implementado en `src/lib/bankroll/workspace.js`, integrado en BankrollWorkspace.svelte. Incluye cancelación, generaciones por petición/sesión, limpieza de borradores, bloqueo de doble envío y claves de reintento. Regresión aprobada: 52 pruebas en 4 archivos (15 nuevas); check 0 errores/advertencias. «Actualizar» conserva la demo. Guardar y desplegar este adicional, verificar demo → cuenta anónima → demo y que no aparecen errores de consola. Retomar aquí si se interrumpe; la preview e0f3abdc de abajo conserva la presentación anterior comprobada.
+
 Entrega final guardada en GitHub y comprobada en Vercel: `e0f3abdcf90733ac5c37dea2c509537908548650`, despliegue `dpl_EkxCwarMDSjXfpcC9SYkAJN96eot`, READY. URL: https://nio-sports-pro-v4-0-ohnzh6lkh-niosports-pros-projects.vercel.app. Incluye el catálogo de fd1a4410, navegación de cfe08c46 y contraste final del bankroll. La vista previa requiere sesión Vercel o acceso temporal autorizado; no guardar tokens de acceso en documentos. La producción main no se ha promovido. Los commits posteriores de documentación no cambian esta implementación comprobada.
 
 Corrección Nav/Logo guardada y desplegada en `cfe08c466b309695413a5ce6f22086c6a79d58c8`: https://nio-sports-pro-v4-0-o1m6jww90-niosports-pros-projects.vercel.app (READY). Nav y Logo respetan el tema claro, visitantes ven «Iniciar sesión», botón de cuenta de 44 px y etiqueta accesible. Revisado en navegador remoto. No repetir la entrega principal ni las migraciones.
@@ -49,7 +51,7 @@ No hay tarea pendiente que dependa de un agente. Los trabajos previos de release
 ## Siguiente acción exacta
 
 1. La entrega anterior está cerrada, guardada y desplegada. No repetir migraciones, suite completa ni el mismo recorrido visual si no hay cambios nuevos.
-2. Revisar el estado propio de BankrollWorkspace (no los stores ya corregidos): sus peticiones usan comparación de UID, falta invalidación por generación al alternar demo/real, salir y volver con el mismo UID, y al desmontar. Probar que una respuesta tardía no cambia datos/loading/saving ni restaura notas de otra sesión.
+2. El estado propio de BankrollWorkspace ya está corregido y tiene 15 pruebas nuevas. Cerrar su publicación según el párrafo inicial antes de otra mejora. No rehacer el controlador ni los stores.
 3. Continuar la coherencia visual en Cuenta/Login/Planes y tenis, con comprobación real de contraste, teclado y móvil. Tipografía y colores compartidos ya se mejoraron; evitar rehacer el catálogo.
 4. Validar identidad y suscripción con cuentas de prueba y entorno correcto; si faltan credenciales, registrar dependencia concreta y avanzar en operación del catálogo y medición de rendimiento.
 5. Registrar la siguiente entrega con sus propias pruebas, SHA y preview. Proyecto Vercel prj_En6HSxmihlQTsxgxW53Z6klKzcMB, team team_YUpxoMdWKSgksacyR0qJ2NPX. No confundir build Windows EPERM con estado remoto.

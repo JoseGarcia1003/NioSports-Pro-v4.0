@@ -1,16 +1,20 @@
 <script>
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { userId } from '$lib/stores/auth.js';
   import { authenticatedFetch } from '$lib/services/authenticated-fetch.js';
-  let data=null, loading=true, failure='', success='', demo=false, mounted=false, activeUser;
-  let type='deposit', amount='', odds='1.91', note='', saving=false, requestKey, requestBody;
+  import { createBankrollWorkspace } from '$lib/bankroll/workspace.js';
+  let type='deposit', amount='', odds='1.91', note='', draftVersion;
   const money=v=>new Intl.NumberFormat('es-EC',{style:'currency',currency:'USD'}).format(Number(v||0)/100);
   const labels={deposit:'Capital añadido',withdraw:'Capital retirado',stake:'Stake reservado',settle:'Ticket liquidado'};
   const example={wallet:{available_minor:128450,reserved_minor:7500,deposited_minor:120000,withdrawn_minor:0,profit_minor:15950,settled_stake_minor:17500},entryCount:6,
     entries:[['stake',-7500,128450,'Lakers · Total del partido'],['settle',19100,135950,'Celtics · Ticket ganado'],['stake',-10000,116850,'Celtics · Total del partido'],['settle',14350,126850,'Nuggets · Ticket ganado'],['stake',-7500,112500,'Nuggets · Total del partido'],['deposit',120000,120000,'Capital de ejemplo']].map((e,i)=>({id:6-i,kind:e[0],delta_minor:e[1],balance_minor:e[2],note:e[3],created_at:`2026-09-${String(10-i).padStart(2,'0')}T12:00:00Z`})),
     tickets:[{id:'demo',stake_minor:7500,odds:1.91,note:'Lakers · Total del partido'}]};
-  onMount(()=>{mounted=true;if(new URLSearchParams(location.search).get('demo')==='1')showDemo();});
-  $: if(mounted&&$userId!==activeUser){activeUser=$userId;if(!demo)load();}
+  const workspace=createBankrollWorkspace({session:userId,request:authenticatedFetch,example});
+  const {load,showDemo,transact}=workspace;
+  onMount(()=>workspace.start({demo:new URLSearchParams(location.search).get('demo')==='1'}));
+  onDestroy(workspace.destroy);
+  $: ({data,loading,failure,success,demo,saving}=$workspace);
+  $: if(draftVersion!==$workspace.draftVersion){draftVersion=$workspace.draftVersion;amount='';note='';odds='1.91';type='deposit';}
   $: w=data?.wallet||{};
   $: available=Number(w.available_minor||0);
   $: reserved=Number(w.reserved_minor||0);
@@ -22,25 +26,11 @@
   $: low=Math.min(...series,available)*.95;
   $: high=Math.max(...series,available,low+1)*1.05;
   $: points=series.map((v,i)=>`${20+i*760/Math.max(1,series.length-1)},${175-(v-low)/(high-low)*150}`).join(' ');
-  function showDemo(){demo=true;data=example;failure='';loading=false;}
-  async function load(){
-    demo=false;data=null;failure='';loading=true;
-    if(!$userId){loading=false;return;}
-    const uid=$userId;
-    try{const res=await authenticatedFetch('/api/bankroll');const body=await res.json();if(!res.ok)throw new Error(body.error||'Registro no disponible');if(uid===$userId&&!demo)data=body;}
-    catch(e){if(uid===$userId&&!demo)failure=e.message;}finally{loading=false;}
-  }
-  async function transact(body){
-    if(demo||saving)return;const uid=$userId;saving=true;failure='';success='';
-    const encoded=JSON.stringify(body);if(encoded!==requestBody){requestKey=crypto.randomUUID();requestBody=encoded;}
-    try{const res=await authenticatedFetch('/api/bankroll',{method:'POST',headers:{'Content-Type':'application/json','Idempotency-Key':requestKey},body:encoded});const result=await res.json();if(!res.ok)throw new Error(result.error||'No se pudo registrar');if(uid!==$userId||demo)return;data=result;requestKey=null;requestBody=null;amount='';note='';success='Movimiento registrado. Saldo actualizado.';}
-    catch(e){if(uid===$userId&&!demo)failure=e.message;}finally{saving=false;}
-  }
-  function submit(){if(!/^\d+(\.\d{1,2})?$/.test(amount)||Number(amount)<=0){failure='Introduce un importe positivo con máximo dos decimales.';return;}transact({type,amountMinor:Math.round(Number(amount)*100),odds:type==='stake'?Number(odds):null,note});}
+  function submit(){if(!/^\d+(\.\d{1,2})?$/.test(amount)||Number(amount)<=0){workspace.setFailure('Introduce un importe positivo con máximo dos decimales.');return;}transact({type,amountMinor:Math.round(Number(amount)*100),odds:type==='stake'?Number(odds):null,note});}
 </script>
 
 <div class="workspace">
-  <header><div><span class="eyebrow">● TU CENTRO DE CONTROL</span><h1>Tu capital.<br/><em>Tus decisiones.</em></h1><p>Entiende tu exposición. Registra cada movimiento. Mide resultados.</p></div><div class="header-tools"><span class="badge">{demo?'Vista de ejemplo':'Registro personal · USD'}</span><button on:click={load} disabled={loading||saving} aria-label="Actualizar bankroll">↻ Actualizar</button></div></header>
+  <header><div><span class="eyebrow">● TU CENTRO DE CONTROL</span><h1>Tu capital.<br/><em>Tus decisiones.</em></h1><p>Entiende tu exposición. Registra cada movimiento. Mide resultados.</p></div><div class="header-tools"><span class="badge">{demo?'Vista de ejemplo':'Registro personal · USD'}</span><button on:click={()=>demo?showDemo():load()} disabled={loading||saving} aria-label="Actualizar bankroll">↻ Actualizar</button></div></header>
   {#if demo}<aside class="demo"><strong>DEMO · DATOS SIMULADOS</strong><span>Ejemplo visual de lectura. No representa rendimiento real.</span><button on:click={load}>Volver a mi cuenta →</button></aside>{/if}
   {#if failure}<div class="message error" role="alert">{failure}<button on:click={load} disabled={saving}>Reintentar carga</button></div>{/if}
   {#if success}<div class="message" role="status">{success}</div>{/if}
