@@ -118,10 +118,10 @@
   .skip-link:focus { top: 0; }
 
   .nav {
-    --color-text-muted: #b5c0d3; --color-text-secondary: #e0e6f0; --color-bg-elevated: #253045;
-    --nav-text: #f1f5f9; --nav-surface: #0f1729; --nav-accent: #b6dd94; --nav-active-bg: rgba(169,216,134,0.1);
+    --color-text-muted: #a6b3a8; --color-text-secondary: #e0e8dc; --color-bg-elevated: #26372a;
+    --nav-text: #f1f5ec; --nav-surface: #142018; --nav-accent: #c5db92; --nav-active-bg: rgba(169,216,134,0.1);
     --logo-text-color: var(--nav-text);
-    background: rgba(10,15,28,0.9);
+    background: rgba(14,22,17,0.96);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--color-border);
@@ -131,15 +131,16 @@
   }
   .nav--scrolled { box-shadow: 0 4px 24px rgba(0,0,0,0.4); }
   :global([data-theme="light"]) .nav {
-    --color-text-muted: #526277; --color-text-secondary: #334155; --color-bg-elevated: #edf1f6;
+    --color-text-muted: #5d6d5e; --color-text-secondary: #344733; --color-bg-elevated: #edf1e7;
     --nav-text: #0f172a; --nav-surface: #fff; --nav-accent: #315f28; --nav-active-bg: #e7f0e2;
-    background: rgba(248,250,252,.96);
+    --logo-accent: #46642c;
+    background: rgba(246,248,240,.96);
   }
   :global([data-theme="light"]) .nav--scrolled { box-shadow: 0 4px 18px rgba(23,43,71,.08); }
   .nav :is(button, a):focus-visible { outline: 2px solid var(--nav-accent); outline-offset: 3px; }
 
   .nav__inner {
-    max-width: 1200px; margin: 0 auto; height: 100%;
+    max-width: 1280px; margin: 0 auto; height: 100%;
     padding: 0 20px; display: flex; align-items: center; gap: 8px;
   }
 
@@ -180,13 +181,13 @@
   .nav__user { position: relative; }
   .nav__avatar {
     width: 44px; height: 44px; border-radius: 50%;
-    background: linear-gradient(135deg, #6366F1, #4F46E5);
+    background: #425b34;
     color: #fff; font-weight: 800; font-size: 0.85rem;
     border: none; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     transition: transform 0.15s, box-shadow 0.15s;
   }
-  .nav__avatar:hover { transform: scale(1.08); box-shadow: 0 0 0 2px rgba(99,102,241,0.4); }
+  .nav__avatar:hover { transform: scale(1.04); box-shadow: 0 0 0 2px var(--nav-accent); }
 
   .nav__user-menu {
     position: absolute; top: calc(100% + 8px); right: 0;
@@ -215,6 +216,6 @@
     .nav__links { display: none; }
   }
   @media (max-width: 400px) {
-    :global(.logo__text) { display: none; }
+    .nav__brand :global(.logo__text) { display: none; }
   }
 </style>
