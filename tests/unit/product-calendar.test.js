@@ -1,5 +1,12 @@
 import { it,expect } from 'vitest';
 import { nbaCalendarUrl,nbaCalendarRows } from '../../src/lib/product/calendar.js';
+it('requests tomorrow using the next New York calendar day across year and DST boundaries',()=>{
+ for(const [now,expected] of [['2026-12-31T20:00:00Z','2027-01-01'],['2026-03-08T04:30:00Z','2026-03-08']]){
+  const url=new URL(nbaCalendarUrl(Date.parse(now),1),'http://localhost');
+  expect(new URLSearchParams(url.searchParams.get('params')).get('dates[]')).toBe(expected);
+ }
+ expect(()=>nbaCalendarUrl(Date.now(),2)).toThrow(RangeError);
+});
 it('sends the New York day inside the proxy params contract, including UTC rollover',()=>{const url=new URL(nbaCalendarUrl(Date.parse('2026-09-14T01:00:00Z')),'http://localhost');expect(url.searchParams.get('endpoint')).toBe('/games');expect(new URLSearchParams(url.searchParams.get('params')).get('dates[]')).toBe('2026-09-13');});
 it('never treats mock, fallback, or unlabelled data as a live calendar',()=>{for(const source of ['mock','mock-fallback','mock-error-fallback',''])expect(()=>nbaCalendarRows(new Response('',{headers:{'X-Data-Source':source}}),{data:[{id:1}]})).toThrow();});
 it('distinguishes a verified empty schedule from an unavailable response',()=>{expect(nbaCalendarRows(new Response('',{headers:{'X-Data-Source':'balldontlie'}}),{data:[]})).toEqual([]);expect(()=>nbaCalendarRows(new Response('',{status:503,headers:{'X-Data-Source':'balldontlie'}}),{data:[]})).toThrow();});

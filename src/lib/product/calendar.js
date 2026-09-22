@@ -1,6 +1,7 @@
 import { calendarDays } from '$lib/tennis/domain.js';
-export function nbaCalendarUrl(now=Date.now()) {
- const day=calendarDays(now,'America/New_York')[0];
+export function nbaCalendarUrl(now=Date.now(), dayIndex=0) {
+ if (![0,1].includes(dayIndex)) throw new RangeError('El calendario admite hoy y mañana.');
+ const day=calendarDays(now,'America/New_York')[dayIndex];
  return `/api/proxy?${new URLSearchParams({endpoint:'/games',params:new URLSearchParams({'dates[]':day}).toString()})}`;
 }
 export function nbaCalendarRows(response,body) {
