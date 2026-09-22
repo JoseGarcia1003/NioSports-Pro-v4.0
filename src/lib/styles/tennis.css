@@ -1,0 +1,44 @@
+/* One palette for the calendar, match report and individual player profile. */
+.tennis-theme {
+  --tennis-text: #edf2e9;
+  --muted: #b1c0b8;
+  --lime: #d5ef8b;
+  --tennis-surface: #111f19;
+  --tennis-raised: #1b3025;
+  --tennis-selected: #283d29;
+  --tennis-border: #3f5548;
+  --tennis-soft: #1c3024;
+  --tennis-warning-bg: #302c1c;
+  --tennis-warning: #e9d59a;
+  --tennis-blue: #b2d4ea;
+  --tennis-blue-bg: #203945;
+  --tennis-win: #c3dfab;
+  --tennis-win-bg: #273b29;
+  --tennis-loss: #f2b7b7;
+  --tennis-loss-bg: #422c30;
+  color: var(--tennis-text);
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+}
+[data-theme="light"] .tennis-theme {
+  --tennis-text: #182d23;
+  --muted: #4e6557;
+  --lime: #386520;
+  --tennis-surface: #ffffff;
+  --tennis-raised: #eef4ec;
+  --tennis-selected: #e2efd9;
+  --tennis-border: #b8cbbd;
+  --tennis-soft: #f0f6eb;
+  --tennis-warning-bg: #fff5d9;
+  --tennis-warning: #745513;
+  --tennis-blue: #285e78;
+  --tennis-blue-bg: #e6f1f8;
+  --tennis-win: #265d2e;
+  --tennis-win-bg: #deefdf;
+  --tennis-loss: #923232;
+  --tennis-loss-bg: #fbe6e6;
+}
+.tennis-theme :is(button, input, select) { min-height: 44px; }
+.tennis-theme input::placeholder { color: var(--muted); opacity: 1; }
+.tennis-theme :is(h1, h2, h3) { text-wrap: balance; }
+.tennis-theme :is(button, a, summary):focus-visible { outline: 3px solid var(--lime); outline-offset: 4px; }

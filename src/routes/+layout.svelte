@@ -58,7 +58,7 @@ $: if (browser && !$authLoading) {
 </script>
 
 <div data-theme={$theme} class="app">
-  <CourtBackground />
+  {#if $page.url.pathname === '/sports/nba' || $page.url.pathname === '/totales'}<CourtBackground />{/if}
   {#if $authLoading}
     <div class="app-loading">
       <div class="app-loading__content">

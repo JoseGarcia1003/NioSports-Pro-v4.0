@@ -22,5 +22,5 @@
   {#each stats as s,i}{#if s}<p class="note">{names[i]} · Datos hasta {new Date(s.asOf).toISOString().slice(0,10)} · No intervienen todavía en el modelo Elo.</p>{/if}{/each}
 </div>
 <style>
-  h3{font-size:15px;font-weight:500;margin:22px 0 8px}p{font-size:10px;color:#9caaa4;line-height:1.8}.row{display:grid;grid-template-columns:1fr 1.7fr 1fr;gap:10px;text-align:center;align-items:center;border-bottom:1px solid #ffffff0c;padding:15px 0}.row b{font-size:14px;font-weight:450}.row span{font-size:10px;color:#9caaa4}.head{margin-top:20px}.head strong{font-size:10px;font-weight:500;color:#d5ef8b}.note{margin-top:17px}
+  h3{font-size:15px;font-weight:500;margin:22px 0 8px}p{font-size:12px;color:var(--muted);line-height:1.8}.row{display:grid;grid-template-columns:1fr 1.7fr 1fr;gap:10px;text-align:center;align-items:center;border-bottom:1px solid var(--tennis-border);padding:15px 0}.row b{font-size:14px;font-weight:450}.row span{font-size:12px;color:var(--muted)}.head{margin-top:20px}.head strong{font-size:12px;font-weight:500;color:var(--lime)}.note{margin-top:17px}
 </style>
