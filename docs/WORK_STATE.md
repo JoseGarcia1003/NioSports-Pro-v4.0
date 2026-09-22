@@ -1,6 +1,15 @@
 # Punto de control — leer antes de continuar
 
-Actualizado: 21 de septiembre de 2026. Rama `codex/security-integrity`. Repositorio `JoseGarcia1003/NioSports-Pro-v4.0`, PR #1. Mandato: mejorar producto real, tipografía, fluidez, diseño y fiabilidad con autonomía; retomar desde este archivo, sin reiniciar la auditoría. Plan completo: EXCELLENCE_PLAN.md.
+Actualizado: 22 de septiembre de 2026. Repositorio `JoseGarcia1003/NioSports-Pro-v4.0`. PR #1 integrada en `main` por petición explícita del propietario de guardar todo en GitHub y publicar en su enlace habitual. Mandato: retomar desde este archivo sin reiniciar la auditoría. Plan completo: EXCELLENCE_PLAN.md.
+
+## Publicación principal — 22 de septiembre
+
+- Todos los cambios hasta `ab30a3532a94fd12955a5c236cf6b5cc2a2cb5b0` integrados mediante PR #1. Commit de integración: `064b9abea319a17a89079e4819b55ad58a7e71ce`.
+- Vercel completó el despliegue de producción `dpl_5WQ4cSjb5RKZGsKWf2TtcvwBuLfy` desde `main`, estado READY, sin error de alias. El dominio habitual está asignado a este despliegue: https://nio-sports-pro-v4-0.vercel.app/login.
+- Verificación del enlace público en navegador: formulario nuevo y portada de tenis visibles, título «Bienvenido de nuevo · NioSports Pro», acceso sin pantalla de Vercel ni enlace temporal; consola sin errores/advertencias. Pestaña entregable abierta. No se inició sesión con credenciales reales ni se completó Google OAuth.
+- El rediseño de Cuenta/Login y sus ajustes finales están guardados en GitHub. Validación previa: 444 pruebas de dominio/servidor y 5 de UI aprobadas; check sin errores ni advertencias. Vercel compiló la preview exacta de `ab30a353` correctamente.
+- Publicar la versión disponible no certifica las dependencias comerciales pendientes: proveedor deportivo, sesión externa, suscripción de prueba y reconciliación del historial. La petición actual autoriza publicar; sustituye el antiguo aplazamiento de `main` registrado abajo.
+- Los apartados históricos siguientes conservan evidencia de entregas anteriores; sus referencias a ajustes locales o producción pendiente ya no describen el estado actual.
 
 ## Estado de esta entrega
 
@@ -54,7 +63,7 @@ No hay tarea pendiente que dependa de un agente. Los trabajos previos de release
 
 1. La entrega anterior está cerrada, guardada y desplegada. No repetir migraciones, suite completa ni el mismo recorrido visual si no hay cambios nuevos.
 2. El estado propio de BankrollWorkspace está corregido, probado y desplegado. No rehacer el controlador ni los stores. Continuar con el paso 3.
-3. Continuar la coherencia visual en Cuenta/Login/Planes y tenis, con comprobación real de contraste, teclado y móvil. Tipografía y colores compartidos ya se mejoraron; evitar rehacer el catálogo.
+3. Cuenta/Login y navegación rediseñados y guardados en `ab30a353`. Continuar la coherencia visual en Planes y tenis, con comprobación real de contraste, teclado y móvil. Evitar rehacer el catálogo o el rediseño ya cerrado.
 4. Validar identidad y suscripción con cuentas de prueba y entorno correcto; si faltan credenciales, registrar dependencia concreta y avanzar en operación del catálogo y medición de rendimiento.
 5. Registrar la siguiente entrega con sus propias pruebas, SHA y preview. Proyecto Vercel prj_En6HSxmihlQTsxgxW53Z6klKzcMB, team team_YUpxoMdWKSgksacyR0qJ2NPX. No confundir build Windows EPERM con estado remoto.
 
@@ -65,7 +74,7 @@ No hay tarea pendiente que dependa de un agente. Los trabajos previos de release
 - NBA real: las líneas/cuotas y credenciales deben conectarse; abstenerse es correcto mientras falten.
 - Validar sesión real, Firebase Third-Party Auth en Supabase y suscripción real de prueba. No importar privilegios desde campos antiguos sin validación Stripe.
 - Migración reconciliada de saldos/historial legacy al nuevo ledger pendiente; no recalcular ni borrar registros reales por suposiciones.
-- Lanzamiento main pendiente de estos flujos. Tener preview no significa producción promovida.
+- `main` integrada por petición explícita el 22 de septiembre. Las dependencias de estos flujos siguen pendientes aunque la versión disponible se publique.
 
 ## Entorno
 

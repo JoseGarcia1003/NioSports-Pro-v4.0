@@ -18,6 +18,10 @@ El propietario rechazó la entrega anterior por verse genérica, plana y sin ide
 
 21 de septiembre: 444 pruebas de dominio/servidor y 5 del formulario aprobadas. Las pruebas de UI usan Svelte en modo navegador y las de servidor conservan sus módulos Node (incluido Stripe). npm run test:unit ejecuta ambos grupos. Check: 0 errores y 0 advertencias. Primera preview 8912ab5e: Vercel READY, qyftc5egf. Cuenta revisada en escritorio/móvil, ambos temas y ayuda. Acceso a 360/390/768/1440 px sin desbordamiento; registro, recuperación, mostrar contraseña y validación nativa comprobados sin efectos externos. Consola sin errores/warnings. Falta registrar el SHA y la comprobación de los ajustes finales: textos mayores, barra inferior verde, franja bajo nav eliminada y palabras separadas correctamente en móvil.
 
-## Límites
+## Cierre y publicación — 22 de septiembre
+
+Los ajustes finales se guardaron en `ab30a3532a94fd12955a5c236cf6b5cc2a2cb5b0`: textos auxiliares mayores, navegación inferior verde, espaciado del título móvil, eliminación de la franja bajo navegación e imports de iconos individuales. La preview exacta terminó READY (`dpl_41ErQtLcSSQv3y54ENzEZCqXHuti`). PR #1 integrada en `main` mediante `064b9abea319a17a89079e4819b55ad58a7e71ce`; despliegue y enlace habitual documentados en WORK_STATE.md. La frase anterior «falta registrar el SHA» corresponde a la revisión del día 21 y queda resuelta.
+
+## Límites de la entrega
 
 Entrega de Cuenta, acceso y navegación. No implica que todas las páginas estén rediseñadas ni que la autenticación externa, las suscripciones o el motor predictivo estén comercialmente validados. Se conservan los permisos y contratos de servidor existentes. El diseño no cambia el plan de un usuario ni añade datos deportivos.
