@@ -4,6 +4,18 @@ Actualizado: 22 de septiembre de 2026. Repositorio `JoseGarcia1003/NioSports-Pro
 
 ## Publicación principal — 22 de septiembre
 
+### Correcciones tras observaciones del propietario
+
+- `30a3a141`: paleta de tenis compartida por calendario, informe y ficha. Texto oscuro real en tema claro; textos secundarios mayores. Fondo de cancha limitado a NBA/totales.
+- `d9fd36c3`: inicio azul noche/celeste/violeta, composición multideporte, selector interactivo NBA/tenis, navegación adaptada y accesos a pronósticos/bankroll.
+- `d8464a66`: nuevo centro NBA con hoy/mañana, búsqueda, selección, contexto, reintento y descarte de respuestas tardías; calculadora de totales con guía, tipografía y jerarquía renovadas.
+- Los tres bloques están guardados en GitHub, incluidos en `main`. Vercel producción `dpl_ESuzwPTPzF1s4XDR4nHHs5iY3sm6` READY, SHA `d8464a668de6f45522f108d21fb0a1603e5982f1`, dominio `nio-sports-pro-v4-0.vercel.app` asignado sin error. Verificado nuevamente al reanudar el 22 de septiembre.
+- Check: 0 errores/advertencias. Pruebas: 5 del contrato del calendario + 8 de UI (3 nuevas NBA y 5 login), aprobadas. Esbuild requiere ejecución fuera del sandbox de Windows; el primer fallo fue de permisos, no de aplicación.
+- Navegador en preview de contraste: tenis demo claro/oscuro, informe saque/resto y ficha individual a 390 px sin desbordamiento. Títulos claros corregidos a #182d23; acento #386520; secundarios #4e6557. Contrastes calculados: título/fondo 13,95:1, secundarios/blanco 6,32:1, acento/blanco 6,88:1. Estos valores no certifican todos los elementos de la aplicación.
+- Revisión final en PRODUCCIÓN completada: inicio y NBA a 360/390/1440 px sin desbordamiento horizontal; temas claro y oscuro legibles. Inicio: enlace interno a deportes, selector NBA/tenis, contenido y destino de cada selección correctos, enlace a centro NBA funcional. NBA: Mañana cambia el estado seleccionado; reintento muestra carga y vuelve a un estado explícito sin fuente. Consola sin errores/advertencias. No hay partidos reales confirmados con el proveedor actual; selección/filtro con encuentros verificados mediante las 3 pruebas de UI, no presentados como observación de datos reales.
+- Esta entrega visual y su publicación están CERRADAS. No repetir estos tres bloques ni su matriz de revisión si no hay cambios nuevos. La calculadora autenticada tiene mejoras de presentación y check aprobado, pero no se ha comprobado con una sesión real en este recorrido.
+- Siguiente acción: continuar con Planes y validar los flujos autenticados de NBA y suscripción con una sesión/entorno de prueba disponible. Proveedor deportivo y suscripción real siguen pendientes; la publicación visual no demuestra esos flujos.
+
 - Todos los cambios hasta `ab30a3532a94fd12955a5c236cf6b5cc2a2cb5b0` integrados mediante PR #1. Commit de integración: `064b9abea319a17a89079e4819b55ad58a7e71ce`.
 - Vercel completó el despliegue de producción `dpl_5WQ4cSjb5RKZGsKWf2TtcvwBuLfy` desde `main`, estado READY, sin error de alias. El dominio habitual está asignado a este despliegue: https://nio-sports-pro-v4-0.vercel.app/login.
 - Verificación del enlace público en navegador: formulario nuevo y portada de tenis visibles, título «Bienvenido de nuevo · NioSports Pro», acceso sin pantalla de Vercel ni enlace temporal; consola sin errores/advertencias. Pestaña entregable abierta. No se inició sesión con credenciales reales ni se completó Google OAuth.
@@ -11,7 +23,7 @@ Actualizado: 22 de septiembre de 2026. Repositorio `JoseGarcia1003/NioSports-Pro
 - Publicar la versión disponible no certifica las dependencias comerciales pendientes: proveedor deportivo, sesión externa, suscripción de prueba y reconciliación del historial. La petición actual autoriza publicar; sustituye el antiguo aplazamiento de `main` registrado abajo.
 - Los apartados históricos siguientes conservan evidencia de entregas anteriores; sus referencias a ajustes locales o producción pendiente ya no describen el estado actual.
 
-## Estado de esta entrega
+## Historial de entregas anteriores (los pendientes antiguos no sustituyen el estado actual)
 
 NUEVA ENTREGA VISUAL EN REVISIÓN FINAL: el propietario rechazó la apariencia anterior por genérica. Se rediseñaron Cuenta e inicio de sesión (AccountExperience.svelte, LoginExperience.svelte, account.css), con portada deportiva original de 175 KB, centro de control visual, panel de acceso y selector de tema. Nav/Logo armonizados en verde. No repetir el controlador del bankroll. Check aprobado con 0 errores/advertencias; 444 pruebas de servidor/dominio y 5 del formulario aprobadas. Primera versión publicada en GitHub 8912ab5e y Vercel READY (qyftc5egf). Cuenta revisada en escritorio/móvil, temas y ayuda. Acceso probado a 360/390/768/1440 px: registro, recuperación, mostrar contraseña y validación nativa, sin efectos externos. Falta publicar y comprobar los ajustes de lectura y navegación detectados en la revisión. Estado de diseño en DESIGN_ACCOUNT_2026-09-20.md. Ajustes finales locales: textos auxiliares mayores, barra inferior verde, separación correcta de palabras en el título móvil, eliminar franja bajo nav, imports individuales de iconos y configuraciones de pruebas de UI/servidor separadas.
 

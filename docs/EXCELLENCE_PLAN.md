@@ -25,7 +25,7 @@ Las áreas 2 y 3 deben producir mejoras visibles mientras se cierran las depende
 ## Próximas entregas concretas
 
 1. Entrega cerrada el 20 septiembre: catálogo diario, correcciones NBA, stores por sesión, CSP, permisos remotos y preview verificable. Evidencia en WORK_STATE.md y RELEASE_2026-09-20.md.
-2. Primera pasada visual completada en catálogo, tokens compartidos, navegación y bankroll. Cuenta/Login rediseñados y comprobados el 21 de septiembre, incluidos en `main` el 22. Continuar Planes/tenis y medición de accesibilidad y rendimiento.
+2. Primera pasada visual completada en catálogo, tokens compartidos, navegación y bankroll. Cuenta/Login rediseñados y comprobados el 21 de septiembre, incluidos en `main` el 22. El 22 se publicaron y comprobaron el inicio multideporte azul, contraste de tenis y centro NBA con hoy/mañana y búsqueda. Continuar Planes, revisión autenticada de totales y medición de accesibilidad/rendimiento. No rehacer las entregas verificadas por falta de contexto.
 3. Endurecimiento de tablas antiguas y ledger aplicado sin eliminar historial. Aislamiento local de BankrollWorkspace probado y desplegado en 367cbf45. Completar validación de identidad y suscripción con cuentas de prueba.
 4. Completar operación del catálogo (publicador NBA, retirada ante datos corregidos, tareas programadas) y revisión de métricas.
 5. Conectar el proveedor deportivo cuando se disponga de credenciales y contrato; medir calidad del motor con datos reales.
