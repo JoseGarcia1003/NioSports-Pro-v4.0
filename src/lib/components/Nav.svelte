@@ -53,7 +53,7 @@
 
 <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
 
-<nav class="nav" class:nav--scrolled={scrolled} aria-label="Navegación principal">
+<nav class="nav" class:nav--scrolled={scrolled} class:nav--studio={['/today','/sports/nba','/totales'].includes($page.url.pathname)} aria-label="Navegación principal">
   <div class="nav__inner">
     <a href="/today" class="nav__brand" aria-label="NioSports Pro — Ir al inicio">
       <Logo size={32} showText={true} />
@@ -137,6 +137,9 @@
     background: rgba(246,248,240,.96);
   }
   :global([data-theme="light"]) .nav--scrolled { box-shadow: 0 4px 18px rgba(23,43,71,.08); }
+  .nav.nav--studio { --color-text-muted:#bac8df; --color-text-secondary:#e0e8f5; --color-bg-elevated:#243652; --nav-text:#f2f6ff; --nav-surface:#132139; --nav-accent:#b8cbff; --nav-active-bg:#294064; --logo-background:#324e88; --logo-accent:#b8cbff; background:#101b2ef5; }
+  :global([data-theme="light"]) .nav.nav--studio { --color-text-muted:#4d607c; --color-text-secondary:#253c5d; --color-bg-elevated:#e1e9f5; --nav-text:#162c48; --nav-surface:#fff; --nav-accent:#274f95; --nav-active-bg:#dce7fa; --logo-background:#324e88; --logo-accent:#324e88; background:#f1f5fcf7; }
+  .nav--studio .nav__avatar { background:#324e88; }
   .nav :is(button, a):focus-visible { outline: 2px solid var(--nav-accent); outline-offset: 3px; }
 
   .nav__inner {

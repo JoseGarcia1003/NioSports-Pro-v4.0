@@ -6,7 +6,7 @@
 
 <div class="logo" class:logo--with-text={showText}>
   <svg width={size} height={size} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="40" height="40" rx="10" fill="#425b34"/>
+    <rect width="40" height="40" rx="10" fill="var(--logo-background, #425b34)"/>
     <path d="M12 28V12l8 5.5L28 12v16l-8-5.5L12 28z" fill="white" opacity="0.9"/>
     <path d="M20 17.5l8 5.5V12l-8 5.5z" fill="white" opacity="0.6"/>
   </svg>
