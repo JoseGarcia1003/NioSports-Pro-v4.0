@@ -3,15 +3,15 @@
   let show = false;
 </script>
 
-<span class="tip-wrap" on:mouseenter={() => show = true} on:mouseleave={() => show = false}>
+<button type="button" aria-label={text} class="tip-wrap" on:focus={() => show = true} on:blur={() => show = false} on:keydown={(event) => { if (event.key === 'Escape') show = false; }} on:mouseenter={() => show = true} on:mouseleave={() => show = false}>
   <span class="tip-icon">?</span>
   {#if show}
-    <div class="tip-popup">{text}</div>
+    <span class="tip-popup" role="tooltip">{text}</span>
   {/if}
-</span>
+</button>
 
 <style>
-  .tip-wrap { position: relative; display: inline-flex; cursor: help; }
+  .tip-wrap { border: 0; padding: 0; background: transparent; position: relative; display: inline-flex; cursor: help; }
   .tip-icon {
     width: 16px; height: 16px; border-radius: 50%;
     background: rgba(99,102,241,0.15); color: #6366F1;

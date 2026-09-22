@@ -1,3 +1,4 @@
+import { authenticatedFetch } from '$lib/services/authenticated-fetch.js';
 // src/lib/stores/data.js
 // ════════════════════════════════════════════════════════════════
 // Stores de datos del usuario — backed by Supabase.
@@ -6,8 +7,9 @@
 // ════════════════════════════════════════════════════════════════
 
 import { writable, derived } from 'svelte/store';
+import { authStore } from '$lib/stores/auth.js';
 import { getUserPicks, savePick as sbSavePick, updatePick, deletePick as sbDeletePick,
-         getBankrollHistory, addBankrollTransaction, getUserProfile, upsertUserProfile
+         upsertUserProfile
 } from '$lib/supabase/client.js';
 
 // ── Helpers de seguridad ──────────────────────────────────────
@@ -21,6 +23,38 @@ function toArray(val) {
 // ── Estado de carga ───────────────────────────────────────────
 export const dataLoading = writable(false);
 export const dataError   = writable(null);
+
+// Every async operation belongs to one session, including a second login by the
+// same user. Clearing a store also invalidates its pending work independently.
+let activeUserId = null;
+let sessionGeneration = 0;
+let picksGeneration = 0;
+let picksLoad = 0;
+let bankrollLoad = 0;
+
+function sessionFor(userId = activeUserId) {
+  if (!userId || userId !== activeUserId || userId !== authStore.getSnapshot().userId) return null;
+  return { userId, generation: sessionGeneration };
+}
+
+function currentSession(session) {
+  return session && session.generation === sessionGeneration && session.userId === activeUserId &&
+    session.userId === authStore.getSnapshot().userId;
+}
+
+function sessionChanged() {
+  return new DOMException('La sesión cambió. Vuelve a cargar tus datos.', 'AbortError');
+}
+
+function requireSession(userId = activeUserId) {
+  const session = sessionFor(userId);
+  if (!session) throw sessionChanged();
+  return session;
+}
+
+function requireCurrentPicks(session, generation) {
+  if (!currentSession(session) || generation !== picksGeneration) throw sessionChanged();
+}
 
 // ── Estadísticas de equipos NBA ───────────────────────────────
 const _teamStats      = writable({});
@@ -55,15 +89,19 @@ export const picksStore = {
 
   /** Load all picks for a user from Supabase */
   async loadForUser(userId) {
-    if (!userId) return;
+    const session = sessionFor(userId);
+    if (!session) return;
+    const request = ++picksLoad;
+    const current = () => currentSession(session) && request === picksLoad;
     dataLoading.set(true);
     dataError.set(null);
 
     try {
       const raw = await getUserPicks(userId, { limit: 500 });
+      if (!current()) return;
 
       // ✅ FIX: garantiza array antes de cualquier .filter()
-      const allPicks = toArray(raw);
+      const allPicks = toArray(raw).filter(pick => pick?.user_id === session.userId);
 
       const totales     = allPicks.filter(p => p.source === 'totales' || p.source === 'manual');
       const ai          = allPicks.filter(p => p.source === 'ai'      || p.source === 'model');
@@ -72,19 +110,25 @@ export const picksStore = {
 
       _picks.set({ totales, ai, backtesting, props, all: allPicks });
     } catch (err) {
+      if (!current()) return;
       console.error('[data.js] Error loading picks:', err);
       dataError.set(err.message);
       // ✅ FIX: en caso de error no deja el store en estado inválido
       _picks.set({ ...EMPTY_PICKS });
     } finally {
-      dataLoading.set(false);
+      if (current()) dataLoading.set(false);
     }
   },
 
   /** Save a new pick to Supabase and update store */
   async save(pick) {
+    const session = requireSession();
+    if (pick?.user_id !== session.userId) throw sessionChanged();
+    const generation = picksGeneration;
     try {
       const saved = await sbSavePick(pick);
+      requireCurrentPicks(session, generation);
+      if (saved?.user_id !== session.userId) throw new Error('El pick guardado no pertenece a la cuenta activa.');
       _picks.update(p => {
         const source = pick.source || 'totales';
         const key    = source === 'model' ? 'ai' : (source === 'manual' ? 'totales' : source);
@@ -97,15 +141,20 @@ export const picksStore = {
       });
       return saved;
     } catch (err) {
-      console.error('[data.js] Error saving pick:', err);
+      if (currentSession(session) && err.name !== 'AbortError') console.error('[data.js] Error saving pick:', err);
       throw err;
     }
   },
 
   /** Update a pick in Supabase and update store */
   async update(pickId, updates) {
+    const session = requireSession();
+    const generation = picksGeneration;
+    if (updates.user_id !== undefined && updates.user_id !== session.userId) throw sessionChanged();
     try {
       const updated = await updatePick(pickId, updates);
+      requireCurrentPicks(session, generation);
+      if (updated?.user_id !== session.userId) throw new Error('El pick actualizado no pertenece a la cuenta activa.');
       _picks.update(p => {
         const updateInArray = (arr) =>
           toArray(arr).map(pick => pick.id === pickId ? { ...pick, ...updated } : pick);
@@ -119,15 +168,18 @@ export const picksStore = {
       });
       return updated;
     } catch (err) {
-      console.error('[data.js] Error updating pick:', err);
+      if (currentSession(session) && err.name !== 'AbortError') console.error('[data.js] Error updating pick:', err);
       throw err;
     }
   },
 
   /** Delete a pick from Supabase and update store */
   async remove(pickId) {
+    const session = requireSession();
+    const generation = picksGeneration;
     try {
       await sbDeletePick(pickId);
+      requireCurrentPicks(session, generation);
       _picks.update(p => {
         const filterOut = (arr) => toArray(arr).filter(pick => pick.id !== pickId);
         return {
@@ -139,14 +191,18 @@ export const picksStore = {
         };
       });
     } catch (err) {
-      console.error('[data.js] Error deleting pick:', err);
+      if (currentSession(session) && err.name !== 'AbortError') console.error('[data.js] Error deleting pick:', err);
       throw err;
     }
   },
 
   /** Clear all local data (on logout) */
   clear() {
+    picksGeneration++;
+    picksLoad++;
     _picks.set({ ...EMPTY_PICKS });
+    dataLoading.set(false);
+    dataError.set(null);
   }
 };
 
@@ -177,40 +233,35 @@ export const bankrollStore = {
 
   /** Load bankroll data from Supabase */
   async loadForUser(userId) {
-    if (!userId) return;
+    const session = sessionFor(userId);
+    if (!session) return;
+    const request = ++bankrollLoad;
+    const current = () => currentSession(session) && request === bankrollLoad;
     try {
-      const [profile, rawHistory] = await Promise.all([
-        getUserProfile(userId),
-        getBankrollHistory(userId, 100),
-      ]);
-
-      // ✅ FIX: garantiza array en history
-      const history = toArray(rawHistory);
-      const initial = profile?.initial_bankroll || 0;
-      const totalPnL = history.reduce((sum, tx) => sum + (tx.amount || 0), 0);
-
+      const response = await authenticatedFetch('/api/bankroll');
+      if (!current()) return;
+      if (!response.ok) throw new Error('Bankroll unavailable');
+      const result = await response.json();
+      if (!current()) return;
+      const wallet = result.wallet || {};
       _bankroll.set({
-        current:  initial + totalPnL,
-        initial,
-        history,
+        current: Number(wallet.available_minor || 0) / 100,
+        initial: (Number(wallet.deposited_minor || 0) - Number(wallet.withdrawn_minor || 0)) / 100,
+        profit: Number(wallet.profit_minor || 0) / 100,
+        reserved: Number(wallet.reserved_minor || 0) / 100,
+        settledStake: Number(wallet.settled_stake_minor || 0) / 100,
+        history: toArray(result.entries).map(e => ({ ...e, type: e.kind, amount: e.delta_minor / 100, balance: e.balance_minor / 100 })),
         lastSync: new Date().toISOString(),
       });
     } catch (err) {
-      console.error('[data.js] Error loading bankroll:', err);
+      if (current()) console.error('[data.js] Error loading bankroll:', err);
     }
   },
 
   /** Add a transaction to Supabase and update store */
   async addTransaction(transaction) {
     try {
-      const saved = await addBankrollTransaction(transaction);
-      _bankroll.update(b => ({
-        ...b,
-        current:  b.current + (transaction.amount || 0),
-        history:  [saved, ...toArray(b.history)],
-        lastSync: new Date().toISOString(),
-      }));
-      return saved;
+      throw new Error('Registra movimientos y liquida tickets desde el nuevo panel de bankroll.');
     } catch (err) {
       console.error('[data.js] Error adding transaction:', err);
       throw err;
@@ -219,16 +270,13 @@ export const bankrollStore = {
 
   /** Clear on logout */
   clear() {
+    bankrollLoad++;
     _bankroll.set({ current: 0, initial: 0, history: [], lastSync: null });
   }
 };
 
-export const bankrollROI = derived(_bankroll, $b => {
-  if (!$b.initial || $b.initial === 0) return 0;
-  return (($b.current - $b.initial) / $b.initial * 100).toFixed(1);
-});
-
-export const bankrollPnL = derived(_bankroll, $b => $b.current - $b.initial);
+export const bankrollROI = derived(_bankroll, b => b.settledStake > 0 ? ((b.profit || 0) / b.settledStake * 100).toFixed(1) : null);
+export const bankrollPnL = derived(_bankroll, b => b.profit ?? null);
 
 // ── AI Picks de hoy ──────────────────────────────────────────
 const _aiPicksToday     = writable([]);
@@ -265,7 +313,8 @@ export const demoStatus = derived(
  * @param {Object} userInfo - { email, displayName }
  */
 export async function loadUserData(userId, userInfo = {}) {
-  if (!userId) return;
+  const session = sessionFor(userId);
+  if (!session) return;
 
   try {
     await upsertUserProfile({
@@ -274,9 +323,10 @@ export async function loadUserData(userId, userInfo = {}) {
       display_name: userInfo.displayName  || '',
     });
   } catch (err) {
-    console.warn('[data.js] Profile upsert warning:', err.message);
+    if (currentSession(session)) console.warn('[data.js] Profile upsert warning:', err.message);
   }
 
+  if (!currentSession(session)) return;
   await Promise.all([
     picksStore.loadForUser(userId),
     bankrollStore.loadForUser(userId),
@@ -287,7 +337,19 @@ export async function loadUserData(userId, userInfo = {}) {
  * Clear all user data. Call on logout.
  */
 export function clearUserData() {
+  sessionGeneration++;
+  activeUserId = null;
   picksStore.clear();
   bankrollStore.clear();
-  dataError.set(null);
+  _aiPicksToday.set([]);
+  _aiPicksCacheDate.set(null);
+  _usingDemoGames.set(false);
 }
+
+// Clear synchronously on every auth transition, including Firebase auth errors.
+// The master loader can then await profile setup without exposing the old owner.
+authStore.subscribe(({ userId }) => {
+  if (userId === activeUserId) return;
+  clearUserData();
+  activeUserId = userId;
+});

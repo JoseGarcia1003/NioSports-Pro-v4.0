@@ -1,4 +1,7 @@
 <script>
+  import { subscription } from '$lib/stores/subscription.js';
+  import { hasFeature } from '$lib/config/plans.js';
+  $: canViewCLV = ['active','trialing'].includes($subscription.status) && hasFeature($subscription.plan,'clvTracking');
   import UpgradeGate from '$lib/components/UpgradeGate.svelte';
   import { onMount } from 'svelte';
   import { userId } from '$lib/stores/auth';
@@ -123,7 +126,7 @@
 <div class="page">
   <header class="page__header">
     <span class="page__label">Tu rendimiento</span>
-    <h1 class="page__title">Estadísticas</h1>
+    <h1 class="page__title">Mis estadísticas</h1>
     <p class="page__subtitle">Análisis detallado de tu historial de picks</p>
   </header>
 
@@ -175,7 +178,8 @@
     </div>
 
     <!-- CLV Banner -->
-    {#if avgCLV !== null}
+
+    {#if avgCLV !== null && canViewCLV}
       <div class="clv-banner" class:clv-pos={parseFloat(avgCLV) >= 0}>
         <div class="clv-left">
           <Activity size={20} />
@@ -202,7 +206,7 @@
       </div>
       <div class="card">
         <h2 class="card__title">Evolución CLV</h2>
-        <CLVEvolution data={clvData} />
+        <UpgradeGate feature="clvTracking" requiredPlan="elite" title="Evolución de líneas" description="Análisis avanzado del cierre de mercado."><CLVEvolution data={clvData} /></UpgradeGate>
       </div>
     </div>
 

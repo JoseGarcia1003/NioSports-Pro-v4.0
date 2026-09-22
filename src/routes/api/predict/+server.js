@@ -1,12 +1,16 @@
+import { buildMLInput } from '$lib/server/ml-input.js';
+import { getEntitlements } from '$lib/server/entitlements.js';
 // src/routes/api/predict/+server.js
 // Motor predictivo server-side con Railway ML fallback a heurístico local.
 // Rate limiting por plan via Upstash Redis.
 
-import { json } from '@sveltejs/kit';
+import { json, isHttpError } from '@sveltejs/kit';
+import { requireIdentity } from '$lib/server/identity.js';
 import { predict } from '$lib/engine/predictor.js';
 import { MODEL_VERSION } from '$lib/engine/constants.js';
 import { env } from '$env/dynamic/private';
 import { checkRateLimit } from '$lib/services/ratelimit.js';
+import { predictionInputError } from '$lib/server/prediction-input.js';
 
 const ML_API_URL = env.ML_API_URL || '';
 const ML_API_KEY = env.ML_API_KEY || '';
@@ -40,39 +44,11 @@ async function predictWithML(body) {
   if (!ML_API_URL) return null;
 
   try {
-    const homeStats = body.homeTeam?.stats || {};
-    const awayStats = body.awayTeam?.stats || {};
+    const mlBody = buildMLInput(body);
+    if (!mlBody) return null;
 
-    const mlBody = {
-      home_team: {
-        name: body.homeTeam?.name || '',
-        total_l5: homeStats.fullHome || homeStats.full || 220,
-        total_l10: homeStats.fullHome || homeStats.full || 220,
-        total_l20: homeStats.fullHome || homeStats.full || 220,
-        home_avg: homeStats.fullHome || homeStats.full || 220,
-        away_avg: homeStats.fullAway || homeStats.full || 220,
-        std: 10,
-        rest_days: body.homeTeam?.restDays ?? 2,
-        is_b2b: (body.homeTeam?.restDays ?? 2) === 0,
-      },
-      away_team: {
-        name: body.awayTeam?.name || '',
-        total_l5: awayStats.fullAway || awayStats.full || 220,
-        total_l10: awayStats.fullAway || awayStats.full || 220,
-        total_l20: awayStats.fullAway || awayStats.full || 220,
-        home_avg: awayStats.fullHome || awayStats.full || 220,
-        away_avg: awayStats.fullAway || awayStats.full || 220,
-        std: 10,
-        rest_days: body.awayTeam?.restDays ?? 2,
-        is_b2b: (body.awayTeam?.restDays ?? 2) === 0,
-      },
-      line: body.line || 220,
-      period: body.period || 'FULL',
-      days_into_season: 150,
-    };
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 3000);
+
 
     const res = await fetch(`${ML_API_URL}/predict`, {
       method: 'POST',
@@ -81,13 +57,16 @@ async function predictWithML(body) {
         'X-API-Key': ML_API_KEY,
       },
       body: JSON.stringify(mlBody),
-      signal: controller.signal,
+      signal: AbortSignal.timeout(3000),
     });
 
-    clearTimeout(timeout);
+
 
     if (res.ok) {
       const data = await res.json();
+      if (!data || !['projection','line','edge','probability','probability_pct','ev','ev_percent'].every(k => typeof data[k] === 'number' && Number.isFinite(data[k])) ||
+          data.projection <= 0 || data.line !== body.line || data.probability < 0 || data.probability > 1 ||
+          Math.abs(data.probability_pct - data.probability * 100) > 1 || !['OVER','UNDER'].includes(data.direction)) return null;
       return {
         projection: data.projection,
         line: data.line,
@@ -105,10 +84,11 @@ async function predictWithML(body) {
         factorsDisplay: '',
         modelVersion: data.model_version,
         generatedAt: new Date().toISOString(),
-        source: data.source,
+        source: 'ml-remote',
       };
     }
   } catch (err) {
+    if (isHttpError(err)) throw err;
     console.warn('[API/predict] ML API unavailable, using fallback:', err.message);
   }
 
@@ -117,8 +97,12 @@ async function predictWithML(body) {
 
 /** @type {import('@sveltejs/kit').RequestHandler} */
 export async function POST({ request }) {
+  const identity = await requireIdentity(request);
   try {
-    const body = await request.json();
+    let body;
+    try { body = await request.json(); } catch { return json({ error: 'Solicitud inválida.' }, { status: 400 }); }
+    const inputError = predictionInputError(body);
+    if (inputError) return json({ error: inputError, status: 'abstained' }, { status: 400 });
     const { homeTeam, awayTeam } = body;
 
     if (!homeTeam || !awayTeam) {
@@ -126,34 +110,10 @@ export async function POST({ request }) {
     }
 
 // ── Rate Limit ─────────────────────────────────────────────────────────
-    const userId = body.userId || 'anonymous';
-    const userPlan = body.plan || 'free';
-    const source = body.source || 'unknown';
-
-    // Owner bypass — skip rate limiting entirely
-    const OWNER_IDS = (env.OWNER_USER_IDS || '').split(',').filter(Boolean);
-    const isOwner = OWNER_IDS.includes(userId);
-
-    // Totales calculator doesn't consume picks quota
-    const isTotales = source === 'totales';
-
-    // Si está cacheado, no consume cuota
-    const cacheKey = getCacheKey(body);
-    const cached = getCached(cacheKey);
-    if (cached) {
-      return json({ ...cached, cached: true }, {
-        headers: {
-          'X-RateLimit-Source': 'cache',
-        },
-      });
-    }
-
-    // Owner and totales skip rate limiting
-    let rl = { success: true, limit: 999, remaining: 999, reset: 0 };
-    if (!isOwner) {
-      rl = await checkRateLimit(userId, userPlan, isTotales ? 'api' : 'predictions');
-    }
-
+    const { plan: userPlan } = await getEntitlements(identity.uid);
+    const rl = await checkRateLimit(identity.uid, userPlan, 'predictions');
+    if (rl.unavailable) return json({ error: 'Quota service unavailable' }, { status: 503 });
+    const cacheKey = JSON.stringify({ uid: identity.uid, model: MODEL_VERSION.version, input: body });
     if (!rl.success) {
       const resetMin = Math.ceil((rl.reset - Date.now()) / 60000);
       const planLabels = { free: 'Pro ($14.99/mes)', pro: 'Elite ($29.99/mes)', elite: null };
@@ -171,7 +131,8 @@ export async function POST({ request }) {
         {
           status: 429,
           headers: {
-            'X-RateLimit-Limit': String(rl.limit),
+            'Cache-Control': 'no-store',
+        'X-RateLimit-Limit': String(rl.limit),
             'X-RateLimit-Remaining': '0',
             'X-RateLimit-Reset': String(rl.reset),
             'Retry-After': String(Math.ceil((rl.reset - Date.now()) / 1000)),
@@ -180,6 +141,9 @@ export async function POST({ request }) {
       );
     }
     // ───────────────────────────────────────────────────────────────────────
+
+    const cached = getCached(cacheKey);
+    if (cached) return json({ ...cached, cached: true }, { headers: { 'Cache-Control': 'no-store' } });
 
     // Try ML API first
     let result = await predictWithML(body);
@@ -220,6 +184,7 @@ export async function POST({ request }) {
 
     return json(result, {
       headers: {
+        'Cache-Control': 'no-store',
         'X-RateLimit-Limit': String(rl.limit),
         'X-RateLimit-Remaining': String(rl.remaining),
         'X-RateLimit-Reset': String(rl.reset),
@@ -227,6 +192,7 @@ export async function POST({ request }) {
     });
 
   } catch (err) {
+    if (isHttpError(err)) throw err;
     console.error('[API/predict] Error:', err.message);
     return json({ error: 'Prediction failed', details: err.message }, { status: 500 });
   }

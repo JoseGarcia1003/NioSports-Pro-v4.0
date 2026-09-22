@@ -101,19 +101,19 @@
   
   /* Familias */
   --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-display: 'Orbitron', var(--font-sans);
+  --font-display: var(--font-sans);
   --font-mono: 'DM Mono', 'Fira Code', 'Consolas', monospace;
   
   /* Tamaños */
-  --text-xs: 0.68rem;    /* 10.88px */
-  --text-sm: 0.78rem;    /* 12.48px */
-  --text-base: 0.88rem;  /* 14.08px */
-  --text-md: 0.95rem;    /* 15.2px */
-  --text-lg: 1.05rem;    /* 16.8px */
-  --text-xl: 1.2rem;     /* 19.2px */
-  --text-2xl: 1.4rem;    /* 22.4px */
-  --text-3xl: 1.8rem;    /* 28.8px */
-  --text-4xl: 2.2rem;    /* 35.2px */
+  --text-xs: 0.75rem;    /* 12px — metadata */
+  --text-sm: 0.8125rem;  /* 13px — labels */
+  --text-base: 0.9375rem;/* 15px — body */
+  --text-md: 1rem;       /* 16px */
+  --text-lg: 1.125rem;   /* 18px */
+  --text-xl: 1.25rem;    /* 20px */
+  --text-2xl: 1.5rem;    /* 24px */
+  --text-3xl: 2rem;      /* 32px */
+  --text-4xl: 2.5rem;    /* 40px */
   
   /* Pesos */
   --font-normal: 400;
@@ -264,6 +264,33 @@
    UTILIDADES CSS
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* Una misma familia en texto, controles y cifras. */
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-sans);
+}
+
+input[type="number"],
+time,
+table,
+.tabular-nums,
+.number-change {
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* El foco también cubre filtros, formularios y detalles nativos. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 4px;
+}
+
 /* Focus visible mejorado */
 .focus-ring:focus-visible {
   outline: none;
@@ -325,5 +352,6 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

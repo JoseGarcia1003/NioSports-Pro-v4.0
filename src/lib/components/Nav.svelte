@@ -2,23 +2,16 @@
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import { theme } from '$lib/stores/ui';
-  import { currentUser, authStore } from '$lib/stores/auth';
+  import { currentUser } from '$lib/stores/auth';
   import { logout } from '$lib/firebase';
   import { browser } from '$app/environment';
   import { onMount, onDestroy } from 'svelte';
   import Logo from '$lib/components/Logo.svelte';
-  import { Home, BarChart3, Cpu, Wallet, TrendingUp, Gem, Trophy, ClipboardList, Sun, Moon, LogOut } from 'lucide-svelte';
+  import { Home, Cpu, Wallet, Trophy, User, Sun, Moon, LogOut } from 'lucide-svelte';
 
-  const NAV_LINKS = [
-    { href: '/',         label: 'Inicio',      icon: Home },
-    { href: '/totales',  label: 'Totales',     icon: BarChart3 },
-    { href: '/picks',    label: 'Picks',       icon: Cpu },
-    { href: '/bankroll', label: 'Bankroll',    icon: Wallet },
-    { href: '/stats',    label: 'Stats',       icon: TrendingUp },
-    { href: '/pricing',  label: 'Precios',     icon: Gem },
-    { href: '/results',  label: 'Resultados',  icon: Trophy },
-    { href: '/tracking', label: 'Tracking',    icon: ClipboardList },
-  ];
+  import { PRIMARY_NAV, navActive } from '$lib/product/navigation.js';
+  const icons={Home,Cpu,Trophy,Wallet,User};
+  const NAV_LINKS=PRIMARY_NAV.map(item=>({...item,icon:icons[item.icon]}));
 
   let scrolled = false;
   let userMenuOpen = false;
@@ -56,24 +49,20 @@
   $: userName = $currentUser?.displayName ?? $currentUser?.email?.split('@')[0] ?? 'Usuario';
   $: userInitial = (userName[0] ?? 'U').toUpperCase();
 
-  function isActive(href) {
-    const path = $page.url.pathname;
-    return href === '/' ? path === '/' : path.startsWith(href);
-  }
 </script>
 
 <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
 
 <nav class="nav" class:nav--scrolled={scrolled} aria-label="Navegación principal">
   <div class="nav__inner">
-    <a href="/" class="nav__brand" aria-label="NioSports Pro — Ir al inicio">
+    <a href="/today" class="nav__brand" aria-label="NioSports Pro — Ir al inicio">
       <Logo size={32} showText={true} />
     </a>
 
     <!-- Desktop nav links - hidden on mobile (BottomNav handles it) -->
     <ul class="nav__links" role="list">
       {#each NAV_LINKS as link}
-        {@const active = isActive(link.href)}
+        {@const active = navActive(link,$page.url.pathname)}
         <li role="none">
           <a href={link.href} class="nav__link" class:nav__link--active={active}
              aria-current={active ? 'page' : undefined}>
@@ -90,9 +79,10 @@
         {#if $theme === 'dark'}<Sun size={18} />{:else}<Moon size={18} />{/if}
       </button>
 
+      {#if $currentUser}
       <div class="nav__user">
         <button class="nav__avatar" on:click|stopPropagation={toggleUserMenu}
-                aria-expanded={userMenuOpen}>
+                aria-label={`Opciones de ${userName}`} aria-expanded={userMenuOpen}>
           {userInitial}
         </button>
 
@@ -104,13 +94,16 @@
                 <span class="nav__user-email">{$currentUser.email}</span>
               {/if}
             </div>
-            <hr class="nav__user-divider" />
+            <a href="/account" class="nav__user-item" role="menuitem" on:click={closeUserMenu}>Mi cuenta y suscripción</a><hr class="nav__user-divider" />
             <button class="nav__user-item" role="menuitem" on:click={handleLogout}>
               <LogOut size={14} /> Cerrar sesión
             </button>
           </div>
         {/if}
       </div>
+      {:else}
+        <a class="nav__login" href="/login">Iniciar sesión</a>
+      {/if}
     </div>
   </div>
 </nav>
@@ -125,7 +118,10 @@
   .skip-link:focus { top: 0; }
 
   .nav {
-    background: rgba(10,15,28,0.9);
+    --color-text-muted: #a6b3a8; --color-text-secondary: #e0e8dc; --color-bg-elevated: #26372a;
+    --nav-text: #f1f5ec; --nav-surface: #142018; --nav-accent: #c5db92; --nav-active-bg: rgba(169,216,134,0.1);
+    --logo-text-color: var(--nav-text);
+    background: rgba(14,22,17,0.96);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--color-border);
@@ -134,9 +130,17 @@
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   }
   .nav--scrolled { box-shadow: 0 4px 24px rgba(0,0,0,0.4); }
+  :global([data-theme="light"]) .nav {
+    --color-text-muted: #5d6d5e; --color-text-secondary: #344733; --color-bg-elevated: #edf1e7;
+    --nav-text: #0f172a; --nav-surface: #fff; --nav-accent: #315f28; --nav-active-bg: #e7f0e2;
+    --logo-accent: #46642c;
+    background: rgba(246,248,240,.96);
+  }
+  :global([data-theme="light"]) .nav--scrolled { box-shadow: 0 4px 18px rgba(23,43,71,.08); }
+  .nav :is(button, a):focus-visible { outline: 2px solid var(--nav-accent); outline-offset: 3px; }
 
   .nav__inner {
-    max-width: 1200px; margin: 0 auto; height: 100%;
+    max-width: 1280px; margin: 0 auto; height: 100%;
     padding: 0 20px; display: flex; align-items: center; gap: 8px;
   }
 
@@ -156,8 +160,8 @@
     font-size: 0.82rem; font-weight: 600;
     color: var(--color-text-muted); transition: color 0.15s, background 0.15s; white-space: nowrap;
   }
-  .nav__link:hover { color: #fff; background: var(--color-bg-elevated); }
-  .nav__link--active { color: #6366F1; background: rgba(99,102,241,0.1); }
+  .nav__link:hover { color: var(--nav-text); background: var(--color-bg-elevated); }
+  .nav__link--active { color: var(--nav-accent); background: var(--nav-active-bg); }
 
   /* Controls */
   .nav__controls {
@@ -169,33 +173,35 @@
     display: flex; align-items: center; justify-content: center;
     color: var(--color-text-secondary); transition: background 0.15s, color 0.15s;
   }
-  .nav__icon-btn:hover { background: var(--color-bg-elevated); color: #fff; }
+  .nav__icon-btn:hover { background: var(--color-bg-elevated); color: var(--nav-text); }
+  .nav__login { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 12px; border: 1px solid var(--color-border); border-radius: 10px; color: var(--nav-text); font-size: 13px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+  .nav__login:hover { background: var(--color-bg-elevated); }
 
   /* User menu */
   .nav__user { position: relative; }
   .nav__avatar {
-    width: 38px; height: 38px; border-radius: 50%;
-    background: linear-gradient(135deg, #6366F1, #4F46E5);
+    width: 44px; height: 44px; border-radius: 50%;
+    background: #425b34;
     color: #fff; font-weight: 800; font-size: 0.85rem;
     border: none; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     transition: transform 0.15s, box-shadow 0.15s;
   }
-  .nav__avatar:hover { transform: scale(1.08); box-shadow: 0 0 0 2px rgba(99,102,241,0.4); }
+  .nav__avatar:hover { transform: scale(1.04); box-shadow: 0 0 0 2px var(--nav-accent); }
 
   .nav__user-menu {
     position: absolute; top: calc(100% + 8px); right: 0;
-    min-width: 200px; background: #0f1729;
-    border: 1px solid rgba(255,255,255,0.12); border-radius: 12px;
+    min-width: 200px; max-width: min(320px, calc(100vw - 40px)); background: var(--nav-surface);
+    border: 1px solid var(--color-border); border-radius: 12px;
     padding: 8px; box-shadow: 0 16px 40px rgba(0,0,0,0.5); z-index: 1000;
     animation: menuIn 0.15s ease;
   }
   @keyframes menuIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; } }
 
   .nav__user-info { padding: 8px 10px 6px; }
-  .nav__user-name { display: block; font-weight: 700; font-size: 0.875rem; color: #fff; }
-  .nav__user-email { display: block; font-size: 0.72rem; color: var(--color-text-muted); margin-top: 2px; }
-  .nav__user-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 6px 0; }
+  .nav__user-name { display: block; font-weight: 700; font-size: 0.875rem; color: var(--nav-text); overflow-wrap: anywhere; }
+  .nav__user-email { display: block; font-size: 0.72rem; color: var(--color-text-muted); margin-top: 2px; overflow-wrap: anywhere; }
+  .nav__user-divider { border: none; border-top: 1px solid var(--color-border); margin: 6px 0; }
   .nav__user-item {
     display: flex; align-items: center; gap: 8px; width: 100%;
     padding: 10px; background: none; border: none; border-radius: 8px;
@@ -203,13 +209,13 @@
     cursor: pointer; font-family: 'DM Sans', sans-serif;
     transition: background 0.15s;
   }
-  .nav__user-item:hover { background: rgba(255,255,255,0.07); color: #fff; }
+  .nav__user-item:hover { background: var(--color-bg-elevated); color: var(--nav-text); }
 
   /* Hide desktop links on mobile — BottomNav handles navigation */
   @media (max-width: 768px) {
     .nav__links { display: none; }
   }
   @media (max-width: 400px) {
-    :global(.logo__text) { display: none; }
+    .nav__brand :global(.logo__text) { display: none; }
   }
 </style>

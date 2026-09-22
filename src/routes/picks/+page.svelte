@@ -1,142 +1,171 @@
 <script>
   import { subscription } from '$lib/stores/subscription';
   import { getMaxPicks } from '$lib/config/plans.js';
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { userId } from '$lib/stores/auth';
-  import { picksStore, picksTotales, teamStats, bankrollStore } from '$lib/stores/data';
+  import { picksStore, allPicks, teamStats, usingDemoStats } from '$lib/stores/data';
   import { toasts } from '$lib/stores/ui';
   import { Cpu, ClipboardList, Trash2, CheckCircle, XCircle, MinusCircle, RefreshCw, Save, Zap, Lock } from 'lucide-svelte';
   import ConfidenceGauge from '$lib/components/charts/ConfidenceGauge.svelte';
   import { getGamesToday } from '$lib/services/games-service.js';
   import { generateAIPicks, getPicksSummary } from '$lib/services/ai-picks-generator.js';
   import { MODEL_VERSION } from '$lib/engine/constants.js';
+  import { pickKey, savedAnalysis, resultUpdate } from './pick-actions.js';
 
-  let loading = true;
+  let mounted = false;
+  let owner;
+  let sessionVersion = 0;
+  let generation = 0;
+  let controller;
   let activeTab = 'ai';
-
-  // AI Picks state
   let aiPicks = [];
   let aiLoading = true;
   let aiError = null;
+  let availability = '';
   let isDemo = false;
   let gamesCount = 0;
   let savedPickKeys = new Set();
-
-  // Result modal
+  let savingPickKeys = new Set();
+  let savingAll = false;
+  let resultSaving = false;
   let showResultModal = false;
   let selectedPick = null;
   let resultActualTotal = '';
 
-  onMount(async () => {
-    loading = false;
-    await loadAIPicks();
-  });
+  onMount(() => { mounted = true; });
+  onDestroy(() => { mounted = false; generation++; sessionVersion++; controller?.abort(); });
+
+  $: if (mounted && owner !== $userId) {
+    owner = $userId;
+    sessionVersion++;
+    savedPickKeys = new Set();
+    savingPickKeys = new Set();
+    savingAll = false;
+    resultSaving = false;
+    showResultModal = false;
+    selectedPick = null;
+    loadAIPicks();
+  }
 
   async function loadAIPicks() {
+    controller?.abort();
+    controller = new AbortController();
+    const signal = controller.signal;
+    const requestGeneration = ++generation;
+    const uid = $userId;
+    const current = () => mounted && !signal.aborted && generation === requestGeneration && uid === $userId;
+    aiPicks = [];
     aiLoading = true;
     aiError = null;
+    isDemo = false;
+    gamesCount = 0;
+    availability = '';
+    if (!uid) {
+      aiLoading = false;
+      availability = 'Inicia sesión para consultar tus análisis NBA.';
+      return;
+    }
     try {
+      if ($usingDemoStats) {
+        availability = 'Las estadísticas disponibles son de demostración. Se necesitan estadísticas y líneas reales para generar análisis.';
+        return;
+      }
       let stats = $teamStats;
       if (!stats || Object.keys(stats).length === 0) {
-        const res = await fetch('/data/nba-stats.json');
-        const data = await res.json();
+        const response = await fetch('/data/nba-stats.json', { signal });
+        if (!response.ok) throw new Error('No se pudieron cargar las estadísticas NBA.');
+        const data = await response.json();
         stats = data.teams || data;
+        if (!stats || typeof stats !== 'object' || Array.isArray(stats) || Object.keys(stats).length === 0) throw new Error('Las estadísticas NBA no están disponibles.');
+        if (!current()) return;
         teamStats.set(stats);
       }
-      const { games, isDemo: demoMode } = await getGamesToday({ teamStats: stats });
-      isDemo = demoMode;
-      gamesCount = games.length;
-      aiPicks = generateAIPicks(games, stats, { maxPicks: 12, minEV: 1.5, minEdge: 1.0 });
+      const schedule = await getGamesToday({ teamStats: stats });
+      if (!current()) return;
+      if (!Array.isArray(schedule.games)) throw new Error('La agenda NBA no está disponible.');
+      isDemo = schedule.isDemo;
+      if (isDemo) {
+        availability = schedule.reason === 'No games today' ? 'La fuente no devolvió partidos para hoy.' : 'No fue posible verificar la agenda NBA con la fuente de datos.';
+        return;
+      }
+      gamesCount = schedule.games.length;
+      const results = await generateAIPicks(schedule.games, stats, { maxPicks: 12, minEV: 1.5, minEdge: 1, signal });
+      if (!current()) return;
+      aiPicks = results;
+      availability = gamesCount === 0 ? 'La fuente no devolvió partidos para hoy.' : 'No hay análisis publicables. Se necesitan partidos pendientes, estadísticas suficientes y líneas de mercado; además deben cumplirse los criterios del modelo.';
     } catch (err) {
-      console.error('[Picks] Error:', err);
-      aiError = 'No se pudieron cargar los picks.';
+      if (!current() || err?.name === 'AbortError') return;
+      aiError = err?.name === 'TimeoutError' ? 'El análisis tardó demasiado. Inténtalo de nuevo.' : err?.message || 'No se pudieron cargar los análisis.';
     } finally {
-      aiLoading = false;
+      if (current()) aiLoading = false;
     }
   }
 
-  // Reactive data from Supabase store
-  $: picks = $picksTotales || [];
+  // Filter by owner even if an older store request resolves after a session change.
+  $: picks = ($allPicks || []).filter(p => $userId && p.user_id === $userId && ['totales', 'manual', 'model', 'ai'].includes(p.source));
   $: total = picks.length;
-  $: wins = picks.filter(p => p.status === 'win' || p.result === 'win').length;
-  $: losses = picks.filter(p => p.status === 'loss' || p.result === 'loss').length;
-  $: pending = picks.filter(p => p.status === 'pending').length;
-  $: winRate = (wins + losses) > 0 ? ((wins / (wins + losses)) * 100).toFixed(1) : '—';
-
-  // ── Feature Gating: limit visible picks by plan ──
-  $: userPlan = $subscription.plan || 'free';
+  $: wins = picks.filter(p => (p.status || p.result) === 'win').length;
+  $: losses = picks.filter(p => (p.status || p.result) === 'loss').length;
+  $: pending = picks.filter(p => (p.status || p.result || 'pending') === 'pending').length;
+  $: winRate = (wins + losses) > 0 ? `${((wins / (wins + losses)) * 100).toFixed(1)}%` : '—';
+  $: userPlan = ['active','trialing'].includes($subscription.status) ? $subscription.plan : 'free';
   $: maxPicks = getMaxPicks(userPlan, aiPicks.length);
-  $: allFilteredPicks = aiPicks.filter(pick => {
-      const key = `${pick.gameId}-${pick.period}`;
-      return !savedPickKeys.has(key);
-    });
-  $: visibleAIPicks = allFilteredPicks.slice(0, maxPicks);
-  $: hiddenCount = Math.max(0, allFilteredPicks.length - maxPicks);
-  // ─────────────────────────────────────────────────
-
+  $: visibleAIPicks = aiPicks.slice(0, maxPicks);
+  $: hiddenCount = Math.max(0, aiPicks.length - maxPicks);
   $: aiSummary = getPicksSummary(visibleAIPicks);
 
-  async function handleSaveAIPick(pick) {
-    if (!$userId) { toasts.error('Inicia sesión para guardar picks.'); return; }
-    const key = `${pick.homeTeam}-${pick.awayTeam}-${pick.period}-${pick.direction}`;
-    if (savedPickKeys.has(key)) { toasts.error('Pick ya guardado.'); return; }
-
+  async function saveOne(pick, uid, version) {
+    const key = pickKey(pick);
+    if (!uid || uid !== $userId || version !== sessionVersion || savedPickKeys.has(key) || savingPickKeys.has(key)) return false;
+    savingPickKeys = new Set([...savingPickKeys, key]);
     try {
-      await picksStore.save({
-        user_id: $userId,
-        home_team: pick.homeTeam,
-        away_team: pick.awayTeam,
-        period: pick.period,
-        direction: pick.direction,
-        line: pick.line,
-        bet_line: pick.line,
-        projection: pick.projection,
-        probability: pick.probability,
-        confidence: pick.confidence,
-        ev: pick.evPercent,
-        edge: pick.edge,
-        model_version: MODEL_VERSION.version,
-        source: 'model',
-        odds: -110,
-        status: 'pending',
-        created_at: new Date().toISOString(),
-      });
-      savedPickKeys.add(key);
-      savedPickKeys = savedPickKeys;
-      toasts.success(`Pick guardado: ${pick.direction} ${pick.line} (${pick.period})`);
-    } catch (err) {
-      console.error('[Picks] Save error:', err);
-      toasts.error('No se pudo guardar.');
+      await picksStore.save(savedAnalysis(pick, uid));
+      if (!mounted || uid !== $userId || version !== sessionVersion) return false;
+      savedPickKeys = new Set([...savedPickKeys, key]);
+      return true;
+    } finally {
+      if (version === sessionVersion) { const next = new Set(savingPickKeys); next.delete(key); savingPickKeys = next; }
+    }
+  }
+
+  async function handleSaveAIPick(pick) {
+    if (!$userId) { toasts.error('Inicia sesión para guardar análisis.'); return; }
+    const uid = $userId;
+    const version = sessionVersion;
+    try {
+      if (await saveOne(pick, uid, version)) toasts.success('Análisis guardado en Mis Picks.');
+    } catch {
+      if (mounted && uid === $userId && version === sessionVersion) toasts.error('No se pudo guardar. Inténtalo de nuevo.');
     }
   }
 
   async function handleSaveAll() {
-    if (!$userId) { toasts.error('Inicia sesión.'); return; }
+    if (!$userId || savingAll) return;
+    const uid = $userId;
+    const version = sessionVersion;
+    const batch = [...visibleAIPicks];
+    savingAll = true;
     let saved = 0;
-    for (const pick of visibleAIPicks) {
-      const key = `${pick.homeTeam}-${pick.awayTeam}-${pick.period}-${pick.direction}`;
-      if (savedPickKeys.has(key)) continue;
-      try {
-        await picksStore.save({
-          user_id: $userId, home_team: pick.homeTeam, away_team: pick.awayTeam,
-          period: pick.period, direction: pick.direction, line: pick.line, bet_line: pick.line,
-          projection: pick.projection, probability: pick.probability, confidence: pick.confidence,
-          ev: pick.evPercent, edge: pick.edge, model_version: MODEL_VERSION.version,
-          source: 'model', odds: -110, status: 'pending', created_at: new Date().toISOString(),
-        });
-        savedPickKeys.add(key);
-        saved++;
-      } catch { /* skip */ }
-    }
-    savedPickKeys = savedPickKeys;
-    toasts.success(`${saved} picks guardados.`);
+    let failed = 0;
+    try {
+      for (const pick of batch) {
+        if (!mounted || uid !== $userId || version !== sessionVersion) break;
+        try { if (await saveOne(pick, uid, version)) saved++; } catch { failed++; }
+      }
+      if (mounted && uid === $userId && version === sessionVersion) {
+        if (failed) toasts.error(`${saved} guardados; ${failed} no se pudieron guardar. Puedes reintentar.`);
+        else if (saved) toasts.success(`${saved} análisis guardados.`);
+      }
+    } finally { if (version === sessionVersion) savingAll = false; }
   }
 
   async function handleDeletePick(pickId) {
+    if (!picks.some(p => p.id === pickId)) return;
+    const version = sessionVersion;
     try {
       await picksStore.remove(pickId);
-      toasts.success('Pick eliminado.');
-    } catch { toasts.error('No se pudo eliminar.'); }
+      if (mounted && version === sessionVersion) toasts.success('Pick eliminado.');
+    } catch { if (mounted && version === sessionVersion) toasts.error('No se pudo eliminar.'); }
   }
 
   function openResult(pick) {
@@ -146,15 +175,17 @@
   }
 
   async function submitResult(result) {
-    if (!selectedPick) return;
+    if (!selectedPick || resultSaving || !picks.some(p => p.id === selectedPick.id)) return;
+    const version = sessionVersion;
+    resultSaving = true;
     try {
-      const updates = { status: result, result, resolved_at: new Date().toISOString() };
-      if (resultActualTotal) updates.actual_total = parseInt(resultActualTotal);
-      await picksStore.update(selectedPick.id, updates);
-      toasts.success(result === 'win' ? 'Pick ganado!' : result === 'loss' ? 'Pick perdido' : 'Push registrado');
+      await picksStore.update(selectedPick.id, resultUpdate(selectedPick, result, resultActualTotal));
+      if (!mounted || version !== sessionVersion) return;
+      toasts.success('Resultado registrado en tu seguimiento personal.');
       showResultModal = false;
       selectedPick = null;
-    } catch { toasts.error('Error guardando resultado.'); }
+    } catch (err) { if (mounted && version === sessionVersion) toasts.error(err?.message || 'Error guardando resultado.'); }
+    finally { if (version === sessionVersion) resultSaving = false; }
   }
 
   function confColor(c) {
@@ -164,20 +195,21 @@
   }
 </script>
 
-<svelte:head><title>Picks del Modelo — NioSports Pro</title></svelte:head>
+<svelte:head><title>Pronósticos NBA — NioSports Pro</title></svelte:head>
 
 <div class="page">
   <header class="page__header">
-    <span class="page__label">Motor predictivo</span>
-    <h1 class="page__title">Picks del Modelo</h1>
-    <p class="page__subtitle">v{MODEL_VERSION.version} — Análisis cuantitativo de totales NBA</p>
+    <span class="page__label">Laboratorio NBA</span>
+    <h1 class="page__title">Pronósticos NBA</h1>
+    <p class="page__subtitle">Análisis experimental de totales NBA · Modelo v{MODEL_VERSION.version}</p>
+    <p class="page__subtitle">Las probabilidades son estimaciones sin calibración demostrada. La vigencia de las estadísticas requiere verificación; revisa las fuentes antes de usar un análisis.</p>
   </header>
 
   <!-- Tabs -->
   <div class="tabs">
     <button class="tab" class:tab--active={activeTab === 'ai'} on:click={() => activeTab = 'ai'}>
       <Cpu size={16} />
-      Picks del Día
+      Análisis de hoy
       {#if visibleAIPicks.length > 0}<span class="tab-badge">{visibleAIPicks.length}</span>{/if}
     </button>
     <button class="tab" class:tab--active={activeTab === 'mis'} on:click={() => activeTab = 'mis'}>
@@ -192,7 +224,7 @@
     {#if isDemo}
       <div class="demo-banner">
         <Zap size={16} />
-        <p>Mostrando picks de demostración. Los partidos reales se cargarán cuando haya juegos programados.</p>
+        <p>La agenda recibida es de demostración. No se generan pronósticos a partir de partidos ficticios.</p>
       </div>
     {/if}
 
@@ -206,21 +238,22 @@
     {:else if visibleAIPicks.length === 0}
       <div class="empty">
         <Cpu size={48} strokeWidth={1} />
-        <p>No hay picks con edge suficiente para hoy</p>
-        <span class="muted">El modelo solo recomienda cuando encuentra valor real</span>
+        <p>{availability || 'No hay análisis disponibles para hoy.'}</p>
+        {#if !$userId}<a href="/login?redirect=/picks">Iniciar sesión</a>{:else}<button class="retry-btn" on:click={loadAIPicks}><RefreshCw size={14} /> Actualizar datos</button>{/if}
+        <span class="muted">El catálogo diario está en <a href="/predictions">Pronósticos</a>. Aquí puedes revisar los análisis experimentales de NBA.</span>
       </div>
     {:else}
       <!-- Summary -->
       <div class="ai-summary">
         <div class="sstat"><span class="sstat__val">{gamesCount}</span><span class="sstat__label">Partidos</span></div>
         <div class="sstat"><span class="sstat__val">{visibleAIPicks.length}</span><span class="sstat__label">Picks</span></div>
-        <div class="sstat"><span class="sstat__val green">+{aiSummary.avgEV}%</span><span class="sstat__label">EV Prom.</span></div>
+        <div class="sstat"><span class="sstat__val green">{aiSummary.avgEV === null ? '—' : `${aiSummary.avgEV > 0 ? '+' : ''}${aiSummary.avgEV}%`}</span><span class="sstat__label">EV · {aiSummary.priced} con cuota</span></div>
         <div class="sstat"><span class="sstat__val">{aiSummary.avgEdge}</span><span class="sstat__label">Edge Prom.</span></div>
       </div>
 
       {#if visibleAIPicks.length > 1}
-        <button class="btn-save-all" on:click={handleSaveAll}>
-          <Save size={16} /> Guardar todos los picks ({visibleAIPicks.length})
+        <button class="btn-save-all" disabled={savingAll} on:click={handleSaveAll}>
+          <Save size={16} /> {savingAll ? 'Guardando…' : `Guardar análisis (${visibleAIPicks.length})`}
         </button>
       {/if}
 
@@ -233,7 +266,7 @@
                 <span class="aicard__matchup">{pick.homeTeam} vs {pick.awayTeam}</span>
                 <span class="aicard__time">{pick.gameTime || ''}</span>
               </div>
-              <ConfidenceGauge value={pick.probabilityPercent || 50} size={52} />
+              <ConfidenceGauge value={pick.probabilityPercent} size={52} />
             </div>
 
             <div class="aicard__body">
@@ -246,12 +279,13 @@
               <div class="aicard__meta">
                 <span>Proy: <strong>{pick.projection?.toFixed?.(1) || '—'}</strong></span>
                 <span>Edge: <strong class:green={pick.edge > 0}>{pick.edge > 0 ? '+' : ''}{pick.edge?.toFixed?.(1) || 0}</strong></span>
-                <span>EV: <strong class:green={pick.evPercent > 0}>+{pick.evPercent?.toFixed?.(1) || 0}%</strong></span>
+                <span>EV: <strong class:green={pick.evPercent > 0}>{pick.evPercent === null ? 'Sin cuota' : `${pick.evPercent > 0 ? '+' : ''}${pick.evPercent.toFixed(1)}%`}</strong></span>
               </div>
+              {#if pick.missingContext?.length}<p class="aicard__limitations">{pick.missingContext.join(' · ')}</p>{/if}
             </div>
 
-            <button class="aicard__save" on:click={() => handleSaveAIPick(pick)}>
-              <Save size={14} /> Guardar Pick
+            <button class="aicard__save" disabled={savedPickKeys.has(pickKey(pick)) || savingPickKeys.has(pickKey(pick)) || savingAll} on:click={() => handleSaveAIPick(pick)}>
+              <Save size={14} /> {savedPickKeys.has(pickKey(pick)) ? 'Guardado en Mis Picks' : savingPickKeys.has(pickKey(pick)) ? 'Guardando…' : 'Guardar análisis'}
             </button>
           </div>
         {/each}
@@ -279,7 +313,7 @@
         <div class="st"><span class="st__val green">{wins}</span><span class="st__label">Ganados</span></div>
         <div class="st"><span class="st__val red">{losses}</span><span class="st__label">Perdidos</span></div>
         <div class="st"><span class="st__val indigo">{pending}</span><span class="st__label">Pendientes</span></div>
-        <div class="st"><span class="st__val">{winRate}%</span><span class="st__label">Win Rate</span></div>
+        <div class="st"><span class="st__val">{winRate}</span><span class="st__label">Aciertos registrados</span></div>
       </div>
     {/if}
 
@@ -287,9 +321,10 @@
       <div class="empty">
         <ClipboardList size={48} strokeWidth={1} />
         <p>No tienes picks guardados</p>
-        <span class="muted">Guarda picks desde "Picks del Día" o desde <a href="/totales">Totales</a></span>
+        <span class="muted">Guarda un análisis desde esta pantalla o desde <a href="/totales">Totales</a>.</span>
       </div>
     {:else}
+      <p class="muted">Seguimiento personal. Estos resultados no modifican el saldo del bankroll ni constituyen un historial predictivo auditado.</p>
       <div class="picks-list">
         {#each [...picks].sort((a, b) => (b.created_at || b.createdAt || '').localeCompare(a.created_at || a.createdAt || '')) as pick (pick.id)}
           {@const status = pick.status || pick.result || 'pending'}
@@ -348,23 +383,23 @@
       <p class="modal__sub">{selectedPick.home_team || selectedPick.localTeam} vs {selectedPick.away_team || selectedPick.awayTeam} — {selectedPick.period} {selectedPick.direction || selectedPick.betType}</p>
 
       <div class="modal__field">
-        <label for="actual-total">Total real (opcional)</label>
-        <input id="actual-total" type="number" bind:value={resultActualTotal} placeholder="ej: 228" class="modal__input" />
+        <label for="actual-total">Total real de {selectedPick.period} (opcional)</label>
+        <input id="actual-total" type="number" min="0" step="1" bind:value={resultActualTotal} placeholder="ej: 228" class="modal__input" />
       </div>
 
       <div class="modal__buttons">
-        <button class="rbtn rbtn--win" on:click={() => submitResult('win')}>
+        <button class="rbtn rbtn--win" disabled={resultSaving} on:click={() => submitResult('win')}>
           <CheckCircle size={16} /> Win
         </button>
-        <button class="rbtn rbtn--loss" on:click={() => submitResult('loss')}>
+        <button class="rbtn rbtn--loss" disabled={resultSaving} on:click={() => submitResult('loss')}>
           <XCircle size={16} /> Loss
         </button>
-        <button class="rbtn rbtn--push" on:click={() => submitResult('push')}>
+        <button class="rbtn rbtn--push" disabled={resultSaving} on:click={() => submitResult('push')}>
           <MinusCircle size={16} /> Push
         </button>
       </div>
 
-      <button class="modal__cancel" on:click={() => showResultModal = false}>Cancelar</button>
+      <button class="modal__cancel" disabled={resultSaving} on:click={() => showResultModal = false}>Cancelar</button>
     </div>
   </div>
 {/if}
@@ -408,7 +443,9 @@
   .over { background: rgba(16,185,129,0.12); color: #10B981; }
   .under { background: rgba(239,68,68,0.12); color: #EF4444; }
   .aicard__line { font-family: 'DM Mono', monospace; font-size: 1.2rem; font-weight: 800; }
-  .aicard__meta { display: flex; gap: 16px; font-size: 0.82rem; color: var(--color-text-muted); }
+  .aicard__meta { display: flex; flex-wrap: wrap; gap: 10px 16px; font-size: 0.82rem; color: var(--color-text-muted); }
+  .aicard__limitations { color: var(--color-text-muted); font-size: 0.78rem; line-height: 1.6; margin: 10px 0 0; }
+  button:disabled { opacity: .55; cursor: default; }
   .aicard__meta strong { color: var(--color-text-primary); }
   .aicard__save { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid rgba(99,102,241,0.2); background: rgba(99,102,241,0.08); color: #6366F1; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.15s; }
   .aicard__save:hover { background: rgba(99,102,241,0.15); }

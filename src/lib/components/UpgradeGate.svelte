@@ -10,15 +10,8 @@
   export let title = 'Función Premium';
   export let description = 'Actualiza tu plan para desbloquear esta función.';
 
-  const OWNER_ID = 'EebS3lcflcRW1pGBnbhoGHbTu3Z2';
-
-  $: userPlan = $subscription.plan || 'free';
-  $: isOwner = $userId === OWNER_ID;
-  $: hasAccess = isOwner || (feature
-    ? hasFeature(userPlan, feature)
-    : (requiredPlan === 'pro'
-        ? (userPlan === 'pro' || userPlan === 'elite')
-        : userPlan === 'elite'));
+  $: userPlan = ['active','trialing'].includes($subscription.status) ? $subscription.plan : 'free';
+  $: hasAccess = feature ? hasFeature(userPlan, feature) : (requiredPlan === 'pro' ? ['pro','elite'].includes(userPlan) : userPlan === 'elite');
 
   $: planLabel = requiredPlan === 'elite' ? 'Elite' : 'Pro';
   $: planPrice = requiredPlan === 'elite' ? '$29.99' : '$14.99';
@@ -28,9 +21,7 @@
   <slot />
 {:else}
   <div class="gate">
-    <div class="gate__preview">
-      <slot />
-    </div>
+
     <div class="gate__overlay">
       <div class="gate__card">
         <div class="gate__icon">
@@ -44,9 +35,9 @@
         <p class="gate__desc">{description}</p>
         <a href="/pricing" class="gate__btn">
           <Lock size={16} />
-          Desbloquear con {planLabel} — {planPrice}/mes
+          Conocer {planLabel} — {planPrice}/mes
         </a>
-        <p class="gate__hint">Cancela cuando quieras · Sin compromiso</p>
+        <p class="gate__hint">Puedes seguir explorando los deportes con FREE</p>
       </div>
     </div>
   </div>
@@ -54,7 +45,7 @@
 
 <style>
   .gate { position: relative; min-height: 300px; }
-  .gate__preview { filter: blur(6px); opacity: 0.4; pointer-events: none; user-select: none; overflow: hidden; max-height: 500px; }
+
   .gate__overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 10; background: radial-gradient(ellipse at center, rgba(6,9,18,0.95) 0%, rgba(6,9,18,0.8) 100%); border-radius: 16px; }
   .gate__card { text-align: center; padding: 40px 32px; max-width: 400px; }
   .gate__icon { display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.25); border-radius: 16px; color: #6366f1; margin-bottom: 20px; }

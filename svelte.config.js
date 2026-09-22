@@ -22,17 +22,14 @@ const config = {
       '$lib': 'src/lib'
     },
 
-    // CSP generado en servidor — SvelteKit puede inyectar nonces automáticamente
-    // para eliminar 'unsafe-inline' por completo. Cada request genera un nonce
-    // único que se aplica a los scripts de hydration de Svelte.
+    // Única CSP: SvelteKit añade el nonce de SSR o los hashes de prerendering.
+    // No sobreescribir esta cabecera en hooks.server.js ni en vercel.json.
     csp: {
       mode: 'auto',  // 'auto' = nonce en SSR, hash en prerendering
       directives: {
-        'default-src':     ["'self'"],
+        'default-src':     ['self'],
         'script-src':      [
-          "'self'",
-          // SvelteKit inyecta el nonce aquí automáticamente en modo 'auto'
-          // Esto reemplaza 'unsafe-inline' con nonces únicos por request
+          'self',
           'https://www.gstatic.com',
           'https://apis.google.com',
           'https://cdn.tailwindcss.com',
@@ -40,22 +37,32 @@ const config = {
           'https://browser.sentry-cdn.com',
         ],
         'connect-src':     [
-          "'self'",
+          'self',
+          'https://*.supabase.co',
+          'wss://*.supabase.co',
           'https://*.firebaseio.com',
           'wss://*.firebaseio.com',
           'https://identitytoolkit.googleapis.com',
           'https://securetoken.googleapis.com',
           'https://www.googleapis.com',
+          'https://firebasestorage.googleapis.com',
           'https://api.balldontlie.io',
+          'https://*.railway.app',
+          'https://*.upstash.io',
           'https://*.ingest.sentry.io',
         ],
-        'style-src':       ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-        'font-src':        ["'self'", 'data:', 'https://fonts.gstatic.com'],
-        'img-src':         ["'self'", 'data:', 'https://*.googleusercontent.com', 'https://www.gstatic.com'],
-        'frame-src':       ['https://accounts.google.com', 'https://*.firebaseapp.com'],
-        'object-src':      ["'none'"],
-        'base-uri':        ["'self'"],
-        'frame-ancestors': ["'none'"],
+        // Las transiciones de Svelte y los estilos de componentes son dinámicos.
+        'style-src':       ['self', 'unsafe-inline', 'https://fonts.googleapis.com', 'https://cdn.tailwindcss.com'],
+        'font-src':        ['self', 'data:', 'https://fonts.gstatic.com'],
+        'img-src':         ['self', 'data:', 'blob:', 'https://*.googleusercontent.com', 'https://www.gstatic.com', 'https://a.espncdn.com', 'https://ui-avatars.com'],
+        'frame-src':       ['self', 'https://accounts.google.com', 'https://*.firebaseapp.com', 'https://js.stripe.com'],
+        'worker-src':      ['self', 'blob:'],
+        'manifest-src':    ['self'],
+        'object-src':      ['none'],
+        'base-uri':        ['self'],
+        'form-action':     ['self'],
+        'frame-ancestors': ['none'],
+        'upgrade-insecure-requests': process.env.NODE_ENV === 'production',
       }
     }
   }
