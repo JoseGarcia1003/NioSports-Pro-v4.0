@@ -1,0 +1,56 @@
+{
+  "phase": 0,
+  "executed_at_utc": "2026-09-28T01:13:35.315589+00:00",
+  "baseline_commit": "a5be119d051c1d3dec09426f0c7286ca1e719478",
+  "audited_application_commit": "ab9b63a4982cdb212c43a5f631507fa839e4e4aa",
+  "status": "PASS",
+  "checks": {
+    "64_unique_sequential_findings": true,
+    "findings_have_seven_nonempty_fields": true,
+    "finding_phase_references_valid": true,
+    "eleven_dependency_groups": true,
+    "all_21_phases_in_order": true,
+    "20_audit_sections_preserved": true,
+    "audit_and_dataset_hashes_unchanged": true,
+    "request_exact_copy": true,
+    "documentation_only_changes": true,
+    "prior_audit_commit_present": true,
+    "diff_whitespace_clean": true,
+    "local_markdown_links_resolve": true
+  },
+  "hashes_sha256": {
+    "docs/AUDIT_2026-09-27.md": "1b859631ac0cda969c852b07b7604e45a2a816bd97f066be2a7d47b863ea04d9",
+    "docs/AUDIT_2026-09-27_DATA.json": "03c07019b2c06e82ffd21ca98159981474487f63c292807c55f2b9ff8cc81631",
+    "ml/data/nba_features.csv": "93b82f452c222832327bc8db130082ef9561f73accc20610dae4a38e3dc961a5"
+  },
+  "request_sha256": "fce365d8d52e14dbe3d02f6ab4b2965595abb2c85f056c799e13939c191b546f",
+  "broken_links": [],
+  "changed_files": [
+    "AGENTS.md",
+    "docs/EXCELLENCE_PLAN.md",
+    "docs/RECONSTRUCTION_MASTER_PLAN.md",
+    "docs/WORK_STATE.md",
+    "docs/reconstruction/CHECKS_PHASE_00.json",
+    "docs/reconstruction/FINDINGS.md",
+    "docs/reconstruction/PHASE_00.md",
+    "docs/reconstruction/REQUEST_2026-09-27.md"
+  ],
+  "manual_review": [
+    "Coverage of all 20 audit sections in FINDINGS.md",
+    "Dependency analysis and F4/F5/F6 gate distinction",
+    "No unseen final holdout claim from reused data",
+    "Phases 1-20 not started; paid API reserved for F19"
+  ],
+  "limitations": [
+    "Structural/documentation checks only, not application tests",
+    "No model training or predictive evaluation executed",
+    "Manual coverage review by the same agent, not independent audit",
+    "453 software tests belong to prior audit, not rerun in Phase 0"
+  ],
+  "final_review": {
+    "scope": "Full staged delivery against a5be119d, including newly created documents",
+    "correction": "Removed trailing blank lines found in two new documents during staged review",
+    "verification_command": "git diff --cached --check a5be119d051c1d3dec09426f0c7286ca1e719478",
+    "status": "PASS"
+  }
+}

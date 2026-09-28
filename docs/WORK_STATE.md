@@ -1,5 +1,15 @@
 # Punto de control — leer antes de continuar
 
+## Reconstrucción rigurosa — Fase 0 cerrada (27 de septiembre de 2026)
+
+- Nuevo mandato: `docs/reconstruction/REQUEST_2026-09-27.md`, copia íntegra de la solicitud del propietario. Solo Fase 0 en esta entrega. Sustituye los siguientes pasos anteriores y la prioridad de diseño de EXCELLENCE_PLAN.
+- Plan vigente: `docs/RECONSTRUCTION_MASTER_PLAN.md`. Inventario: `docs/reconstruction/FINDINGS.md`, 64 hallazgos/límites con fuente, dependencia, fase y criterio de cierre. Acta: `docs/reconstruction/PHASE_00.md`. Comprobaciones documentales: `docs/reconstruction/CHECKS_PHASE_00.json`.
+- F0: lectura de auditoría completa, clasificación, dependencias y gates. Nota técnica de planificación 8/10; APROBADA dentro de ese alcance, sin subir las notas del producto. No se han corregido los 64 registros ni modificado aplicación, modelos, datos, servicios o producción. Fases 1-20 NO INICIADAS.
+- Conflictos resueltos en el plan: F4 prepara candidatos; comparación válida solo tras F5/F6. El histórico ya usado no se declara test final independiente. Infraestructura probada y desempeño empírico son gates diferentes; si falta evidencia se limita la capacidad y no se inventa validación. API pagada F19, interfaz F17.
+- Verificación: estructura/trazabilidad documental y conservación del código/datos; no se vuelven a ejecutar las 453 pruebas como si fueran resultados nuevos. Git inicial a5be119d en rama codex/security-integrity, remoto coincidente; main ab9b63a4. Guardar entrega solo en rama de trabajo y verificar push; no implica despliegue.
+- Próxima acción cuando el propietario pida continuar: abrir Fase 1 y anunciar sus siete puntos; redactar especificación conceptual única con mercados soportados/experimentales/no soportados, glosario y casos de reglas. No comenzar por fixes de modelo, bankroll, diseño o API. No repetir F0.
+- Si hay interrupción durante ese trabajo: conservar acta de la fase activa, cambios, pruebas y gate pendiente; retomar desde ahí. No avanzar por el mero hecho de que exista un commit.
+
 ## Auditoría terminada — 27 de septiembre de 2026
 
 - Petición actual: entrar al sitio publicado, evaluar con rigor el producto y especialmente sus modelos y entregar un documento. Auditoría CERRADA; no repetirla al recibir «continúa».

@@ -1,5 +1,12 @@
 # NioSports Pro — acuerdos persistentes
 
+## Mandato vigente de reconstrucción (27 de septiembre de 2026)
+
+- Leer primero `docs/RECONSTRUCTION_MASTER_PLAN.md` y el acta de fase indicada en WORK_STATE. La solicitud íntegra está en `docs/reconstruction/REQUEST_2026-09-27.md`; sustituye el orden anterior de diseño y mejoras.
+- Ejecutar una sola fase a la vez: anunciar problema, importancia, archivos, propuesta, riesgos, comprobación y criterio de cierre; implementar, verificar y emitir acta APROBADA / REQUIERE CORRECCIÓN antes de avanzar. Una aprobación técnica no demuestra rendimiento predictivo.
+- La entrega inicial se limita a Fase 0. No iniciar Fase 1 dentro de esa entrega. Una continuación posterior retoma la siguiente fase registrada, sin repetir el diagnóstico.
+- API deportiva de pago solo en Fase 19; interfaz solo en Fase 17 tras estabilizar lógica. No inventar evidencia ni aprobar gates fallidos por falta de datos. Conservar pendientes empíricos separados de pruebas de software.
+
 ## Continuidad
 
 - Al comenzar o reanudar, lee `docs/WORK_STATE.md` y `docs/EXCELLENCE_PLAN.md`. «Continúa» significa retomar la primera acción pendiente verificable, no rehacer la auditoría general.

@@ -1,5 +1,7 @@
 # Plan de excelencia — NioSports Pro
 
+> **Orden sustituido el 27/09/2026 por instrucción explícita del propietario.** El plan vigente es [RECONSTRUCTION_MASTER_PLAN.md](RECONSTRUCTION_MASTER_PLAN.md), fases 0-20 secuenciales. Este archivo conserva objetivos e historial, pero sus instrucciones de priorizar diseño, Planes o conectar proveedores antes de la fase final ya no gobiernan la ejecución. La entrega inicial solo completa F0; diseño F17, preparación F18 y API pagada F19. Consultar WORK_STATE para la fase activa.
+
 Fecha: 14 de septiembre de 2026. Mandato permanente del propietario: ejecutar mejoras de funcionalidad, interfaz y fluidez con autonomía; conservar el progreso entre pausas y entregar versiones comprobables. Este documento fija el orden y las condiciones de cierre. El estado vivo está en WORK_STATE.md.
 
 ## Regla de avance
