@@ -5,6 +5,8 @@ Calcula rolling stats, matchup features, y factores contextuales.
 Uso: python ml/data/feature_engineering.py
 """
 
+raise SystemExit("LEGACY_DATA_QUARANTINED: this archived exporter manufactures missing windows/context. Build versioned snapshots with the Phase 2 contract; the historical CSV was not changed.")
+
 import os
 import sys
 import pandas as pd

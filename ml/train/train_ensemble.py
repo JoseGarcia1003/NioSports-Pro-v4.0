@@ -6,6 +6,8 @@ LogisticRegression + calibración Platt mejorada.
 Ejecutar: py ml/train/train_ensemble.py
 """
 
+raise SystemExit("LEGACY_DATA_QUARANTINED: this archived trainer lacks point-in-time provenance. Use the Phase 4/5 reconstruction; no models or files were changed.")
+
 import os
 import json
 import time
@@ -13,6 +15,10 @@ import warnings
 import numpy as np
 import pandas as pd
 from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from ml.contracts.features import add_legacy_interactions, INTERACTION_NAMES
 
 warnings.filterwarnings('ignore')
 
@@ -98,24 +104,12 @@ exclude_cols = {
 
 feature_cols = [c for c in df.columns if c not in exclude_cols]
 
-# Interaction features
-if 'total_sum_l5' in df.columns and 'total_sum_l10' in df.columns:
-    df['momentum_5v10'] = df['total_sum_l5'] - df['total_sum_l10']
-    feature_cols.append('momentum_5v10')
-
-if 'home_std' in df.columns and 'away_std' in df.columns:
-    df['matchup_volatility'] = df['home_std'] + df['away_std']
-    feature_cols.append('matchup_volatility')
-
-if 'home_rest_days' in df.columns and 'away_rest_days' in df.columns:
-    df['total_rest'] = df['home_rest_days'] + df['away_rest_days']
-    df['both_rested'] = ((df['home_rest_days'] >= 2) & (df['away_rest_days'] >= 2)).astype(int)
-    df['both_b2b'] = ((df.get('is_b2b_home', 0) == 1) & (df.get('is_b2b_away', 0) == 1)).astype(int)
-    feature_cols.extend(['total_rest', 'both_rested', 'both_b2b'])
-
-if 'home_home_avg' in df.columns and 'away_away_avg' in df.columns:
-    df['venue_split_diff'] = df['home_home_avg'] - df['away_away_avg']
-    feature_cols.append('venue_split_diff')
+# Shared dictionary recipes; missing required inputs fail rather than becoming
+# a different model. Statistical validation below remains legacy until F4/F5.
+interactions = pd.DataFrame([add_legacy_interactions(row) for row in df.to_dict('records')], index=df.index)
+for name in INTERACTION_NAMES:
+    df[name] = interactions[name]
+feature_cols.extend(INTERACTION_NAMES)
 
 # Dedupe and validate
 feature_cols = list(dict.fromkeys(feature_cols))

@@ -1,0 +1,1395 @@
+{
+  "version": "1.0.0",
+  "featureRecipeVersion": "nba-legacy26-documented-1",
+  "description": "Documents existing 26-variable semantics. New strict snapshots do not make legacy model validation valid.",
+  "observationFields": {
+    "id": "Unique versioned observation ID",
+    "variable": "Dictionary name",
+    "entityId": "Participant ID or event ID in scope",
+    "value": "Typed value; null only with a reason, never used in model vector",
+    "unit": "Exact dictionary unit",
+    "source": "provider + recordId + revision + kind(provider/fixture); manual origin is not eligible for model input + publishedAt",
+    "capturedAt": "First captured at UTC instant, not import time",
+    "availableAt": "Earliest documented availability; >= publishedAt and <= capturedAt",
+    "measuredAt": "End of measured period, <= availableAt; event schedule future goes in event.startsAt",
+    "sample": "For aggregates: complete=true, records=[{id,endedAt,availableAt,capturedAt,value,venue}]",
+    "missingReason": "Required for null; null never becomes zero",
+    "rawValue": "Original before explicit clipping, when applicable"
+  },
+  "scopeFields": {
+    "event": "id, sport, league, season, period, startsAt, timezone, participants[2]",
+    "asOf": "Prediction cutoff UTC milliseconds ISO; < startsAt and <= now",
+    "purpose": "inference or training_features; targets are separate",
+    "origin": "observed, manual or fixture; never upgraded automatically",
+    "previousHash": "null or hash of earlier immutable snapshot"
+  },
+  "variables": [
+    {
+      "name": "home_total_l5",
+      "type": "number",
+      "unit": "points",
+      "description": "Mean of final combined scores in the last 5 completed games of this team, including overtime.",
+      "sport": "basketball",
+      "league": [
+        "NBA"
+      ],
+      "period": [
+        "FULL"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": 0,
+      "window": 5,
+      "aggregation": "mean"
+    },
+    {
+      "name": "home_total_l10",
+      "type": "number",
+      "unit": "points",
+      "description": "Mean of final combined scores in the last 10 completed games of this team, including overtime.",
+      "sport": "basketball",
+      "league": [
+        "NBA"
+      ],
+      "period": [
+        "FULL"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": 0,
+      "window": 10,
+      "aggregation": "mean"
+    },
+    {
+      "name": "home_total_l20",
+      "type": "number",
+      "unit": "points",
+      "description": "Mean of final combined scores in the last 20 completed games of this team, including overtime.",
+      "sport": "basketball",
+      "league": [
+        "NBA"
+      ],
+      "period": [
+        "FULL"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": 0,
+      "window": 20,
+      "aggregation": "mean"
+    },
+    {
+      "name": "home_home_avg",
+      "type": "number",
+      "unit": "points",
+      "description": "Mean combined score for home appearances within the last 10 completed games, not team points scored.",
+      "sport": "basketball",
+      "league": [
+        "NBA"
+      ],
+      "period": [
+        "FULL"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": 0,
+      "window": 10,
+      "venue": "home",
+      "aggregation": "mean"
+    },
+    {
+      "name": "home_std",
+      "type": "number",
+      "unit": "points",
+      "description": "Population standard deviation of combined totals in the last 10 completed games.",
+      "sport": "basketball",
+      "league": [
+        "NBA"
+      ],
+      "period": [
+        "FULL"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": 0,
+      "window": 10,
+      "aggregation": "population_std"
+    },
+    {
+      "name": "away_total_l5",
+      "type": "number",
+      "unit": "points",
+      "description": "Mean of final combined scores in the last 5 completed games of this team, including overtime.",
+      "sport": "basketball",
+      "league": [
+        "NBA"
+      ],
+      "period": [
+        "FULL"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": 0,
+      "window": 5,
+      "aggregation": "mean"
+    },
+    {
+      "name": "away_total_l10",
+      "type": "number",
+      "unit": "points",
+      "description": "Mean of final combined scores in the last 10 completed games of this team, including overtime.",
+      "sport": "basketball",
+      "league": [
+        "NBA"
+      ],
+      "period": [
+        "FULL"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": 0,
+      "window": 10,
+      "aggregation": "mean"
+    },
+    {
+      "name": "away_total_l20",
+      "type": "number",
+      "unit": "points",
+      "description": "Mean of final combined scores in the last 20 completed games of this team, including overtime.",
+      "sport": "basketball",
+      "league": [
+        "NBA"
+      ],
+      "period": [
+        "FULL"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": 0,
+      "window": 20,
+      "aggregation": "mean"
+    },
+    {
+      "name": "away_away_avg",
+      "type": "number",
+      "unit": "points",
+      "description": "Mean combined score for away appearances within the last 10 completed games, not team points scored.",
+      "sport": "basketball",
+      "league": [
+        "NBA"
+      ],
+      "period": [
+        "FULL"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": 0,
+      "window": 10,
+      "venue": "away",
+      "aggregation": "mean"
+    },
+    {
+      "name": "away_std",
+      "type": "number",
+      "unit": "points",
+      "description": "Population standard deviation of combined totals in the last 10 completed games.",
+      "sport": "basketball",
+      "league": [
+        "NBA"
+      ],
+      "period": [
+        "FULL"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": 0,
+      "window": 10,
+      "aggregation": "population_std"
+    },
+    {
+      "name": "total_sum_l5",
+      "type": "number",
+      "unit": "points",
+      "description": "Sum of two team window averages, not the predicted score.",
+      "sport": "basketball",
+      "league": [
+        "NBA"
+      ],
+      "period": [
+        "FULL"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": 0,
+      "derive": {
+        "op": "sum",
+        "args": [
+          "home_total_l5",
+          "away_total_l5"
+        ]
+      }
+    },
+    {
+      "name": "total_sum_l10",
+      "type": "number",
+      "unit": "points",
+      "description": "Sum of two L10 averages.",
+      "sport": "basketball",
+      "league": [
+        "NBA"
+      ],
+      "period": [
+        "FULL"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": 0,
+      "derive": {
+        "op": "sum",
+        "args": [
+          "home_total_l10",
+          "away_total_l10"
+        ]
+      }
+    },
+    {
+      "name": "total_diff_l5",
+      "type": "number",
+      "unit": "points",
+      "description": "Home minus away L5 average.",
+      "sport": "basketball",
+      "league": [
+        "NBA"
+      ],
+      "period": [
+        "FULL"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": null,
+      "derive": {
+        "op": "difference",
+        "args": [
+          "home_total_l5",
+          "away_total_l5"
+        ]
+      }
+    },
+    {
+      "name": "home_rest_days",
+      "type": "integer",
+      "unit": "days",
+      "description": "Completed calendar rest days in event timezone; legacy model input capped at 7, raw value must also be retained.",
+      "sport": "basketball",
+      "league": [
+        "NBA"
+      ],
+      "period": [
+        "FULL"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": 0,
+      "max": 7,
+      "transform": "min(raw_rest_days,7); never default missing"
+    },
+    {
+      "name": "away_rest_days",
+      "type": "integer",
+      "unit": "days",
+      "description": "Completed calendar rest days in event timezone; legacy model input capped at 7, raw value must also be retained.",
+      "sport": "basketball",
+      "league": [
+        "NBA"
+      ],
+      "period": [
+        "FULL"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": 0,
+      "max": 7,
+      "transform": "min(raw_rest_days,7); never default missing"
+    },
+    {
+      "name": "is_b2b_home",
+      "type": "integer",
+      "unit": "indicator",
+      "description": "1 if raw rest days equals zero, otherwise 0.",
+      "sport": "basketball",
+      "league": [
+        "NBA"
+      ],
+      "period": [
+        "FULL"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "is_b2b_away",
+      "type": "integer",
+      "unit": "indicator",
+      "description": "1 if raw rest days equals zero, otherwise 0.",
+      "sport": "basketball",
+      "league": [
+        "NBA"
+      ],
+      "period": [
+        "FULL"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "rest_diff",
+      "type": "integer",
+      "unit": "days",
+      "description": "Home raw rest minus away raw rest. NOT difference of capped values.",
+      "sport": "basketball",
+      "league": [
+        "NBA"
+      ],
+      "period": [
+        "FULL"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": null
+    },
+    {
+      "name": "altitude_ft",
+      "type": "number",
+      "unit": "feet",
+      "description": "Venue altitude from a source; unknown altitude is missing, not zero.",
+      "sport": "basketball",
+      "league": [
+        "NBA"
+      ],
+      "period": [
+        "FULL"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": null
+    },
+    {
+      "name": "days_into_season",
+      "type": "integer",
+      "unit": "days",
+      "description": "Days from documented season start; legacy training clipped at 250; retain raw value.",
+      "sport": "basketball",
+      "league": [
+        "NBA"
+      ],
+      "period": [
+        "FULL"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": 0,
+      "max": 250,
+      "transform": "min(raw_days_into_season,250); season start must be sourced"
+    },
+    {
+      "name": "momentum_5v10",
+      "type": "number",
+      "unit": "points",
+      "description": "Combined L5 minus combined L10.",
+      "sport": "basketball",
+      "league": [
+        "NBA"
+      ],
+      "period": [
+        "FULL"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": null,
+      "derive": {
+        "op": "difference",
+        "args": [
+          "total_sum_l5",
+          "total_sum_l10"
+        ]
+      },
+      "max": null
+    },
+    {
+      "name": "matchup_volatility",
+      "type": "number",
+      "unit": "points",
+      "description": "Sum of population standard deviations; not a probability model.",
+      "sport": "basketball",
+      "league": [
+        "NBA"
+      ],
+      "period": [
+        "FULL"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": 0,
+      "derive": {
+        "op": "sum",
+        "args": [
+          "home_std",
+          "away_std"
+        ]
+      },
+      "max": null
+    },
+    {
+      "name": "total_rest",
+      "type": "integer",
+      "unit": "days",
+      "description": "Sum of capped rest inputs.",
+      "sport": "basketball",
+      "league": [
+        "NBA"
+      ],
+      "period": [
+        "FULL"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": 0,
+      "derive": {
+        "op": "sum",
+        "args": [
+          "home_rest_days",
+          "away_rest_days"
+        ]
+      },
+      "max": 14
+    },
+    {
+      "name": "both_rested",
+      "type": "integer",
+      "unit": "indicator",
+      "description": "Both capped rest inputs at least two.",
+      "sport": "basketball",
+      "league": [
+        "NBA"
+      ],
+      "period": [
+        "FULL"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": 0,
+      "derive": {
+        "op": "all_gte",
+        "args": [
+          "home_rest_days",
+          "away_rest_days"
+        ],
+        "threshold": 2
+      },
+      "max": 1
+    },
+    {
+      "name": "both_b2b",
+      "type": "integer",
+      "unit": "indicator",
+      "description": "Both B2B indicators are one.",
+      "sport": "basketball",
+      "league": [
+        "NBA"
+      ],
+      "period": [
+        "FULL"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": 0,
+      "derive": {
+        "op": "all_gte",
+        "args": [
+          "is_b2b_home",
+          "is_b2b_away"
+        ],
+        "threshold": 1
+      },
+      "max": 1
+    },
+    {
+      "name": "venue_split_diff",
+      "type": "number",
+      "unit": "points",
+      "description": "Home home-venue minus away away-venue average.",
+      "sport": "basketball",
+      "league": [
+        "NBA"
+      ],
+      "period": [
+        "FULL"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": null,
+      "derive": {
+        "op": "difference",
+        "args": [
+          "home_home_avg",
+          "away_away_avg"
+        ]
+      },
+      "max": null
+    },
+    {
+      "name": "actual_total",
+      "type": "integer",
+      "unit": "points",
+      "description": "Final combined score including overtime, target only.",
+      "sport": "basketball",
+      "league": [
+        "NBA"
+      ],
+      "period": [
+        "FULL"
+      ],
+      "role": "target",
+      "source": "verified final result after the game; stored outside predictor snapshots",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": false,
+      "inference": false,
+      "min": 0,
+      "target": true
+    },
+    {
+      "name": "tennis.rank",
+      "type": "integer",
+      "unit": "rank",
+      "description": "Published ranking, not an Elo input.",
+      "sport": "tennis",
+      "league": [
+        "ATP",
+        "WTA",
+        "Challenger",
+        "WTA 125",
+        "ITF Men",
+        "ITF Women"
+      ],
+      "period": [
+        "MATCH"
+      ],
+      "role": "context",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": false,
+      "inference": false,
+      "min": 1
+    },
+    {
+      "name": "tennis.surface",
+      "type": "enum",
+      "unit": "category",
+      "description": "Court surface of the event.",
+      "sport": "tennis",
+      "league": [
+        "ATP",
+        "WTA",
+        "Challenger",
+        "WTA 125",
+        "ITF Men",
+        "ITF Women"
+      ],
+      "period": [
+        "MATCH"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": 0,
+      "values": [
+        "hard",
+        "clay",
+        "grass"
+      ]
+    },
+    {
+      "name": "tennis.best_of",
+      "type": "enum",
+      "unit": "sets",
+      "description": "Scheduled match format, context until model explicitly uses it.",
+      "sport": "tennis",
+      "league": [
+        "ATP",
+        "WTA",
+        "Challenger",
+        "WTA 125",
+        "ITF Men",
+        "ITF Women"
+      ],
+      "period": [
+        "MATCH"
+      ],
+      "role": "context",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": false,
+      "inference": false,
+      "min": 0,
+      "values": [
+        3,
+        5
+      ]
+    },
+    {
+      "name": "tennis.injury_status",
+      "type": "enum",
+      "unit": "category",
+      "description": "Latest reported or cleared incidence; no report does not mean healthy.",
+      "sport": "tennis",
+      "league": [
+        "ATP",
+        "WTA",
+        "Challenger",
+        "WTA 125",
+        "ITF Men",
+        "ITF Women"
+      ],
+      "period": [
+        "MATCH"
+      ],
+      "role": "eligibility",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": false,
+      "inference": true,
+      "min": 0,
+      "values": [
+        "reported",
+        "cleared",
+        "unknown"
+      ]
+    },
+    {
+      "name": "tennis.elo_overall",
+      "type": "number",
+      "unit": "rating",
+      "description": "Chronological general rating; algorithm version and input history required.",
+      "sport": "tennis",
+      "league": [
+        "ATP",
+        "WTA",
+        "Challenger",
+        "WTA 125",
+        "ITF Men",
+        "ITF Women"
+      ],
+      "period": [
+        "MATCH"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": null
+    },
+    {
+      "name": "tennis.elo_surface",
+      "type": "number",
+      "unit": "rating",
+      "description": "Chronological surface rating; not interchangeable with general Elo.",
+      "sport": "tennis",
+      "league": [
+        "ATP",
+        "WTA",
+        "Challenger",
+        "WTA 125",
+        "ITF Men",
+        "ITF Women"
+      ],
+      "period": [
+        "MATCH"
+      ],
+      "role": "feature",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": true,
+      "inference": true,
+      "min": null
+    },
+    {
+      "name": "tennis.history_count",
+      "type": "integer",
+      "unit": "count",
+      "description": "Observed count with sample identity, season and surface; not automatically used by Elo.",
+      "sport": "tennis",
+      "league": [
+        "ATP",
+        "WTA",
+        "Challenger",
+        "WTA 125",
+        "ITF Men",
+        "ITF Women"
+      ],
+      "period": [
+        "MATCH"
+      ],
+      "role": "eligibility",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": false,
+      "inference": true,
+      "min": 0
+    },
+    {
+      "name": "tennis.surface_count",
+      "type": "integer",
+      "unit": "count",
+      "description": "Observed count with sample identity, season and surface; not automatically used by Elo.",
+      "sport": "tennis",
+      "league": [
+        "ATP",
+        "WTA",
+        "Challenger",
+        "WTA 125",
+        "ITF Men",
+        "ITF Women"
+      ],
+      "period": [
+        "MATCH"
+      ],
+      "role": "eligibility",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": false,
+      "inference": true,
+      "min": 0
+    },
+    {
+      "name": "tennis.h2h_wins",
+      "type": "integer",
+      "unit": "count",
+      "description": "Observed count with sample identity, season and surface; not automatically used by Elo.",
+      "sport": "tennis",
+      "league": [
+        "ATP",
+        "WTA",
+        "Challenger",
+        "WTA 125",
+        "ITF Men",
+        "ITF Women"
+      ],
+      "period": [
+        "MATCH"
+      ],
+      "role": "context",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": false,
+      "inference": false,
+      "min": 0
+    },
+    {
+      "name": "tennis.h2h_losses",
+      "type": "integer",
+      "unit": "count",
+      "description": "Observed count with sample identity, season and surface; not automatically used by Elo.",
+      "sport": "tennis",
+      "league": [
+        "ATP",
+        "WTA",
+        "Challenger",
+        "WTA 125",
+        "ITF Men",
+        "ITF Women"
+      ],
+      "period": [
+        "MATCH"
+      ],
+      "role": "context",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": false,
+      "inference": false,
+      "min": 0
+    },
+    {
+      "name": "tennis.matches",
+      "type": "integer",
+      "unit": "count",
+      "description": "Observed count with sample identity, season and surface; not automatically used by Elo.",
+      "sport": "tennis",
+      "league": [
+        "ATP",
+        "WTA",
+        "Challenger",
+        "WTA 125",
+        "ITF Men",
+        "ITF Women"
+      ],
+      "period": [
+        "MATCH"
+      ],
+      "role": "context",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": false,
+      "inference": false,
+      "min": 0
+    },
+    {
+      "name": "tennis.service_points",
+      "type": "integer",
+      "unit": "count",
+      "description": "Observed count with sample identity, season and surface; not automatically used by Elo.",
+      "sport": "tennis",
+      "league": [
+        "ATP",
+        "WTA",
+        "Challenger",
+        "WTA 125",
+        "ITF Men",
+        "ITF Women"
+      ],
+      "period": [
+        "MATCH"
+      ],
+      "role": "context",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": false,
+      "inference": false,
+      "min": 0
+    },
+    {
+      "name": "tennis.first_serve_in",
+      "type": "integer",
+      "unit": "count",
+      "description": "Observed count with sample identity, season and surface; not automatically used by Elo.",
+      "sport": "tennis",
+      "league": [
+        "ATP",
+        "WTA",
+        "Challenger",
+        "WTA 125",
+        "ITF Men",
+        "ITF Women"
+      ],
+      "period": [
+        "MATCH"
+      ],
+      "role": "context",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": false,
+      "inference": false,
+      "min": 0
+    },
+    {
+      "name": "tennis.first_serve_won",
+      "type": "integer",
+      "unit": "count",
+      "description": "Observed count with sample identity, season and surface; not automatically used by Elo.",
+      "sport": "tennis",
+      "league": [
+        "ATP",
+        "WTA",
+        "Challenger",
+        "WTA 125",
+        "ITF Men",
+        "ITF Women"
+      ],
+      "period": [
+        "MATCH"
+      ],
+      "role": "context",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": false,
+      "inference": false,
+      "min": 0
+    },
+    {
+      "name": "tennis.second_serve_points",
+      "type": "integer",
+      "unit": "count",
+      "description": "Observed count with sample identity, season and surface; not automatically used by Elo.",
+      "sport": "tennis",
+      "league": [
+        "ATP",
+        "WTA",
+        "Challenger",
+        "WTA 125",
+        "ITF Men",
+        "ITF Women"
+      ],
+      "period": [
+        "MATCH"
+      ],
+      "role": "context",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": false,
+      "inference": false,
+      "min": 0
+    },
+    {
+      "name": "tennis.second_serve_won",
+      "type": "integer",
+      "unit": "count",
+      "description": "Observed count with sample identity, season and surface; not automatically used by Elo.",
+      "sport": "tennis",
+      "league": [
+        "ATP",
+        "WTA",
+        "Challenger",
+        "WTA 125",
+        "ITF Men",
+        "ITF Women"
+      ],
+      "period": [
+        "MATCH"
+      ],
+      "role": "context",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": false,
+      "inference": false,
+      "min": 0
+    },
+    {
+      "name": "tennis.break_points_faced",
+      "type": "integer",
+      "unit": "count",
+      "description": "Observed count with sample identity, season and surface; not automatically used by Elo.",
+      "sport": "tennis",
+      "league": [
+        "ATP",
+        "WTA",
+        "Challenger",
+        "WTA 125",
+        "ITF Men",
+        "ITF Women"
+      ],
+      "period": [
+        "MATCH"
+      ],
+      "role": "context",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": false,
+      "inference": false,
+      "min": 0
+    },
+    {
+      "name": "tennis.break_points_saved",
+      "type": "integer",
+      "unit": "count",
+      "description": "Observed count with sample identity, season and surface; not automatically used by Elo.",
+      "sport": "tennis",
+      "league": [
+        "ATP",
+        "WTA",
+        "Challenger",
+        "WTA 125",
+        "ITF Men",
+        "ITF Women"
+      ],
+      "period": [
+        "MATCH"
+      ],
+      "role": "context",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": false,
+      "inference": false,
+      "min": 0
+    },
+    {
+      "name": "tennis.break_opportunities",
+      "type": "integer",
+      "unit": "count",
+      "description": "Observed count with sample identity, season and surface; not automatically used by Elo.",
+      "sport": "tennis",
+      "league": [
+        "ATP",
+        "WTA",
+        "Challenger",
+        "WTA 125",
+        "ITF Men",
+        "ITF Women"
+      ],
+      "period": [
+        "MATCH"
+      ],
+      "role": "context",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": false,
+      "inference": false,
+      "min": 0
+    },
+    {
+      "name": "tennis.breaks_converted",
+      "type": "integer",
+      "unit": "count",
+      "description": "Observed count with sample identity, season and surface; not automatically used by Elo.",
+      "sport": "tennis",
+      "league": [
+        "ATP",
+        "WTA",
+        "Challenger",
+        "WTA 125",
+        "ITF Men",
+        "ITF Women"
+      ],
+      "period": [
+        "MATCH"
+      ],
+      "role": "context",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": false,
+      "inference": false,
+      "min": 0
+    },
+    {
+      "name": "tennis.aces",
+      "type": "integer",
+      "unit": "count",
+      "description": "Observed count with sample identity, season and surface; not automatically used by Elo.",
+      "sport": "tennis",
+      "league": [
+        "ATP",
+        "WTA",
+        "Challenger",
+        "WTA 125",
+        "ITF Men",
+        "ITF Women"
+      ],
+      "period": [
+        "MATCH"
+      ],
+      "role": "context",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": false,
+      "inference": false,
+      "min": 0
+    },
+    {
+      "name": "tennis.double_faults",
+      "type": "integer",
+      "unit": "count",
+      "description": "Observed count with sample identity, season and surface; not automatically used by Elo.",
+      "sport": "tennis",
+      "league": [
+        "ATP",
+        "WTA",
+        "Challenger",
+        "WTA 125",
+        "ITF Men",
+        "ITF Women"
+      ],
+      "period": [
+        "MATCH"
+      ],
+      "role": "context",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": false,
+      "inference": false,
+      "min": 0
+    },
+    {
+      "name": "tennis.winner",
+      "type": "string",
+      "unit": "participant_id",
+      "description": "Winner of a completed singles match; post-event target only.",
+      "sport": "tennis",
+      "league": [
+        "ATP",
+        "WTA",
+        "Challenger",
+        "WTA 125",
+        "ITF Men",
+        "ITF Women"
+      ],
+      "period": [
+        "MATCH"
+      ],
+      "role": "target",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": false,
+      "inference": false,
+      "min": null,
+      "target": true
+    },
+    {
+      "name": "tennis.result_status",
+      "type": "enum",
+      "unit": "category",
+      "description": "Observed sporting outcome; retired/walkover are not completed targets.",
+      "sport": "tennis",
+      "league": [
+        "ATP",
+        "WTA",
+        "Challenger",
+        "WTA 125",
+        "ITF Men",
+        "ITF Women"
+      ],
+      "period": [
+        "MATCH"
+      ],
+      "role": "target",
+      "source": "provider historical results or a documented derivation; never inferred from a missing value",
+      "missing": "reject",
+      "extremes": "reject invalid domain; retain finite values within the explicit domain without silent clipping; statistical outlier policy deferred",
+      "update": "new observation revision and new snapshot only",
+      "version": "1.0.0",
+      "training": false,
+      "inference": false,
+      "min": 0,
+      "values": [
+        "completed",
+        "retired",
+        "walkover",
+        "disqualified",
+        "cancelled"
+      ],
+      "target": true
+    }
+  ]
+}

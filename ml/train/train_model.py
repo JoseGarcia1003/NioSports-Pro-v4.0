@@ -6,6 +6,8 @@ Compara contra modelo heurístico baseline.
 Uso: python ml/train/train_model.py
 """
 
+raise SystemExit("LEGACY_DATA_QUARANTINED: this archived trainer lacks point-in-time provenance. Use the Phase 4/5 reconstruction; no models or files were changed.")
+
 import os
 import sys
 import json
@@ -329,12 +331,12 @@ def main():
         json.dump(best_params, f, indent=2)
     
     results_path = 'ml/models/training_results.json'
-        with open(results_path, 'w') as f:
-            json.dump({
-                'trained_at': datetime.now().isoformat(),
-                'feature_cols': FEATURE_COLS,
-                'folds': all_results,
-            }, f, indent=2, default=str)
+    with open(results_path, 'w') as f:
+        json.dump({
+            'trained_at': datetime.now().isoformat(),
+            'feature_cols': FEATURE_COLS,
+            'folds': all_results,
+        }, f, indent=2, default=str)
     
     # Feature importance
     importance = dict(zip(FEATURE_COLS, best_model.feature_importances_))

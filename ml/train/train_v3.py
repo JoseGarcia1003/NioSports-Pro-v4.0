@@ -4,6 +4,8 @@ Entrena XGBoost mejorado con features expandidas + calibración Platt.
 Ejecutar: py ml/train/train_v3.py
 """
 
+raise SystemExit("LEGACY_DATA_QUARANTINED: this archived trainer lacks point-in-time provenance. Use the Phase 4/5 reconstruction; no models or files were changed.")
+
 import os
 import json
 import time

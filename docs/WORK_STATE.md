@@ -1,5 +1,13 @@
 # Punto de control — leer antes de continuar
 
+## Reconstrucción — Fase 2 en verificación final (28 de septiembre de 2026)
+
+- Mandato actual: F2, contrato/diccionario único. Implementado: `ml/contracts/dictionary.json` (51 definiciones, 26 NBA); `src/lib/data/contract.js`; `src/lib/server/data-snapshot.js`; `ml/contracts/features.py`; informe de cuarentena del CSV y diccionario legible. Detalles en `docs/reconstruction/DATA_CONTRACT.md`.
+- Ventanas con registros y recuentos exactos/coherentes; tiempos de publicación/disponibilidad/captura al corte; unidades/orígenes/alcances; objetivos separados; hashes/revisiones. Nueve composiciones compartidas con API Python. No migración remota ni API pagada. Solicitudes antiguas aún no adaptadas; es pendiente de F3, no funcionalidad ya cerrada.
+- Entrenadores legacy y exportador feature_engineering bloqueados antes de imports/escrituras; archivos conservados. CSV original y artefactos no modificados. No quitar bloqueos para continuar usando datos no certificados.
+- Verificación final local: 501 pruebas de dominio/servidor, 8 UI y 11 Python aprobadas; svelte-check 0 errores/warnings. Vite compila cliente/servidor, pero el empaquetado adapter-vercel termina en EPERM creando symlink en Windows (exit 1). No es un build completo aprobado. Comprobar preview automática de la rama en Vercel tras guardar código; no modificar main. Acta/checkpoint final pendientes; no afirmar entrega cerrada todavía.
+- Si se interrumpe: retomar estas comprobaciones, completar PHASE_02 y CHECKS_PHASE_02, actualizar plan/inventario, commit/push a rama de trabajo. No reiniciar diagnóstico ni avanzar a F3 hasta cerrar F2. Base e42a8f33 en codex/security-integrity.
+
 ## Reconstrucción rigurosa — Fase 1 cerrada (28 de septiembre de 2026)
 
 - El propietario autorizó el siguiente paso. F1 completada: `docs/reconstruction/PRODUCT_SPEC.md` v1.0.0, referencia única conceptual; `PHASE_01_CASES.md` con C01-C38; acta `PHASE_01.md`; comprobaciones `CHECKS_PHASE_01.json`.

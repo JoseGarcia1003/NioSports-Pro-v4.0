@@ -8,3 +8,5 @@ coverage/
 !.env.example
 *.log
 supabase/.temp/
+__pycache__/
+*.pyc

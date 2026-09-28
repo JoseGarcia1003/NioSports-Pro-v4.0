@@ -14,6 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
 from contextlib import asynccontextmanager
+from ml.contracts.features import add_legacy_interactions
 
 # ── Paths ──
 MODEL_DIR = os.getenv('MODEL_DIR', 'ml/models')
@@ -127,23 +128,15 @@ def build_features(req: PredictRequest) -> dict:
         'home_total_l20': home.total_l20, 'home_home_avg': home.home_avg, 'home_std': home.std,
         'away_total_l5': away.total_l5, 'away_total_l10': away.total_l10,
         'away_total_l20': away.total_l20, 'away_away_avg': away.away_avg, 'away_std': away.std,
-        'total_sum_l5': home.total_l5 + away.total_l5,
-        'total_sum_l10': home.total_l10 + away.total_l10,
-        'total_diff_l5': home.total_l5 - away.total_l5,
         'home_rest_days': min(home.rest_days, 7), 'away_rest_days': min(away.rest_days, 7),
         'is_b2b_home': 1 if home.is_b2b else 0, 'is_b2b_away': 1 if away.is_b2b else 0,
         'rest_diff': home.rest_days - away.rest_days,
         'altitude_ft': ALTITUDE_TEAMS.get(home.name, 0),
         'days_into_season': req.days_into_season,
     }
-    # Engineered features (match training)
-    base['momentum_5v10'] = base['total_sum_l5'] - base['total_sum_l10']
-    base['matchup_volatility'] = home.std + away.std
-    base['total_rest'] = base['home_rest_days'] + base['away_rest_days']
-    base['both_rested'] = 1 if (home.rest_days >= 2 and away.rest_days >= 2) else 0
-    base['both_b2b'] = 1 if (home.is_b2b and away.is_b2b) else 0
-    base['venue_split_diff'] = home.home_avg - away.away_avg
-    return base
+    # One versioned recipe, also consumed by training. This legacy request is
+    # still unverified provenance; it is NOT a strict data snapshot.
+    return add_legacy_interactions(base)
 
 
 def ridge_predict(features_array, ridge_params, scaler_params):

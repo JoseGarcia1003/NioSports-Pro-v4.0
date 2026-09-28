@@ -28,6 +28,9 @@ jobs:
       - name: Unit tests
         run: npm run test:unit
 
+      - name: Python data contracts (stdlib only)
+        run: python3 -m unittest discover -s tests/python -v
+
       - name: Build
         env:
           VITE_APP_VERSION: '4.0.0'
