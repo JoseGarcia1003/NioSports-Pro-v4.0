@@ -1,0 +1,248 @@
+{
+  "phase": 2,
+  "date": "2026-09-28",
+  "verdict": "APROBADA TECNICAMENTE; VALIDACION EMPIRICA PENDIENTE",
+  "base_commit": "e42a8f33e44382955fd8f528522bc970a4357f84",
+  "implementation_commit": "768e2d50d132f28e090c84359c3b1fd11b5b7dab",
+  "branch": "codex/security-integrity",
+  "main_commit": "ab9b63a4982cdb212c43a5f631507fa839e4e4aa",
+  "remote_branch_verified": true,
+  "environment": {
+    "os": "Windows",
+    "node": "24.19.0",
+    "python": "3.12.14"
+  },
+  "contract": {
+    "version": "1.0.0",
+    "variables": 51,
+    "nba_vector_size": 26,
+    "shared_recipes": 9,
+    "production_consumers_migrated": false,
+    "immutable_database_created": false,
+    "provider_authenticated": false,
+    "paid_api_connected": false
+  },
+  "checks": [
+    {
+      "name": "domain_server",
+      "command": "node node_modules/vitest/vitest.mjs run",
+      "passed": 501,
+      "files": 29,
+      "exit_code": 0,
+      "log": "phase02-final-unit.log"
+    },
+    {
+      "name": "ui",
+      "command": "node node_modules/vitest/vitest.mjs run --config vitest.ui.config.js",
+      "passed": 8,
+      "files": 2,
+      "exit_code": 0,
+      "log": "phase02-ui.log"
+    },
+    {
+      "name": "python",
+      "command": "python -m unittest discover -s tests/python -v",
+      "passed": 11,
+      "exit_code": 0,
+      "includes_api_function_ast": true,
+      "full_python_service_tested": false
+    },
+    {
+      "name": "svelte_check",
+      "command": "node node_modules/svelte-check/bin/svelte-check --tsconfig ./jsconfig.json",
+      "errors": 0,
+      "warnings": 0,
+      "exit_code": 0,
+      "log": "phase02-check.log"
+    },
+    {
+      "name": "local_build",
+      "command": "node node_modules/vite/bin/vite.js build",
+      "exit_code": 1,
+      "compilation_completed": true,
+      "packaging_completed": false,
+      "reason": "Windows EPERM creating adapter-vercel symlink index.func",
+      "log": "phase02-build.log"
+    }
+  ],
+  "total_passed_tests": 520,
+  "new_tests": 67,
+  "predictive_performance_validated": false,
+  "preview": {
+    "id": "dpl_8G1TuYxyQEc7wZsSLxnobAboxZ5r",
+    "url": "https://nio-sports-pro-v4-0-lctr660up-niosports-pros-projects.vercel.app",
+    "sha": "768e2d50d132f28e090c84359c3b1fd11b5b7dab",
+    "state": "READY",
+    "production": false,
+    "ready_at_unix_ms": 1790623449348,
+    "verified_via": "Vercel get_deployment; exact implementation SHA; target null",
+    "build_logs_tool_available": false
+  },
+  "source_files": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "2a737fb3b6140e4f42ad012f5cd73a4b2a4b3ad113036b46307f6e99fa34b49b"
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "cb76f5ca1ec41b85c4056edecc29fcdac45447ea104d07f612ca8d59a37ea177"
+    },
+    {
+      "path": "docs/reconstruction/DATA_CONTRACT.md",
+      "sha256": "da4de62309cd7baa72f1629336bafe3a0c061071d444923b45bb05631acf6f6a"
+    },
+    {
+      "path": "docs/reconstruction/DATA_DICTIONARY.md",
+      "sha256": "2cb0f1ef1854c9acf11e996f47bcd56d40587922b362ce4e9ceb6868d19fc5eb"
+    },
+    {
+      "path": "docs/reconstruction/LEGACY_DATA_REPORT.json",
+      "sha256": "f142b378c05e0cee53562e868e965cba65b8c5565de68c21765f10abad7ad408"
+    },
+    {
+      "path": "ml/api/main.py",
+      "sha256": "cb6c373fc71ec32a62255b4d2a9cdddcfd2495f3a54b9af246be48ff470d19e0"
+    },
+    {
+      "path": "ml/contracts/dictionary.json",
+      "sha256": "c86ed376ec7c96e853d871cb371b312a95e7b6f0de85f501bae943297b447e22"
+    },
+    {
+      "path": "ml/contracts/features.py",
+      "sha256": "66ecc4a26fb4799d509b041e086235f621aa52c978120e2eefef822240e69f0b"
+    },
+    {
+      "path": "ml/data/feature_engineering.py",
+      "sha256": "9e43c9526c18b4b291343d6cf47ce9bee68c44adb549ae09af69468750bb40c8"
+    },
+    {
+      "path": "ml/train/train_ensemble.py",
+      "sha256": "997a9b665b517fef486d33b75870552d5a1154e130269882daed5f375150bec6"
+    },
+    {
+      "path": "ml/train/train_model.py",
+      "sha256": "5b75629870a7ba27c445c250734e6af8126fd6a16ad4f0426748b6d6b175c2e9"
+    },
+    {
+      "path": "ml/train/train_v3.py",
+      "sha256": "fd1e43eab55634fa7eedf25e81a42d00a44fd4889eb2b5371bf1469ea7a21cdc"
+    },
+    {
+      "path": "scripts/audit-data-contract.py",
+      "sha256": "36130ec778721a25621d3b73da652adbeda43c19705c7d70e9fd9f650348537e"
+    },
+    {
+      "path": "scripts/render-data-dictionary.py",
+      "sha256": "431ae875e67c29bb66ccb808a4b9389b58d1a4d37bed460248880ca43b8c21c2"
+    },
+    {
+      "path": "src/lib/data/contract.js",
+      "sha256": "5eb4c7733afaca3cc764b0d6765d7fbc5331858c57c90dafa8daf8469ab3e451"
+    },
+    {
+      "path": "src/lib/server/data-snapshot.js",
+      "sha256": "319df2f96a21128de0ef98fe17f6190a7c125f86f7e27d9c203b0017954fabd5"
+    },
+    {
+      "path": "tests/fixtures/data-contract.js",
+      "sha256": "66a3c88c0f74263c60973521623506045c6b0ecf6644b75bbcaabdb6a4978b4b"
+    },
+    {
+      "path": "tests/fixtures/nba-contract-vector.json",
+      "sha256": "c4a722a34e102f96604e9a4c5ee5b832858722b55493817222bf20cf5017ba9c"
+    },
+    {
+      "path": "tests/python/test_data_contract.py",
+      "sha256": "757da9167e2aaaefd59d4cf94c9609805a353917578af4c3d3d6b8ab63abf4e0"
+    },
+    {
+      "path": "tests/unit/data-contract.test.js",
+      "sha256": "315775024aa2564285b78ee892da76a9e335054b7abad8ed810f51ba98661d14"
+    }
+  ],
+  "preserved_files": [
+    {
+      "path": "ml/data/nba_features.csv",
+      "sha256": "93b82f452c222832327bc8db130082ef9561f73accc20610dae4a38e3dc961a5",
+      "git_blob": "0e030e0f3299136b5fb145a65740768653839e24",
+      "matches_base": true
+    },
+    {
+      "path": "ml/models/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "matches_base": true
+    },
+    {
+      "path": "ml/models/best_params.json",
+      "sha256": "6722da57192007492db44694ceada608faeda35a3029777e8fb0d3a24538ab59",
+      "git_blob": "bb0168c0aa490e27e1473ab6cb8449de625ae321",
+      "matches_base": true
+    },
+    {
+      "path": "ml/models/calibration.json",
+      "sha256": "c68d203961ee9620325bc881cbc589c3579fd87ceb82074b59f4697b6d722007",
+      "git_blob": "349a3415f1691718ad2347b8f402b41d1d22ed00",
+      "matches_base": true
+    },
+    {
+      "path": "ml/models/ensemble_model.json",
+      "sha256": "236ec9433ea15ad7a978a7303bb682798bb80152f51b8c594f5238d4125e2781",
+      "git_blob": "88dcebfa31c2440496f1d105342487aed9b42a9e",
+      "matches_base": true
+    },
+    {
+      "path": "ml/models/lightgbm_totals.txt",
+      "sha256": "8ecc6e8803cf845f871c9828e8354563aa0654e479ac0c4012bc4006b0a4ba75",
+      "git_blob": "2e83b49651f63e14d22bbd8fe277a0f7b8093cd5",
+      "matches_base": true
+    },
+    {
+      "path": "ml/models/training_results.json",
+      "sha256": "55e5bb44e88c939fb289f623d1b6a631300ab748fe8a1e410c12bcdb2e0549c6",
+      "git_blob": "768868d7ea5062d456ac276dcd13cde6e31fbed8",
+      "matches_base": true
+    },
+    {
+      "path": "ml/models/xgboost_totals.json",
+      "sha256": "236ec9433ea15ad7a978a7303bb682798bb80152f51b8c594f5238d4125e2781",
+      "git_blob": "88dcebfa31c2440496f1d105342487aed9b42a9e",
+      "matches_base": true
+    }
+  ],
+  "logs": [
+    {
+      "path": "phase02-final-unit.log",
+      "sha256": "e71f711ada622dacdb48927aea386c0985ce67693ada858bdc110c96431c15fe",
+      "stored_in_git": false
+    },
+    {
+      "path": "phase02-ui.log",
+      "sha256": "290e03ccb6024de985c943beadef17392312dde5ca06c04abd4a2b438933cf0b",
+      "stored_in_git": false
+    },
+    {
+      "path": "phase02-check.log",
+      "sha256": "98dcd228a357111230493cd6b5636fb938f7d7d84e356ba7027de8cc041223b1",
+      "stored_in_git": false
+    },
+    {
+      "path": "phase02-build.log",
+      "sha256": "06214ffe63be4e43043d51df08796d26b3469232b4718d4a37796d6a784080cd",
+      "stored_in_git": false
+    }
+  ],
+  "limitations": [
+    "No independent predictive validation or profitability evidence",
+    "Old application inputs not migrated to strict snapshots",
+    "No authenticated data provider or complete-universe reconciliation",
+    "No remote immutable persistence",
+    "Freshness policy selection pending",
+    "Legacy trainers and CSV exporter deliberately disabled",
+    "Vercel web build does not deploy Python API",
+    "No production promotion"
+  ],
+  "github_pr_workflow_runs_returned": 0,
+  "github_actions_pass_claimed": false,
+  "technical_phase_score": 8
+}

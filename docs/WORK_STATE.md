@@ -1,12 +1,14 @@
 # Punto de control — leer antes de continuar
 
-## Reconstrucción — Fase 2 en verificación final (28 de septiembre de 2026)
+## Reconstrucción — Fase 2 cerrada técnicamente (28 de septiembre de 2026)
 
 - Mandato actual: F2, contrato/diccionario único. Implementado: `ml/contracts/dictionary.json` (51 definiciones, 26 NBA); `src/lib/data/contract.js`; `src/lib/server/data-snapshot.js`; `ml/contracts/features.py`; informe de cuarentena del CSV y diccionario legible. Detalles en `docs/reconstruction/DATA_CONTRACT.md`.
 - Ventanas con registros y recuentos exactos/coherentes; tiempos de publicación/disponibilidad/captura al corte; unidades/orígenes/alcances; objetivos separados; hashes/revisiones. Nueve composiciones compartidas con API Python. No migración remota ni API pagada. Solicitudes antiguas aún no adaptadas; es pendiente de F3, no funcionalidad ya cerrada.
 - Entrenadores legacy y exportador feature_engineering bloqueados antes de imports/escrituras; archivos conservados. CSV original y artefactos no modificados. No quitar bloqueos para continuar usando datos no certificados.
-- Verificación final local: 501 pruebas de dominio/servidor, 8 UI y 11 Python aprobadas; svelte-check 0 errores/warnings. Vite compila cliente/servidor, pero el empaquetado adapter-vercel termina en EPERM creando symlink en Windows (exit 1). No es un build completo aprobado. Comprobar preview automática de la rama en Vercel tras guardar código; no modificar main. Acta/checkpoint final pendientes; no afirmar entrega cerrada todavía.
-- Si se interrumpe: retomar estas comprobaciones, completar PHASE_02 y CHECKS_PHASE_02, actualizar plan/inventario, commit/push a rama de trabajo. No reiniciar diagnóstico ni avanzar a F3 hasta cerrar F2. Base e42a8f33 en codex/security-integrity.
+- Verificación final local: 501 pruebas de dominio/servidor, 8 UI y 11 Python aprobadas (520 total, 67 nuevas); svelte-check 0 errores/warnings. Vite compila cliente/servidor, pero el empaquetado adapter-vercel termina en EPERM creando symlink en Windows (exit 1). Build completo verificado remotamente: Vercel READY, dpl_8G1TuYxyQEc7wZsSLxnobAboxZ5r, SHA 768e2d50d132f28e090c84359c3b1fd11b5b7dab. No confundir esa evidencia con un build local correcto ni con pruebas remotas de GitHub Actions.
+- Acta PHASE_02.md y CHECKS_PHASE_02.json: APROBADA TÉCNICAMENTE; VALIDACIÓN EMPÍRICA PENDIENTE. Nota de fase 8/10, no cambia notas del producto/modelo. Plan v1.2; inventario 13 parciales y 51 pendientes; no hay cierre integral de hallazgos por introducir un contrato todavía no consumido por toda la app.
+- Implementación guardada y remoto comprobado en 768e2d50 (codex/security-integrity); main sigue ab9b63a4. Preview READY: https://nio-sports-pro-v4-0-lctr660up-niosports-pros-projects.vercel.app . El commit posterior de cierre solo modifica documentación; consultar Git para SHA final. Sin promoción a producción.
+- Próximo «continúa»: abrir F3 y anunciar alcance; separar proyección/distribución/decisión/presentación/resultados e integrar frontera de contratos y compatibilidad de artefactos. F3 NO INICIADA. No repetir F2, no quitar cuarentena legacy, no API pagada antes de F19 ni rediseño antes de F17.
 
 ## Reconstrucción rigurosa — Fase 1 cerrada (28 de septiembre de 2026)
 

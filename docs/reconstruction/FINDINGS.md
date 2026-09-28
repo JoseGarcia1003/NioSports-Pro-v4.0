@@ -1,8 +1,21 @@
 # Registro de hallazgos y criterios de cierre
 
-Fecha inicial: 27/09/2026. Actualización 28/09/2026: **H01, H02, H27, H38, H45, H51 y H60 están PARCIALES** tras la definición conceptual de F1; los otros 57 registros siguen PENDIENTES. Ningún defecto de implementación se declara reparado por esta documentación.
+Fecha inicial: 27/09/2026. Actualización 28/09/2026: **13 registros PARCIALES** (H01-H08, H27, H38, H45, H51 y H60); los otros 51 siguen PENDIENTES. F2 añade controles ejecutables, pero ningún hallazgo compuesto se cierra sin completar todas sus condiciones e integrar sus consumidores.
 
 Evidencia del avance: [PRODUCT_SPEC v1.0.0](PRODUCT_SPEC.md), [C01-C38](PHASE_01_CASES.md) y [acta F1](PHASE_01.md). H01/H02 tienen especificación completa, pero quedan pendientes su aplicación al motor, terminología y pantallas; se amplían las fases responsables para evitar un cierre falso. H27/H38/H45/H51/H60 tienen reglas conceptuales que deberán implementarse o validarse posteriormente.
+
+Avance ejecutable F2: [acta](PHASE_02.md), [contrato](DATA_CONTRACT.md), [inventario del legado](LEGACY_DATA_REPORT.json). H06/H08 incorporan F3 para verificar la integración efectiva; el contrato nuevo no certifica rutas antiguas.
+
+| Registro | Parte implementada en F2 | Sigue pendiente |
+|---|---|---|
+| H03 | Histórico sin mercado identificado y entrenadores/exportador legacy bloqueados | Nueva evaluación sin líneas sintéticas ni rentabilidad supuesta; backtest antiguo aún por retirar |
+| H04 | Definiciones y orden de las 26 entradas; nueve composiciones compartidas | Ablaciones temporales y aporte incremental |
+| H05 | Diccionario distingue inputs reales de contexto; no incorpora PACE/lesiones por relato | Coherencia del relato público y selección empírica de variables |
+| H06 | Metadatos, unidades, versiones y rechazos de tiempo en nuevo contrato | Conectar productores/consumidores, autenticar procedencia y persistir snapshots |
+| H07 | Manifiesto de fechas, IDs, filas por año y límites, sin alterar original | Conciliar universo/temporadas/exclusiones; cobertura real no demostrada |
+| H08 | Recuentos exactos, agregados recalculados y ventanas anidadas probados; exportador inseguro bloqueado | Exigir la frontera nueva en todo consumidor y verificar completitud del proveedor |
+
+H14/H17/H19/H29 no se declaran resueltos: el manifiesto de datos no es un experimento reproducible completo, las solicitudes antiguas no están adaptadas, frescura no tiene aún política obligatoria y la ficha pública de Elo requiere integración. H63 continúa pendiente hasta la auditoría final.
 
 Fuente: [auditoría completa](../AUDIT_2026-09-27.md), código auditado `ab9b63a4982cdb212c43a5f631507fa839e4e4aa`. Las páginas son las 20 secciones del PDF, delimitadas por `<!-- PAGE -->` en Markdown. Consultar sus referencias E1-E13 para archivos y límites. Las referencias abarcan evidencia observada, revisión de código y pendientes NV: **un NV no se convierte aquí en fallo confirmado**. H62 es una inferencia de planificación explícita a partir de datos ya usados, no una observación de un test nuevo. H63 es un riesgo de proceso.
 
@@ -15,9 +28,9 @@ Los hallazgos compuestos se desglosan en pruebas al iniciar su fase. Ningún ID 
 | H03 | G2 | crítico | 3,5 | 2,5,10 | CSV sin líneas reales; mediana global 226 usa también evaluación; ROI presupone -110. | No generar líneas a partir del objetivo; sin mercado histórico, métricas de apuestas no disponibles. |
 | H04 | G2 | alto | 3 | 2,4 | 26 variables correlacionadas; no se demuestra su contribución incremental. | Diccionario de las 26 variables y ablaciones temporales por grupos, con resultados adversos. |
 | H05 | G2 | alto | 3 | 2,15 | adv_df descargado sin incorporarse; PACE, ratings y lesiones no figuran en el artefacto pese al relato. | Inventario de features coincide con entrada y documentación; fuentes no utilizadas identificadas. |
-| H06 | G2 | alto | 3,4,17 | 2 | Faltan unidades, procedencia, disponibilidad temporal, faltantes y reglas de actualización. | Diccionario completo y validadores rechazan uso de información disponible después de predicted_at. |
+| H06 | G2 | alto | 3,4,17 | 2,3 | Faltan unidades, procedencia, disponibilidad temporal, faltantes y reglas de actualización. | Diccionario completo y validadores rechazan uso de información disponible después de predicted_at; consumidores aplican la frontera. |
 | H07 | G2 | alto | 4 | 2,18,19 | 5.999 filas no conciliadas con universo; exclusiones/cobertura y antigüedad no caracterizadas. | Manifiesto por temporada, duplicados, exclusiones y límites; datos antiguos nunca etiquetados actuales. |
-| H08 | G2 | alto | 4 | 2 | Ventanas L5/L10/L20 no garantizan ese número de encuentros. | Conservar recuentos efectivos y probar inicio de histórico y muestra insuficiente. |
+| H08 | G2 | alto | 4 | 2,3 | Ventanas L5/L10/L20 no garantizan ese número de encuentros. | Conservar recuentos efectivos y probar inicio de histórico y muestra insuficiente; consumidores no eluden el contrato. |
 | H09 | G3 | crítico | 4 | 5 | Entrenamiento ordena date y CSV usa _date; actual orden correcto, procedimiento frágil. | Validar y ordenar fecha disponible; separar grupos temporales sin cruzar fronteras indebidas. |
 | H10 | G3 | crítico | 5 | 5 | Stacking aprende de predicciones dentro de muestra. | Cada predicción del meta-modelo tiene train_end anterior a su corte; prueba impide solapamiento. |
 | H11 | G3 | crítico | 5 | 5 | Calibración presentada OOS procede de modelos reajustados sobre todos los datos. | Calibración independiente y trazabilidad de índices/fechas; refit no reutiliza el bloque evaluado. |

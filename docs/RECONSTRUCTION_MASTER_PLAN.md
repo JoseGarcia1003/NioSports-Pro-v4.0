@@ -1,8 +1,8 @@
 # Plan maestro de reconstrucción de NioSports Pro
 
-Versión 1.1 · 28/09/2026 · Fase actual: **1, cerrada en alcance conceptual**. F0 cerrada; F2-F20 no iniciadas. El propietario autorizó el siguiente paso el 28/09/2026; la parada inicial en F0 pertenece a la entrega anterior.
+Versión 1.2 · 28/09/2026 · Fase actual: **2, APROBADA TÉCNICAMENTE; VALIDACIÓN EMPÍRICA PENDIENTE**. F0/F1 cerradas; F3-F20 no iniciadas. El propietario autorizó explícitamente F2 y su cierre; no se inicia F3 en esta entrega.
 
-Este plan sustituye el orden de ejecución de EXCELLENCE_PLAN.md y los siguientes pasos anteriores de WORK_STATE.md. La auditoría original se conserva intacta. Autoridad: [solicitud íntegra del propietario](reconstruction/REQUEST_2026-09-27.md). Cierre actual: [Fase 1](reconstruction/PHASE_01.md); referencia conceptual: [PRODUCT_SPEC v1.0.0](reconstruction/PRODUCT_SPEC.md). [Fase 0 histórica](reconstruction/PHASE_00.md). Inventario: [64 hallazgos](reconstruction/FINDINGS.md).
+Este plan sustituye el orden de ejecución de EXCELLENCE_PLAN.md y los siguientes pasos anteriores de WORK_STATE.md. La auditoría original se conserva intacta. Autoridad: [solicitud íntegra del propietario](reconstruction/REQUEST_2026-09-27.md). Cierre actual: [Fase 2](reconstruction/PHASE_02.md); [contrato v1.0.0](reconstruction/DATA_CONTRACT.md); referencia conceptual: [PRODUCT_SPEC v1.0.0](reconstruction/PRODUCT_SPEC.md). [Fase 1](reconstruction/PHASE_01.md) y [Fase 0](reconstruction/PHASE_00.md) históricas. Inventario: [64 hallazgos](reconstruction/FINDINGS.md).
 
 ## 1. Mandato y límites
 
@@ -12,7 +12,7 @@ No se implementa una API deportiva pagada hasta F19. No se compra ningún servic
 
 Una prueba de software demuestra un comportamiento en sus condiciones; una demo demuestra una interacción; una API conectada demuestra conectividad; ninguna de ellas demuestra precisión, cobertura, calibración o rentabilidad.
 
-La Fase 0 organizó y verificó el plan. F1 define el producto y sus casos conceptuales; no selecciona modelos, cambia cálculos ni configura servicios. F2 formalizará esos conceptos como contratos de datos.
+La Fase 0 organizó y verificó el plan. F1 define el producto y sus casos conceptuales. F2 implementa el diccionario y contrato estricto, centraliza nueve recetas y bloquea entrenadores/exportador legacy no certificados. La API antigua solo comparte esas recetas; F3 debe conectar la nueva frontera con los consumidores. No hay validación predictiva nueva ni API deportiva conectada.
 
 ## 2. Línea base que no se reescribe
 
@@ -54,7 +54,7 @@ Estas distinciones son condiciones visibles de los gates, no dispensas para marc
 
 ## 4. Secuencia de fases y puertas de salida
 
-F0 y F1 están cerradas en su alcance documental/conceptual. F2-F20 están **NO INICIADAS**. “Archivos” son áreas previstas: la lista exacta y los riesgos se anuncian antes de tocar cada fase. Las rutas nuevas se crean solo cuando corresponda.
+F0/F1 están cerradas en su alcance documental/conceptual y F2 en su alcance técnico con datos controlados. F3-F20 están **NO INICIADAS**. F2 no certifica procedencia real, persistencia remota ni la migración de todos los consumidores. “Archivos” son áreas previstas: la lista exacta y los riesgos se anuncian antes de tocar cada fase. Las rutas nuevas se crean solo cuando corresponda.
 
 | Fase | Problema y cambio previsto | Áreas afectadas | Verificación y criterio de aprobación |
 |---|---|---|---|
@@ -99,7 +99,7 @@ Por fase:
 4. Registrar comando, entorno, fecha, resultado y artefacto; distinguir histórico de ejecución nueva.
 5. Emitir nota de fase justificada y APROBADA / REQUIERE CORRECCIÓN, con límites empíricos separados.
 6. Guardar commit coherente, verificar remoto y actualizar WORK_STATE antes de terminar.
-7. Solo después abrir la siguiente fase autorizada. En la entrega del 28/09/2026 se detiene en F1; el siguiente paso es F2.
+7. Solo después abrir la siguiente fase autorizada. Esta entrega se detiene en F2; el siguiente paso es F3 (arquitectura de modelos e integración de contratos), todavía no iniciado.
 
 La aprobación técnica la emite el revisor con criterios comprobados, no el mero paso del tiempo ni un test verde aislado. No implica auditoría independiente. Si el propietario cambia el alcance, registrar la decisión y sus consecuencias antes de ejecutar. No solicitar confirmaciones repetidas para tareas ya autorizadas, pero no atravesar una orden explícita de detenerse en una fase.
 
@@ -110,7 +110,7 @@ La aprobación técnica la emite el revisor con criterios comprobados, no el mer
 - **Legado ambiguo:** no adivinar moneda, formato de cuota o estado; cuarentena/reconciliación y migración reversible con conservación del original.
 - **Privacidad:** la ruta pública auditada sigue siendo un riesgo pendiente; ausencia de filas visibles no prueba aislamiento. No ampliar su publicación durante la reconstrucción.
 - **Versiones mezcladas:** experimentos y cambios intermedios en rama de trabajo; no promover una cadena parcialmente migrada a producción.
-- **Afirmaciones vigentes:** el sitio actual conserva defectos mientras esta fase documental se termina. Guardar el plan no los retira. No lanzar campaña ni presentar nuevos porcentajes apoyándose en él.
+- **Afirmaciones vigentes:** el sitio principal conserva defectos mientras se reconstruye la cadena en la rama de trabajo. Los contratos nuevos no retiran por sí solos las afirmaciones antiguas. No lanzar campaña ni presentar nuevos porcentajes apoyándose en ellos.
 - **Costes y servicios:** ninguna contratación/API de pago en F0-F18; credencial y condiciones comerciales se resuelven al llegar a F19.
 - **Tiempo:** no prometer fecha de excelencia ni de validación prospectiva sin conocer volumen y cobertura. Reportar progreso por gates cumplidos, no por cantidad de archivos.
 
