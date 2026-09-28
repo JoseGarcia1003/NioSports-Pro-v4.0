@@ -1,0 +1,78 @@
+{
+  "as_of": "2026-09-27",
+  "audited_commit": "ab9b63a4982cdb212c43a5f631507fa839e4e4aa",
+  "rows": 5999,
+  "unique_game_ids": 5999,
+  "date_range": [
+    "2020-12-25",
+    "2025-06-22"
+  ],
+  "chronological": true,
+  "empty_cells": 0,
+  "contains_market_line": false,
+  "median_total": 226.0,
+  "fold_dates": [
+    [
+      "2023-11-02",
+      "2024-10-26"
+    ],
+    [
+      "2024-10-26",
+      "2025-06-22"
+    ]
+  ],
+  "feature_count": 26,
+  "training_samples": 5999,
+  "archived_metrics_not_retrained": {
+    "results": [
+      {
+        "fold": 1,
+        "mae": 14.663005032576123,
+        "wr": 0.6216666666666667,
+        "roi": 18.681818181818176,
+        "brier": 0.30269633565618986,
+        "ece": 0.2248197129741372,
+        "wins": 746,
+        "losses": 454,
+        "total": 1200,
+        "base_maes": {
+          "xgboost": 14.949524879455566,
+          "lightgbm": 14.821053210522168,
+          "ridge": 14.575535774230957,
+          "mlp": 15.431780815124512
+        }
+      },
+      {
+        "fold": 2,
+        "mae": 15.033657465705849,
+        "wr": 0.61,
+        "roi": 16.45454545454545,
+        "brier": 0.2892290240005377,
+        "ece": 0.19010456268041032,
+        "wins": 732,
+        "losses": 468,
+        "total": 1200,
+        "base_maes": {
+          "xgboost": 15.30810832977295,
+          "lightgbm": 15.128428558063042,
+          "ridge": 15.033364295959473,
+          "mlp": 15.445947647094727
+        }
+      }
+    ],
+    "version": "4.0.0"
+  },
+  "controlled_example_not_live_prediction": {
+    "base_full_predictions": [
+      220,
+      220,
+      220,
+      220
+    ],
+    "q1_line": 60,
+    "q1_projection_after_scaling": 55,
+    "prob_over_before_scaling": 0.999999999675451
+  },
+  "published_formula_recomputed": 0.6976431957126106,
+  "global_score_weighted": 4.05
+}

@@ -1,5 +1,19 @@
 # Punto de control — leer antes de continuar
 
+## Auditoría terminada — 27 de septiembre de 2026
+
+- Petición actual: entrar al sitio publicado, evaluar con rigor el producto y especialmente sus modelos y entregar un documento. Auditoría CERRADA; no repetirla al recibir «continúa».
+- Entregables: `docs/AUDIT_2026-09-27.md`, PDF de 20 páginas en `output/pdf/NioSports_Auditoria_2026-09-27.pdf`, datos reproducibles en `docs/AUDIT_2026-09-27_DATA.json` y generador `scripts/build-audit-report.py`. PDF renderizado y revisado visualmente; tablas finales comprobadas.
+- Código auditado: `ab9b63a4982cdb212c43a5f631507fa839e4e4aa`. Navegación pública realizada en el dominio habitual. No se modificó ni desplegó código de la aplicación durante esta auditoría.
+- Notas justificadas: global 4,1/10 (suma ponderada 4,05), modelo 3/10 (NBA 2, tenis 4), diseño 7/10. Son juicios de madurez y evidencia, no porcentajes de acierto.
+- Pruebas ejecutadas: 445 de dominio/servidor y 8 de UI, todas aprobadas. No demuestran calidad predictiva. CSV analizado: 5.999 registros únicos; sin línea histórica de mercado. No se ejecutó el backtesting sintético ni entrenamiento nuevo.
+- Hallazgos prioritarios: clasificación NBA frente a mediana artificial; stacking y calibración reutilizan datos de entrenamiento; inconsistencia Q1/FULL; etiqueta ML con heurística; estadísticas estáticas antiguas; probabilidades de periodos dependientes multiplicadas; cuotas decimales interpretadas como americanas; guardado de pick desconectado del ledger; historial público confunde fallos con ceros y necesita publicación autorizada explícita. Evidencia y matices en el informe.
+- Límites: no certificados autenticación real, pagos, cobertura deportiva completa, servicio Python desplegado, persistencia real por cuenta, rendimiento de carga o auditoría legal. Demos identificadas y recorridos anónimos sí revisados.
+- Siguiente acción al retomar mejoras: corregir primero comunicación y contratos de probabilidad/cuotas/periodos/publicación; pruebas de regresión que reproduzcan esos errores. Después integración del stake con ledger y validación temporal reproducible. Estas prioridades sustituyen el antiguo siguiente paso de Planes. No afirmar rentabilidad validada ni aumentar notas por añadir código.
+- Guardado: entrega documental en la rama `codex/security-integrity`; verificar commit y remoto para conocer el estado definitivo. La producción de la aplicación conserva la versión auditada; guardar el informe no equivale a corregir sus hallazgos.
+
+## Estado anterior de publicación (conservado como historial)
+
 Actualizado: 22 de septiembre de 2026. Repositorio `JoseGarcia1003/NioSports-Pro-v4.0`. PR #1 integrada en `main` por petición explícita del propietario de guardar todo en GitHub y publicar en su enlace habitual. Mandato: retomar desde este archivo sin reiniciar la auditoría. Plan completo: EXCELLENCE_PLAN.md.
 
 ## Publicación principal — 22 de septiembre
