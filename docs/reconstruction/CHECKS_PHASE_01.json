@@ -1,0 +1,87 @@
+{
+  "phase": 1,
+  "spec_version": "1.0.0",
+  "executed_at_utc": "2026-09-28T14:28:29.861820+00:00",
+  "baseline_commit": "7408124678271fafed585605cc9c959ed0b84a1c",
+  "status": "PASS",
+  "checks": {
+    "38_unique_ordered_conceptual_cases": true,
+    "11_market_capabilities": true,
+    "required_concepts_present": true,
+    "seven_states_explained": true,
+    "phase2_not_started": true,
+    "sequential_plan_preserved": true,
+    "64_findings_preserved": true,
+    "C12_EV_14_60": true,
+    "C12_displayed_price_and_edge": true,
+    "C13_EV_4_32_vs_minus_0_68": true,
+    "C13_probability_space": true,
+    "C14_all_refunds_no_decisive_probability": true,
+    "C16_prices_are_not_identical": true,
+    "C17_ticket_profit_80": true,
+    "C02_C03_C04_C29_C31_returns_and_balance": true,
+    "C06_C08_period_arithmetic": true,
+    "C33_acierto_60_percent": true,
+    "baseline_matches_previous_phase": true,
+    "audit_and_dataset_unchanged": true,
+    "documentation_only": true,
+    "local_links_resolve": true
+  },
+  "arithmetic_examples_controlled_not_real_predictions": {
+    "C12_ev": "14.6000",
+    "C12_break_even_percent": "52.356020942408376963350785340314",
+    "C12_edge_percentage_points": "7.6439790575916230366492146596860",
+    "C13_ev_with_push": "4.3200",
+    "C13_wrong_ev_push_as_loss": "-0.6800",
+    "C13_decisive_probability_percent": "54.736842105263157894736842105263",
+    "C16_american_minus110_to_decimal": "1.9090909090909090909090909090909",
+    "C17_ticket_profit_at_1_80": "80.00",
+    "C31_settlement": {
+      "won": {
+        "available": "1091.00",
+        "reserved": "0",
+        "profit": "91.00"
+      },
+      "lost": {
+        "available": "900",
+        "reserved": "0",
+        "profit": "-100"
+      },
+      "push": {
+        "available": "1000",
+        "reserved": "0",
+        "profit": "0"
+      },
+      "void": {
+        "available": "1000",
+        "reserved": "0",
+        "profit": "0"
+      }
+    },
+    "C33_decisive_win_rate": "0.6"
+  },
+  "broken_links": [],
+  "source_sha256": {
+    "src/lib/engine/settlement.js": "7e5cfb035961ab93f7793a6102a7bd9c8596236e5c7946c518546363878be5c1",
+    "src/lib/engine/probability.js": "2b694938b1eb73f70593b9811580ded82ab1d83cd3f6b8350f70b17bb872bf62",
+    "src/lib/engine/constants.js": "6c2b0c296b8107f6f69621416a5c2bfb54c4496a807940ddef296d80d0b32262",
+    "src/lib/tennis/domain.js": "ac0d5ad65a04657e58c76586f0eea26f8f0db54e2b119a261ef73b2b6e0261ba",
+    "src/lib/catalog/domain.js": "5af4cd50ea60b429c676b5772d3ebfbdb8d9cdaed8cd52d07790a46c816426c0",
+    "ml/api/main.py": "60896c34be3b381237e00def853b78cd6708b6ce5407488a4606aeb5ecb42cd8",
+    "ml/data/feature_engineering.py": "0cf684bcfe201eb60c06ddc1937e48cd3958bc08b44c3c0d7dffc3fe1a5f05fe",
+    "ml/data/collect_historical.py": "4094d9a5d56122e9e88ae1eaa541c43a60390dae1539b8ae1efc50c53feda99f"
+  },
+  "dataset_sha256": "93b82f452c222832327bc8db130082ef9561f73accc20610dae4a38e3dc961a5",
+  "manual_review": [
+    "All 38 cases checked for conceptual consistency against specification",
+    "Current implementation distinguished from required behavior",
+    "Conditional tennis event and bookmaker settlement separated",
+    "NBA projection/probability/push/price and ticket semantics separated"
+  ],
+  "limitations": [
+    "No functional application tests executed",
+    "No model training or predictive validation",
+    "No paid data connection or UI change",
+    "No independent reviewer; numerical checks evaluate examples, not deployed logic"
+  ]
+}

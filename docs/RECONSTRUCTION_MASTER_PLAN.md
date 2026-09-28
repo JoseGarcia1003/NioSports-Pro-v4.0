@@ -1,8 +1,8 @@
 # Plan maestro de reconstrucción de NioSports Pro
 
-Versión 1.0 · 27/09/2026 · Fase autorizada en esta entrega: **0 exclusivamente**.
+Versión 1.1 · 28/09/2026 · Fase actual: **1, cerrada en alcance conceptual**. F0 cerrada; F2-F20 no iniciadas. El propietario autorizó el siguiente paso el 28/09/2026; la parada inicial en F0 pertenece a la entrega anterior.
 
-Este plan sustituye el orden de ejecución de EXCELLENCE_PLAN.md y los siguientes pasos anteriores de WORK_STATE.md. La auditoría original se conserva intacta. Autoridad: [solicitud íntegra del propietario](reconstruction/REQUEST_2026-09-27.md). Informe de cierre actual: [Fase 0](reconstruction/PHASE_00.md). Inventario: [64 hallazgos](reconstruction/FINDINGS.md).
+Este plan sustituye el orden de ejecución de EXCELLENCE_PLAN.md y los siguientes pasos anteriores de WORK_STATE.md. La auditoría original se conserva intacta. Autoridad: [solicitud íntegra del propietario](reconstruction/REQUEST_2026-09-27.md). Cierre actual: [Fase 1](reconstruction/PHASE_01.md); referencia conceptual: [PRODUCT_SPEC v1.0.0](reconstruction/PRODUCT_SPEC.md). [Fase 0 histórica](reconstruction/PHASE_00.md). Inventario: [64 hallazgos](reconstruction/FINDINGS.md).
 
 ## 1. Mandato y límites
 
@@ -12,7 +12,7 @@ No se implementa una API deportiva pagada hasta F19. No se compra ningún servic
 
 Una prueba de software demuestra un comportamiento en sus condiciones; una demo demuestra una interacción; una API conectada demuestra conectividad; ninguna de ellas demuestra precisión, cobertura, calibración o rentabilidad.
 
-La Fase 0 organiza y verifica el plan. No define aún el glosario definitivo, no selecciona modelos, no cambia cálculos ni configura servicios. La implementación conceptual empieza en F1 después de esta entrega.
+La Fase 0 organizó y verificó el plan. F1 define el producto y sus casos conceptuales; no selecciona modelos, cambia cálculos ni configura servicios. F2 formalizará esos conceptos como contratos de datos.
 
 ## 2. Línea base que no se reescribe
 
@@ -54,7 +54,7 @@ Estas distinciones son condiciones visibles de los gates, no dispensas para marc
 
 ## 4. Secuencia de fases y puertas de salida
 
-Todas las fases 1-20 están **NO INICIADAS**. “Archivos” son áreas previstas: la lista exacta y los riesgos se anuncian antes de tocar cada fase. Las rutas nuevas se crean solo cuando corresponda.
+F0 y F1 están cerradas en su alcance documental/conceptual. F2-F20 están **NO INICIADAS**. “Archivos” son áreas previstas: la lista exacta y los riesgos se anuncian antes de tocar cada fase. Las rutas nuevas se crean solo cuando corresponda.
 
 | Fase | Problema y cambio previsto | Áreas afectadas | Verificación y criterio de aprobación |
 |---|---|---|---|
@@ -99,7 +99,7 @@ Por fase:
 4. Registrar comando, entorno, fecha, resultado y artefacto; distinguir histórico de ejecución nueva.
 5. Emitir nota de fase justificada y APROBADA / REQUIERE CORRECCIÓN, con límites empíricos separados.
 6. Guardar commit coherente, verificar remoto y actualizar WORK_STATE antes de terminar.
-7. Solo después abrir la siguiente fase autorizada. En esta entrega se detiene en F0.
+7. Solo después abrir la siguiente fase autorizada. En la entrega del 28/09/2026 se detiene en F1; el siguiente paso es F2.
 
 La aprobación técnica la emite el revisor con criterios comprobados, no el mero paso del tiempo ni un test verde aislado. No implica auditoría independiente. Si el propietario cambia el alcance, registrar la decisión y sus consecuencias antes de ejecutar. No solicitar confirmaciones repetidas para tareas ya autorizadas, pero no atravesar una orden explícita de detenerse en una fase.
 

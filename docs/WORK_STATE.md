@@ -1,5 +1,16 @@
 # Punto de control — leer antes de continuar
 
+## Reconstrucción rigurosa — Fase 1 cerrada (28 de septiembre de 2026)
+
+- El propietario autorizó el siguiente paso. F1 completada: `docs/reconstruction/PRODUCT_SPEC.md` v1.0.0, referencia única conceptual; `PHASE_01_CASES.md` con C01-C38; acta `PHASE_01.md`; comprobaciones `CHECKS_PHASE_01.json`.
+- APROBADA en alcance conceptual, nota de fase 8/10; notas de producto/modelo sin cambios. Solo documentación, no correcciones funcionales ni despliegue. F2-F20 no iniciadas.
+- Decisiones: proyección NBA es media esperada en puntos; FULL incluye prórrogas, HALF primera mitad, Q1 primer cuarto. FULL y ganador individual de tenis son experimentales; Q1/HALF no soportados predictivamente sin datos/modelos propios; combinadas y otros mercados fuera de v1. No confundir estado normativo con lo ya desplegado.
+- Probabilidad NBA separa over/under/push; Elo se interpreta como estimación experimental condicionada a finalización. Retiro y reglas de casa no se convierten en acierto del Elo. EV usa victoria/derrota/devolución coherentes; cuota decimal interna; pick, análisis y ticket distintos; abstención no reserva capital. Resultado manual y verificado separados.
+- Verificación de F1: contratos actuales contrastados, revisión conceptual de 38 casos, aritmética controlada y checks documentales/Git. No se ejecutaron tests funcionales, entrenamiento ni llamadas deportivas; las 453 pruebas siguen siendo históricas, no nuevas.
+- Inventario: siete registros PARCIALES (H01/H02/H27/H38/H45/H51/H60), resto pendiente; ningún defecto del programa se cierra por escribir la regla. Plan maestro actualizado a v1.1 y continuidad inequívoca.
+- Base Git 74081246, rama codex/security-integrity. Guardar commit de F1 y verificar push en esa rama; main permanece sin cambios funcionales. Consultar Git para SHA final.
+- Próximo «continúa»: abrir FASE 2 (diccionario y contrato único de datos), anunciar siete puntos y partir de PRODUCT_SPEC. No repetir F0/F1, no empezar por rediseño/API. Mantener F17 interfaz y F19 API pagada.
+
 ## Reconstrucción rigurosa — Fase 0 cerrada (27 de septiembre de 2026)
 
 - Nuevo mandato: `docs/reconstruction/REQUEST_2026-09-27.md`, copia íntegra de la solicitud del propietario. Solo Fase 0 en esta entrega. Sustituye los siguientes pasos anteriores y la prioridad de diseño de EXCELLENCE_PLAN.

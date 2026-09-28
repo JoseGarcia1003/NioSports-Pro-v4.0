@@ -1,6 +1,8 @@
 # Registro de hallazgos y criterios de cierre
 
-Fecha: 27/09/2026. Estado inicial: **los 64 registros están PENDIENTES**. Este inventario no corrige el producto.
+Fecha inicial: 27/09/2026. Actualización 28/09/2026: **H01, H02, H27, H38, H45, H51 y H60 están PARCIALES** tras la definición conceptual de F1; los otros 57 registros siguen PENDIENTES. Ningún defecto de implementación se declara reparado por esta documentación.
+
+Evidencia del avance: [PRODUCT_SPEC v1.0.0](PRODUCT_SPEC.md), [C01-C38](PHASE_01_CASES.md) y [acta F1](PHASE_01.md). H01/H02 tienen especificación completa, pero quedan pendientes su aplicación al motor, terminología y pantallas; se amplían las fases responsables para evitar un cierre falso. H27/H38/H45/H51/H60 tienen reglas conceptuales que deberán implementarse o validarse posteriormente.
 
 Fuente: [auditoría completa](../AUDIT_2026-09-27.md), código auditado `ab9b63a4982cdb212c43a5f631507fa839e4e4aa`. Las páginas son las 20 secciones del PDF, delimitadas por `<!-- PAGE -->` en Markdown. Consultar sus referencias E1-E13 para archivos y límites. Las referencias abarcan evidencia observada, revisión de código y pendientes NV: **un NV no se convierte aquí en fallo confirmado**. H62 es una inferencia de planificación explícita a partir de datos ya usados, no una observación de un test nuevo. H63 es un riesgo de proceso.
 
@@ -8,8 +10,8 @@ Los hallazgos compuestos se desglosan en pruebas al iniciar su fase. Ningún ID 
 
 | ID | Grupo | Prioridad | Páginas fuente | Fases | Problema o límite | Evidencia exigida para cerrar |
 |---|---|---|---|---|---|---|
-| H01 | G1 | crítico | 3,17 | 1 | Objetivo de puntos confundido con acertar una apuesta; reglas de prórroga, empate y retiro incompletas. | Especificación distingue evento, mercado, predicción, decisión y liquidación con ejemplos y exclusiones. |
-| H02 | G1 | alto | 6,14,17 | 1 | Terminología y categorías HIGH/MEDIUM/ELITE VALUE sugieren fiabilidad no demostrada. | Glosario y matriz de capacidades separan etiqueta descriptiva, probabilidad estimada y evidencia de validación. |
+| H01 | G1 | crítico | 3,17 | 1,7,13 | Objetivo de puntos confundido con acertar una apuesta; reglas de prórroga, empate y retiro incompletas. | Especificación distingue evento, mercado, predicción, decisión y liquidación con ejemplos y exclusiones; implementación y resultados respetan esas reglas. |
+| H02 | G1 | alto | 6,14,17 | 1,15,17 | Terminología y categorías HIGH/MEDIUM/ELITE VALUE sugieren fiabilidad no demostrada. | Glosario y matriz separan etiqueta descriptiva, probabilidad estimada y evidencia; textos y pantallas cumplen esa distinción. |
 | H03 | G2 | crítico | 3,5 | 2,5,10 | CSV sin líneas reales; mediana global 226 usa también evaluación; ROI presupone -110. | No generar líneas a partir del objetivo; sin mercado histórico, métricas de apuestas no disponibles. |
 | H04 | G2 | alto | 3 | 2,4 | 26 variables correlacionadas; no se demuestra su contribución incremental. | Diccionario de las 26 variables y ablaciones temporales por grupos, con resultados adversos. |
 | H05 | G2 | alto | 3 | 2,15 | adv_df descargado sin incorporarse; PACE, ratings y lesiones no figuran en el artefacto pese al relato. | Inventario de features coincide con entrada y documentación; fuentes no utilizadas identificadas. |
