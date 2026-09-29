@@ -40,7 +40,7 @@
   });
 
 $: if (browser && !$authLoading) {
-    const isPublic = ['/today','/sports','/sports/nba','/predictions','/account','/pricing','/methodology','/public'].includes($page.url.pathname) || $page.url.pathname.startsWith('/legal/') || $page.url.pathname === '/' || $page.url.pathname === '/bankroll' || $page.url.pathname === '/tennis' || /^\/tennis\/player\/[^/]+\/?$/.test($page.url.pathname) || PUBLIC_ROUTES.some(r => $page.url.pathname.startsWith(r));
+    const isPublic = ['/today','/sports','/sports/nba','/totales','/predictions','/account','/pricing','/methodology','/public'].includes($page.url.pathname) || $page.url.pathname.startsWith('/legal/') || $page.url.pathname === '/' || $page.url.pathname === '/bankroll' || $page.url.pathname === '/tennis' || /^\/tennis\/player\/[^/]+\/?$/.test($page.url.pathname) || PUBLIC_ROUTES.some(r => $page.url.pathname.startsWith(r));
     if (!$isAuthenticated && !isPublic) goto('/login');
     if ($isAuthenticated && ['/', '/login'].includes($page.url.pathname)) goto('/today');
     if ($isAuthenticated && $authStore.userId !== subscriptionUser) {

@@ -1,3 +1,4 @@
+import { eloRatings, tennisEligibility, demoRatingProbability } from './elo.js';
 export const SURFACES = { hard: 'Dura', clay: 'Tierra batida', grass: 'Césped' };
 export const CIRCUITS = ['ATP', 'WTA', 'Challenger', 'WTA 125', 'ITF Men', 'ITF Women'];
 export const MODEL_VERSION = 'tennis-elo-baseline-0.1';
@@ -99,27 +100,15 @@ export function playerSummary(playerId, history, match, cutoff) {
 export function analyzeMatch(data, match, now = Date.now()) {
   const cutoff=Math.min(now,Date.parse(data.fetchedAt),Date.parse(match.startAt));
   const history=data.history.filter(h=>h.id!==match.id&&h.status==='completed'&&Date.parse(h.endedAt)<cutoff&&Date.parse(h.observedAt)<=cutoff&&h.circuit && (['WTA','WTA 125','ITF Women'].includes(h.circuit)===['WTA','WTA 125','ITF Women'].includes(match.circuit))).sort((a,b)=>Date.parse(a.endedAt)-Date.parse(b.endedAt)||a.id.localeCompare(b.id));
-  const ratings=new Map();
-  const rating=id=>{if(!ratings.has(id))ratings.set(id,{overall:1500,hard:1500,clay:1500,grass:1500,count:0,surfaceCount:{hard:0,clay:0,grass:0},last:null});return ratings.get(id);};
-  const expected=(a,b)=>1/(1+10**((b-a)/400));
-  for(const h of history){
-    const a=rating(h.a),b=rating(h.b),win=h.winner===h.a?1:0;
-    for(const key of ['overall',h.surface]){const delta=24*(win-expected(a[key],b[key]));a[key]+=delta;b[key]-=delta;}
-    for(const p of [a,b]){p.count++;p.surfaceCount[h.surface]++;p.last=h.endedAt;}
-  }
+  const rating=eloRatings(history);
   const a=rating(match.a),b=rating(match.b);
   const reports=data.injuries.filter(r=>[match.a,match.b].includes(r.playerId)&&Date.parse(r.publishedAt)<=cutoff).sort((x,y)=>Date.parse(y.publishedAt)-Date.parse(x.publishedAt));
   const latest=[match.a,match.b].map(id=>reports.find(r=>r.playerId===id));
-  const reasons=[];
-  if(match.status!=='scheduled'||Date.parse(match.startAt)<=now)reasons.push('El partido ya empezó o no está programado.');
-  if(now-Date.parse(data.fetchedAt)>6*3600000)reasons.push('La actualización tiene más de seis horas.');
-  if(Math.min(a.count,b.count)<20)reasons.push('Se necesitan al menos 20 partidos completos por jugador.');
-  if(Math.min(a.surfaceCount[match.surface],b.surfaceCount[match.surface])<8)reasons.push('Se necesitan al menos 8 partidos por jugador en esta superficie.');
-  if([a,b].some(p=>!p.last || now-Date.parse(p.last)>180*86400000))reasons.push('Historial reciente insuficiente: más de 180 días sin partido registrado.');
-  if(latest.some(r=>r?.status==='reported'))reasons.push('Existe una incidencia física reportada; requiere revisión.');
-  const blendedA=(a.overall+a[match.surface])/2,blendedB=(b.overall+b[match.surface])/2;
+  const reasons=tennisEligibility(data,match,a,b,latest,now);
+  let probabilityA=null;
+  if(!reasons.length){try{probabilityA=demoRatingProbability(data,match,a,b,cutoff,now);}catch{reasons.push('Los datos no cumplen el contrato temporal del modelo.');}}
   const h2h=history.filter(h=>[h.a,h.b].includes(match.a)&&[h.a,h.b].includes(match.b));
-  return {modelVersion:MODEL_VERSION,status:reasons.length?'abstained':'experimental',probabilityA:reasons.length?null:expected(blendedA,blendedB),reasons,
+  return {modelVersion:MODEL_VERSION,status:reasons.length?'abstained':'experimental',probabilityA,reasons,
     ratings:[a,b].map(p=>({overall:Math.round(p.overall),surface:Math.round(p[match.surface]),matches:p.count,surfaceMatches:p.surfaceCount[match.surface]})),
     summaries:[match.a,match.b].map(id=>playerSummary(id,history,match,cutoff)),
     h2h:{aWins:h2h.filter(h=>h.winner===match.a).length,bWins:h2h.filter(h=>h.winner===match.b).length,matches:h2h.slice(-5).reverse()},

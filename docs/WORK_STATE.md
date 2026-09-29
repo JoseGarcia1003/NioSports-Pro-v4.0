@@ -1,5 +1,11 @@
 # Punto de control — leer antes de continuar
 
+## Reconstrucción — Fase 3 en curso
+
+- Autorizada por el propietario después del cierre F2. Base local/remota 0db3c484; rama codex/security-integrity; main ab9b63a4.
+- Alcance y gate: docs/reconstruction/PHASE_03.md. Separar proyección, probabilidad, decisión, presentación y resultados; conectar contrato F2; abstención ante datos/modelos no admisibles, sin fallback.
+- No nuevos modelos ni entrenamiento; F4 no iniciada. Conservar cuarentena F2, no API pagada ni rediseño. Actualizar este bloque con pruebas y estado antes de cerrar.
+
 ## Reconstrucción — Fase 2 cerrada técnicamente (28 de septiembre de 2026)
 
 - Mandato actual: F2, contrato/diccionario único. Implementado: `ml/contracts/dictionary.json` (51 definiciones, 26 NBA); `src/lib/data/contract.js`; `src/lib/server/data-snapshot.js`; `ml/contracts/features.py`; informe de cuarentena del CSV y diccionario legible. Detalles en `docs/reconstruction/DATA_CONTRACT.md`.

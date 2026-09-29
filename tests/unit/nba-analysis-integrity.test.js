@@ -14,79 +14,44 @@ const run = (rows = [game()], options = {}) => generateAIPicks(rows, stats, { pe
 
 beforeEach(() => { vi.clearAllMocks(); respond(); });
 
-describe('NBA automatic analysis integrity', () => {
-  it('awaits the server and preserves its model identity without fictional context or odds', async () => {
-    let resolve;
-    authenticatedFetch.mockReturnValue(new Promise(done => { resolve = done; }));
-    const pending = run();
-    resolve({ ok: true, json: async () => forecast() });
-    const [pick] = await pending;
-    const body = JSON.parse(authenticatedFetch.mock.calls[0][1].body);
-    expect(body.homeTeam).toEqual({ name: 'Lakers', stats: stats.Lakers });
-    expect(body.awayTeam).toEqual({ name: 'Celtics', stats: stats.Celtics });
-    expect(body.gameInfo).toEqual({});
-    expect(pick).toMatchObject({ modelVersion: 'server-model-3', odds: null, ev: null, evPercent: null, isValueBet: false });
-    expect(pick.missingContext).toHaveLength(3);
-  });
-  it('preserves reported zero rest days, explicit injury information and actual arena', async () => {
-    const [pick] = await run([game({ context: { home: { restDays: 0, injuries: [{ name: 'A Player', type: 'starter' }] }, away: { restDays: 4, injuries: [] } }, arena: 'Neutral site' })]);
-    const body = JSON.parse(authenticatedFetch.mock.calls[0][1].body);
-    expect(body.homeTeam.restDays).toBe(0);
-    expect(body.homeTeam.injuries).toEqual([{ name: 'A Player', type: 'starter' }]);
-    expect(body.gameInfo.arena).toBe('Neutral site');
-    expect(pick.missingContext).toEqual(['Cuota no disponible: EV sin calcular']);
-  });
-  it.each([{ isLive: true }, { isFinal: true }, { isDemo: true }, { status: 'Postponed' }, { status: 'Final' }, { homeScore: 1 }, { awayScore: 1 }, { startAt: '2020-01-01T00:00:00Z' }, { startAt: 'invalid' }, { homeTeam: ' Celtics ' }, { id: null }, { lines: { FULL: '220' } }])('does not analyze ineligible games %j', async patch => {
-    expect(await run([game(patch)])).toEqual([]);
+describe('NBA server-owned analysis integrity', () => {
+  it('never promotes legacy averages into a snapshot', async () => {
+    await expect(run()).rejects.toThrow('instantánea');
     expect(authenticatedFetch).not.toHaveBeenCalled();
   });
-  it('does not spend requests on incomplete or invalid period statistics', async () => {
-    expect(await generateAIPicks([game()], { Lakers: {}, Celtics: stats.Celtics })).toEqual([]);
-    expect(await generateAIPicks([game()], { Lakers: { fullHome: 115, fullLast5: -1 }, Celtics: stats.Celtics })).toEqual([]);
+  it('requests a versioned snapshot and never recalculates EV from a projection', async () => {
+    authenticatedFetch.mockResolvedValue({ok:true,json:async()=>({version:'prediction-chain-1',status:'experimental',recommendation:null,message:'Política no habilitada',projection:{value:{mean:225}}})});
+    await expect(run([game({snapshotId:'snapshot-1'})])).rejects.toThrow('Política no habilitada');
+    expect(JSON.parse(authenticatedFetch.mock.calls[0][1].body)).toEqual({version:'prediction-chain-1',snapshotId:'snapshot-1',market:{eventId:'nba-1',period:'FULL',line:220}});
+  });
+  it.each([{isLive:true},{isFinal:true},{isDemo:true},{status:'Postponed'},{status:'Final'},{homeScore:1},{awayScore:1},{startAt:'2020-01-01T00:00:00Z'},{startAt:'invalid'},{homeTeam:' Celtics '},{id:null},{lines:{FULL:'220'}}])('does not request ineligible games %j',async patch=>{
+    expect(await run([game(patch)])).toEqual([]);expect(authenticatedFetch).not.toHaveBeenCalled();
+  });
+  it('does not request unsupported periods',async()=>{
+    expect(await run([game({snapshotId:'one'})],{periods:['HALF','Q1']})).toEqual([]);expect(authenticatedFetch).not.toHaveBeenCalled();
+  });
+  it('rejects old flat responses rather than interpreting them as the new chain',async()=>{
+    await expect(run([game({snapshotId:'one'})])).rejects.toThrow('inconsistente');
+  });
+  it('retains quota errors',async()=>{
+    authenticatedFetch.mockResolvedValue({ok:false,status:429});
+    await expect(run([game({snapshotId:'one'})])).rejects.toThrow('límite');
+  });
+  it('cancels pending analysis even when the fetch implementation ignores cancellation',async()=>{
+    const controller=new AbortController();let resolve;
+    authenticatedFetch.mockReturnValue(new Promise(done=>{resolve=done;}));
+    const pending=run([game({snapshotId:'one'})],{signal:controller.signal});controller.abort();
+    resolve({ok:true,json:async()=>forecast()});
+    await expect(pending).rejects.toMatchObject({name:'AbortError'});
+  });
+  it('does not request when already aborted',async()=>{
+    const controller=new AbortController();controller.abort();
+    await expect(run(undefined,{signal:controller.signal})).rejects.toMatchObject({name:'AbortError'});
     expect(authenticatedFetch).not.toHaveBeenCalled();
   });
-  it('recomputes expected value from the actual selected-direction price', async () => {
-    const [pick] = await run([game({ odds: { FULL: { OVER: 100, UNDER: -250 } } })]);
-    expect(pick).toMatchObject({ odds: 100, evPercent: 20, isValueBet: true });
-  });
-  it('rejects negative expected value even when point difference is large', async () => {
-    expect(await run([game({ odds: { FULL: { OVER: -300 } } })])).toEqual([]);
-  });
-  it.each([{ line: 221 }, { edge: 25 }, { probability: 3 }, { projection: NaN }, { period: 'Q1' }, { direction: 'UNDER' }, { modelVersion: null }, { confidence: 'CERTAIN' }])('rejects inconsistent API results %j', async patch => {
-    respond(patch);
-    await expect(run()).rejects.toThrow('inconsistente');
-  });
-  it('stops immediately on quota failure instead of labelling it as no value', async () => {
-    authenticatedFetch.mockResolvedValue({ ok: false, status: 429 });
-    await expect(run([game(), game({ id: 'nba-2' })])).rejects.toThrow('límite');
-    expect(authenticatedFetch).toHaveBeenCalledTimes(1);
-  });
-  it('cancels a pending generation without starting the next game even when fetch ignores cancellation', async () => {
-    const controller = new AbortController();
-    let resolve;
-    authenticatedFetch.mockReturnValue(new Promise(done => { resolve = done; }));
-    const result = run([game(), game({ id: 'nba-2' })], { signal: controller.signal });
-    controller.abort();
-    resolve({ ok: true, json: async () => forecast() });
-    await expect(result).rejects.toMatchObject({ name: 'AbortError' });
-    expect(authenticatedFetch).toHaveBeenCalledTimes(1);
-    expect(authenticatedFetch.mock.calls[0][1].signal.aborted).toBe(true);
-  });
-  it('does not call the API for an already canceled task', async () => {
-    const controller = new AbortController(); controller.abort();
-    await expect(run(undefined, { signal: controller.signal })).rejects.toMatchObject({ name: 'AbortError' });
-    expect(authenticatedFetch).not.toHaveBeenCalled();
-  });
-  it('deduplicates games and periods before consuming quota', async () => {
-    expect(await run([game(), game()], { periods: ['FULL', 'FULL', 'Q9'] })).toHaveLength(1);
-    expect(authenticatedFetch).toHaveBeenCalledTimes(1);
-  });
-  it('does not mix separate fixtures between the same teams', () => {
-    expect(groupPicksByGame([{ ...game(), gameId: 'one' }, { ...game(), gameId: 'two' }])).toHaveLength(2);
-  });
-  it('distinguishes unpriced analyses from zero expected value in summaries', () => {
-    expect(getPicksSummary([{ evPercent: null, edge: 5 }, { evPercent: 10, edge: 3 }])).toMatchObject({ avgEV: 10, priced: 1, avgEdge: 4 });
-    expect(getPicksSummary([]).avgEV).toBeNull();
+  it('preserves personal summary and event identity helpers',()=>{
+    expect(groupPicksByGame([{...game(),gameId:'one'},{...game(),gameId:'two'}])).toHaveLength(2);
+    expect(getPicksSummary([{evPercent:null,edge:5},{evPercent:10,edge:3}])).toMatchObject({avgEV:10,priced:1,avgEdge:4});
   });
 });
 
