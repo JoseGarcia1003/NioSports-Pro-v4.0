@@ -1,5 +1,12 @@
 # Punto de control — leer antes de continuar
 
+## Reconstrucción — Fase 4 en curso (29 de septiembre de 2026)
+
+- Base Git 94b190a7; rama codex/security-integrity. Usuario autorizó F4. Nuevos ml/experiments y tests/experiments; acta PHASE_04.md abierta. No iniciar F5 ni entrenar CSV en cuarentena.
+- Implementados candidatos de puntos, grupos de variables con derivados dependientes, stacking de regresión con folds OOF aportados por llamador y frontera fixture-only. Entorno aislado .venv-phase4 con dependencias fijadas, ignorado por Git.
+- Primeras 15 pruebas de experimentos aprobadas. Matriz completa terminada: 68 candidatos/escenarios y 11 stacks; cada uno repetido con salida idéntica. 144 eventos ficticios, 120 de entrenamiento y 24 de comprobación; sin warnings ni ganador. phase04-fixture-smoke.json es evidencia de software, nunca datos NBA.
+- Pendiente: pase crítico final, regresiones de contratos Python, informe reproducible con hashes, acta/plan/hallazgos, commit y push. No cambios en aplicación web ni producción. Si se interrumpe, retomar estos pendientes; no reconstruir candidatos ya presentes.
+
 ## Reconstrucción — Fase 3 cerrada en alcance arquitectónico (29 de septiembre de 2026)
 
 - Implementación y corrección de contraste guardadas en GitHub: 909d40f5 y 4dcceb27, rama codex/security-integrity. Main sigue ab9b63a4. No confundir rama de revisión con el sitio principal.

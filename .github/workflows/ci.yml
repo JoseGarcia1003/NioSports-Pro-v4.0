@@ -7,6 +7,25 @@ on:
     branches: [main]
 
 jobs:
+  model-fixtures:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: ml/experiments/requirements.txt
+      - name: Install isolated experiment dependencies
+        run: python -m pip install -r ml/experiments/requirements.txt
+      - name: Model fixture tests (not predictive validation)
+        run: python -m unittest discover -s tests/experiments -v
+      - name: Reproducible fixture matrix (no winner selected)
+        run: python -m ml.experiments.run > phase04-fixture-smoke.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fixture-software-report-not-nba-performance
+          path: phase04-fixture-smoke.json
   build:
     runs-on: ubuntu-latest
     steps:

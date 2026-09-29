@@ -1,0 +1,8 @@
+# Isolated experiment environment. Same core versions as legacy service; no service install.
+numpy==1.26.4
+scipy==1.14.1
+scikit-learn==1.5.2
+xgboost==2.1.1
+lightgbm==4.5.0
+joblib==1.4.2
+threadpoolctl==3.5.0
