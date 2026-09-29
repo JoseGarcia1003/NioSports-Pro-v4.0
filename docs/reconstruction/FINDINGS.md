@@ -1,6 +1,6 @@
 # Registro de hallazgos y criterios de cierre
 
-Fecha inicial: 27/09/2026. Actualización 28/09/2026: **13 registros PARCIALES** (H01-H08, H27, H38, H45, H51 y H60); los otros 51 siguen PENDIENTES. F2 añade controles ejecutables, pero ningún hallazgo compuesto se cierra sin completar todas sus condiciones e integrar sus consumidores.
+Fecha inicial: 27/09/2026. Actualización 29/09/2026: **21 registros PARCIALES** (H01-H08, H15-H18, H20-H22, H27, H29, H38, H45, H51 y H60); los otros 43 siguen PENDIENTES. Ningún hallazgo compuesto se cierra sin completar todas sus condiciones e integrar sus consumidores. El avance F3 corresponde a la rama de revisión; no corrige todavía la producción principal.
 
 Evidencia del avance: [PRODUCT_SPEC v1.0.0](PRODUCT_SPEC.md), [C01-C38](PHASE_01_CASES.md) y [acta F1](PHASE_01.md). H01/H02 tienen especificación completa, pero quedan pendientes su aplicación al motor, terminología y pantallas; se amplían las fases responsables para evitar un cierre falso. H27/H38/H45/H51/H60 tienen reglas conceptuales que deberán implementarse o validarse posteriormente.
 
@@ -15,7 +15,22 @@ Avance ejecutable F2: [acta](PHASE_02.md), [contrato](DATA_CONTRACT.md), [invent
 | H07 | Manifiesto de fechas, IDs, filas por año y límites, sin alterar original | Conciliar universo/temporadas/exclusiones; cobertura real no demostrada |
 | H08 | Recuentos exactos, agregados recalculados y ventanas anidadas probados; exportador inseguro bloqueado | Exigir la frontera nueva en todo consumidor y verificar completitud del proveedor |
 
-H14/H17/H19/H29 no se declaran resueltos: el manifiesto de datos no es un experimento reproducible completo, las solicitudes antiguas no están adaptadas, frescura no tiene aún política obligatoria y la ficha pública de Elo requiere integración. H63 continúa pendiente hasta la auditoría final.
+H14/H19 no se declaran resueltos: el manifiesto de datos no es un experimento reproducible completo y frescura no tiene aún política obligatoria. H17/H29 avanzan parcialmente en F3, según la tabla siguiente. H63 continúa pendiente hasta la auditoría final.
+
+### Avance F3: arquitectura y retirada de caminos no admisibles
+
+Evidencia: [arquitectura](MODEL_ARCHITECTURE.md), [acta F3](PHASE_03.md) y tests de arquitectura/API/consumidores. Se distingue retirar una ruta defectuosa de habilitar su reemplazo validado.
+
+| Registro | Parte implementada en F3 | Sigue pendiente |
+|---|---|---|
+| H06/H08/H17 | API exige referencia a snapshot del servidor y contrato F2; rechaza JSON legacy. Generador no fabrica solicitudes ni picks; calculadora antigua retirada | Productor real, persistencia y recorrido con datos admisibles; resolver de producción sin registros |
+| H15 | Periodo forma parte del contrato y del manifiesto; Q1/HALF no soportados; no se transforma FULL en otros periodos | Distribución y validación independiente por capacidad que se pretenda habilitar |
+| H16 | Carga exige todos los archivos/hashes/dimensiones; eliminados padding, truncado y sustitución silenciosa | Arranque e inferencia del servicio Python real con artefacto certificado; servicio externo no desplegado en F3 |
+| H18 | Retirada la pantalla que llamaba ML a un fallback; presentador no calcula ni atribuye precisión | Revisión completa del relato público en F15 y recorrido de un modelo habilitado |
+| H20 | API/generador/calculadora dejan de inventar líneas, cuotas, EV o picks | Precio observado, procedencia, frescura y política de decisión F8/F9 |
+| H21 | Un contrato de probabilidad; retirados cálculos activos duplicados de cliente y API | Distribución F7 y replay F10; fórmulas antiguas de engine/backtest todavía conservadas fuera de esas rutas activas |
+| H22 | Retirada la calculadora que multiplicaba periodos solapados; contrato actual no ofrece combinadas | Mantener restricción y regresiones integrales en F7/F9/F16 |
+| H29 | Elo separado del contexto H2H/saque; demo bajo contrato fixture y feed real sin procedencia suficiente se abstiene | Validación Elo F11, explicaciones F12 y metodología pública F15 |
 
 Fuente: [auditoría completa](../AUDIT_2026-09-27.md), código auditado `ab9b63a4982cdb212c43a5f631507fa839e4e4aa`. Las páginas son las 20 secciones del PDF, delimitadas por `<!-- PAGE -->` en Markdown. Consultar sus referencias E1-E13 para archivos y límites. Las referencias abarcan evidencia observada, revisión de código y pendientes NV: **un NV no se convierte aquí en fallo confirmado**. H62 es una inferencia de planificación explícita a partir de datos ya usados, no una observación de un test nuevo. H63 es un riesgo de proceso.
 

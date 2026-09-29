@@ -1,12 +1,14 @@
 # Punto de control — leer antes de continuar
 
-## Reconstrucción — Fase 3 en curso
+## Reconstrucción — Fase 3 cerrada en alcance arquitectónico (29 de septiembre de 2026)
 
-- Autorizada por el propietario después del cierre F2. Base local/remota 0db3c484; rama codex/security-integrity; main ab9b63a4.
-- Alcance y gate: docs/reconstruction/PHASE_03.md. Separar proyección, probabilidad, decisión, presentación y resultados; conectar contrato F2; abstención ante datos/modelos no admisibles, sin fallback.
-- No nuevos modelos ni entrenamiento; F4 no iniciada. Conservar cuarentena F2, no API pagada ni rediseño. Actualizar este bloque con pruebas y estado antes de cerrar.
-
-## Reconstrucción — Fase 2 cerrada técnicamente (28 de septiembre de 2026)
+- Implementación y corrección de contraste guardadas en GitHub: 909d40f5 y 4dcceb27, rama codex/security-integrity. Main sigue ab9b63a4. No confundir rama de revisión con el sitio principal.
+- Cinco etapas separadas (proyección, probabilidad, decisión, presentación y resultado); contratos versionados enlazados a snapshots F2. API/generador sin fallback ni EV en cliente; calculadora legacy retirada. /totales informa límites y permite consultar disponibilidad. Elo separado del contexto; demo experimental, feed real no certificado se abstiene.
+- Producción sin snapshots/modelos registrados: no se habilitan predicciones comerciales. API Python exige artefacto completo y dimensiones exactas; servicio externo NO desplegado/verificado integralmente. CSV y siete archivos del directorio de modelos preservados por hash. Cuarentena F2 intacta.
+- Pruebas: 529 dominio/servidor + 10 UI + 17 Python = 556 aprobadas; check 0 errores/warnings. Tras corrección CSS se repitieron las 10 UI, aprobadas. Vercel READY para el código final 4dcceb27, dpl_8w2UjbdSyvUxHwrSqT6we8nvSUtv. Preview: https://nio-sports-pro-v4-0-gojpae80w-niosports-pros-projects.vercel.app/totales (acceso Vercel). Navegador: disponibilidad/reintento/enlace NBA, contraste claro/oscuro; 1265/375 px efectivos sin overflow; demo tenis etiquetada; consola /totales sin errores observados. No repetir todas las pruebas sin un nuevo cambio que lo justifique.
+- Acta PHASE_03.md y CHECKS_PHASE_03.json: APROBADA EN ALCANCE ARQUITECTÓNICO; VALIDACIÓN EMPÍRICA PENDIENTE. Nota de fase 8/10 con rúbrica; notas del producto/modelo sin cambios. Plan v1.3; inventario 21 parciales y 43 pendientes. Commit posterior de cierre solo modifica documentación; consultar Git para SHA final. No repetir F3.
+- Próximo paso después del acta aprobada: F4, candidatos/benchmarks/ablaciones bajo fixtures, sin entrenar CSV en cuarentena ni seleccionar ganador antes de F5/F6. Interfaz F17 y API pagada F19.
+## Historial: Reconstrucción — Fase 2 cerrada técnicamente (28 de septiembre de 2026)
 
 - Mandato actual: F2, contrato/diccionario único. Implementado: `ml/contracts/dictionary.json` (51 definiciones, 26 NBA); `src/lib/data/contract.js`; `src/lib/server/data-snapshot.js`; `ml/contracts/features.py`; informe de cuarentena del CSV y diccionario legible. Detalles en `docs/reconstruction/DATA_CONTRACT.md`.
 - Ventanas con registros y recuentos exactos/coherentes; tiempos de publicación/disponibilidad/captura al corte; unidades/orígenes/alcances; objetivos separados; hashes/revisiones. Nueve composiciones compartidas con API Python. No migración remota ni API pagada. Solicitudes antiguas aún no adaptadas; es pendiente de F3, no funcionalidad ya cerrada.

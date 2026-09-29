@@ -1,0 +1,262 @@
+{
+  "phase": 3,
+  "date": "2026-09-29",
+  "verdict": "APROBADA EN ALCANCE ARQUITECTONICO; VALIDACION EMPIRICA PENDIENTE",
+  "base_commit": "0db3c48422fd0cda3606a78009db5172670ab04f",
+  "implementation_commit": "909d40f51da2e7c7e9cc6907feba0a46019c9f98",
+  "final_code_commit": "4dcceb2723e4162739ace5ada7c7579b370f8352",
+  "branch": "codex/security-integrity",
+  "main_commit": "ab9b63a4982cdb212c43a5f631507fa839e4e4aa",
+  "architecture_version": "prediction-chain-1",
+  "checks": [
+    {
+      "date": "2026-09-28",
+      "name": "domain_server",
+      "files": 30,
+      "command": "node node_modules/vitest/vitest.mjs run",
+      "passed": 529,
+      "exit_code": 0
+    },
+    {
+      "date": "2026-09-29",
+      "name": "ui",
+      "files": 3,
+      "after_final_css_fix": true,
+      "command": "node node_modules/vitest/vitest.mjs run --config vitest.ui.config.js",
+      "passed": 10,
+      "exit_code": 0
+    },
+    {
+      "date": "2026-09-28",
+      "name": "python",
+      "full_service_executed": false,
+      "command": "python -m unittest discover -s tests/python -v",
+      "passed": 17,
+      "exit_code": 0
+    },
+    {
+      "after_final_css_fix": false,
+      "name": "svelte_check",
+      "warnings": 0,
+      "command": "node node_modules/svelte-check/bin/svelte-check --tsconfig ./jsconfig.json",
+      "date": "2026-09-28",
+      "errors": 0,
+      "exit_code": 0
+    }
+  ],
+  "total_passed_tests": 556,
+  "predictive_performance_validated": false,
+  "environment": {
+    "python": "3.12.14",
+    "os": "Windows",
+    "node": "24.19.0"
+  },
+  "original_preview": {
+    "sha": "909d40f51da2e7c7e9cc6907feba0a46019c9f98",
+    "production": false,
+    "ready_at_unix_ms": 1790693713337,
+    "state": "READY",
+    "id": "dpl_FGwAH3E12cupoN5ZbraPsAocEGbj"
+  },
+  "final_preview": {
+    "url": "https://nio-sports-pro-v4-0-gojpae80w-niosports-pros-projects.vercel.app",
+    "production": false,
+    "sha": "4dcceb2723e4162739ace5ada7c7579b370f8352",
+    "state": "READY",
+    "id": "dpl_8w2UjbdSyvUxHwrSqT6we8nvSUtv",
+    "ready_at_unix_ms": 1790694117557
+  },
+  "source_files": [
+    {
+      "path": "ml/api/main.py",
+      "sha256": "4b741bd176c0c406ed7744e892a41b4727a99dd1b2792ddd74808bc6b1086a9a"
+    },
+    {
+      "path": "ml/contracts/projection.py",
+      "sha256": "da9d10538a8ad11f156f9374099c326cbd21f49fd06bb1a20ec9ae5b5fee469e"
+    },
+    {
+      "path": "src/lib/prediction/capabilities.js",
+      "sha256": "2fafc944848d81617d0bc024e1ec680fdd842bce4511dd0b8074f05702f42128"
+    },
+    {
+      "path": "src/lib/prediction/contracts.js",
+      "sha256": "085957c43d5c4f39d92b91fe05c219a2fd83fdea0d835b78c0e458a6c05c6130"
+    },
+    {
+      "path": "src/lib/prediction/decision.js",
+      "sha256": "7c92443b7716aba38d1d90b110827e64408465f8414e19cd16ec9b8ede25f183"
+    },
+    {
+      "path": "src/lib/prediction/presentation.js",
+      "sha256": "9eb98cee38adc17fd3fb48dec927d2d1080b2c082c5e6ca1a13b5ed4ff79bf40"
+    },
+    {
+      "path": "src/lib/prediction/probability.js",
+      "sha256": "b0c4600f98a561d4e17297a5ba2c3afbb8f4f4ca4d7cdccb4f85e2ff07fa6956"
+    },
+    {
+      "path": "src/lib/prediction/projection.js",
+      "sha256": "e36b6917d289dcddcfede555f2766e141ae8445e7aafa3b324a289085af4eafb"
+    },
+    {
+      "path": "src/lib/prediction/results.js",
+      "sha256": "3bbfdb48da34961a3d8565ec6e7a62e212e3282760476c180e451945ac8d862e"
+    },
+    {
+      "path": "src/lib/server/prediction-pipeline.js",
+      "sha256": "82cfa38fe1a433a2dccaa4e62b03639b5804592fc528fe28b2bb4ef2e5f8e60d"
+    },
+    {
+      "path": "src/lib/server/prediction-service.js",
+      "sha256": "90717a97bd10960b6ca8c8954cebe1a7973350a5eb7f1cfc3095f7d7f758003e"
+    },
+    {
+      "path": "src/lib/server/remote-projection.js",
+      "sha256": "356481201cf8a48f36abea682ad1b00a2c4a0fc71b390f55670b40898a4bf28d"
+    },
+    {
+      "path": "src/lib/services/ai-picks-generator.js",
+      "sha256": "9c2ce875a987b5f3c72b2abf31fa22ba67bc2724db980e9e0b1e1d3ace36a1a8"
+    },
+    {
+      "path": "src/lib/tennis/domain.js",
+      "sha256": "cd15b24a8e715c64ea969192ac8908966c80151ae1e5472475f18e96bc6d7834"
+    },
+    {
+      "path": "src/lib/tennis/elo.js",
+      "sha256": "3c63e55d05b1cf2137edd9a4245d8e7981980ce35dccbf5f139b04e7903490f4"
+    },
+    {
+      "path": "src/routes/+layout.svelte",
+      "sha256": "51f0e1a0fac7f1447485e50d7b846aa0c8693be42132dace5db05e314512fb9d"
+    },
+    {
+      "path": "src/routes/api/predict-batch/+server.js",
+      "sha256": "80350c7365098db55f825cad4f895178d78309431d87ce9a225414e14148585c"
+    },
+    {
+      "path": "src/routes/api/predict/+server.js",
+      "sha256": "b2a69d77ad6aaf336b58a063ddeb3d970f92ef2a637bc2c1c3de3646fe06e8b7"
+    },
+    {
+      "path": "src/routes/totales/+page.svelte",
+      "sha256": "a7f297f0c20dc40872ffc4e55eee19d5bb75e70072f3b3e6b2ff37adf7287eab"
+    },
+    {
+      "path": "tests/python/test_projection_architecture.py",
+      "sha256": "c79e167a4f01a4aa7d2bd714d913e982ecb1dcb0693f79053eba7aacf93c261a"
+    },
+    {
+      "path": "tests/ui/totals-capabilities.test.js",
+      "sha256": "07312cb2fd207947affcc7f3d50c669976bbb77f472f67535910740cbb195c87"
+    },
+    {
+      "path": "tests/unit/nba-analysis-integrity.test.js",
+      "sha256": "abbb43af4cda408fe4c9fe4770a2a888c4541d6a752bce041d8cb69e8cb57fec"
+    },
+    {
+      "path": "tests/unit/predict-api.test.js",
+      "sha256": "9e153d7bc1a0ef560fe4974666e63edcd9f0f082d00f1303d47824b43b318421"
+    },
+    {
+      "path": "tests/unit/prediction-architecture.test.js",
+      "sha256": "9deae6daa9beac3ee135bdfa01b24dfa0734a4e3f39601a805414fb8fde4a399"
+    }
+  ],
+  "preserved_files": [
+    {
+      "matches_phase_02": true,
+      "sha256": "93b82f452c222832327bc8db130082ef9561f73accc20610dae4a38e3dc961a5",
+      "path": "ml/data/nba_features.csv"
+    },
+    {
+      "matches_phase_02": true,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "path": "ml/models/.gitkeep"
+    },
+    {
+      "matches_phase_02": true,
+      "sha256": "6722da57192007492db44694ceada608faeda35a3029777e8fb0d3a24538ab59",
+      "path": "ml/models/best_params.json"
+    },
+    {
+      "matches_phase_02": true,
+      "sha256": "c68d203961ee9620325bc881cbc589c3579fd87ceb82074b59f4697b6d722007",
+      "path": "ml/models/calibration.json"
+    },
+    {
+      "matches_phase_02": true,
+      "sha256": "236ec9433ea15ad7a978a7303bb682798bb80152f51b8c594f5238d4125e2781",
+      "path": "ml/models/ensemble_model.json"
+    },
+    {
+      "matches_phase_02": true,
+      "sha256": "8ecc6e8803cf845f871c9828e8354563aa0654e479ac0c4012bc4006b0a4ba75",
+      "path": "ml/models/lightgbm_totals.txt"
+    },
+    {
+      "matches_phase_02": true,
+      "sha256": "55e5bb44e88c939fb289f623d1b6a631300ab748fe8a1e410c12bcdb2e0549c6",
+      "path": "ml/models/training_results.json"
+    },
+    {
+      "matches_phase_02": true,
+      "sha256": "236ec9433ea15ad7a978a7303bb682798bb80152f51b8c594f5238d4125e2781",
+      "path": "ml/models/xgboost_totals.json"
+    }
+  ],
+  "logs": [
+    {
+      "stored_in_git": false,
+      "sha256": "c15bec58c2fc9dc28af3b51aa4edf1f605c934adffd4a41c4449de73641ad074",
+      "path": "phase03-final-unit.log"
+    },
+    {
+      "stored_in_git": false,
+      "sha256": "ee6f3f580b5874dad7088c765de87af0d9d92cfd12d0c765e264aee90e2914f6",
+      "path": "phase03-ui.log"
+    },
+    {
+      "stored_in_git": false,
+      "sha256": "71ceed542e015b5c697c26c61ce42c74e1b204319f4e9390e0fdd6bc43ac151f",
+      "path": "phase03-python.log"
+    },
+    {
+      "stored_in_git": false,
+      "sha256": "98dcd228a357111230493cd6b5636fb938f7d7d84e356ba7027de8cc041223b1",
+      "path": "phase03-check-final.log"
+    }
+  ],
+  "limitations": [
+    "Production snapshot resolver and model registry intentionally empty",
+    "No new predictive accuracy/calibration/profitability evidence",
+    "Full FastAPI/ML dependencies not executed or deployed; stdlib and extracted functions tested",
+    "No database persistence or paid provider connection",
+    "Legacy engine/backtest formulas remain outside active inference routes",
+    "No final local build claimed: remote build used after known Windows adapter symlink limitation",
+    "No production promotion; preview requires Vercel authorized access",
+    "Public methodology and older NBA promotional copy remain pending phase 15"
+  ],
+  "github_actions_pass_claimed": false,
+  "technical_phase_score": 8,
+  "browser_checks": {
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "effective_document_widths": [
+      1265,
+      375
+    ],
+    "retry_and_nba_link_checked_on_initial_preview": true,
+    "console_warnings_observed": 0,
+    "route": "/totales",
+    "full_accessibility_audit": false,
+    "tennis_demo_labeled_on_initial_preview": true,
+    "final_sha": "4dcceb2723e4162739ace5ada7c7579b370f8352",
+    "horizontal_overflow": false,
+    "console_errors_observed": 0,
+    "server_status_confirmed": true
+  }
+}
