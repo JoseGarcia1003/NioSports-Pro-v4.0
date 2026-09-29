@@ -22,10 +22,14 @@ jobs:
         run: python -m unittest discover -s tests/experiments -v
       - name: Reproducible fixture matrix (no winner selected)
         run: python -m ml.experiments.run > phase04-fixture-smoke.json
+      - name: Temporal isolation report (final test stays locked)
+        run: python -m ml.validation.experiment > phase05-temporal.json
       - uses: actions/upload-artifact@v4
         with:
           name: fixture-software-report-not-nba-performance
-          path: phase04-fixture-smoke.json
+          path: |
+            phase04-fixture-smoke.json
+            phase05-temporal.json
   build:
     runs-on: ubuntu-latest
     steps:
