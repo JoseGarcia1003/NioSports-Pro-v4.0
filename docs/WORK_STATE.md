@@ -1,5 +1,15 @@
 # Punto de control — leer antes de continuar
 
+## Reconstrucción — Fase 5 cerrada técnicamente (29 de septiembre de 2026)
+
+- Usuario autorizó F5. Implementación 1fabe7e5, base 025c9743, rama codex/security-integrity. Main conserva ab9b63a4. Commit posterior de cierre solo documentación/evidencia; consultar Git para SHA final y remoto. Sin cambios en src/, datos/pesos legacy ni producción.
+- ml/validation: metadatos UTC, particiones por fechas, grupos indivisibles/simultáneos, disponibilidad y embargo; cuatro bloques de validación y OOF automático. Modelo final usa solo desarrollo admisible; preprocesadores ajustados dentro de train. Lote de calibración autorizado y recibos ligados a modelo congelado; refit y cambio de lote rechazados.
+- Calibración PREPARADA, no ajustada: calibratorFitted=false; distribución/calibrador F7. Test final UNAVAILABLE_INDEPENDENT_DATA, sin lector; sus valores no se consumen. No confundir reserva ficticia con evidencia independiente. Ejecutor sigue fixture-only; no abrir CSV en cuarentena.
+- 38 tests de experimentos (19 F4 + 19 F5) y 17 contratos Python: 55 aprobados. Dos procesos generaron informe temporal idéntico. 144 filas ficticias: 60 train, 40 validation, 24 calibration, 20 reservadas; 99 train final, 79 OOF en ocho folds. Ocho hashes legacy intactos, fuentes verificadas y YAML CI válido. CI configurado, ejecución remota NO verificada. Las 539 pruebas web F3 son históricas; no se repitieron sin cambios web.
+- APROBADA TÉCNICAMENTE; VALIDACIÓN EMPÍRICA PENDIENTE. Nota técnica 8/10, no precisión. Acta PHASE_05.md, protocolo TEMPORAL_VALIDATION.md y CHECKS_PHASE_05.json. Plan v1.5; inventario 26 parciales/38 pendientes. Informe completo ignorado local: ml/experiments/output/phase05-temporal.json, regenerable. No ganador ni nuevas notas del producto/modelo.
+- Guardar cierre y verificar push solo en rama de trabajo. Una preview automática de Vercel no valida Python ni implica promoción a producción.
+- Próximo «continúa»: abrir F6, anunciar alcance y formalizar métricas/denominadores y comparación temporal de desarrollo con incertidumbre. Sin precios no hay retorno; sin datos admisibles no afirmar superioridad empírica. Mantener test final cerrado, calibración separada, legacy bloqueado y API pagada F19. F6 NO INICIADA. No repetir F5.
+
 ## Reconstrucción — Fase 4 cerrada en preparación técnica (29 de septiembre de 2026)
 
 - Usuario autorizó F4 y su continuación. Implementación c76d0bf3, rama codex/security-integrity; base 94b190a7. No cambios en src/, servicio web, CSV ni pesos. Main conserva ab9b63a4. Commit posterior de cierre solo añade documentación/evidencia; consultar Git para SHA final y remoto.

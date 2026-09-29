@@ -1,6 +1,6 @@
 # Registro de hallazgos y criterios de cierre
 
-Fecha inicial: 27/09/2026. Actualización 29/09/2026: **23 registros PARCIALES** (H01-H08, H10, H14-H18, H20-H22, H27, H29, H38, H45, H51 y H60); los otros 41 siguen PENDIENTES. Ningún hallazgo compuesto se cierra sin completar todas sus condiciones e integrar sus consumidores. El avance F3/F4 corresponde a la rama de revisión; no corrige todavía la producción principal.
+Fecha inicial: 27/09/2026. Actualización 29/09/2026: **26 registros PARCIALES** (H01-H11, H14-H18, H20-H22, H27, H29, H38, H45, H51, H60 y H62); los otros 38 siguen PENDIENTES. Ningún hallazgo compuesto se cierra sin completar todas sus condiciones e integrar sus consumidores. El avance F3-F5 corresponde a la rama de revisión; no corrige todavía la producción principal.
 
 Evidencia del avance: [PRODUCT_SPEC v1.0.0](PRODUCT_SPEC.md), [C01-C38](PHASE_01_CASES.md) y [acta F1](PHASE_01.md). H01/H02 tienen especificación completa, pero quedan pendientes su aplicación al motor, terminología y pantallas; se amplían las fases responsables para evitar un cierre falso. H27/H38/H45/H51/H60 tienen reglas conceptuales que deberán implementarse o validarse posteriormente.
 
@@ -133,6 +133,18 @@ Evidencia: PHASE_04.md, NBA_EXPERIMENTS.md y CHECKS_PHASE_04.json. No se cierra 
 | H04 | Once ablaciones ejecutables, con eliminación de derivados; análisis explícito de las 26 variables | Aporte incremental con datos admisibles y evaluación temporal F5/F6 |
 | H10 | Stacking de puntos entrenado sobre OOF; se rechazan solapamiento/futuro y bloque de comprobación en sus folds; recibos reproducibles | Protocolo temporal real F5 y comparación independiente F6; pesos legacy siguen bloqueados |
 | H14 | Configuración, semilla, entorno, fuentes, fixture y predicciones con hashes; 79 casos repetidos idénticamente | Reproducción del experimento empírico y actualización pública de folds reales |
+### Avance F5: aislamiento temporal comprobado
+
+Evidencia: [acta F5](PHASE_05.md), [protocolo](TEMPORAL_VALIDATION.md) y [55 pruebas/evidencia](CHECKS_PHASE_05.json). Sin test final real ni métricas empíricas nuevas. La tabla F4 anterior conserva su alcance histórico.
+
+| Registro | Parte implementada en F5 | Sigue pendiente |
+|---|---|---|
+| H09 | Fechas UTC estrictas, orden determinista, grupos indivisibles, disponibilidad y embargo | Admisión y procedencia de datos reales; legacy en cuarentena |
+| H10 | OOF generado temporalmente e integrado con stacking; no usa calibración ni reserva | Comparación de desarrollo F6 y validación deportiva real |
+| H11 | Lote separado ligado al modelo congelado; rechazo de refit, recibos alterados y sustitución por reserva | Distribución/calibrador F7 y verificación empírica independiente |
+| H14 | Manifiesto temporal con IDs/cortes, hashes de código y desarrollo, entorno; dos procesos idénticos | Reproducción con datos admisibles, ejecución remota y relato público F15 |
+| H62 | Reserva sin lector; estado NO DISPONIBLE, prohibido usarla como lote de calibración; valores excluidos de ejecución | Datos externos/prospectivos realmente independientes y evaluación de versión congelada |
+
 ## Estados permitidos y responsabilidad
 
 Responsable de ejecución: agente que retome la fase activa. Revisor técnico: mismo agente mediante pase explícito de auditoría; no equivale a revisión independiente. El propietario conserva decisión de alcance.
