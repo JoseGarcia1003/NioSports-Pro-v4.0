@@ -34,7 +34,7 @@
 </div>
 <style>
   .page{--text:var(--color-text-primary);--muted:var(--color-text-secondary);--surface:var(--color-bg-card);--border:var(--color-border);--accent:var(--color-brand-primary);--bg:var(--color-text-inverse);max-width:1000px;margin:auto;padding:32px 24px 100px;color:var(--text)}
-  a{color:var(--accent)}header{margin:36px 0}.eyebrow{font-size:12px;letter-spacing:.12em;color:var(--muted)}
+  a{color:var(--text);text-decoration:underline;text-underline-offset:3px}header{margin:36px 0}.eyebrow{font-size:12px;letter-spacing:.12em;color:var(--muted)}
   h1{font-size:clamp(32px,5vw,52px);margin:12px 0;font-weight:700;letter-spacing:-.04em}h2{font-size:24px}
   p{line-height:1.8;color:var(--muted);max-width:75ch}section{padding:28px;border:1px solid var(--border);border-radius:16px;background:var(--surface)}
   dl{margin:28px 0}dl div{padding:16px 0;border-bottom:1px solid var(--border)}dt{font-weight:600}dd{margin:8px 0 0;color:var(--muted)}
