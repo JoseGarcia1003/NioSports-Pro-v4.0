@@ -1,12 +1,13 @@
 # Punto de control — leer antes de continuar
 
-## Reconstrucción — Fase 4 en curso (29 de septiembre de 2026)
+## Reconstrucción — Fase 4 cerrada en preparación técnica (29 de septiembre de 2026)
 
-- Base Git 94b190a7; rama codex/security-integrity. Usuario autorizó F4. Nuevos ml/experiments y tests/experiments; acta PHASE_04.md abierta. No iniciar F5 ni entrenar CSV en cuarentena.
-- Implementados candidatos de puntos, grupos de variables con derivados dependientes, stacking de regresión con folds OOF aportados por llamador y frontera fixture-only. Entorno aislado .venv-phase4 con dependencias fijadas, ignorado por Git.
-- Primeras 15 pruebas de experimentos aprobadas. Matriz completa terminada: 68 candidatos/escenarios y 11 stacks; cada uno repetido con salida idéntica. 144 eventos ficticios, 120 de entrenamiento y 24 de comprobación; sin warnings ni ganador. phase04-fixture-smoke.json es evidencia de software, nunca datos NBA.
-- Pendiente: pase crítico final, regresiones de contratos Python, informe reproducible con hashes, acta/plan/hallazgos, commit y push. No cambios en aplicación web ni producción. Si se interrumpe, retomar estos pendientes; no reconstruir candidatos ya presentes.
-
+- Usuario autorizó F4 y su continuación. Implementación c76d0bf3, rama codex/security-integrity; base 94b190a7. No cambios en src/, servicio web, CSV ni pesos. Main conserva ab9b63a4. Commit posterior de cierre solo añade documentación/evidencia; consultar Git para SHA final y remoto.
+- Laboratorio ml/experiments: medias histórica/móvil, árbol simple, Ridge, XGBoost, LightGBM, MLP, media ensemble y stacking de puntos con OOF. Once escenarios con derivados retirados si falta su componente. No logística contra mediana artificial, no probabilidad/EV ni recomendaciones nuevas. Entorno local .venv-phase4 ignorado, bibliotecas reales fijadas.
+- 19 tests de experimentos + 17 de contratos Python = 36 pruebas actuales aprobadas. Matriz de 68 candidatos/escenarios + 11 stacks = 79 configuraciones; cada una repetida desde cero con resultados idénticos, sin warnings. 144 eventos ficticios, 120 train, 24 comprobación y 80 filas OOF. Informe reproducible y hashes en CHECKS_PHASE_04.json; salida completa local ignorada ml/experiments/output/phase04-fixture-smoke.json. pip check correcto, YAML CI validado. Job remoto configurado, NO se afirma que haya ejecutado.
+- APROBADA EN PREPARACIÓN TÉCNICA; EVALUACIÓN EMPÍRICA PENDIENTE. Nota de fase 8/10, no precisión. Acta PHASE_04.md y análisis NBA_EXPERIMENTS.md. Plan v1.4; inventario 23 parciales/41 pendientes. No ganador, no aporte incremental demostrado, ningún cambio en notas de auditoría. Ocho hashes legacy preservados; entrenadores continúan en cuarentena.
+- No repetir las 539 pruebas web de F3 sin cambios que lo justifiquen; son históricas. No hay despliegue comercial ni servicio Python habilitado por este laboratorio. Una preview automática de Vercel no verifica los modelos.
+- Próximo «continúa»: abrir F5 y anunciar alcance. Implementar TRAIN → VALIDACIÓN TEMPORAL → CALIBRACIÓN → TEST FINAL y controles de disponibilidad, OOF y reserva independiente o no disponible. El particionador real y los datos observados siguen pendientes. No usar CSV en cuarentena ni seleccionar ganador antes de F5/F6. F5 NO INICIADA; diseño F17, API pagada F19.
 ## Reconstrucción — Fase 3 cerrada en alcance arquitectónico (29 de septiembre de 2026)
 
 - Implementación y corrección de contraste guardadas en GitHub: 909d40f5 y 4dcceb27, rama codex/security-integrity. Main sigue ab9b63a4. No confundir rama de revisión con el sitio principal.

@@ -1,6 +1,6 @@
 # Registro de hallazgos y criterios de cierre
 
-Fecha inicial: 27/09/2026. Actualización 29/09/2026: **21 registros PARCIALES** (H01-H08, H15-H18, H20-H22, H27, H29, H38, H45, H51 y H60); los otros 43 siguen PENDIENTES. Ningún hallazgo compuesto se cierra sin completar todas sus condiciones e integrar sus consumidores. El avance F3 corresponde a la rama de revisión; no corrige todavía la producción principal.
+Fecha inicial: 27/09/2026. Actualización 29/09/2026: **23 registros PARCIALES** (H01-H08, H10, H14-H18, H20-H22, H27, H29, H38, H45, H51 y H60); los otros 41 siguen PENDIENTES. Ningún hallazgo compuesto se cierra sin completar todas sus condiciones e integrar sus consumidores. El avance F3/F4 corresponde a la rama de revisión; no corrige todavía la producción principal.
 
 Evidencia del avance: [PRODUCT_SPEC v1.0.0](PRODUCT_SPEC.md), [C01-C38](PHASE_01_CASES.md) y [acta F1](PHASE_01.md). H01/H02 tienen especificación completa, pero quedan pendientes su aplicación al motor, terminología y pantallas; se amplían las fases responsables para evitar un cierre falso. H27/H38/H45/H51/H60 tienen reglas conceptuales que deberán implementarse o validarse posteriormente.
 
@@ -47,11 +47,11 @@ Los hallazgos compuestos se desglosan en pruebas al iniciar su fase. Ningún ID 
 | H07 | G2 | alto | 4 | 2,18,19 | 5.999 filas no conciliadas con universo; exclusiones/cobertura y antigüedad no caracterizadas. | Manifiesto por temporada, duplicados, exclusiones y límites; datos antiguos nunca etiquetados actuales. |
 | H08 | G2 | alto | 4 | 2,3 | Ventanas L5/L10/L20 no garantizan ese número de encuentros. | Conservar recuentos efectivos y probar inicio de histórico y muestra insuficiente; consumidores no eluden el contrato. |
 | H09 | G3 | crítico | 4 | 5 | Entrenamiento ordena date y CSV usa _date; actual orden correcto, procedimiento frágil. | Validar y ordenar fecha disponible; separar grupos temporales sin cruzar fronteras indebidas. |
-| H10 | G3 | crítico | 5 | 5 | Stacking aprende de predicciones dentro de muestra. | Cada predicción del meta-modelo tiene train_end anterior a su corte; prueba impide solapamiento. |
+| H10 | G3 | crítico | 5 | 4,5 | Stacking aprende de predicciones dentro de muestra. | Cada predicción del meta-modelo tiene train_end anterior a su corte; prueba impide solapamiento. |
 | H11 | G3 | crítico | 5 | 5 | Calibración presentada OOS procede de modelos reajustados sobre todos los datos. | Calibración independiente y trazabilidad de índices/fechas; refit no reutiliza el bloque evaluado. |
 | H12 | G3 | alto | 5 | 4,5,6 | Ensemble no supera Ridge en MAE archivado; falta comparación robusta. | Benchmarks y ablaciones temporales; elegir modelo simple si no hay mejora consistente y relevante. |
 | H13 | G3 | crítico | 5 | 6,7 | Brier/ECE archivados desfavorables; faltan log loss, intervalos y estabilidad; objetivo ECE no es resultado. | Métricas separadas, referencias y rangos temporales; no presentar probabilidades como calibradas sin evidencia. |
-| H14 | G3 | alto | 4,8,17 | 5,10,15 | Experimento sin manifiesto reproducible completo y fechas públicas de folds incorrectas. | Código/dataset/semilla/entorno/fechas/hiperparámetros registrados; reproducción y documentos coinciden. |
+| H14 | G3 | alto | 4,8,17 | 4,5,10,15 | Experimento sin manifiesto reproducible completo y fechas públicas de folds incorrectas. | Código/dataset/semilla/entorno/fechas/hiperparámetros registrados; reproducción y documentos coinciden. |
 | H15 | G4 | crítico | 5,6 | 3,7 | API ensemble no aplica Platt guardado y probabilidad Q1/HALF compara proyección FULL. | Camino de inferencia explícito por versión y periodo; no escalar FULL arbitrariamente; abstenerse sin modelo válido. |
 | H16 | G4 | alto | 6 | 3,7 | Carga parcial sustituye LightGBM por XGBoost; recorta/rellena dimensiones. | Artefacto incompleto o features incompatibles producen error/abstención identificada, nunca sustitución silenciosa. |
 | H17 | G4 | crítico | 6,13 | 2,3,7 | /totales y /picks incumplen contrato ML: daysIntoSeason/stats.ml ausentes. | Contrato de solicitud comprobado en ambos flujos; respuesta identifica motor realmente ejecutado. |
@@ -124,6 +124,15 @@ Los hallazgos compuestos se desglosan en pruebas al iniciar su fase. Ningún ID 
 - P18: veredicto/preguntas: criterios distribuidos en H01-H64; nota no representa acierto.
 - P19-P20: fuentes y verificaciones: referencias preservadas en auditoría; resumen y huellas en CHECKS_PHASE_00.json.
 
+### Avance F4: candidatos y evidencia de software
+
+Evidencia: PHASE_04.md, NBA_EXPERIMENTS.md y CHECKS_PHASE_04.json. No se cierra el desempeño predictivo mediante fixtures.
+
+| Registro | Parte implementada en F4 | Sigue pendiente |
+|---|---|---|
+| H04 | Once ablaciones ejecutables, con eliminación de derivados; análisis explícito de las 26 variables | Aporte incremental con datos admisibles y evaluación temporal F5/F6 |
+| H10 | Stacking de puntos entrenado sobre OOF; se rechazan solapamiento/futuro y bloque de comprobación en sus folds; recibos reproducibles | Protocolo temporal real F5 y comparación independiente F6; pesos legacy siguen bloqueados |
+| H14 | Configuración, semilla, entorno, fuentes, fixture y predicciones con hashes; 79 casos repetidos idénticamente | Reproducción del experimento empírico y actualización pública de folds reales |
 ## Estados permitidos y responsabilidad
 
 Responsable de ejecución: agente que retome la fase activa. Revisor técnico: mismo agente mediante pase explícito de auditoría; no equivale a revisión independiente. El propietario conserva decisión de alcance.
