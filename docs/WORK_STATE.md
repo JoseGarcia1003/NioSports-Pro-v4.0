@@ -1,5 +1,16 @@
 # Punto de control — leer antes de continuar
 
+## Reconstrucción — Fase 6 implementada; selección empírica pendiente (29 de septiembre de 2026)
+
+- Autorizada F6 y continuación. Base 6425f762; implementación 1a3234e1; rama codex/security-integrity, main ab9b63a4. Implementación ml/evaluation y 32 pruebas F6; no cambios web, CSV, pesos o servicio desplegado. Consultar Git para commits finales y verificar remoto antes de afirmar guardado.
+- Métricas separadas: MAE/RMSE/sesgo, Brier/log loss/ECE/curvas, beneficio/yield/ROI sobre capital/CLV/drawdown, cobertura/abstenciones. Vacíos no son cero, falta de cuotas bloquea retorno completo, moneda/procedencia homogénea, picks y tickets distintos. Integración con pantallas legacy pendiente F8/F13/F15.
+- Comparación de 79 configuraciones (68 candidatos + 11 stacks), cuatro folds exteriores, mismos 40 eventos ficticios. Stacking OOF anidado dentro de cada train. Calibración y reserva: valores no leídos. Sin ganador ni métricas deportivas/retornos empíricos. Dos informes idénticos en procesos separados; consultar CHECKS_PHASE_06 para versión final.
+- 70 pruebas de experimentos (19 F4 + 19 F5 + 32 F6) y 17 contratos = 87 aprobadas; tras ajuste de metadatos de referencia histórica se repitieron las 32 F6. No repetir las 539 web históricas sin cambios web. CI configurado, ejecución remota no certificada. Ocho hashes legacy preservados.
+- APROBADA la definición/verificación técnica; SELECCIÓN EMPÍRICA BLOQUEADA POR EVIDENCIA. No declarar gate integral de F6 aprobado. Nota técnica 8/10, no precisión. Política de incertidumbre previa: 2000 remuestreos pareados, mínimo ocho bloques; fixture solo tiene cuatro, devuelve intervalo no disponible. No cambiarlo para fabricar significancia.
+- Documentos: PHASE_06.md, EVALUATION_METRICS.md, PHASE_06_FIXTURE_RESULTS.md y CHECKS_PHASE_06.json. Plan v1.6; inventario 32 parciales/32 pendientes. Informe completo ignorado y regenerable: ml/experiments/output/phase06-comparison.json.
+- Guardar entrega solo en rama de trabajo y comprobar push. Main/dominio habitual no cambian; preview web no valida Python.
+- Al continuar: leer acta F6 y abordar su pendiente empírico/alcance antes de iniciar F7. La infraestructura de métricas ya está terminada: no rehacerla ni repetir 79 casos sin cambios. No entrenar CSV en cuarentena, no abrir test final, no seleccionar con fixtures, API pagada solo F19. F7 NO INICIADA; no avanzar automáticamente como si la selección real estuviera aprobada.
+
 ## Reconstrucción — Fase 5 cerrada técnicamente (29 de septiembre de 2026)
 
 - Usuario autorizó F5. Implementación 1fabe7e5, base 025c9743, rama codex/security-integrity. Main conserva ab9b63a4. Commit posterior de cierre solo documentación/evidencia; consultar Git para SHA final y remoto. Sin cambios en src/, datos/pesos legacy ni producción.

@@ -1,8 +1,8 @@
 # Plan maestro de reconstrucción de NioSports Pro
 
-Versión 1.5 · 29/09/2026 · Fase actual: **5, APROBADA TÉCNICAMENTE; VALIDACIÓN EMPÍRICA PENDIENTE**. F0-F4 cerradas en sus alcances registrados; F6-F20 no iniciadas. El propietario autorizó F5; no se inicia F6 en esta entrega.
+Versión 1.6 · 29/09/2026 · Fase actual: **6, IMPLEMENTACIÓN DE MÉTRICAS VERIFICADA; SELECCIÓN EMPÍRICA BLOQUEADA POR EVIDENCIA**. F0-F5 cerradas en sus alcances registrados; F7-F20 no iniciadas. El propietario autorizó F6 y su continuación. No se declara aprobado su gate empírico integral ni se inicia F7 automáticamente.
 
-Este plan sustituye el orden de ejecución de EXCELLENCE_PLAN.md y los siguientes pasos anteriores de WORK_STATE.md. La auditoría original se conserva intacta. Autoridad: [solicitud íntegra del propietario](reconstruction/REQUEST_2026-09-27.md). Acta actual: [Fase 5](reconstruction/PHASE_05.md); [protocolo temporal](reconstruction/TEMPORAL_VALIDATION.md); cierre previo: [Fase 4](reconstruction/PHASE_04.md); [laboratorio NBA](reconstruction/NBA_EXPERIMENTS.md); cierre previo: [Fase 3](reconstruction/PHASE_03.md); [arquitectura](reconstruction/MODEL_ARCHITECTURE.md); cierre previo: [Fase 2](reconstruction/PHASE_02.md); [contrato v1.0.0](reconstruction/DATA_CONTRACT.md); referencia conceptual: [PRODUCT_SPEC v1.0.0](reconstruction/PRODUCT_SPEC.md). [Fase 1](reconstruction/PHASE_01.md) y [Fase 0](reconstruction/PHASE_00.md) históricas. Inventario: [64 hallazgos](reconstruction/FINDINGS.md).
+Este plan sustituye el orden de ejecución de EXCELLENCE_PLAN.md y los siguientes pasos anteriores de WORK_STATE.md. La auditoría original se conserva intacta. Autoridad: [solicitud íntegra del propietario](reconstruction/REQUEST_2026-09-27.md). Acta actual: [Fase 6](reconstruction/PHASE_06.md); [métricas](reconstruction/EVALUATION_METRICS.md); cierre previo: [Fase 5](reconstruction/PHASE_05.md); [protocolo temporal](reconstruction/TEMPORAL_VALIDATION.md); cierre previo: [Fase 4](reconstruction/PHASE_04.md); [laboratorio NBA](reconstruction/NBA_EXPERIMENTS.md); cierre previo: [Fase 3](reconstruction/PHASE_03.md); [arquitectura](reconstruction/MODEL_ARCHITECTURE.md); cierre previo: [Fase 2](reconstruction/PHASE_02.md); [contrato v1.0.0](reconstruction/DATA_CONTRACT.md); referencia conceptual: [PRODUCT_SPEC v1.0.0](reconstruction/PRODUCT_SPEC.md). [Fase 1](reconstruction/PHASE_01.md) y [Fase 0](reconstruction/PHASE_00.md) históricas. Inventario: [64 hallazgos](reconstruction/FINDINGS.md).
 
 ## 1. Mandato y límites
 
@@ -54,7 +54,7 @@ Estas distinciones son condiciones visibles de los gates, no dispensas para marc
 
 ## 4. Secuencia de fases y puertas de salida
 
-F0/F1 están cerradas en su alcance documental/conceptual, F2 en su alcance técnico y F3 en su alcance arquitectónico. F4 está cerrada en preparación técnica con fixtures; F5 en infraestructura temporal con calibración preparada y test final no disponible. F6-F20 están **NO INICIADAS**. F2/F3 no certifican procedencia real, persistencia remota ni rendimiento predictivo; los productores reales todavía no están conectados. “Archivos” son áreas previstas: la lista exacta y los riesgos se anuncian antes de tocar cada fase. Las rutas nuevas se crean solo cuando corresponda.
+F0/F1 están cerradas en su alcance documental/conceptual, F2 en su alcance técnico y F3 en su alcance arquitectónico. F4 está cerrada en preparación técnica con fixtures; F5 en infraestructura temporal con calibración preparada y test final no disponible. F6 tiene métricas y comparación controlada implementadas/verificadas; su selección empírica está BLOQUEADA POR EVIDENCIA. F7-F20 están **NO INICIADAS**. F2/F3 no certifican procedencia real, persistencia remota ni rendimiento predictivo; los productores reales todavía no están conectados. “Archivos” son áreas previstas: la lista exacta y los riesgos se anuncian antes de tocar cada fase. Las rutas nuevas se crean solo cuando corresponda.
 
 | Fase | Problema y cambio previsto | Áreas afectadas | Verificación y criterio de aprobación |
 |---|---|---|---|
@@ -99,7 +99,7 @@ Por fase:
 4. Registrar comando, entorno, fecha, resultado y artefacto; distinguir histórico de ejecución nueva.
 5. Emitir nota de fase justificada y APROBADA / REQUIERE CORRECCIÓN, con límites empíricos separados.
 6. Guardar commit coherente, verificar remoto y actualizar WORK_STATE antes de terminar.
-7. Solo después abrir la siguiente fase autorizada. Esta entrega se detiene en F5; el siguiente paso es F6 (métricas y comparación de desarrollo), todavía no iniciado. No entrenar el CSV en cuarentena ni abrir el test final; F5 no demuestra rendimiento empírico ni ajusta un calibrador probabilístico.
+7. Solo después abrir la siguiente fase autorizada. Esta entrega termina la implementación de F6; selección empírica bloqueada por datos admisibles insuficientes. Consultar el acta antes de continuar: no repetir la matriz de fixtures ni iniciar F7 automáticamente. No entrenar CSV en cuarentena, abrir el test final o declarar que una tabla ficticia demuestra superioridad deportiva.
 
 La aprobación técnica la emite el revisor con criterios comprobados, no el mero paso del tiempo ni un test verde aislado. No implica auditoría independiente. Si el propietario cambia el alcance, registrar la decisión y sus consecuencias antes de ejecutar. No solicitar confirmaciones repetidas para tareas ya autorizadas, pero no atravesar una orden explícita de detenerse en una fase.
 

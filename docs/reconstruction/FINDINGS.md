@@ -1,6 +1,6 @@
 # Registro de hallazgos y criterios de cierre
 
-Fecha inicial: 27/09/2026. Actualización 29/09/2026: **26 registros PARCIALES** (H01-H11, H14-H18, H20-H22, H27, H29, H38, H45, H51, H60 y H62); los otros 38 siguen PENDIENTES. Ningún hallazgo compuesto se cierra sin completar todas sus condiciones e integrar sus consumidores. El avance F3-F5 corresponde a la rama de revisión; no corrige todavía la producción principal.
+Fecha inicial: 27/09/2026. Actualización 29/09/2026: **32 registros PARCIALES** (H01-H18, H20-H22, H27, H29, H32-H34, H38, H41, H45, H51, H60 y H62); los otros 32 siguen PENDIENTES. Ningún hallazgo compuesto se cierra sin completar todas sus condiciones e integrar sus consumidores. El avance F3-F6 corresponde a la rama de revisión; no corrige todavía la producción principal.
 
 Evidencia del avance: [PRODUCT_SPEC v1.0.0](PRODUCT_SPEC.md), [C01-C38](PHASE_01_CASES.md) y [acta F1](PHASE_01.md). H01/H02 tienen especificación completa, pero quedan pendientes su aplicación al motor, terminología y pantallas; se amplían las fases responsables para evitar un cierre falso. H27/H38/H45/H51/H60 tienen reglas conceptuales que deberán implementarse o validarse posteriormente.
 
@@ -144,6 +144,19 @@ Evidencia: [acta F5](PHASE_05.md), [protocolo](TEMPORAL_VALIDATION.md) y [55 pru
 | H11 | Lote separado ligado al modelo congelado; rechazo de refit, recibos alterados y sustitución por reserva | Distribución/calibrador F7 y verificación empírica independiente |
 | H14 | Manifiesto temporal con IDs/cortes, hashes de código y desarrollo, entorno; dos procesos idénticos | Reproducción con datos admisibles, ejecución remota y relato público F15 |
 | H62 | Reserva sin lector; estado NO DISPONIBLE, prohibido usarla como lote de calibración; valores excluidos de ejecución | Datos externos/prospectivos realmente independientes y evaluación de versión congelada |
+
+### Avance F6: métricas offline y comparación controlada
+
+Evidencia: [acta F6](PHASE_06.md), [definiciones](EVALUATION_METRICS.md), [resultados de fixtures](PHASE_06_FIXTURE_RESULTS.md) y [comprobaciones](CHECKS_PHASE_06.json). Implementación técnica verificada; selección empírica bloqueada. Ninguna pantalla legacy se considera corregida por añadir este módulo.
+
+| Registro | Parte implementada en F6 | Sigue pendiente |
+|---|---|---|
+| H12 | 79 configuraciones comparadas en los mismos cuatro bloques; benchmarks, ablaciones y stacking con OOF anidado | Comparación deportiva admisible e incertidumbre suficiente; no hay ganador |
+| H13 | Brier con convención explícita, log loss, curvas, ECE e intervalos exploratorios probados | Distribuciones reales F7, estabilidad y evidencia independiente |
+| H32 | Estados canónicos diferenciados en métricas: push/void/pending no son derrotas | Normalización e integración de registros legacy F8/F13 |
+| H33 | Muestras y denominadores explícitos; curvas con recuentos y vacíos nulos | Unificar gráficos/KPI de las pantallas y datos deportivos admisibles |
+| H34 | Procedencia homogénea, moneda y referencias pick/ticket exigidas; manual no se mezcla con verified | Autenticar procedencia en productor y enlazar resultados/ledger reales |
+| H41 | Evaluador no trunca a 100 filas ni inventa -110; cuota faltante bloquea retorno del conjunto | Paginación/universo completo y reemplazo de agregados del historial público |
 
 ## Estados permitidos y responsabilidad
 

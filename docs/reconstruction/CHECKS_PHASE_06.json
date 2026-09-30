@@ -1,0 +1,3607 @@
+{
+  "phase": 6,
+  "date": "2026-09-29",
+  "base_commit": "6425f7629d09089cc9ae53d0bb091d9f135ef257",
+  "implementation_commit": "1a3234e1996ed0a3e59dc6c9f3148f2b6b4c6f1d",
+  "branch": "codex/security-integrity",
+  "main_commit": "ab9b63a4982cdb212c43a5f631507fa839e4e4aa",
+  "technical_verdict": "APROBADA DEFINICION Y VERIFICACION TECNICA DE METRICAS",
+  "empirical_gate": "BLOCKED_BY_EVIDENCE",
+  "integral_empirical_gate_passed": false,
+  "technical_phase_score": 8,
+  "purpose": "DEVELOPMENT_COMPARISON_SOFTWARE_FIXTURE_ONLY",
+  "metric_version": "evaluation-metrics-1",
+  "comparison_policy": {
+    "version": "development-comparison-1",
+    "primary": "MAE_points",
+    "secondary": "RMSE_points",
+    "seed": 1729,
+    "replicates": 2000,
+    "confidence": 0.95,
+    "minimumBlocks": 8,
+    "resamplingUnit": "whole_temporal_validation_fold",
+    "interval": "percentile_paired_block_bootstrap",
+    "multipleComparisonAdjusted": false,
+    "automaticSelection": false
+  },
+  "environment": {
+    "python": "3.12.14",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "dependencies": {
+      "numpy": "1.26.4",
+      "scipy": "1.14.1",
+      "scikit-learn": "1.5.2",
+      "xgboost": "2.1.1",
+      "lightgbm": "4.5.0",
+      "joblib": "1.4.2",
+      "threadpoolctl": "3.5.0"
+    }
+  },
+  "development_hash": "2d27d6a60d779e41c4dc18c39bb52f2a224c35de1a625418959d3911f381e95f",
+  "temporal_plan_hash": "7a301a27f24c04a4876e42cd2a21590f87e272abbaa9efb5bd8a7e0a90e41d88",
+  "partition_counts": {
+    "train": 60,
+    "validation": 40,
+    "calibration": 24,
+    "reserved": 20
+  },
+  "validation_ids": [
+    "fixture-game-0060",
+    "fixture-game-0061",
+    "fixture-game-0062",
+    "fixture-game-0063",
+    "fixture-game-0064",
+    "fixture-game-0065",
+    "fixture-game-0066",
+    "fixture-game-0067",
+    "fixture-game-0068",
+    "fixture-game-0069",
+    "fixture-game-0070",
+    "fixture-game-0071",
+    "fixture-game-0072",
+    "fixture-game-0073",
+    "fixture-game-0074",
+    "fixture-game-0075",
+    "fixture-game-0076",
+    "fixture-game-0077",
+    "fixture-game-0078",
+    "fixture-game-0079",
+    "fixture-game-0080",
+    "fixture-game-0081",
+    "fixture-game-0082",
+    "fixture-game-0083",
+    "fixture-game-0084",
+    "fixture-game-0085",
+    "fixture-game-0086",
+    "fixture-game-0087",
+    "fixture-game-0088",
+    "fixture-game-0089",
+    "fixture-game-0090",
+    "fixture-game-0091",
+    "fixture-game-0092",
+    "fixture-game-0093",
+    "fixture-game-0094",
+    "fixture-game-0095",
+    "fixture-game-0096",
+    "fixture-game-0097",
+    "fixture-game-0098",
+    "fixture-game-0099"
+  ],
+  "source_hashes": {
+    "ml/evaluation/comparison.py": "5f9900dd7d5203af68c9f51070d4db5673d6566c7d606fe4c413d89ad7bb36de",
+    "ml/evaluation/metrics.py": "bcf6b97ad57908f547ddac1456102944025d41ab3b3b2a9aed5ad04123d1a83e",
+    "ml/evaluation/run.py": "882f35ac02c4a7477383231c0b87c190da07f0ff3f14dfe7dff949bfdfd6f4e8",
+    "ml/experiments/candidates.py": "835fc972a81b1a5ef655f34dd89f52ef26f94e35ca1ea035192fc1118cffe335",
+    "ml/experiments/fixtures.py": "c1b7eb4f01b18624498590c1dc66bed0f3128d5eb4848e2e66d361d2cc96320f",
+    "ml/experiments/protocol.py": "61e4bb3dde9a90e0d9433184757ae650f0dddc065fa23e17f0c6dca69398e2b4",
+    "ml/experiments/run.py": "8728ce08e41601ec1b403978e3295ba6dc08a69ad9ac94b1302a4427c3194d74",
+    "ml/experiments/spec.py": "4c6c84c2f9f096dc7fafee78d2c4869390ff90b09b06926d5770f9cc08a5f4b7",
+    "ml/experiments/stacking.py": "d8febbf6382b9cc79d324c20c63e846d943a047e38928a87e647d19b1923e5e1",
+    "ml/validation/experiment.py": "0549756bf1db69bd83f569382d74257801d0c598880e971d0c646bb639755fbe",
+    "ml/validation/temporal.py": "1fd5d1ecece9c85a6188419a1c030b9ebf631fa3da7cbd3d4836c154019a5983",
+    "ml/contracts/features.py": "66ecc4a26fb4799d509b041e086235f621aa52c978120e2eefef822240e69f0b",
+    "ml/contracts/dictionary.json": "c86ed376ec7c96e853d871cb371b312a95e7b6f0de85f501bae943297b447e22",
+    "ml/experiments/requirements.txt": "afec6c90c68d4c6beae88735d9b80ade3f8de7214808cc04900b38dd8701ee18"
+  },
+  "additional_source_hashes": {
+    "tests/experiments/test_evaluation.py": "5b263d9d1cc4e84d643745565c44fd98152885164ad4dc5e9dbb2726bee863f7",
+    ".github/workflows/ci.yml": "f9d30a67be687cf2e6a9acb74764c07cfcc3ea64b586e1564605ff98879ea0ec"
+  },
+  "tests": {
+    "experiments": {
+      "passed": 70,
+      "phase04": 19,
+      "phase05": 19,
+      "phase06": 32,
+      "seconds": 14.431,
+      "command": ".venv-phase4/Scripts/python -m unittest discover -s tests/experiments -v"
+    },
+    "contracts": {
+      "passed": 17,
+      "seconds": 0.675,
+      "command": ".venv-phase4/Scripts/python -m unittest discover -s tests/python -v"
+    },
+    "final_focused_after_metadata_fix": {
+      "passed": 32,
+      "seconds": 1.851,
+      "command": ".venv-phase4/Scripts/python -m unittest discover -s tests/experiments -p test_evaluation.py -v"
+    },
+    "unique_tests_passed": 87,
+    "web_tests_rerun": false
+  },
+  "experiment": {
+    "configurations": 79,
+    "outer_evaluations": 316,
+    "unique_validation_events": 40,
+    "folds": 4,
+    "results": [
+      {
+        "candidate": "ridge",
+        "scenario": "baseline",
+        "feature_names": [
+          "home_total_l20",
+          "away_total_l20"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 2.878058899008676,
+          "rmse": 3.33241545380615,
+          "bias": 0.5295723947822033,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "28fea5d7eff1bac80885d519d2c5f41dfa3fed2aeed2df07fa7921c63c87b4a6",
+        "difference_vs_historical": {
+          "mae": -3.9055406571695452,
+          "rmse": -5.090197795110714
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.48123511146884557,
+          "rmse": -0.627665890477596
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "simple_tree",
+        "scenario": "baseline",
+        "feature_names": [
+          "home_total_l20",
+          "away_total_l20"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 4.8006199124949145,
+          "rmse": 5.857350608941558,
+          "bias": 0.007857397232393704,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "b15a75497c44c88be5178e9e9de3c5e17d7749d9c5041b0975a4a8f3c02d69ef",
+        "difference_vs_historical": {
+          "mae": -1.982979643683307,
+          "rmse": -2.5652626399753062
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0.1508189124114061,
+          "rmse": 0.4119306805957681
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "xgboost",
+        "scenario": "baseline",
+        "feature_names": [
+          "home_total_l20",
+          "away_total_l20"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.955936813354492,
+          "rmse": 5.021537980565557,
+          "bias": 0.8679737091064452,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "a81c1c7370f49adc840dad8f2de808c268955a0dcb8f805266d06e8f2b3a2aed",
+        "difference_vs_historical": {
+          "mae": -2.8276627428237293,
+          "rmse": -3.401075268351307
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.08546981811523446,
+          "rmse": 0.06285286755125341
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "lightgbm",
+        "scenario": "baseline",
+        "feature_names": [
+          "home_total_l20",
+          "away_total_l20"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.9513629139114625,
+          "rmse": 4.986934774125495,
+          "bias": 0.6356448351847064,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "53edbb505762ac55447b69b0c3503a2ac27220f8d8b492d1b6263a373873d928",
+        "difference_vs_historical": {
+          "mae": -2.832236642266759,
+          "rmse": -3.435678474791369
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.08996318291125682,
+          "rmse": 0.03564492769164396
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "mlp",
+        "scenario": "baseline",
+        "feature_names": [
+          "home_total_l20",
+          "away_total_l20"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 2.7629443321187863,
+          "rmse": 3.1514554094143215,
+          "bias": 0.41900230382632203,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "9018f6cace6ed374ee5da9550a14a1e0ed2fac93d3e4f0cfce107f81bce241e5",
+        "difference_vs_historical": {
+          "mae": -4.0206552240594355,
+          "rmse": -5.271157839502543
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.9931349437522963,
+          "rmse": -1.612550442240237
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "mean_ensemble",
+        "scenario": "baseline",
+        "feature_names": [
+          "home_total_l20",
+          "away_total_l20"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.298780845116822,
+          "rmse": 3.8881174114496884,
+          "bias": 0.613048310724919,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "8f0331c334c5219892d60724184714a3219c4183a027af9aea2eccb0b123a460",
+        "difference_vs_historical": {
+          "mae": -3.4848187110613993,
+          "rmse": -4.534495837467176
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.21798582181492554,
+          "rmse": -0.3675101883852636
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "stacking",
+        "scenario": "baseline",
+        "feature_names": [
+          "home_total_l20",
+          "away_total_l20"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 2.8344670138779167,
+          "rmse": 3.261438417255743,
+          "bias": -0.16376689859666843,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "c9064870010084a47979a374ff55e4e895ed47495b45b5f0184164acca431268",
+        "difference_vs_historical": {
+          "mae": -3.9491325423003047,
+          "rmse": -5.161174831661121
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.4501988191144455,
+          "rmse": -0.7797608877332145
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "ridge",
+        "scenario": "plus_form",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "momentum_5v10"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.011850855319058,
+          "rmse": 3.5285238133369847,
+          "bias": 0.34419082085558017,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "a96ce721f6a479b9aef3d1643bd564148f4926457448b773032161a708e35bb0",
+        "difference_vs_historical": {
+          "mae": -3.7717487008591633,
+          "rmse": -4.894089435579879
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.3474431551584636,
+          "rmse": -0.4315575309467614
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "simple_tree",
+        "scenario": "plus_form",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "momentum_5v10"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 4.649801000083508,
+          "rmse": 5.44541992834579,
+          "bias": 0.030144097388676946,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "3949f411c7be6c65ebb4022a72759f006ebd93c74af54b8d71d349534966d607",
+        "difference_vs_historical": {
+          "mae": -2.133798556094713,
+          "rmse": -2.9771933205710743
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0,
+          "rmse": 0
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "xgboost",
+        "scenario": "plus_form",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "momentum_5v10"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 4.050184631347657,
+          "rmse": 4.95238622058167,
+          "bias": 0.7166107177734374,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "622b0f05e00bc4ed4bb5d8b6613c60cb5a38954469af4050b7331a601310b3b3",
+        "difference_vs_historical": {
+          "mae": -2.733414924830565,
+          "rmse": -3.470227028335194
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0.008777999877930043,
+          "rmse": -0.006298892432633707
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "lightgbm",
+        "scenario": "plus_form",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "momentum_5v10"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.942343091617013,
+          "rmse": 4.855576262184726,
+          "bias": 0.5225052407378108,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "07924e6bcbb5bf752a2ec1f515ea1dbd13aa70a98f059d545be76268371696c0",
+        "difference_vs_historical": {
+          "mae": -2.8412564645612086,
+          "rmse": -3.5670369867321385
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.09898300520570658,
+          "rmse": -0.09571358424912546
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "mlp",
+        "scenario": "plus_form",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "momentum_5v10"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.1990101810268117,
+          "rmse": 3.784264683508475,
+          "bias": 0.6099819997708991,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "12f8d3a6ba8a4ebbe7ae1b6b17f40c58e2a40fd7aa45570b42b9fb7841436f6f",
+        "difference_vs_historical": {
+          "mae": -3.5845893751514097,
+          "rmse": -4.638348565408389
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.5570690948442709,
+          "rmse": -0.9797411681460835
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "mean_ensemble",
+        "scenario": "plus_form",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "momentum_5v10"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.294159536255793,
+          "rmse": 3.890997921287077,
+          "bias": 0.5483221947844357,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "0d9d5e7ca450c81c7bfcbc50208b2a9bb2aede6801eb2ab5a4bfd6e475d4723a",
+        "difference_vs_historical": {
+          "mae": -3.4894400199224282,
+          "rmse": -4.531615327629787
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.2226071306759545,
+          "rmse": -0.3646296785478751
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "stacking",
+        "scenario": "plus_form",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "momentum_5v10"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 2.8926595467676877,
+          "rmse": 3.5006523422182654,
+          "bias": -0.4070650553824876,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "ff6abeb67c5b820b001f163300cdf5ccc4c387d2f72f43b157888dc7a3b414b9",
+        "difference_vs_historical": {
+          "mae": -3.8909400094105338,
+          "rmse": -4.921960906698599
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.3920062862246745,
+          "rmse": -0.540546962770692
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "ridge",
+        "scenario": "plus_rest",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "momentum_5v10",
+          "total_rest",
+          "both_rested",
+          "both_b2b"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.127299720234359,
+          "rmse": 3.628750646436819,
+          "bias": 0.2995793195298973,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "21d6f0056eab42e68ed15422e8ced8521d07abc1e5feab3681dd62686eec7e36",
+        "difference_vs_historical": {
+          "mae": -3.6562998359438623,
+          "rmse": -4.793862602480045
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.23199429024316265,
+          "rmse": -0.33133069784692726
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "simple_tree",
+        "scenario": "plus_rest",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "momentum_5v10",
+          "total_rest",
+          "both_rested",
+          "both_b2b"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 4.649801000083508,
+          "rmse": 5.44541992834579,
+          "bias": 0.030144097388676946,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "3949f411c7be6c65ebb4022a72759f006ebd93c74af54b8d71d349534966d607",
+        "difference_vs_historical": {
+          "mae": -2.133798556094713,
+          "rmse": -2.9771933205710743
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0,
+          "rmse": 0
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "xgboost",
+        "scenario": "plus_rest",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "momentum_5v10",
+          "total_rest",
+          "both_rested",
+          "both_b2b"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 4.050184631347657,
+          "rmse": 4.95238622058167,
+          "bias": 0.7166107177734374,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "622b0f05e00bc4ed4bb5d8b6613c60cb5a38954469af4050b7331a601310b3b3",
+        "difference_vs_historical": {
+          "mae": -2.733414924830565,
+          "rmse": -3.470227028335194
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0.008777999877930043,
+          "rmse": -0.006298892432633707
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "lightgbm",
+        "scenario": "plus_rest",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "momentum_5v10",
+          "total_rest",
+          "both_rested",
+          "both_b2b"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.9252671020836827,
+          "rmse": 4.8365771399758595,
+          "bias": 0.4887757899015127,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "0a147ad8829e0756ef133f3b5611e6c8ca5c93ac0e79530ba61f2823acc83578",
+        "difference_vs_historical": {
+          "mae": -2.8583324540945387,
+          "rmse": -3.5860361089410047
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.11605899473903669,
+          "rmse": -0.11471270645799159
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "mlp",
+        "scenario": "plus_rest",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "momentum_5v10",
+          "total_rest",
+          "both_rested",
+          "both_b2b"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.543508605594274,
+          "rmse": 4.4006702771243225,
+          "bias": 0.8976408627915284,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "77368a753a9f1dd9b0ab613a06a626abaf77092238217b3dd51288a0dfe154ea",
+        "difference_vs_historical": {
+          "mae": -3.2400909505839475,
+          "rmse": -4.021942971792542
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.21257067027680865,
+          "rmse": -0.363335574530236
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "mean_ensemble",
+        "scenario": "plus_rest",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "momentum_5v10",
+          "total_rest",
+          "both_rested",
+          "both_b2b"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.4517019694811255,
+          "rmse": 4.087796958140027,
+          "bias": 0.6006516724990916,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "e3d1fb66f74887e83b8d09539f50bc897472e70bdd0f866bee8500c030537a7a",
+        "difference_vs_historical": {
+          "mae": -3.331897586697096,
+          "rmse": -4.334816290776837
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.06506469745062216,
+          "rmse": -0.16783064169492512
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "stacking",
+        "scenario": "plus_rest",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "momentum_5v10",
+          "total_rest",
+          "both_rested",
+          "both_b2b"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.0764188598275517,
+          "rmse": 3.7641100277522375,
+          "bias": -0.4425195446403997,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "71218b4230b4f0aad5eec76b1e552dad393d6b68f1f82f09928507b5071c48e6",
+        "difference_vs_historical": {
+          "mae": -3.7071806963506697,
+          "rmse": -4.658503221164627
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.20824697316481044,
+          "rmse": -0.27708927723671994
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "historical_mean",
+        "scenario": "all",
+        "feature_names": [],
+        "metrics": {
+          "n": 40,
+          "mae": 6.783599556178221,
+          "rmse": 8.422613248916864,
+          "bias": 1.2727287611892222,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "4f6b9461280843331a5e8f8e4050ab5f74059f34300f638c2686ac9472cf123c",
+        "difference_vs_historical": {
+          "mae": 0,
+          "rmse": 0
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0,
+          "rmse": 0
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "moving_mean",
+        "scenario": "all",
+        "feature_names": [
+          "home_total_l20",
+          "away_total_l20"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 2.597868230361474,
+          "rmse": 3.0697863050765943,
+          "bias": 0.2939488542411545,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "76b349370765cedd4b5e19d3d10843231dabfc77a2a7c481fb15917682bf4100",
+        "difference_vs_historical": {
+          "mae": -4.1857313258167475,
+          "rmse": -5.35282694384027
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0,
+          "rmse": 0
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "ridge",
+        "scenario": "all",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.3592940104775217,
+          "rmse": 3.960081344283746,
+          "bias": -0.6944830803594577,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "54eb9feee12e2dc01ce6e2f5504a0ad92cd5bb4fc96a1a1ccb670dea7b295185",
+        "difference_vs_historical": {
+          "mae": -3.4243055457006997,
+          "rmse": -4.462531904633118
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0,
+          "rmse": 0
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "simple_tree",
+        "scenario": "all",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 4.649801000083508,
+          "rmse": 5.44541992834579,
+          "bias": 0.030144097388676946,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "3949f411c7be6c65ebb4022a72759f006ebd93c74af54b8d71d349534966d607",
+        "difference_vs_historical": {
+          "mae": -2.133798556094713,
+          "rmse": -2.9771933205710743
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0,
+          "rmse": 0
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "xgboost",
+        "scenario": "all",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 4.041406631469727,
+          "rmse": 4.958685113014304,
+          "bias": 0.6584468841552734,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "f72d040724d077bf9dd6501514517975f06c49524327d40207a632227fbf88d0",
+        "difference_vs_historical": {
+          "mae": -2.742192924708495,
+          "rmse": -3.4639281359025604
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0,
+          "rmse": 0
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "lightgbm",
+        "scenario": "all",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 4.041326096822719,
+          "rmse": 4.951289846433851,
+          "bias": 0.5424394731243851,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "5ab6691a288134815c655e94f9a3c9b07b731b5ba54fa22c2643b71c6923edb9",
+        "difference_vs_historical": {
+          "mae": -2.742273459355502,
+          "rmse": -3.471323402483013
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0,
+          "rmse": 0
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "mlp",
+        "scenario": "all",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.7560792758710826,
+          "rmse": 4.7640058516545585,
+          "bias": -0.1490451176379544,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "511a9a63b4031ada5771b966115d1ad450b6977d7104fa597c0744c90467f70b",
+        "difference_vs_historical": {
+          "mae": -3.027520280307139,
+          "rmse": -3.6586073972623057
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0,
+          "rmse": 0
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "mean_ensemble",
+        "scenario": "all",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.5167666669317477,
+          "rmse": 4.255627599834952,
+          "bias": 0.08933953982056334,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "087adb8c90a098bb80208bbe0636a5954bfcb5e7abad3278c7db0db9792b9e62",
+        "difference_vs_historical": {
+          "mae": -3.2668328892464737,
+          "rmse": -4.166985649081912
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0,
+          "rmse": 0
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "stacking",
+        "scenario": "all",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.284665832992362,
+          "rmse": 4.041199304988957,
+          "bias": -1.3115520345918987,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "6974c4a4678890bfa67a43c558800e3e6d244b8671d5d058d728de735badc3ae",
+        "difference_vs_historical": {
+          "mae": -3.4989337231858593,
+          "rmse": -4.381413943927907
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0,
+          "rmse": 0
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "ridge",
+        "scenario": "without_long",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 5.734813851728088,
+          "rmse": 6.5819336828010115,
+          "bias": -1.0963737414949415,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "cad7e0f6bdf01cf15e77e9f113244e0392ae807d5a7f4fea788888ba4249b446",
+        "difference_vs_historical": {
+          "mae": -1.0487857044501334,
+          "rmse": -1.8406795661158526
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 2.3755198412505663,
+          "rmse": 2.6218523385172654
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "simple_tree",
+        "scenario": "without_long",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 5.647586539209615,
+          "rmse": 6.994735071291451,
+          "bias": -0.9478610117417902,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "ce7dd43f6e468db56f80bda8b3e312531ec309f873f926da05205fb8c0d063a1",
+        "difference_vs_historical": {
+          "mae": -1.1360130169686062,
+          "rmse": -1.4278781776254128
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0.9977855391261068,
+          "rmse": 1.5493151429456615
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "xgboost",
+        "scenario": "without_long",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 5.837839126586914,
+          "rmse": 6.672636671159808,
+          "bias": 0.3531368255615235,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "0fb582bd0ebab456f53d6ee3c4c2020cb00d254f6a3efa390ec3af2791df65e9",
+        "difference_vs_historical": {
+          "mae": -0.9457604295913073,
+          "rmse": -1.7499765777570557
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 1.7964324951171875,
+          "rmse": 1.7139515581455047
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "lightgbm",
+        "scenario": "without_long",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 5.566484637557479,
+          "rmse": 6.433816809122622,
+          "bias": 0.17510439193473032,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "274e187533686ce8551e298113457df8610ec3bf10d7ae2de3bf87bcf2180aa2",
+        "difference_vs_historical": {
+          "mae": -1.2171149186207426,
+          "rmse": -1.9887964397942417
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 1.5251585407347594,
+          "rmse": 1.4825269626887714
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "mlp",
+        "scenario": "without_long",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 5.620458522860135,
+          "rmse": 7.045851793725031,
+          "bias": -1.4171376836192557,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "49e2fe64971d67a7d3934d03acbdfb012027d46d49fee9fbc664137550c9e132",
+        "difference_vs_historical": {
+          "mae": -1.1631410333180865,
+          "rmse": -1.3767614551918328
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 1.8643792469890523,
+          "rmse": 2.281845942070473
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "mean_ensemble",
+        "scenario": "without_long",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 5.316299366814431,
+          "rmse": 6.207525611478387,
+          "bias": -0.4963175519044853,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "1faea68a20c6f3b934b9be2d5d923cde332b3f6d76f56d2e14012b9773563ba9",
+        "difference_vs_historical": {
+          "mae": -1.4673001893637903,
+          "rmse": -2.2150876374384767
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 1.7995326998826835,
+          "rmse": 1.9518980116434355
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "stacking",
+        "scenario": "without_long",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 5.710930371421021,
+          "rmse": 6.547881456379358,
+          "bias": -1.3694132100738714,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "0678fefc158c1cf283fc9c97627c4fb97f35109abd035626e3b9da7ba6d1bffb",
+        "difference_vs_historical": {
+          "mae": -1.0726691847572,
+          "rmse": -1.8747317925375064
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 2.426264538428659,
+          "rmse": 2.5066821513904003
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "ridge",
+        "scenario": "without_short",
+        "feature_names": [
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l10",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.214070369054294,
+          "rmse": 3.730895515366652,
+          "bias": -0.2841862567068738,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "d7c6d83a9901ca5414abe5761e7191922bfc921fa6bd50431895b0315a2308e8",
+        "difference_vs_historical": {
+          "mae": -3.569529187123927,
+          "rmse": -4.691717733550212
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.14522364142322752,
+          "rmse": -0.22918582891709427
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "simple_tree",
+        "scenario": "without_short",
+        "feature_names": [
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l10",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 5.180241402116405,
+          "rmse": 6.378981783629069,
+          "bias": -0.3307903439153485,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "ad5440ba019385e5e74c037785a36ee2c2e63003ea1d707e78839facede02ed9",
+        "difference_vs_historical": {
+          "mae": -1.6033581540618167,
+          "rmse": -2.0436314652877954
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0.5304404020328963,
+          "rmse": 0.933561855283279
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "xgboost",
+        "scenario": "without_short",
+        "feature_names": [
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l10",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.919611358642578,
+          "rmse": 4.9921327407970875,
+          "bias": 0.8096229553222657,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "448cad9e376adfe640a7e6df5c6fa3ab0e081198dc9cd6ddbf0094dfdb2ed143",
+        "difference_vs_historical": {
+          "mae": -2.8639881975356434,
+          "rmse": -3.4304805081197767
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.12179527282714853,
+          "rmse": 0.03344762778278376
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "lightgbm",
+        "scenario": "without_short",
+        "feature_names": [
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l10",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.7481021607274534,
+          "rmse": 4.84869064699717,
+          "bias": 0.5192818532531966,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "b63d9299d6e66ca16967b0693d8ebfd85a867a7d614501e69608756259d438e5",
+        "difference_vs_historical": {
+          "mae": -3.035497395450768,
+          "rmse": -3.573922601919694
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.293223936095266,
+          "rmse": -0.10259919943668105
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "mlp",
+        "scenario": "without_short",
+        "feature_names": [
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l10",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 4.081345355002345,
+          "rmse": 5.011375587045946,
+          "bias": -0.39940547323924913,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "dd9b21acfaab5092b924e5157d36b59da3ed96205b7c30e945002818858e7aed",
+        "difference_vs_historical": {
+          "mae": -2.702254201175877,
+          "rmse": -3.411237661870918
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0.32526607913126204,
+          "rmse": 0.24736973539138774
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "mean_ensemble",
+        "scenario": "without_short",
+        "feature_names": [
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l10",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.381701150861418,
+          "rmse": 4.2539474849157575,
+          "bias": 0.16132826965733427,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "4983edb3542e059848c563b976f2f5d20ba81b4850e12840b808afdd430ece18",
+        "difference_vs_historical": {
+          "mae": -3.4018984053168033,
+          "rmse": -4.168665764001107
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.13506551607032957,
+          "rmse": -0.0016801149191945086
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "stacking",
+        "scenario": "without_short",
+        "feature_names": [
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l10",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.255262500697588,
+          "rmse": 3.8494551562972865,
+          "bias": -0.7613486917596866,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "e4608e07b0e57fde6f63a208e3c81652d9dbda796c488f87e031ea10fcce4ce5",
+        "difference_vs_historical": {
+          "mae": -3.5283370554806335,
+          "rmse": -4.573158092619577
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.02940333229477421,
+          "rmse": -0.1917441486916709
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "ridge",
+        "scenario": "without_medium",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.3243324563504393,
+          "rmse": 3.8664841065041293,
+          "bias": -0.7835397492101556,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "6ac024d3d4efc38b75c8a41e7b6e60c2d5f961bd435695be4e1a07157be87c14",
+        "difference_vs_historical": {
+          "mae": -3.459267099827782,
+          "rmse": -4.556129142412734
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.03496155412708246,
+          "rmse": -0.09359723777961682
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "simple_tree",
+        "scenario": "without_medium",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 4.649801000083508,
+          "rmse": 5.44541992834579,
+          "bias": 0.030144097388676946,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "3949f411c7be6c65ebb4022a72759f006ebd93c74af54b8d71d349534966d607",
+        "difference_vs_historical": {
+          "mae": -2.133798556094713,
+          "rmse": -2.9771933205710743
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0,
+          "rmse": 0
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "xgboost",
+        "scenario": "without_medium",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 4.030525588989258,
+          "rmse": 4.927367831394591,
+          "bias": 0.5881343841552734,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "7e003b01f5a5a3fea1da0e2fb3f9a5fdfe701063241ef83f65b0292c5c475477",
+        "difference_vs_historical": {
+          "mae": -2.7530739671889632,
+          "rmse": -3.4952454175222734
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.010881042480468395,
+          "rmse": -0.03131728161971292
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "lightgbm",
+        "scenario": "without_medium",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 4.037802307398616,
+          "rmse": 4.957082043688337,
+          "bias": 0.5116908937932102,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "b93c7f2c27c351c1150954ac72067c53b7f6a268373ab01f91db59c0f3d4db2f",
+        "difference_vs_historical": {
+          "mae": -2.7457972487796054,
+          "rmse": -3.465531205228527
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.003523789424103363,
+          "rmse": 0.005792197254486098
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "mlp",
+        "scenario": "without_medium",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.7627588828117076,
+          "rmse": 4.4927133289851415,
+          "bias": -0.7079354428339294,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "ff5f66ea35713b7ca903e2b82826d71cde1059481b1c4d0953c9f997a7755a89",
+        "difference_vs_historical": {
+          "mae": -3.020840673366514,
+          "rmse": -3.9298999199317226
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0.006679606940624971,
+          "rmse": -0.27129252266941695
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "mean_ensemble",
+        "scenario": "without_medium",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.5469654659780145,
+          "rmse": 4.174094629983873,
+          "bias": -0.09791247852390515,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "f39e022e9e0a04d94721eac5792f870e37ff3484e6f34e91298470b3aa82ac38",
+        "difference_vs_historical": {
+          "mae": -3.236634090200207,
+          "rmse": -4.248518618932991
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0.030198799046266878,
+          "rmse": -0.08153296985107872
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "stacking",
+        "scenario": "without_medium",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.1543890132138435,
+          "rmse": 3.9217519165867367,
+          "bias": -1.4559216835554103,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "7e1c09bc1e61a7cf653d8be4edaef569b0788cf9d709d4c0e69c7fff51057557",
+        "difference_vs_historical": {
+          "mae": -3.629210542964378,
+          "rmse": -4.500861332330127
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.13027681977851868,
+          "rmse": -0.11944738840222069
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "ridge",
+        "scenario": "without_venue",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.3638407012910543,
+          "rmse": 4.018592626207522,
+          "bias": -0.8809741549579023,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "be5f8e83dd9272164f0fedbba4e8b689115e324c7220a29888a87e70983f8c92",
+        "difference_vs_historical": {
+          "mae": -3.419758854887167,
+          "rmse": -4.404020622709342
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0.004546690813532539,
+          "rmse": 0.05851128192377608
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "simple_tree",
+        "scenario": "without_venue",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 4.649801000083508,
+          "rmse": 5.44541992834579,
+          "bias": 0.030144097388676946,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "3949f411c7be6c65ebb4022a72759f006ebd93c74af54b8d71d349534966d607",
+        "difference_vs_historical": {
+          "mae": -2.133798556094713,
+          "rmse": -2.9771933205710743
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0,
+          "rmse": 0
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "xgboost",
+        "scenario": "without_venue",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 4.049893569946289,
+          "rmse": 4.951723376963776,
+          "bias": 0.7043643951416015,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "3692d1650d3a4e3bb9dba4cac415674e995175a495b351fedd20155a1901991c",
+        "difference_vs_historical": {
+          "mae": -2.733705986231932,
+          "rmse": -3.470889871953088
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0.008486938476562678,
+          "rmse": -0.006961736050527634
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "lightgbm",
+        "scenario": "without_venue",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 4.042709459420998,
+          "rmse": 4.918913111166721,
+          "bias": 0.5157282706251408,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "1ea2c6cbdead63bd8a6396210334a67e93b5f579b45f67ca83c6ff7ca3869d77",
+        "difference_vs_historical": {
+          "mae": -2.740890096757224,
+          "rmse": -3.503700137750143
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0.0013833625982782038,
+          "rmse": -0.03237673526713003
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "mlp",
+        "scenario": "without_venue",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 4.049889665779345,
+          "rmse": 4.948104239283086,
+          "bias": -0.6468045153159189,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "e8d6a3f47d389beefba896992cd5023b50f643f0d675f4f7ea2210f643e731aa",
+        "difference_vs_historical": {
+          "mae": -2.7337098903988766,
+          "rmse": -3.4745090096337785
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0.29381038990826225,
+          "rmse": 0.18409838762852715
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "mean_ensemble",
+        "scenario": "without_venue",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.5515472648199102,
+          "rmse": 4.268123896511442,
+          "bias": -0.07692150112677114,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "f0a61b138be1a50242684ddf2a56f408e223971bd3760c6b3165922a484f9c7a",
+        "difference_vs_historical": {
+          "mae": -3.232052291358311,
+          "rmse": -4.154489352405422
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0.03478059788816257,
+          "rmse": 0.012496296676490104
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "stacking",
+        "scenario": "without_venue",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.3610021825024097,
+          "rmse": 4.202901811513735,
+          "bias": -1.5938171430076928,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "3ca78cb9d5351a26a4cb72ea51335efad6039b30d6fc34d33cda72e547223a78",
+        "difference_vs_historical": {
+          "mae": -3.4225973736758117,
+          "rmse": -4.219711437403129
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0.07633634951004753,
+          "rmse": 0.1617025065247777
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "ridge",
+        "scenario": "without_dispersion",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.2033587196675333,
+          "rmse": 3.7772027595469013,
+          "bias": -0.7145030439121548,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "3f69db160e17c6dd271df6f3658a18c5031c328e6eb1fd4f6f86a3d6af78769b",
+        "difference_vs_historical": {
+          "mae": -3.580240836510688,
+          "rmse": -4.645410489369963
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.15593529080998847,
+          "rmse": -0.18287858473684482
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "simple_tree",
+        "scenario": "without_dispersion",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 4.649801000083508,
+          "rmse": 5.44541992834579,
+          "bias": 0.030144097388676946,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "3949f411c7be6c65ebb4022a72759f006ebd93c74af54b8d71d349534966d607",
+        "difference_vs_historical": {
+          "mae": -2.133798556094713,
+          "rmse": -2.9771933205710743
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0,
+          "rmse": 0
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "xgboost",
+        "scenario": "without_dispersion",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 4.034955978393555,
+          "rmse": 4.9560379413835065,
+          "bias": 0.653164291381836,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "eaeacace149a48476a65e93511bc4f541f1fce25a63fb1e63bc5aaa6d75a668d",
+        "difference_vs_historical": {
+          "mae": -2.7486435777846667,
+          "rmse": -3.4665753075333576
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.006450653076171875,
+          "rmse": -0.002647171630797196
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "lightgbm",
+        "scenario": "without_dispersion",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.9484344014098705,
+          "rmse": 4.8877551016428935,
+          "bias": 0.44989301593905895,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "b7e0c9a9e18798652bbc2d389dcca9c259214c11ad4dc3c07ec04808bd28b35b",
+        "difference_vs_historical": {
+          "mae": -2.835165154768351,
+          "rmse": -3.5348581472739706
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.09289169541284892,
+          "rmse": -0.06353474479095755
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "mlp",
+        "scenario": "without_dispersion",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.5666016852559883,
+          "rmse": 4.340733215880188,
+          "bias": -0.425706594863356,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "ca656e9bc535dcd2a727e08224d3ec47dbae06fb3e6aa763349e854564ef4fbf",
+        "difference_vs_historical": {
+          "mae": -3.216997870922233,
+          "rmse": -4.0818800330366765
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.18947759061509428,
+          "rmse": -0.4232726357743708
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "mean_ensemble",
+        "scenario": "without_dispersion",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.3736664714252527,
+          "rmse": 4.10034699837698,
+          "bias": -0.009288082863655185,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "c68b3e08dd43eaf734827ea23be375a6db9ef766bbc43f50fa9b61272c7b0b59",
+        "difference_vs_historical": {
+          "mae": -3.4099330847529687,
+          "rmse": -4.322266250539884
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.143100195506495,
+          "rmse": -0.15528060145797173
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "stacking",
+        "scenario": "without_dispersion",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.233285852954473,
+          "rmse": 3.956458678517098,
+          "bias": -1.500412956269684,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "8872d806fe21e098bc4c997dbd191f9e6dbddbcc1b1bedb0ec9e7532a9667055",
+        "difference_vs_historical": {
+          "mae": -3.5503137032237486,
+          "rmse": -4.466154570399766
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.05137998003788935,
+          "rmse": -0.08474062647185931
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "ridge",
+        "scenario": "without_rest",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.301953078544464,
+          "rmse": 3.8795399517785434,
+          "bias": -0.314467074835482,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "ef64b8a87c81e87f5c00061b75453b749053029bd2c213f1aebe8b1d86aafa42",
+        "difference_vs_historical": {
+          "mae": -3.4816464776337575,
+          "rmse": -4.543073297138321
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.05734093193305778,
+          "rmse": -0.08054139250520276
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "simple_tree",
+        "scenario": "without_rest",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 4.649801000083508,
+          "rmse": 5.44541992834579,
+          "bias": 0.030144097388676946,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "3949f411c7be6c65ebb4022a72759f006ebd93c74af54b8d71d349534966d607",
+        "difference_vs_historical": {
+          "mae": -2.133798556094713,
+          "rmse": -2.9771933205710743
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0,
+          "rmse": 0
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "xgboost",
+        "scenario": "without_rest",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 4.041406631469727,
+          "rmse": 4.958685113014304,
+          "bias": 0.6584468841552734,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "f72d040724d077bf9dd6501514517975f06c49524327d40207a632227fbf88d0",
+        "difference_vs_historical": {
+          "mae": -2.742192924708495,
+          "rmse": -3.4639281359025604
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0,
+          "rmse": 0
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "lightgbm",
+        "scenario": "without_rest",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 4.046221864991657,
+          "rmse": 4.951381708945686,
+          "bias": 0.5239772133993832,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "bc3e3b2b3997b34b0f333e8befa289a1e2c1691ca31f43380ca626af27e915de",
+        "difference_vs_historical": {
+          "mae": -2.7373776911865644,
+          "rmse": -3.4712315399711784
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0.004895768168937664,
+          "rmse": 0.00009186251183468386
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "mlp",
+        "scenario": "without_rest",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.6840023400708892,
+          "rmse": 4.314455589723945,
+          "bias": -0.47115164392799963,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "8544ac4201472add8dcaad0ae337bba44331fff461966b562235a75d55e4fe0e",
+        "difference_vs_historical": {
+          "mae": -3.099597216107332,
+          "rmse": -4.108157659192919
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.07207693580019336,
+          "rmse": -0.44955026193061354
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "mean_ensemble",
+        "scenario": "without_rest",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.3081151410744924,
+          "rmse": 4.073513863776021,
+          "bias": 0.09920134469779213,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "277e1810b765a81b979a6a28cda23573737673d4b09fcca8fc0155f80d9a3b4b",
+        "difference_vs_historical": {
+          "mae": -3.475484415103729,
+          "rmse": -4.3490993851408435
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.20865152585725522,
+          "rmse": -0.18211373605893133
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "stacking",
+        "scenario": "without_rest",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "altitude_ft",
+          "days_into_season",
+          "momentum_5v10",
+          "matchup_volatility",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.2033771351450824,
+          "rmse": 3.9200115513389244,
+          "bias": -1.1125833088658894,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "9e96b0289fe8109a36c88f0173993ae5be6a71597baec68ec2dd09f1127da870",
+        "difference_vs_historical": {
+          "mae": -3.580222421033139,
+          "rmse": -4.50260169757794
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.08128869784727977,
+          "rmse": -0.12118775365003298
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "ridge",
+        "scenario": "without_context",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.273814652721722,
+          "rmse": 3.7716192679783513,
+          "bias": 0.40814726994905537,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "fe2ec6c29c1ed73118d7e6293f816753d6b873dc700d903416e938d8bd6b2a48",
+        "difference_vs_historical": {
+          "mae": -3.5097849034564996,
+          "rmse": -4.650993980938512
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.08547935775579996,
+          "rmse": -0.1884620763053948
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "simple_tree",
+        "scenario": "without_context",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 4.649801000083508,
+          "rmse": 5.44541992834579,
+          "bias": 0.030144097388676946,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "3949f411c7be6c65ebb4022a72759f006ebd93c74af54b8d71d349534966d607",
+        "difference_vs_historical": {
+          "mae": -2.133798556094713,
+          "rmse": -2.9771933205710743
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0,
+          "rmse": 0
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "xgboost",
+        "scenario": "without_context",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 4.041406631469727,
+          "rmse": 4.958685113014304,
+          "bias": 0.6584468841552734,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "f72d040724d077bf9dd6501514517975f06c49524327d40207a632227fbf88d0",
+        "difference_vs_historical": {
+          "mae": -2.742192924708495,
+          "rmse": -3.4639281359025604
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": 0,
+          "rmse": 0
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "lightgbm",
+        "scenario": "without_context",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 4.017139692982311,
+          "rmse": 4.933030522741606,
+          "bias": 0.5727907308380431,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "fdc4e2b35be3eaf14eb8d1457b80152a25ae80f65ca6ceff2647daa1d7e60c30",
+        "difference_vs_historical": {
+          "mae": -2.7664598631959105,
+          "rmse": -3.489582726175258
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.024186403840408488,
+          "rmse": -0.018259323692245033
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "mlp",
+        "scenario": "without_context",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.516130461579395,
+          "rmse": 3.963312890175352,
+          "bias": 0.47086423476243905,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "9dc0a0d24274f971fef442d464ea0415bdc9acc80cd09b8e3dac220b47b4adc4",
+        "difference_vs_historical": {
+          "mae": -3.2674690945988263,
+          "rmse": -4.459300358741512
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.23994881429168746,
+          "rmse": -0.8006929614792067
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "mean_ensemble",
+        "scenario": "without_context",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.4447944111067614,
+          "rmse": 4.070624769134621,
+          "bias": 0.5275622799262081,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "599427096aab58ff9cc254874f2f200f183699072585b3a5bc7f82ac9276b514",
+        "difference_vs_historical": {
+          "mae": -3.33880514507146,
+          "rmse": -4.351988479782243
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.07197225582498623,
+          "rmse": -0.18500283070033063
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      },
+      {
+        "candidate": "stacking",
+        "scenario": "without_context",
+        "feature_names": [
+          "home_total_l5",
+          "home_total_l10",
+          "home_total_l20",
+          "home_home_avg",
+          "home_std",
+          "away_total_l5",
+          "away_total_l10",
+          "away_total_l20",
+          "away_away_avg",
+          "away_std",
+          "total_sum_l5",
+          "total_sum_l10",
+          "total_diff_l5",
+          "home_rest_days",
+          "away_rest_days",
+          "is_b2b_home",
+          "is_b2b_away",
+          "rest_diff",
+          "momentum_5v10",
+          "matchup_volatility",
+          "total_rest",
+          "both_rested",
+          "both_b2b",
+          "venue_split_diff"
+        ],
+        "metrics": {
+          "n": 40,
+          "mae": 3.0934038337232694,
+          "rmse": 3.659554195559597,
+          "bias": -0.5592808739201742,
+          "status": "COMPUTED",
+          "unit": "points"
+        },
+        "prediction_hash": "13502ffd153f6ea6f7d90f03e3a4e40f49fd81880d0efa74a44bcf7597acc5b7",
+        "difference_vs_historical": {
+          "mae": -3.690195722454952,
+          "rmse": -4.763059053357267
+        },
+        "difference_vs_same_candidate_all": {
+          "mae": -0.1912619992690927,
+          "rmse": -0.3816451094293605
+        },
+        "interval_status": "INSUFFICIENT_TEMPORAL_BLOCKS"
+      }
+    ],
+    "coverage": {
+      "eligibleEvents": 40,
+      "counts": {
+        "predicted": 40,
+        "abstained": 0,
+        "no_data": 0,
+        "error": 0,
+        "not_covered": 0
+      },
+      "predictionRate": 1,
+      "abstentionRate": 0,
+      "dataAvailabilityRate": 1,
+      "errorRate": 0,
+      "reasons": {}
+    }
+  },
+  "reproducibility": {
+    "processes": 2,
+    "identical": true,
+    "report_sha256": "5223384f363cc998dce538b3b89ab0a80f0408d1e05917ce0f8f5ce284eeb1b5",
+    "local_ignored_report": "ml/experiments/output/phase06-comparison.json",
+    "command": ".venv-phase4/Scripts/python -m ml.evaluation.run",
+    "cross_platform_verified": false
+  },
+  "calibration_values_read": false,
+  "final_test_values_read": false,
+  "selected_winner": null,
+  "empirical_metrics": null,
+  "probability_metrics": {
+    "status": "UNAVAILABLE_NO_ADMISSIBLE_DISTRIBUTION",
+    "values": null
+  },
+  "decision_metrics": {
+    "status": "UNAVAILABLE_NO_OBSERVED_PRICES_OR_TICKETS",
+    "values": null
+  },
+  "preserved_files": [
+    {
+      "path": "ml/data/nba_features.csv",
+      "sha256": "93b82f452c222832327bc8db130082ef9561f73accc20610dae4a38e3dc961a5",
+      "matches_phase_05": true
+    },
+    {
+      "path": "ml/models/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "matches_phase_05": true
+    },
+    {
+      "path": "ml/models/best_params.json",
+      "sha256": "6722da57192007492db44694ceada608faeda35a3029777e8fb0d3a24538ab59",
+      "matches_phase_05": true
+    },
+    {
+      "path": "ml/models/calibration.json",
+      "sha256": "c68d203961ee9620325bc881cbc589c3579fd87ceb82074b59f4697b6d722007",
+      "matches_phase_05": true
+    },
+    {
+      "path": "ml/models/ensemble_model.json",
+      "sha256": "236ec9433ea15ad7a978a7303bb682798bb80152f51b8c594f5238d4125e2781",
+      "matches_phase_05": true
+    },
+    {
+      "path": "ml/models/lightgbm_totals.txt",
+      "sha256": "8ecc6e8803cf845f871c9828e8354563aa0654e479ac0c4012bc4006b0a4ba75",
+      "matches_phase_05": true
+    },
+    {
+      "path": "ml/models/training_results.json",
+      "sha256": "55e5bb44e88c939fb289f623d1b6a631300ab748fe8a1e410c12bcdb2e0549c6",
+      "matches_phase_05": true
+    },
+    {
+      "path": "ml/models/xgboost_totals.json",
+      "sha256": "236ec9433ea15ad7a978a7303bb682798bb80152f51b8c594f5238d4125e2781",
+      "matches_phase_05": true
+    }
+  ],
+  "ci": {
+    "yaml_valid": true,
+    "comparison_report_step_configured": true,
+    "remote_execution_verified": false
+  },
+  "production_updated": false,
+  "technical_decision": "KEEP_CANDIDATES_UNSELECTED_UNTIL_ADMISSIBLE_DATA",
+  "limitations": [
+    "No admissible observed dataset",
+    "Fixture comparison cannot select NBA winner",
+    "Only four validation blocks: predeclared minimum for interval is eight",
+    "Bootstrap is exploratory, conditional on fixed predictions, unadjusted for multiple comparisons",
+    "No fitted probability distribution or observed prices/tickets",
+    "Offline metrics not yet wired into legacy screens",
+    "Paid API remains deferred to F19; final test remains locked"
+  ]
+}
