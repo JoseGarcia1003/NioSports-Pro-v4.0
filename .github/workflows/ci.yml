@@ -24,12 +24,15 @@ jobs:
         run: python -m ml.experiments.run > phase04-fixture-smoke.json
       - name: Temporal isolation report (final test stays locked)
         run: python -m ml.validation.experiment > phase05-temporal.json
+      - name: Development metrics and ablations (fixture only)
+        run: python -m ml.evaluation.run > phase06-comparison.json
       - uses: actions/upload-artifact@v4
         with:
           name: fixture-software-report-not-nba-performance
           path: |
             phase04-fixture-smoke.json
             phase05-temporal.json
+            phase06-comparison.json
   build:
     runs-on: ubuntu-latest
     steps:
