@@ -1,8 +1,9 @@
 import { DATA_DICTIONARY, tennisPredictors } from '../data/contract.js';
+import { eloOutcomes } from '../prediction/distribution.js';
 
 export const ELO_SPEC=Object.freeze({id:'tennis-elo-baseline-0.1',k:24,initial:1500,scale:400,surfaceWeight:0.5,
   calibrated:false,target:'winner_conditional_on_completed_match'});
-export const eloProbability=(a,b)=>1/(1+10**((b-a)/ELO_SPEC.scale));
+export const eloProbability=(a,b)=>eloOutcomes(a,b).a;
 
 // Rating updates see historical completed outcomes only; no odds or UI concerns.
 export function eloRatings(history) {

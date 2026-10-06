@@ -8,6 +8,10 @@ const messages = {
   UNSUPPORTED_SCOPE:'Este periodo no tiene un modelo propio habilitado.',
   INVALID_DATA:'Los datos no cumplen el contrato de procedencia y disponibilidad temporal.',
   PROBABILITY_UNAVAILABLE:'No hay una distribución compatible para calcular probabilidades.',
+  PROBABILITY_CONTRACT_REQUIRED:'La distribución no acredita el contrato probabilístico requerido.',
+  PROBABILITY_MODEL_MISMATCH:'La distribución corresponde a otra versión del modelo de puntos.',
+  UNSUPPORTED_TOTAL_LINE:'Solo se admiten líneas enteras o de medio punto; las líneas divididas no están habilitadas.',
+  UNSUPPORTED_MARKET:'Este análisis admite un solo mercado del partido; no calcula combinadas.',
   DECISION_POLICY_NOT_ENABLED:'No se generan recomendaciones comerciales mientras su política y validación estén pendientes.'
 };
 // Presentation only copies stage outputs and selects text. It never recomputes probability/EV.

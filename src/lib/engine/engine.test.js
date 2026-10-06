@@ -132,69 +132,21 @@ describe('Probability Functions', () => {
     });
   });
 
-  describe('calculateOverProbability', () => {
-    it('retorna ~0.5 cuando projection = line', () => {
-      const prob = calculateOverProbability(220, 220, 'FULL');
-      expect(prob).toBeCloseTo(0.5, 2);
-    });
-
-    it('retorna >0.5 cuando projection > line', () => {
-      const prob = calculateOverProbability(230, 220, 'FULL');
-      expect(prob).toBeGreaterThan(0.5);
-    });
-
-    it('retorna <0.5 cuando projection < line', () => {
-      const prob = calculateOverProbability(210, 220, 'FULL');
-      expect(prob).toBeLessThan(0.5);
-    });
-
-    it('retorna valor mayor para diferencia mayor', () => {
-      const prob5 = calculateOverProbability(225, 220, 'FULL');
-      const prob10 = calculateOverProbability(230, 220, 'FULL');
-      expect(prob10).toBeGreaterThan(prob5);
-    });
-
-    it('usa STD_DEV correcto por período', () => {
-      const probQ1 = calculateOverProbability(60, 55, 'Q1');
-      const probFull = calculateOverProbability(230, 225, 'FULL');
-      expect(probQ1).toBeGreaterThan(probFull);
+  describe('calculateOverProbability quarantine', () => {
+    it('rejects legacy inference instead of inventing probabilities', () => {
+      expect(() => calculateOverProbability(220,220)).toThrow('LEGACY_PROBABILITY_DISABLED');
     });
   });
 
-  describe('calculateUnderProbability', () => {
-    it('es complemento de calculateOverProbability', () => {
-      const over = calculateOverProbability(225, 220, 'FULL');
-      const under = calculateUnderProbability(225, 220, 'FULL');
-      expect(over + under).toBeCloseTo(1, 10);
+  describe('calculateUnderProbability quarantine', () => {
+    it('rejects legacy inference instead of inventing probabilities', () => {
+      expect(() => calculateUnderProbability(220,220)).toThrow('LEGACY_PROBABILITY_DISABLED');
     });
   });
 
-  describe('getRecommendation', () => {
-    it('recomienda OVER cuando projection > line', () => {
-      const rec = getRecommendation(230, 220, 'FULL');
-      expect(rec.direction).toBe('OVER');
-      expect(rec.probability).toBeGreaterThan(0.5);
-    });
-
-    it('recomienda UNDER cuando projection < line', () => {
-      const rec = getRecommendation(210, 220, 'FULL');
-      expect(rec.direction).toBe('UNDER');
-      expect(rec.probability).toBeGreaterThan(0.5);
-    });
-
-    it('asigna confidence HIGH para prob >= 65%', () => {
-      const rec = getRecommendation(240, 220, 'FULL');
-      expect(rec.confidence).toBe('HIGH');
-    });
-
-    it('asigna confidence MEDIUM para prob 55-65%', () => {
-      const rec = getRecommendation(224, 220, 'FULL');
-      expect(rec.confidence).toBe('MEDIUM');
-    });
-
-    it('asigna confidence LOW para prob < 55%', () => {
-      const rec = getRecommendation(221, 220, 'FULL');
-      expect(rec.confidence).toBe('LOW');
+  describe('getRecommendation quarantine', () => {
+    it('rejects legacy inference instead of inventing probabilities', () => {
+      expect(() => getRecommendation(220,220)).toThrow('LEGACY_PROBABILITY_DISABLED');
     });
   });
 
@@ -254,19 +206,9 @@ describe('Probability Functions', () => {
     });
   });
 
-  describe('analyzePlay', () => {
-    it('retorna análisis completo', () => {
-      const analysis = analyzePlay(230, 220, 'FULL', -110);
-      
-      expect(analysis.projection).toBe(230);
-      expect(analysis.line).toBe(220);
-      expect(analysis.period).toBe('FULL');
-      expect(analysis.direction).toBe('OVER');
-      expect(analysis.probability).toBeGreaterThan(0.5);
-      expect(analysis.ev).toBeDefined();
-      expect(analysis.edge).toBe(10);
-      expect(analysis.zScore).toBeDefined();
-      expect(analysis.stdDev).toBe(STD_DEV.FULL);
+  describe('analyzePlay quarantine', () => {
+    it('rejects legacy inference instead of inventing probabilities', () => {
+      expect(() => analyzePlay(220,220)).toThrow('LEGACY_PROBABILITY_DISABLED');
     });
   });
 });
@@ -460,71 +402,15 @@ describe('Predictor', () => {
     });
   });
 
-  describe('predict', () => {
-    const homeTeam = {
-      stats: { q1Home: 28, halfHome: 55, fullHome: 112 },
-      restDays: 2
-    };
-    const awayTeam = {
-      stats: { q1Away: 27, halfAway: 54, fullAway: 110 },
-      restDays: 1
-    };
-
-    it('retorna predicción completa', () => {
-      const result = predict({
-        homeTeam,
-        awayTeam,
-        line: 220,
-        period: 'FULL'
-      });
-
-      expect(result.projection).toBeDefined();
-      expect(result.line).toBe(220);
-      expect(result.direction).toMatch(/OVER|UNDER/);
-      expect(result.probability).toBeGreaterThan(0);
-      expect(result.probability).toBeLessThan(1);
-      expect(result.confidence).toMatch(/HIGH|MEDIUM|LOW/);
-      expect(result.ev).toBeDefined();
-      expect(result.modelVersion).toBeDefined();
-    });
-
-    it('incluye factores de ajuste', () => {
-      const result = predict({
-        homeTeam: { ...homeTeam, restDays: 0 },
-        awayTeam,
-        line: 220,
-        period: 'FULL'
-      });
-
-      expect(result.adjustments).toBeInstanceOf(Array);
-      expect(result.totalAdjustment).toBeDefined();
-    });
-
-    it('genera timestamp', () => {
-      const result = predict({
-        homeTeam,
-        awayTeam,
-        line: 220,
-        period: 'FULL'
-      });
-
-      expect(result.generatedAt).toBeDefined();
-      expect(new Date(result.generatedAt).getTime()).not.toBeNaN();
+  describe('predict quarantine', () => {
+    it('rejects legacy inference instead of inventing probabilities', () => {
+      expect(() => predict({homeTeam:{},awayTeam:{},line:220})).toThrow('LEGACY_PROBABILITY_DISABLED');
     });
   });
 
-  describe('quickPredict', () => {
-    it('retorna análisis básico', () => {
-      const result = quickPredict(112, 108, 220, 'FULL');
-      
-      expect(result.direction).toBeDefined();
-      expect(result.probability).toBeDefined();
-      expect(result.ev).toBeDefined();
-    });
-
-    it('calcula edge correctamente', () => {
-      const result = quickPredict(115, 110, 220, 'FULL');
-      expect(result.edge).toBe(5);
+  describe('quickPredict quarantine', () => {
+    it('rejects legacy inference instead of inventing probabilities', () => {
+      expect(() => quickPredict(110,110,220)).toThrow('LEGACY_PROBABILITY_DISABLED');
     });
   });
 });
@@ -533,59 +419,4 @@ describe('Predictor', () => {
 // TESTS DE INVARIANTES
 // ═══════════════════════════════════════════════════════════════
 
-describe('Invariants', () => {
-  it('probabilidades siempre entre 0 y 1', () => {
-    const testCases = [
-      { proj: 180, line: 220 },
-      { proj: 220, line: 220 },
-      { proj: 260, line: 220 },
-      { proj: 50, line: 55 }
-    ];
-
-    testCases.forEach(({ proj, line }) => {
-      const prob = calculateOverProbability(proj, line, 'FULL');
-      expect(prob).toBeGreaterThanOrEqual(0);
-      expect(prob).toBeLessThanOrEqual(1);
-    });
-  });
-
-  it('OVER + UNDER = 1', () => {
-    const testCases = [200, 210, 220, 230, 240];
-    
-    testCases.forEach(proj => {
-      const over = calculateOverProbability(proj, 220, 'FULL');
-      const under = calculateUnderProbability(proj, 220, 'FULL');
-      expect(over + under).toBeCloseTo(1, 10);
-    });
-  });
-
-  it('proyecciones siempre positivas', () => {
-    const result = predict({
-      homeTeam: { stats: { fullHome: 100 }, restDays: 0 },
-      awayTeam: { stats: { fullAway: 100 }, restDays: 0 },
-      line: 200,
-      period: 'FULL'
-    });
-
-    expect(result.projection).toBeGreaterThan(0);
-  });
-
-  it('edge tiene signo correcto', () => {
-    const over = predict({
-      homeTeam: { stats: { fullHome: 115 } },
-      awayTeam: { stats: { fullAway: 115 } },
-      line: 220,
-      period: 'FULL'
-    });
-
-    const under = predict({
-      homeTeam: { stats: { fullHome: 105 } },
-      awayTeam: { stats: { fullAway: 105 } },
-      line: 220,
-      period: 'FULL'
-    });
-
-    expect(over.edge).toBeGreaterThan(0);
-    expect(under.edge).toBeLessThan(0);
-  });
-});
+// Probability invariants now live in tests/unit/probability-contract.test.js.

@@ -155,6 +155,7 @@ export function predict({
   period = 'FULL',
   gameInfo = {}
 }) {
+  throw new Error('LEGACY_PROBABILITY_DISABLED: use the versioned prediction pipeline');
   // 1. Calcular proyección base
   const baseProjection = calculateBaseProjection(
     homeTeam.stats || homeTeam,
@@ -229,6 +230,7 @@ export function predictAllPeriods({
   lines = {},
   gameInfo = {}
 }) {
+  throw new Error('LEGACY_PROBABILITY_DISABLED: use the versioned prediction pipeline');
   const periods = ['Q1', 'HALF', 'FULL'];
   const predictions = {};
 
@@ -257,6 +259,7 @@ export function predictAllPeriods({
  * @returns {Object} Predicción básica
  */
 export function quickPredict(homePoints, awayPoints, line, period = 'FULL') {
+  throw new Error('LEGACY_PROBABILITY_DISABLED: use the versioned prediction pipeline');
   const projection = homePoints + awayPoints;
   return analyzePlay(projection, line, period);
 }

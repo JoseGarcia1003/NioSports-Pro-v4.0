@@ -15,7 +15,8 @@ const fixtureModels=()=>{
   const base={schemaVersion:version,artifactHash:'a'.repeat(64),sport:'basketball',period:'FULL',
     dataContractVersion:'1.0.0',featureRecipeVersion:DATA_DICTIONARY.featureRecipeVersion,validation:'fixture'};
   return {projection:{manifest:{...base,id:'points-fixture',stage:'projection',featureNames:NBA_FEATURES.map(f=>f.name)},run:vi.fn(async()=>({mean:225}))},
-    probability:{manifest:{...base,id:'distribution-fixture',stage:'probability',projectionModelId:'points-fixture'},run:vi.fn(async()=>({over:.6,under:.35,push:.05}))}};
+    probability:{manifest:{...base,id:'distribution-fixture',stage:'probability',projectionModelId:'points-fixture',
+      projectionArtifactHash:base.artifactHash,probabilityContractVersion:'event-probability-1',method:'fixture-explicit-1'},run:vi.fn(async()=>({over:.6,under:.35,push:.05}))}};
 };
 const run=(models=fixtureModels(),snapshot=nbaSnapshot(),patch={})=>analyzeSnapshot(snapshot,{models,market,dataOptions:OPTIONS,...patch});
 describe('five-stage architecture',()=>{

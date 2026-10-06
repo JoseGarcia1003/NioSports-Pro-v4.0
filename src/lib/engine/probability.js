@@ -56,9 +56,7 @@ export function calculateZScore(value, mean, stdDev) {
  * @returns {number} Probabilidad de OVER (0-1)
  */
 export function calculateOverProbability(projection, line, period = 'FULL') {
-  const stdDev = STD_DEV[period] || STD_DEV.FULL;
-  const zScore = calculateZScore(line, projection, stdDev);
-  return normalCDF(zScore);
+  throw new Error('LEGACY_PROBABILITY_DISABLED: an explicit event distribution is required');
 }
 
 /**

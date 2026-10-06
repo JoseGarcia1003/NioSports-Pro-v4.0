@@ -23,6 +23,9 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+// F7 quarantine: this legacy runner invents lines/partials and must never publish evidence.
+throw new Error('LEGACY_BACKTEST_QUARANTINED: use temporal evaluation; replay reconstruction belongs to F10');
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 
