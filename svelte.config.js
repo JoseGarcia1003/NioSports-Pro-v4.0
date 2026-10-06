@@ -10,9 +10,8 @@ import adapter from '@sveltejs/adapter-vercel';
 const config = {
   kit: {
     adapter: adapter({
-      // Usar Edge Runtime para las rutas del servidor cuando sea posible
-      // (menor latencia que Node.js serverless en Vercel)
-      runtime: 'nodejs20.x',
+      // Node LTS alineado con CI; Node 20 ya no admite nuevos despliegues.
+      runtime: 'nodejs24.x',
     }),
 
     // Alias $lib → src/lib (disponible en todos los archivos .svelte y .js)
