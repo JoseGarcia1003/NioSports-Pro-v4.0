@@ -1,5 +1,14 @@
 # Punto de control — leer antes de continuar
 
+## Reconstrucción — Fase 7 cerrada técnicamente (9 de octubre de 2026)
+
+- Autorizada expresamente F7 por el propietario el 30/09 y su continuación. Base b9bb2a4f; implementación 1dd6ec69 guardada/verificada en GitHub, rama codex/security-integrity. Main continúa ab9b63a4. Acta PHASE_07.md, contrato PROBABILITY_CONTRACT.md y CHECKS_PHASE_07.json. No F8 ni promoción a producción.
+- Núcleo discreto/Elo JS y Python con vectores compartidos y contrato event-probability-1; recibos ligados a hash de proyección. Over/under/push explícitos, sin desviación arbitraria. HALF/Q1, líneas de cuarto, combinadas y contextos incompatibles se rechazan. Adaptador PMF solo fixture, producción sin modelos registrados. Inferencia legacy y backtest sintético bloqueados; datos/pesos históricos conservados (ocho hashes).
+- Verificación: 551 pruebas JS y 23 Python aprobadas el 06/10, incluidas paridad entre lenguajes y corrección de cotas numéricas. 10 UI el 30/09; Svelte check 0 errores/advertencias repetido el 06/10 tras actualizar runtime. Total de entrega 584, sin sumar subconjuntos ni las pruebas históricas F4-F6. Logs ignorados phase07-*.log. Build local compila cliente/servidor pero falla empaquetado por EPERM symlink Windows; no llamarlo build aprobado.
+- Primer despliegue remoto dpl_DayTJi2DqVDefHmyEUVtoT6P9EzZ compiló, pero ERROR al publicar por runtime nodejs20.x discontinuado. Corregido a nodejs24.x en 9df7d0bb (mismo major de CI y pruebas locales). Segunda preview dpl_HEWNTgy2BjHmNpefsyXAsht9Rw5r READY, verificada el 06/10: https://nio-sports-pro-v4-0-1lh8mofd8-niosports-pros-projects.vercel.app. No certifica Python remoto ni modifica el dominio principal. Cierre documental guardado después; consultar Git para su SHA.
+- APROBADA TÉCNICAMENTE; validación empírica PENDIENTE, nota técnica 8/10, no nota predictiva. No distribución NBA ajustada ni calibrador entrenado; calibrated=false. F6 mantiene selección empírica bloqueada. No se han verificado el servicio Python remoto ni recorridos comerciales. Ninguna mejora de acierto/rentabilidad afirmada.
+- Plan v1.7; 33 hallazgos parciales y 31 pendientes, ninguno compuesto cerrado. Al continuar: F8 (cuota canónica decimal, conversiones en bordes, conciliación y cuarentena del legado ambiguo). No repetir F7, no abrir test final ni entrenar CSV en cuarentena; interfaz F17 y API pagada F19. Mantener el trabajo en rama de revisión hasta integrar la cadena completa.
+
 ## Reconstrucción — Fase 6 implementada; selección empírica pendiente (29 de septiembre de 2026)
 
 - Autorizada F6 y continuación. Base 6425f762; implementación 1a3234e1; rama codex/security-integrity, main ab9b63a4. Implementación ml/evaluation y 32 pruebas F6; no cambios web, CSV, pesos o servicio desplegado. Consultar Git para commits finales y verificar remoto antes de afirmar guardado.

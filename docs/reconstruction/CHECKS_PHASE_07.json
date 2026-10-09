@@ -1,0 +1,349 @@
+{
+  "phase": 7,
+  "date": "2026-10-09",
+  "authorized_date": "2026-09-30",
+  "base_commit": "b9bb2a4fb18da624798fa565d6f02f45c767f2f6",
+  "implementation_commit": "1dd6ec69f1cf31985d405d471c992ac339806940",
+  "branch": "codex/security-integrity",
+  "main_commit": "ab9b63a4982cdb212c43a5f631507fa839e4e4aa",
+  "technical_verdict": "APROBADA TECNICAMENTE",
+  "empirical_gate": "PENDING_ADMISSIBLE_DATA_DISTRIBUTION_AND_CALIBRATION",
+  "integral_empirical_gate_passed": false,
+  "technical_phase_score": 8,
+  "probability_contract_version": "event-probability-1",
+  "calibrated": false,
+  "production_models_enabled": false,
+  "selected_winner": null,
+  "empirical_metrics": null,
+  "final_test_values_read": false,
+  "production_updated": false,
+  "tests": [
+    {
+      "name": "domain_server",
+      "command": "node node_modules/vitest/vitest.mjs run --maxWorkers=2 --minWorkers=1",
+      "date": "2026-10-06",
+      "passed": 551,
+      "files": 31,
+      "duration_seconds": 66.21
+    },
+    {
+      "name": "python_contracts",
+      "command": ".venv-phase4/Scripts/python.exe -m unittest discover -s tests/python -v",
+      "date": "2026-10-06",
+      "passed": 23,
+      "duration_seconds": 0.733
+    },
+    {
+      "name": "ui",
+      "command": "node node_modules/vitest/vitest.mjs run --config vitest.ui.config.js",
+      "date": "2026-09-30",
+      "passed": 10,
+      "files": 3,
+      "duration_seconds": 75.93
+    }
+  ],
+  "total_tests_passed": 584,
+  "svelte_check": {
+    "command": "node node_modules/@sveltejs/kit/svelte-kit.js sync; node node_modules/svelte-check/bin/svelte-check --tsconfig ./jsconfig.json",
+    "date": "2026-10-06",
+    "errors": 0,
+    "warnings": 0
+  },
+  "local_build": {
+    "command": "node node_modules/vite/bin/vite.js build",
+    "date": "2026-09-30",
+    "status": "FAILED_PACKAGING",
+    "client_server_compiled": true,
+    "reason": "Windows EPERM symlink in adapter-vercel for index.func",
+    "exit_code": 1
+  },
+  "shared_vectors": {
+    "version": "event-probability-1",
+    "purpose": "SOFTWARE_FIXTURE_ONLY",
+    "cases": [
+      {
+        "id": "integer-push",
+        "kind": "total",
+        "points": [
+          {
+            "total": 200,
+            "mass": 0.2
+          },
+          {
+            "total": 210,
+            "mass": 0.3
+          },
+          {
+            "total": 220,
+            "mass": 0.5
+          }
+        ],
+        "line": 210,
+        "expected": {
+          "over": 0.5,
+          "under": 0.2,
+          "push": 0.3
+        }
+      },
+      {
+        "id": "fractional",
+        "kind": "total",
+        "points": [
+          {
+            "total": 200,
+            "mass": 0.2
+          },
+          {
+            "total": 210,
+            "mass": 0.3
+          },
+          {
+            "total": 220,
+            "mass": 0.5
+          }
+        ],
+        "line": 210.5,
+        "expected": {
+          "over": 0.5,
+          "under": 0.5,
+          "push": 0
+        }
+      },
+      {
+        "id": "lower-bound",
+        "kind": "total",
+        "points": [
+          {
+            "total": 200,
+            "mass": 0.2
+          },
+          {
+            "total": 210,
+            "mass": 0.3
+          },
+          {
+            "total": 220,
+            "mass": 0.5
+          }
+        ],
+        "line": 199.5,
+        "expected": {
+          "over": 1,
+          "under": 0,
+          "push": 0
+        }
+      },
+      {
+        "id": "upper-bound",
+        "kind": "total",
+        "points": [
+          {
+            "total": 200,
+            "mass": 0.2
+          },
+          {
+            "total": 210,
+            "mass": 0.3
+          },
+          {
+            "total": 220,
+            "mass": 0.5
+          }
+        ],
+        "line": 220.5,
+        "expected": {
+          "over": 0,
+          "under": 1,
+          "push": 0
+        }
+      },
+      {
+        "id": "all-push",
+        "kind": "total",
+        "points": [
+          {
+            "total": 220,
+            "mass": 1
+          }
+        ],
+        "line": 220,
+        "expected": {
+          "over": 0,
+          "under": 0,
+          "push": 1
+        }
+      },
+      {
+        "id": "equal-ratings",
+        "kind": "elo",
+        "a": 1500,
+        "b": 1500,
+        "expected": {
+          "a": 0.5,
+          "b": 0.5
+        }
+      },
+      {
+        "id": "higher-rating",
+        "kind": "elo",
+        "a": 1900,
+        "b": 1500,
+        "expected": {
+          "a": 0.9090909090909091,
+          "b": 0.09090909090909091
+        }
+      },
+      {
+        "id": "extreme-rating",
+        "kind": "elo",
+        "a": -1E+308,
+        "b": 1E+308,
+        "expected": {
+          "a": 0,
+          "b": 1
+        }
+      }
+    ]
+  },
+  "parity_tolerance": 1E-12,
+  "preserved_files": [
+    {
+      "path": "ml/data/nba_features.csv",
+      "sha256": "93b82f452c222832327bc8db130082ef9561f73accc20610dae4a38e3dc961a5",
+      "matches_phase_06": true
+    },
+    {
+      "path": "ml/models/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "matches_phase_06": true
+    },
+    {
+      "path": "ml/models/best_params.json",
+      "sha256": "6722da57192007492db44694ceada608faeda35a3029777e8fb0d3a24538ab59",
+      "matches_phase_06": true
+    },
+    {
+      "path": "ml/models/calibration.json",
+      "sha256": "c68d203961ee9620325bc881cbc589c3579fd87ceb82074b59f4697b6d722007",
+      "matches_phase_06": true
+    },
+    {
+      "path": "ml/models/ensemble_model.json",
+      "sha256": "236ec9433ea15ad7a978a7303bb682798bb80152f51b8c594f5238d4125e2781",
+      "matches_phase_06": true
+    },
+    {
+      "path": "ml/models/lightgbm_totals.txt",
+      "sha256": "8ecc6e8803cf845f871c9828e8354563aa0654e479ac0c4012bc4006b0a4ba75",
+      "matches_phase_06": true
+    },
+    {
+      "path": "ml/models/training_results.json",
+      "sha256": "55e5bb44e88c939fb289f623d1b6a631300ab748fe8a1e410c12bcdb2e0549c6",
+      "matches_phase_06": true
+    },
+    {
+      "path": "ml/models/xgboost_totals.json",
+      "sha256": "236ec9433ea15ad7a978a7303bb682798bb80152f51b8c594f5238d4125e2781",
+      "matches_phase_06": true
+    }
+  ],
+  "implementation_sources": [
+    {
+      "path": "docs/reconstruction/PROBABILITY_CONTRACT.md",
+      "sha256": "19bfec4000f0165f823ec639ae18562e217b5bfea64e0484814bc0da9626e4eb"
+    },
+    {
+      "path": "ml/contracts/probability.py",
+      "sha256": "1b4eced9dbca3f5a8d16d12a1be2758b33e79f8d72168a81d7dea8a11009fb68"
+    },
+    {
+      "path": "scripts/backtesting-runner.js",
+      "sha256": "364780920c38599eda5d9fbd848021ba712d2bed95ca4d7b41ea6a67a637d173"
+    },
+    {
+      "path": "src/lib/engine/engine.test.js",
+      "sha256": "2521e47f9b4e45606b53907043d145b0e2e5a71533aabffb15fcbe8200930e5f"
+    },
+    {
+      "path": "src/lib/engine/predictor.js",
+      "sha256": "cff30031b372dd6d811c1305154817ecb5c1125ca699f22d951320b2959bef73"
+    },
+    {
+      "path": "src/lib/engine/probability.js",
+      "sha256": "d48b8cfd88b84da5367c693a889024cf9f512725e9e3cd83bdaa24e61d8fee2d"
+    },
+    {
+      "path": "src/lib/prediction/distribution.js",
+      "sha256": "9cbc6fcbad4c83b4ea0d983a32d7934154eb6c1e038956fed5aeb2d001745076"
+    },
+    {
+      "path": "src/lib/prediction/presentation.js",
+      "sha256": "bd1021264f2e224a19fb5028d9f7b98478c0f2f628afe97fd1272b5e54b4a09e"
+    },
+    {
+      "path": "src/lib/prediction/probability.js",
+      "sha256": "29c3b13dff1507f931df7d45d227eebfdda5d90c85fb15c8a01ff79e45c9721d"
+    },
+    {
+      "path": "src/lib/tennis/elo.js",
+      "sha256": "d1f04fadc3f13a06bc75e03534e4224e3625568a2ab620044b1dbfd2b7bb920a"
+    },
+    {
+      "path": "tests/fixtures/probability-vectors.json",
+      "sha256": "2dbc97c725eef06826d0e86ff3e935d75938514ea7758c1d918d4e8f3aca769a"
+    },
+    {
+      "path": "tests/python/test_probability_contract.py",
+      "sha256": "e16f22a78cba180234c177d746de60806ca086abf95c488dbef890c41618a5ee"
+    },
+    {
+      "path": "tests/unit/prediction-architecture.test.js",
+      "sha256": "cc15818b6830979ffcc749177b634365ed430e5cc9394690531c718b182120fe"
+    },
+    {
+      "path": "tests/unit/probability-contract.test.js",
+      "sha256": "ac1ac47704cab7a6b9c2d7a2ae1b573f62509644979c28734b5d126b2a54ce45"
+    },
+    {
+      "path": "svelte.config.js",
+      "sha256": "afc2bc1aed484da07dfa9071a92ad853b5a0446d90565ec359185b0116869619"
+    }
+  ],
+  "ci_remote_tests_verified": false,
+  "limitations": [
+    "Controlled PMF fixtures only; no fitted NBA distribution",
+    "Elo is experimental, not empirically calibrated",
+    "No deployed Python service certification",
+    "Legacy screens and historical records not fully migrated",
+    "F6 empirical selection remains blocked",
+    "UI passed September 30; numeric guard and runtime correction verified October 6; UI unchanged",
+    "F8 not started; paid provider F19; final test locked"
+  ],
+  "runtime_fix_commit": "9df7d0bbb6680eccc8c5dd133ddd94c54d43ee5d",
+  "runtime": "nodejs24.x",
+  "remote_preview": {
+    "id": "dpl_HEWNTgy2BjHmNpefsyXAsht9Rw5r",
+    "commit": "9df7d0bbb6680eccc8c5dd133ddd94c54d43ee5d",
+    "status": "READY",
+    "url": "https://nio-sports-pro-v4-0-1lh8mofd8-niosports-pros-projects.vercel.app",
+    "verified_date": "2026-10-06",
+    "scope": "web build and deployment, not predictive validation"
+  },
+  "failed_preview": {
+    "id": "dpl_DayTJi2DqVDefHmyEUVtoT6P9EzZ",
+    "commit": "1dd6ec69f1cf31985d405d471c992ac339806940",
+    "status": "ERROR",
+    "build_completed": true,
+    "reason": "nodejs20.x runtime discontinued",
+    "fixed_by": "9df7d0bbb6680eccc8c5dd133ddd94c54d43ee5d"
+  },
+  "http_smoke": {
+    "date": "2026-10-09",
+    "path": "/totales",
+    "status": 200,
+    "result": "HTML app shell served",
+    "client_hydration_verified": false,
+    "authenticated_flow_verified": false
+  }
+}

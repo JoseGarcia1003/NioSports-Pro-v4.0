@@ -1,6 +1,6 @@
 # Registro de hallazgos y criterios de cierre
 
-Fecha inicial: 27/09/2026. Actualización 29/09/2026: **32 registros PARCIALES** (H01-H18, H20-H22, H27, H29, H32-H34, H38, H41, H45, H51, H60 y H62); los otros 32 siguen PENDIENTES. Ningún hallazgo compuesto se cierra sin completar todas sus condiciones e integrar sus consumidores. El avance F3-F6 corresponde a la rama de revisión; no corrige todavía la producción principal.
+Fecha inicial: 27/09/2026. Actualización 06/10/2026: **33 registros PARCIALES** (H01-H18, H20-H23, H27, H29, H32-H34, H38, H41, H45, H51, H60 y H62); los otros 31 siguen PENDIENTES. Ningún hallazgo compuesto se cierra sin completar todas sus condiciones e integrar sus consumidores. El avance F3-F7 corresponde a la rama de revisión; no corrige todavía la producción principal.
 
 Evidencia del avance: [PRODUCT_SPEC v1.0.0](PRODUCT_SPEC.md), [C01-C38](PHASE_01_CASES.md) y [acta F1](PHASE_01.md). H01/H02 tienen especificación completa, pero quedan pendientes su aplicación al motor, terminología y pantallas; se amplían las fases responsables para evitar un cierre falso. H27/H38/H45/H51/H60 tienen reglas conceptuales que deberán implementarse o validarse posteriormente.
 
@@ -60,7 +60,7 @@ Los hallazgos compuestos se desglosan en pruebas al iniciar su fase. Ningún ID 
 | H20 | G4 | crítico | 6 | 7,8,9 | Líneas/cuota/descanso/lesiones por defecto y líneas derivadas de propia proyección. | Separar entrada manual/demostración/observación; no fabricar mercado ni EV; ausencias bloquean recomendación. |
 | H21 | G4 | crítico | 6,8 | 7,10 | Dispersiones divergentes en JS, UI y backtest; ajustes iguales para periodos distintos. | Un solo contrato y propietario del cálculo por periodo; API/UI/replay producen la misma salida. |
 | H22 | G4 | crítico | 6 | 7,9 | Combinadas multiplican Q1/HALF/FULL solapados sin modelo conjunto. | Retirar probabilidad conjunta salvo modelo de dependencia evaluado; regresión impide producto ingenuo. |
-| H23 | G3 | crítico | 8 | 10 | Backtest usa Math.random, líneas fabricadas, parciales inventados y snapshot actual. | Replay usa exclusivamente cortes históricos y resultados observados; no escribe simulación en evidencia pública. |
+| H23 | G3 | crítico | 8 | 7,10 | Backtest usa Math.random, líneas fabricadas, parciales inventados y snapshot actual. | Replay usa exclusivamente cortes históricos y resultados observados; no escribe simulación en evidencia pública. |
 | H24 | G5 | alto | 7 | 11 | Elo K=24, mezcla 50/50 y mínimos 20/8 no contrastados empíricamente. | Comparar Elo simple, ranking si existe, parámetros y ablaciones temporales sin selección por test. |
 | H25 | G5 | alto | 7 | 11 | Sin evaluación suficiente por ATP/WTA/Challenger/ITF, superficie y formato. | Reportar cobertura, muestras, calidad y abstenciones por segmento; insuficiencia explícita. |
 | H26 | G5 | alto | 7 | 11 | Inactividad/decay/retorno tras lesión sin comparación; no hay modelo de gravedad. | Evaluar opciones con historia disponible; lesión desconocida no significa ausencia; no inventar impactos. |
@@ -157,6 +157,18 @@ Evidencia: [acta F6](PHASE_06.md), [definiciones](EVALUATION_METRICS.md), [resul
 | H33 | Muestras y denominadores explícitos; curvas con recuentos y vacíos nulos | Unificar gráficos/KPI de las pantallas y datos deportivos admisibles |
 | H34 | Procedencia homogénea, moneda y referencias pick/ticket exigidas; manual no se mezcla con verified | Autenticar procedencia en productor y enlazar resultados/ledger reales |
 | H41 | Evaluador no trunca a 100 filas ni inventa -110; cuota faltante bloquea retorno del conjunto | Paginación/universo completo y reemplazo de agregados del historial público |
+
+### Avance F7: contrato probabilístico y cuarentena
+
+Evidencia: [acta F7](PHASE_07.md), [contrato](PROBABILITY_CONTRACT.md), [comprobaciones](CHECKS_PHASE_07.json). 584 pruebas de software aprobadas en esta entrega; validación/calibración deportivas pendientes. No se cierran hallazgos compuestos por retirar una ruta insegura.
+
+| Registro | Parte implementada en F7 | Sigue pendiente |
+|---|---|---|
+| H01/H15 | Espacios over/under/push y ganador completado explícitos; recibos ligados a evento/periodo/corte/modelo; parciales rechazados | Distribuciones reales por capacidad; resultados y liquidación integrados |
+| H13 | Probabilidades numéricamente válidas, sin atribución de calibración; pares Python/JS comprobados | Calibrador ajustado de forma independiente y evaluación temporal con datos admisibles |
+| H21 | Núcleo discreto/Elo compartido; inferencia legacy bloqueada; API consume recibos sin recalcular | Distribución real certificada, servicio Python desplegado y replay F10 |
+| H22 | Rechazo explícito de combinadas y regresiones; no producto de probabilidades de periodos solapados | Política de decisión F9 y recorrido integral F16 |
+| H23 | Backtest sintético aborta antes de red/escritura; test verifica rechazo y conservación del resultado histórico | Replay real con cortes, líneas, resultados y versiones verificables F10 |
 
 ## Estados permitidos y responsabilidad
 
