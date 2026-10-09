@@ -1,5 +1,13 @@
 # Punto de control — leer antes de continuar
 
+## Incidencia GitHub Actions — 9 de octubre de 2026
+
+- Captura del propietario contrastada con run CI #78, ID 35780410017, job 106924207119, commit main ab9b63a4 del 22/09. Anotación exacta: "The job was not started because your account is locked due to a billing issue." No arrancó el runner ni ejecutó pruebas; no atribuir este rojo a un error de compilación del código.
+- Segunda anotación: aviso de migración futura de ubuntu-latest a Ubuntu 26; no es la causa del fallo. Logs del job no disponibles (404); diagnóstico sustentado en annotations del check-run, consultadas por API pública.
+- F7 f44b763c: cero runs de Actions para ese SHA; estado Vercel SUCCESS confirmado por GitHub. Workflow actual solo dispara push main o pull_request hacia main; el push directo a codex/security-integrity no prueba CI. Las 584 pruebas reportadas fueron locales y no equivalen a CI remota aprobada.
+- Bloqueo externo: el propietario debe resolver la incidencia de facturación en GitHub. No se han realizado pagos, cambiado planes, desactivado comprobaciones o reintentado inútilmente el job. No promover la reconstrucción a main para ocultar el rojo. Tras resolver la cuenta, comprobar Actions para la versión que vaya a revisarse; un reintento del run antiguo sigue evaluando el commit antiguo.
+- Evidencia: https://github.com/JoseGarcia1003/NioSports-Pro-v4.0/actions/runs/35780410017. Sin cambios funcionales ni inicio de F8 por esta incidencia.
+
 ## Reconstrucción — Fase 7 cerrada técnicamente (9 de octubre de 2026)
 
 - Autorizada expresamente F7 por el propietario el 30/09 y su continuación. Base b9bb2a4f; implementación 1dd6ec69 guardada/verificada en GitHub, rama codex/security-integrity. Main continúa ab9b63a4. Acta PHASE_07.md, contrato PROBABILITY_CONTRACT.md y CHECKS_PHASE_07.json. No F8 ni promoción a producción.
