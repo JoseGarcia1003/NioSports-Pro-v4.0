@@ -12,7 +12,7 @@
 .research-lab .detail-metrics>div>span{font-size:10px}.research-lab .rail-note p,.research-lab .rail-note a,.research-lab .lab-evidence dt{font-size:11px}.research-lab .lab-evidence dd{font-size:12px}
 @media(prefers-reduced-motion:reduce){.research-lab *{scroll-behavior:auto;transition:none!important}}
 /* Segunda dirección del propietario: marino intenso + negro + oro luminoso. */
-.lab-rail{background:var(--nio-chrome);--lab-ink:#f7f9fc;--lab-muted:#b4bfd2;--lab-accent:var(--nio-gold);--lab-soft:#101c34;--lab-line:#26354f;--lab-selection:#10254d;border-right-color:#26354f}
+.lab-rail{background:var(--nio-chrome);color:var(--lab-ink);--lab-ink:#f7f9fc;--lab-muted:#b4bfd2;--lab-accent:var(--nio-gold);--lab-soft:#101c34;--lab-line:#26354f;--lab-selection:#10254d;border-right-color:#26354f}
 .lab-main{background:radial-gradient(ellipse at 70% 0%,#00307a35,transparent 50%)}
 .lab-header{padding:28px;border:1px solid #35527b;border-top:2px solid var(--nio-gold);border-radius:12px;background:var(--nio-hero);box-shadow:0 18px 40px #0003;color:#fff;position:relative;overflow:hidden}
 .lab-header::after{content:'';position:absolute;right:-80px;top:-110px;width:230px;height:230px;border:1px solid #ffd44730;border-radius:50%;pointer-events:none;box-shadow:0 0 80px #ffd4470a}

@@ -20,6 +20,8 @@ Paleta: marino #001B52, fondo oscuro #00143D, superficies negras #07090F, navega
 
 No cambian cálculos ni datos. Riesgos: exceso de brillo, contraste del degradado y pérdida de coherencia al cambiar tema. Se usan efectos estáticos y contenidos, etiquetas de gráfico exactas y regiones con contraste medido. Contrastes sólidos: oro/negro 14,34:1, oro/marino 11,54:1, texto dorado oscuro/blanco 6,68:1; texto oscuro en el punto más oscuro del degradado de acción 5,93:1. No se presenta como auditoría integral de accesibilidad. Cierre técnico y preview se registran tras comprobar escritorio, móvil y ambos temas; aceptación estética pendiente del propietario.
 
+Verificación local de esta segunda iteración: nueve pruebas UI/regresión aprobadas (seis del laboratorio y tres del calendario), Svelte check cero errores y cero advertencias. Implementación `73ba315b6dbdca58d2a530d5f2dbde7ffec62b2b`, rama `codex/match-studio`. No se suman ejecuciones históricas ni se atribuye aprobación estética a estas comprobaciones.
+
 El propietario rechazó los fondos y acentos de la primera preview y especificó azul marino, detalles dorados, negro y blanco, respetando los temas oscuro/claro. Esta preferencia sustituye la propuesta inicial de menta y queda persistida también en AGENTS.md.
 
 - Fuente única de paleta: `src/lib/styles/brand.css`. Oscuro: fondo #07162B, superficies #0D203B, dorado #D5B46B y texto casi blanco. Claro: fondo #F5F6F8, tarjetas blancas, texto marino/negro y dorado de texto #896219.
@@ -31,7 +33,7 @@ Alcance: corrección visual reversible, sin cambios en cálculo, autenticación,
 
 Verificación local de identidad: nueve pruebas UI/regresión aprobadas (seis de laboratorio y tres de calendario), Svelte check cero errores/advertencias. No se vuelven a atribuir las tres pruebas unitarias de la entrega anterior a esta corrección de colores. Commit de implementación: `690d4500b086bcc9d6057eb18351f46f1008d56b`.
 
-Corrección visual APROBADA en su alcance. Preview `dpl_Dq1BZgDtbLa6WkqEAyAvNwEQhejP`, READY: https://nio-sports-pro-v4-0-hgqf41v4g-niosports-pros-projects.vercel.app/sports/nba/analisis. Comprobados laboratorio y centro NBA en ambos temas a 1440 px, móvil claro a 390 y oscuro a 360, cambio de tema y ajuste de referencia con teclado. Colores renderizados: fondo/cabecera oscuro rgb(7,22,43), claro rgb(245,246,248); acento oscuro #D5B46B y claro #896219. Sin desbordamiento horizontal de página (375/390 y 345/360, descontando scrollbar). Capturas locales `artifacts/match-studio/identidad-oscuro.jpg` y `identidad-claro.jpg`. Producción principal sin promoción. Siguiente trabajo: publicación del historial y afirmaciones heredadas, seguido de viabilidad de datos y F8.
+Verificación técnica de la primera corrección completada; dirección estética rechazada después por el propietario. Preview `dpl_Dq1BZgDtbLa6WkqEAyAvNwEQhejP`, READY: https://nio-sports-pro-v4-0-hgqf41v4g-niosports-pros-projects.vercel.app/sports/nba/analisis. Comprobados laboratorio y centro NBA en ambos temas a 1440 px, móvil claro a 390 y oscuro a 360, cambio de tema y ajuste de referencia con teclado. Colores renderizados: fondo/cabecera oscuro rgb(7,22,43), claro rgb(245,246,248); acento oscuro #D5B46B y claro #896219. Sin desbordamiento horizontal de página (375/390 y 345/360, descontando scrollbar). Capturas locales `artifacts/match-studio/identidad-oscuro.jpg` y `identidad-claro.jpg`. Producción principal sin promoción. Siguiente trabajo: publicación del historial y afirmaciones heredadas, seguido de viabilidad de datos y F8.
 
 ## Implementación
 
