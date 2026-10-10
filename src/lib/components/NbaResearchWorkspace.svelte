@@ -13,7 +13,7 @@
   import '../styles/research.css';
   let mode='demo',query='',count=10,venue='all',sort='mean',onlySaved=false,saved=[],selectedId=DEMO_MATCHES[0].id;
   let customLine=null,showFilters=false,lineContext=null;
-  let mobileView='list',detailHeading,listHeading,mobileNavigation;
+  let mobileView='list',detailHeading,listHeading;
   let referenceDraft='',referenceError='';
   $: matches=filterResearch(mode==='demo'?DEMO_MATCHES:[],{query,count,venue,sort,onlySaved,saved});
   $: selected=matches.find(m=>m.id===selectedId)||matches[0]||null;
@@ -30,7 +30,7 @@
     if(typeof window!=='undefined' && typeof window.matchMedia==='function' && window.matchMedia('(max-width: 760px)').matches){
       const heading=value==='detail'?detailHeading:listHeading;
       heading?.focus({preventScroll:true});
-      mobileNavigation?.scrollIntoView({block:'start'});
+      heading?.scrollIntoView({block:'start'});
     }
   }
   function choose(id){selectedId=id;resetReference();changeView('detail');}
@@ -79,7 +79,7 @@
     {#if mode==='real'}<section class="lab-empty" aria-labelledby="real-title"><ShieldCheck size={34}/><span class="lab-kicker">DATOS REALES</span><h2 id="real-title">El análisis empieza con una fuente.</h2><p>Este laboratorio todavía no recibe históricos y líneas de mercado verificados. Cuando exista una fuente admisible, podrás explorar aquí su muestra y su fecha de corte.</p><div><a class="lab-primary" href="/sports/nba">Consultar calendario <ArrowUpRight size={15}/></a><button on:click={()=>switchMode('demo')}>Explorar el ejemplo</button></div><small>No se generan pronósticos, cuotas ni selecciones.</small></section>
     {:else if !selected}<section class="lab-empty" aria-live="polite"><Search size={32}/><h2>{onlySaved?'No hay guardados en esta vista.':'No encontramos ese encuentro.'}</h2><p>{onlySaved?'Guarda un encuentro con el marcador de su fila. Los guardados duran esta sesión.':'Prueba con Ámbar, Coral o cualquier club del ejemplo.'}</p><button on:click={reset}>Restablecer vista</button></section>
     {:else}
-      <div class="mobile-navigation" bind:this={mobileNavigation}>
+      <div class="mobile-navigation">
         <div role="group" aria-label="Vista del laboratorio"><button aria-pressed={mobileView==='list'} aria-controls="research-matches" on:click={()=>changeView('list')}>Encuentros <span>{matches.length}</span></button><button aria-pressed={mobileView==='detail'} aria-controls="research-detail" on:click={()=>changeView('detail')}>Análisis <ArrowUpRight size={14}/></button></div>
         <p>{selected.home.replace('Club ','')} vs {selected.away.replace('Club ','')} · L{count}</p>
       </div>

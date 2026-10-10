@@ -86,7 +86,8 @@ describe('NBA research: honest, interactive exploration',()=>{
   });
   it('opens the chosen encounter on mobile and returns without losing analysis settings',async()=>{
     vi.stubGlobal('matchMedia',()=>({matches:true}));
-    const scroll=vi.fn();
+    let scrolledElement;
+    const scroll=vi.fn(function(){scrolledElement=this;});
     vi.stubGlobal('HTMLElement',HTMLElement);
     const originalScroll=HTMLElement.prototype.scrollIntoView;
     HTMLElement.prototype.scrollIntoView=scroll;
@@ -95,10 +96,12 @@ describe('NBA research: honest, interactive exploration',()=>{
       await fireEvent.click(view.getByRole('button',{name:'Analizar Club Coral vs Club Oliva'}));
       expect(view.container.querySelector('.lab-grid').getAttribute('data-mobile-view')).toBe('detail');
       expect(document.activeElement).toBe(view.getByRole('heading',{name:'Coral vs Oliva'}));
+      expect(scrolledElement).toBe(document.activeElement);
       await fireEvent.click(view.getByRole('button',{name:'L5',exact:true}));
       await fireEvent.input(view.getByRole('slider',{name:/Explorar otra referencia/}),{target:{value:'240'}});
       await fireEvent.click(view.getByRole('button',{name:'Encuentros 6',exact:true}));
       expect(document.activeElement).toBe(view.getByRole('heading',{name:'Explorador de encuentros'}));
+      expect(scrolledElement).toBe(document.activeElement);
       await fireEvent.click(view.getByRole('button',{name:'Análisis',exact:true}));
       expect(Number(view.getByRole('slider',{name:/Explorar otra referencia/}).value)).toBe(240);
       expect(view.getByRole('button',{name:'L5',exact:true}).getAttribute('aria-pressed')).toBe('true');
