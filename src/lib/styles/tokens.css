@@ -9,11 +9,11 @@
      ───────────────────────────────────────────────────────────────────────── */
   
   /* Brand */
-  --color-brand-primary: #fbbf24;
-  --color-brand-primary-hover: #f59e0b;
-  --color-brand-primary-active: #d97706;
-  --color-brand-primary-subtle: rgba(251, 191, 36, 0.1);
-  --color-brand-primary-border: rgba(251, 191, 36, 0.3);
+  --color-brand-primary: var(--nio-gold, #d5b46b);
+  --color-brand-primary-hover: #e6c983;
+  --color-brand-primary-active: #b58d43;
+  --color-brand-primary-subtle: var(--nio-gold-soft);
+  --color-brand-primary-border: var(--nio-gold-border);
   
   /* Backgrounds */
   --color-bg-base: #0a0e1a;
@@ -33,7 +33,7 @@
   /* Borders */
   --color-border: rgba(255, 255, 255, 0.09);
   --color-border-hover: rgba(255, 255, 255, 0.16);
-  --color-border-focus: #fbbf24;
+  --color-border-focus: var(--nio-accent);
   --color-border-subtle: rgba(255, 255, 255, 0.05);
   
   /* Estados - Éxito */

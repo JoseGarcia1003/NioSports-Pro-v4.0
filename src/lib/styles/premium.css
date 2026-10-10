@@ -20,7 +20,7 @@
 /* ═══ GRADIENT BUTTONS ═══ */
 :global(.btn-gradient) {
   background: var(--color-accent-gradient) !important;
-  color: white !important;
+  color: var(--nio-navy) !important;
   border: none !important;
   position: relative;
   overflow: hidden;
@@ -47,7 +47,7 @@
 /* ═══ GOLD CTA BUTTONS ═══ */
 :global(.btn-gold) {
   background: var(--color-cta-gradient) !important;
-  color: white !important;
+  color: var(--nio-navy) !important;
   border: none !important;
   position: relative;
   overflow: hidden;
@@ -87,7 +87,7 @@
 /* ═══ ACCENT BADGES ═══ */
 :global(.badge-premium) {
   background: var(--color-accent-gradient);
-  color: white;
+  color: var(--nio-navy);
   padding: 3px 10px;
   border-radius: 20px;
   font-size: 0.68rem;
@@ -98,7 +98,7 @@
 
 :global(.badge-gold) {
   background: var(--color-cta-gradient);
-  color: white;
+  color: var(--nio-navy);
   padding: 3px 10px;
   border-radius: 20px;
   font-size: 0.68rem;

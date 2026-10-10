@@ -23,6 +23,8 @@
 
 ## Prioridades del propietario
 
+Identidad visual indicada expresamente el 10/10/2026: azul marino con detalles dorados, negro y blanco. Adaptar fondos, textos y contraste al tema oscuro/claro. Usar los tokens compartidos de `src/lib/styles/brand.css`; no volver a introducir verde/menta como identidad de marca. En tema claro, el dorado de texto es más oscuro para mantener legibilidad. Colores semánticos de errores/estados no son colores de marca.
+
 El usuario quiere un producto excelente y visible: diseño elegante, tipografía y pesos coherentes, lectura clara de cifras, fluidez, buen móvil, datos deportivos verificables y bankroll fiable. La calidad visual es una tarea de producto, no un retoque final que se pospone indefinidamente.
 
 Autoriza las mejoras técnicas razonables del repositorio sin pedir aprobación por cada archivo. Avanza y prueba. Las compras, nuevas credenciales y decisiones externas que no puedas completar requieren intervención concreta; no inventes conexiones ni servicios contratados. Su aspiración «11/10» es una exigencia de calidad, nunca una afirmación publicitaria que debas dar por demostrada.

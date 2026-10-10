@@ -1,0 +1,41 @@
+/* Identidad indicada por el propietario: marino, dorado, negro y blanco. */
+:root, [data-theme="dark"] {
+  --nio-navy: #07162b;
+  --nio-gold: #d5b46b;
+  --nio-page: #07162b;
+  --nio-surface: #0d203b;
+  --nio-raised: #142b49;
+  --nio-border: #344b69;
+  --nio-ink: #f7f9fc;
+  --nio-muted: #b0bed1;
+  --nio-accent: #d5b46b;
+  --nio-accent-hover: #e6c983;
+  --nio-selection: #1c2c41;
+  --nio-gold-soft: rgba(213,180,107,.1);
+  --nio-gold-border: rgba(213,180,107,.4);
+  --nio-chart-under: #90a1ba;
+  --nio-chart-equal: #ffffff;
+  --nio-shadow: rgba(0,0,0,.3);
+  --logo-background: var(--nio-navy);
+  --logo-symbol: var(--nio-gold);
+  --logo-text-color: var(--nio-ink);
+  --logo-accent: var(--nio-accent);
+}
+[data-theme="light"] {
+  --nio-page: #f5f6f8;
+  --nio-surface: #ffffff;
+  --nio-raised: #edf1f6;
+  --nio-border: #cad2de;
+  --nio-ink: #101a2c;
+  --nio-muted: #536279;
+  /* Dorado oscuro para texto pequeño sobre blanco; el dorado de marca
+     permanece en símbolos y botones rellenos con texto marino. */
+  --nio-accent: #896219;
+  --nio-accent-hover: #705015;
+  --nio-selection: #f6f0e3;
+  --nio-gold-soft: #f6f0e3;
+  --nio-gold-border: #cbb57d;
+  --nio-chart-under: #264266;
+  --nio-chart-equal: #151515;
+  --nio-shadow: rgba(7,22,43,.08);
+}

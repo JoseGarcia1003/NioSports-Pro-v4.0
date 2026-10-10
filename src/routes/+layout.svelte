@@ -5,6 +5,7 @@
   import { onMount } from 'svelte';
   import { onNavigate } from '$app/navigation';
   import '$lib/styles/tokens.css';
+  import '$lib/styles/brand.css';
   import '$lib/styles/animations.css';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
@@ -64,8 +65,8 @@ $: if (browser && !$authLoading) {
       <div class="app-loading__content">
         <div class="app-loading__logo">
           <svg width="48" height="48" viewBox="0 0 40 40" fill="none">
-            <rect width="40" height="40" rx="10" fill="#6366F1"/>
-            <path d="M12 28V12l8 5.5L28 12v16l-8-5.5L12 28z" fill="white" opacity="0.9"/>
+            <rect width="40" height="40" rx="10" fill="var(--nio-navy)"/>
+            <path d="M12 28V12l8 5.5L28 12v16l-8-5.5L12 28z" fill="var(--nio-gold)"/>
             <path d="M20 17.5l8 5.5V12l-8 5.5z" fill="white" opacity="0.6"/>
           </svg>
         </div>
@@ -94,8 +95,8 @@ $: if (browser && !$authLoading) {
 
 <style>
 :global([data-theme="dark"]) {
-    --color-bg-base: #0c1220;
-    --color-bg: #111827;
+    --color-bg-base: var(--nio-page);
+    --color-bg: var(--nio-surface);
     --color-bg-card: rgba(255,255,255,0.04);
     --color-bg-elevated: rgba(255,255,255,0.07);
     --color-border: rgba(255,255,255,0.08);
@@ -103,18 +104,18 @@ $: if (browser && !$authLoading) {
     --color-text-primary: #f1f5f9;
     --color-text-secondary: rgba(255,255,255,0.7);
     --color-text-muted: rgba(255,255,255,0.45);
-    --color-accent: #6366F1;
-    --color-accent-hover: #818CF8;
-    --color-accent-glow: rgba(99,102,241,0.2);
-    --color-accent-gradient: linear-gradient(135deg, #6366F1, #8B5CF6);
-    --color-cta: #F59E0B;
-    --color-cta-hover: #FBBF24;
-    --color-cta-gradient: linear-gradient(135deg, #F59E0B, #F97316);
+    --color-accent: var(--nio-accent);
+    --color-accent-hover: var(--nio-accent-hover);
+    --color-accent-glow: rgba(213,180,107,0.16);
+    --color-accent-gradient: linear-gradient(135deg, var(--nio-gold), #b58d43);
+    --color-cta: var(--nio-gold);
+    --color-cta-hover: var(--nio-accent-hover);
+    --color-cta-gradient: linear-gradient(135deg, var(--nio-gold), #b58d43);
     --color-success: #10B981;
-    --color-warning: #F59E0B;
+    --color-warning: var(--nio-gold);
     --color-error: #EF4444;
-    --color-gold: #F59E0B;
-    --color-gold-glow: rgba(245,158,11,0.15);
+    --color-gold: var(--nio-gold);
+    --color-gold-glow: rgba(213,180,107,0.15);
     --shadow-card: 0 2px 12px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.05);
     --shadow-elevated: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.06);
     --glass-bg: rgba(17,24,39,0.8);
@@ -123,31 +124,31 @@ $: if (browser && !$authLoading) {
   }
 
   :global([data-theme="light"]) {
-    --color-bg-base: #f8fafc;
+    --color-bg-base: var(--nio-page);
     --color-bg: #ffffff;
-    --color-bg-card: rgba(99,102,241,0.03);
-    --color-bg-elevated: rgba(99,102,241,0.05);
-    --color-border: rgba(99,102,241,0.1);
-    --color-border-hover: rgba(99,102,241,0.2);
+    --color-bg-card: rgba(7,22,43,0.03);
+    --color-bg-elevated: rgba(7,22,43,0.05);
+    --color-border: rgba(7,22,43,0.1);
+    --color-border-hover: rgba(7,22,43,0.2);
     --color-text-primary: #0f172a;
     --color-text-secondary: #334155;
     --color-text-muted: #64748b;
-    --color-accent: #4F46E5;
-    --color-accent-hover: #6366F1;
-    --color-accent-glow: rgba(79,70,229,0.12);
-    --color-accent-gradient: linear-gradient(135deg, #4F46E5, #7C3AED);
-    --color-cta: #D97706;
-    --color-cta-hover: #F59E0B;
-    --color-cta-gradient: linear-gradient(135deg, #D97706, #EA580C);
+    --color-accent: var(--nio-accent);
+    --color-accent-hover: var(--nio-accent-hover);
+    --color-accent-glow: rgba(137,98,25,0.12);
+    --color-accent-gradient: linear-gradient(135deg, var(--nio-gold), #b58d43);
+    --color-cta: var(--nio-accent);
+    --color-cta-hover: var(--nio-gold);
+    --color-cta-gradient: linear-gradient(135deg, var(--nio-gold), #b58d43);
     --color-success: #059669;
-    --color-warning: #D97706;
+    --color-warning: var(--nio-accent);
     --color-error: #dc2626;
-    --color-gold: #D97706;
-    --color-gold-glow: rgba(217,119,6,0.1);
-    --shadow-card: 0 2px 12px rgba(99,102,241,0.06), 0 0 0 1px rgba(99,102,241,0.08);
-    --shadow-elevated: 0 8px 32px rgba(99,102,241,0.1), 0 0 0 1px rgba(99,102,241,0.1);
+    --color-gold: var(--nio-accent);
+    --color-gold-glow: rgba(137,98,25,0.1);
+    --shadow-card: 0 2px 12px rgba(7,22,43,0.06), 0 0 0 1px rgba(7,22,43,0.08);
+    --shadow-elevated: 0 8px 32px rgba(7,22,43,0.1), 0 0 0 1px rgba(7,22,43,0.1);
     --glass-bg: rgba(255,255,255,0.85);
-    --glass-border: rgba(99,102,241,0.12);
+    --glass-border: rgba(7,22,43,0.12);
     --glass-blur: blur(20px);
   }
 
@@ -177,8 +178,8 @@ $: if (browser && !$authLoading) {
   }
 
   :global(::selection) {
-    background: rgba(99, 102, 241, 0.3);
-    color: #fff;
+    background: var(--nio-selection);
+    color: var(--nio-ink);
   }
 
   :global(button, a, input, select, textarea) {
@@ -244,8 +245,8 @@ $: if (browser && !$authLoading) {
   .app-loading__spinner {
     width: 48px;
     height: 48px;
-    border: 3px solid rgba(99, 102, 241, 0.1);
-    border-top-color: #6366F1;
+    border: 3px solid var(--nio-gold-soft);
+    border-top-color: var(--nio-accent);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
   }

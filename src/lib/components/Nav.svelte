@@ -53,7 +53,7 @@
 
 <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
 
-<nav class="nav" class:nav--scrolled={scrolled} class:nav--studio={['/today','/sports/nba','/totales'].includes($page.url.pathname)} aria-label="Navegación principal">
+<nav class="nav" class:nav--scrolled={scrolled} aria-label="Navegación principal">
   <div class="nav__inner">
     <a href="/today" class="nav__brand" aria-label="NioSports Pro — Ir al inicio">
       <Logo size={32} showText={true} />
@@ -111,17 +111,17 @@
 <style>
   .skip-link {
     position: absolute; top: -100%; left: 12px; z-index: 99999;
-    padding: 8px 16px; background: #6366F1; color: #fff;
+    padding: 8px 16px; background: var(--nio-gold); color: var(--nio-navy);
     font-weight: 700; font-size: 0.875rem; border-radius: 0 0 8px 8px;
     text-decoration: none; transition: top 0.1s;
   }
   .skip-link:focus { top: 0; }
 
   .nav {
-    --color-text-muted: #a6b3a8; --color-text-secondary: #e0e8dc; --color-bg-elevated: #26372a;
-    --nav-text: #f1f5ec; --nav-surface: #142018; --nav-accent: #c5db92; --nav-active-bg: rgba(169,216,134,0.1);
+    --color-text-muted: var(--nio-muted); --color-text-secondary: var(--nio-ink); --color-bg-elevated: var(--nio-raised);
+    --nav-text: var(--nio-ink); --nav-surface: var(--nio-surface); --nav-accent: var(--nio-accent); --nav-active-bg: var(--nio-selection);
     --logo-text-color: var(--nav-text);
-    background: rgba(14,22,17,0.96);
+    background: var(--nio-page);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--color-border);
@@ -129,17 +129,7 @@
     transition: box-shadow 0.3s;
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   }
-  .nav--scrolled { box-shadow: 0 4px 24px rgba(0,0,0,0.4); }
-  :global([data-theme="light"]) .nav {
-    --color-text-muted: #5d6d5e; --color-text-secondary: #344733; --color-bg-elevated: #edf1e7;
-    --nav-text: #0f172a; --nav-surface: #fff; --nav-accent: #315f28; --nav-active-bg: #e7f0e2;
-    --logo-accent: #46642c;
-    background: rgba(246,248,240,.96);
-  }
-  :global([data-theme="light"]) .nav--scrolled { box-shadow: 0 4px 18px rgba(23,43,71,.08); }
-  .nav.nav--studio { --color-text-muted:#bac8df; --color-text-secondary:#e0e8f5; --color-bg-elevated:#243652; --nav-text:#f2f6ff; --nav-surface:#132139; --nav-accent:#b8cbff; --nav-active-bg:#294064; --logo-background:#324e88; --logo-accent:#b8cbff; background:#101b2ef5; }
-  :global([data-theme="light"]) .nav.nav--studio { --color-text-muted:#4d607c; --color-text-secondary:#253c5d; --color-bg-elevated:#e1e9f5; --nav-text:#162c48; --nav-surface:#fff; --nav-accent:#274f95; --nav-active-bg:#dce7fa; --logo-background:#324e88; --logo-accent:#324e88; background:#f1f5fcf7; }
-  .nav--studio .nav__avatar { background:#324e88; }
+  .nav--scrolled { box-shadow: 0 4px 24px var(--nio-shadow); }
   .nav :is(button, a):focus-visible { outline: 2px solid var(--nav-accent); outline-offset: 3px; }
 
   .nav__inner {
@@ -150,7 +140,7 @@
   .nav__brand {
     display: flex; align-items: center; text-decoration: none; flex-shrink: 0; margin-right: 12px;
   }
-  .nav__brand:focus-visible { outline: 2px solid #6366F1; outline-offset: 3px; border-radius: 6px; }
+  .nav__brand:focus-visible { outline: 2px solid var(--nav-accent); outline-offset: 3px; border-radius: 6px; }
 
   /* Desktop links */
   .nav__links {
@@ -184,8 +174,8 @@
   .nav__user { position: relative; }
   .nav__avatar {
     width: 44px; height: 44px; border-radius: 50%;
-    background: #425b34;
-    color: #fff; font-weight: 800; font-size: 0.85rem;
+    background: var(--nio-gold);
+    color: var(--nio-navy); font-weight: 800; font-size: 0.85rem;
     border: none; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     transition: transform 0.15s, box-shadow 0.15s;

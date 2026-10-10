@@ -8,7 +8,18 @@ El 10/10/2026 el propietario pidió potenciar NioSports con autonomía, tomando 
 
 NioSports tiene calendario y una pantalla de capacidades, pero falta una mesa de investigación que permita comparar muestras y explorar referencias con poco esfuerzo. La entrega añade `/sports/nba/analisis`, accesible desde el centro NBA. La navegación y los filtros son funcionales dentro del ejemplo; la pestaña de datos reales muestra explícitamente ausencia de fuente.
 
-La referencia inspira búsqueda, ventanas históricas, vistas comparativas y detalle gráfico. NioSports conserva identidad propia: paleta azul noche/menta, tipografía DM Sans, totales de equipos, contadores de observaciones en lugar de porcentajes predictivos, trazabilidad y enlace a bankroll. No se reutilizan logos, fotos, código ni datos de Props.Cash.
+La referencia inspira búsqueda, ventanas históricas, vistas comparativas y detalle gráfico. NioSports conserva identidad propia: azul marino y dorado (corregidos por indicación expresa del propietario), tipografía DM Sans, totales de equipos, contadores de observaciones en lugar de porcentajes predictivos, trazabilidad y enlace a bankroll. No se reutilizan logos, fotos, código ni datos de Props.Cash.
+
+## Corrección de identidad — azul marino y dorado
+
+El propietario rechazó los fondos y acentos de la primera preview y especificó azul marino, detalles dorados, negro y blanco, respetando los temas oscuro/claro. Esta preferencia sustituye la propuesta inicial de menta y queda persistida también en AGENTS.md.
+
+- Fuente única de paleta: `src/lib/styles/brand.css`. Oscuro: fondo #07162B, superficies #0D203B, dorado #D5B46B y texto casi blanco. Claro: fondo #F5F6F8, tarjetas blancas, texto marino/negro y dorado de texto #896219.
+- Match Studio, centro NBA, cabecera, logo y barra móvil comparten la identidad. Los tokens de producto y acciones compartidas adoptan el dorado. Las pantallas heredadas con colores propios requieren revisión cuando se integren; no se declara una revisión visual completa de todos los módulos.
+- Dorado claro en símbolos y rellenos con texto marino; dorado oscuro para texto pequeño en tema claro. El gráfico conserva etiquetas y valores para distinguir categorías sin depender solo del color.
+- Contrastes calculados sobre colores sólidos: dorado oscuro en blanco 5,49:1; sobre selección clara 4,83:1; dorado en superficie oscura 8,21:1; texto marino en relleno dorado 9,12:1. Estas mediciones no equivalen a una auditoría de accesibilidad completa.
+
+Alcance: corrección visual reversible, sin cambios en cálculo, autenticación, muestras ni datos. Riesgo principal: contraste y divergencia entre temas. Cierre requiere revisar ambos temas y móvil en la preview, comprobar el cambio de tema y guardar la entrega. La evidencia de esta corrección se registra al completar la comprobación.
 
 ## Implementación
 

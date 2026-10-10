@@ -1,12 +1,12 @@
 /* Shared product rhythm: titles, reading copy, actions and data. */
 .product-page {
   --color-text-muted: #aab6c8;
-  --product-accent: #b6dfa0;
-  --product-accent-text: #b6dfa0;
-  --product-accent-soft: rgba(182, 223, 160, .07);
-  --product-accent-border: rgba(182, 223, 160, .28);
-  --product-surface: #141e2d;
-  --product-border: #2b3749;
+  --product-accent: var(--nio-gold);
+  --product-accent-text: var(--nio-accent);
+  --product-accent-soft: var(--nio-gold-soft);
+  --product-accent-border: var(--nio-gold-border);
+  --product-surface: var(--nio-surface);
+  --product-border: var(--nio-border);
   --product-shadow: 0 10px 30px rgba(3, 8, 17, .1);
   max-width: 1180px;
   margin: auto;
@@ -20,9 +20,9 @@
 
 [data-theme="light"] .product-page {
   --color-text-muted: #526277;
-  --product-accent-text: #3d682e;
-  --product-accent-soft: #f2f7ed;
-  --product-accent-border: #c6d7bd;
+  --product-accent-text: var(--nio-accent);
+  --product-accent-soft: var(--nio-gold-soft);
+  --product-accent-border: var(--nio-gold-border);
   --product-surface: #ffffff;
   --product-border: #dce3eb;
   --product-shadow: 0 6px 22px rgba(23, 43, 71, .035);
@@ -117,12 +117,12 @@
   font-size: 14px;
   line-height: 1.5;
   background: var(--product-accent);
-  color: #15251d;
+  color: var(--nio-navy);
   text-decoration: none;
   cursor: pointer;
   transition: background-color .15s ease, box-shadow .15s ease;
 }
-.product-action:hover { background: #c7eab5; box-shadow: 0 3px 12px rgba(0, 0, 0, .12); }
+.product-action:hover { background: #e6c983; box-shadow: 0 3px 12px rgba(0, 0, 0, .12); }
 .product-link {
   display: inline-flex;
   align-items: center;
