@@ -20,6 +20,12 @@ Tema claro inicial, respetando la elección previamente guardada; el tema oscuro
 
 Riesgos: contraste de detalles dorados sobre blanco y adaptación de controles al tema oscuro. Cierre técnico requiere comprobación de escritorio/móvil y ambos temas, controles reales, Svelte check y regresiones pertinentes. La aceptación estética sigue pendiente del propietario; las propuestas anteriores quedan rechazadas aunque sus pruebas técnicas pasaran.
 
+Implementación `56980121115b9ca31eca9fcca893a8a8e66bf52e`, guardada y subida en `codex/match-studio`. Contrastes sólidos medidos: blanco/marino de acción 13,75:1, texto secundario/blanco 5,53:1, referencia dorada/fondo crema 5,00:1, acción de tema oscuro 7,65:1 y texto secundario/superficie oscura 8,04:1. No equivale a una auditoría integral de accesibilidad.
+
+Verificación local de esta dirección: nueve pruebas UI/regresión aprobadas (seis del laboratorio y tres del calendario), Svelte check cero errores y cero advertencias. No se añaden a ese total las ejecuciones de propuestas anteriores.
+
+Preview `dpl_GyFJPueV3fuanhVnPgUeRL2ahJkJ` READY, código `56980121`: https://nio-sports-pro-v4-0-1am74lckh-niosports-pros-projects.vercel.app/sports/nba/analisis. Abrió inicialmente en claro sin preferencia guardada. Revisados escritorio 1440 px en ambos temas, móvil claro 390 y oscuro 360: anchos de página 1425/1440, 375/390 y 345/360 (descontando scrollbar), sin desbordamiento horizontal general. Navegación, barra lateral y gráfico renderizados blancos en claro; en oscuro navegación rgb(20,40,65), sin negro permanente. Comprobados localía + L20 (10 observaciones efectivas), referencia por teclado a 228,0 y desplazamiento interno 40 px; restablecer filtros recupera L10 y referencia 227,5. Centro NBA comprobado en claro/oscuro, incluida navegación al laboratorio; calendario informa fuente no disponible sin inventar datos. Capturas locales `artifacts/match-studio/blancos-escritorio.jpg`, `blancos-movil.jpg`, `blancos-oscuro.jpg` y `blancos-centro-nba.jpg`. Comprobación técnica completada; pendiente la valoración estética del propietario. Producción sin promoción; un cierre documental posterior no modifica el código probado.
+
 ### Segunda iteración: marino intenso, negro y oro luminoso
 
 El propietario indicó después que la primera corrección tampoco le representa: solicita marino fuerte, dorado reluciente y negro combinado. La verificación técnica previa no constituía aceptación estética y esta segunda iteración sustituye su dirección mate/suave.
