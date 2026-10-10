@@ -13,12 +13,12 @@ import { writable, derived } from 'svelte/store';
 import { browser } from '$app/environment';
 
 // ── Tema oscuro/claro ─────────────────────────────────────────────
-// Lee la preferencia guardada en localStorage, o la preferencia del OS.
+// La presentación inicial es clara; una elección guardada tiene prioridad.
 function getInitialTheme() {
-  if (!browser) return 'dark';  // SSR: siempre dark (no hay localStorage)
+  if (!browser) return 'light';
   const saved = localStorage.getItem('ns_theme');
   if (saved === 'light' || saved === 'dark') return saved;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  return 'light';
 }
 
 const _theme = writable(getInitialTheme());

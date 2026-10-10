@@ -1,44 +1,51 @@
-/* Identidad indicada por el propietario: marino, dorado, negro y blanco. */
-:root, [data-theme="dark"] {
-  --nio-navy: #001b52;
-  --nio-gold: #ffd447;
-  --nio-page: #00143d;
-  --nio-surface: #07090f;
-  --nio-raised: #101c34;
-  --nio-border: #293c60;
-  --nio-ink: #f7f9fc;
-  --nio-muted: #b0bed1;
-  --nio-accent: #ffd447;
-  --nio-accent-hover: #ffeb9a;
-  --nio-selection: #12264c;
-  --nio-gold-soft: rgba(255,212,71,.12);
-  --nio-gold-border: rgba(255,212,71,.55);
-  --nio-chart-under: #7394c9;
-  --nio-chart-equal: #ffffff;
-  --nio-shadow: rgba(0,0,0,.3);
-  --nio-chrome: #030509;
-  --nio-gold-gradient: linear-gradient(115deg,#bd870a 0%,#ffdc59 25%,#fff0a8 45%,#ffcd32 65%,#d69b13 100%);
-  --nio-hero: linear-gradient(112deg,#00143d 0%,#00276b 65%,#06090f 100%);
-  --logo-background: var(--nio-chrome);
+/* Blanco como base; marino estructural y oro puntual, sin acabados metálicos. */
+:root, [data-theme="light"] {
+  --nio-navy: #112d54;
+  --nio-gold: #d6ae49;
+  --nio-page: #f5f7fa;
+  --nio-surface: #ffffff;
+  --nio-raised: #f0f3f8;
+  --nio-border: #dce3ec;
+  --nio-ink: #132c4e;
+  --nio-muted: #596a80;
+  --nio-accent: #886516;
+  --nio-accent-hover: #6b4d0c;
+  --nio-selection: #edf2fa;
+  --nio-gold-soft: #fcf7e8;
+  --nio-gold-border: #e6d6a7;
+  --nio-chart-over: #193d6b;
+  --nio-chart-under: #b5c7de;
+  --nio-chart-equal: #bf912e;
+  --nio-shadow: rgba(17,45,84,.05);
+  --nio-chrome: #ffffff;
+  --nio-action: #112d54;
+  --nio-action-ink: #ffffff;
+  --nio-action-icon: var(--nio-gold);
+  --nio-gold-gradient: var(--nio-gold);
+  --nio-hero: var(--nio-surface);
+  --logo-background: var(--nio-navy);
   --logo-symbol: var(--nio-gold);
   --logo-text-color: var(--nio-ink);
   --logo-accent: var(--nio-accent);
 }
-[data-theme="light"] {
-  --nio-page: #f2f4f8;
-  --nio-surface: #ffffff;
-  --nio-raised: #edf1f6;
-  --nio-border: #cad2de;
-  --nio-ink: #050c1d;
-  --nio-muted: #536279;
-  /* Dorado oscuro para texto pequeño sobre blanco; el dorado de marca
-     permanece en símbolos y botones rellenos con texto marino. */
-  --nio-accent: #795600;
-  --nio-accent-hover: #614500;
-  --nio-selection: #fff4c9;
-  --nio-gold-soft: #fff4c9;
-  --nio-gold-border: #a37c18;
-  --nio-chart-under: #264266;
-  --nio-chart-equal: #151515;
-  --nio-shadow: rgba(7,22,43,.08);
+[data-theme="dark"] {
+  --nio-page: #0d1d34;
+  --nio-surface: #142841;
+  --nio-raised: #1a3250;
+  --nio-border: #30445e;
+  --nio-ink: #f4f7fc;
+  --nio-muted: #b0c0d4;
+  --nio-accent: #e2bd62;
+  --nio-accent-hover: #f2d997;
+  --nio-selection: #203d60;
+  --nio-gold-soft: #302f2a;
+  --nio-gold-border: #756844;
+  --nio-chart-over: #e2bd62;
+  --nio-chart-under: #7093bb;
+  --nio-chart-equal: #f4f7fc;
+  --nio-shadow: rgba(5,15,30,.16);
+  --nio-chrome: #142841;
+  --nio-action: #e2bd62;
+  --nio-action-ink: #112d54;
+  --nio-action-icon: #112d54;
 }

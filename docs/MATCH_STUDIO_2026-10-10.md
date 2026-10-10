@@ -12,6 +12,14 @@ La referencia inspira búsqueda, ventanas históricas, vistas comparativas y det
 
 ## Corrección de identidad — azul marino y dorado
 
+### Dirección vigente: blanco protagonista, marino y oro puntual
+
+El propietario rechazó la segunda iteración de negro y metalizado. Indicó que el negro estaba mal interpretado y pidió jugar con blancos. Se sustituye aquella propuesta: navegación, barra lateral, cabecera, tarjetas y gráfico blancos, base gris muy clara, títulos y acciones marinos y oro en subrayado, iconos y referencias. Se retiran superficies negras, degradados metálicos, halos y marco dorado generalizado. La lista también se convierte en tarjeta para ordenar la información sin teñir toda el área de trabajo.
+
+Tema claro inicial, respetando la elección previamente guardada; el tema oscuro sigue disponible con marinos y textos claros, sin negro permanente. Paleta base #FFFFFF / #F5F7FA, marino #112D54, oro #D6AE49 y oro de texto #886516. Las barras distinguen sobre/bajo/igual mediante marino, azul claro y oro; cifras, leyenda y tabla accesible conservan los valores exactos. Centro NBA y navegación compartida siguen la dirección nueva. No se alteran datos, cálculos, modelos ni APIs.
+
+Riesgos: contraste de detalles dorados sobre blanco y adaptación de controles al tema oscuro. Cierre técnico requiere comprobación de escritorio/móvil y ambos temas, controles reales, Svelte check y regresiones pertinentes. La aceptación estética sigue pendiente del propietario; las propuestas anteriores quedan rechazadas aunque sus pruebas técnicas pasaran.
+
 ### Segunda iteración: marino intenso, negro y oro luminoso
 
 El propietario indicó después que la primera corrección tampoco le representa: solicita marino fuerte, dorado reluciente y negro combinado. La verificación técnica previa no constituía aceptación estética y esta segunda iteración sustituye su dirección mate/suave.

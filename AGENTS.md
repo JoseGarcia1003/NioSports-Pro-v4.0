@@ -25,7 +25,7 @@
 
 Identidad visual indicada expresamente el 10/10/2026: azul marino con detalles dorados, negro y blanco. Adaptar fondos, textos y contraste al tema oscuro/claro. Usar los tokens compartidos de `src/lib/styles/brand.css`; no volver a introducir verde/menta como identidad de marca. En tema claro, el dorado de texto es más oscuro para mantener legibilidad. Colores semánticos de errores/estados no son colores de marca.
 
-Corrección posterior del mismo día: el propietario rechazó la paleta mate/suave. Pide marino fuerte e intenso, oro reluciente destacado y negro con presencia real. Usar superficies negras contrastadas con marino, oro luminoso y acabados metálicos discretos en protagonistas; el tema claro mantiene blanco en el área de lectura y negro/marino/oro en navegación, cabecera destacada y gráfico. La aceptación estética corresponde al propietario; una verificación técnica no implica que le guste.
+Última corrección del mismo día: el propietario rechazó la propuesta de grandes superficies negras y oro metálico. Pide jugar con blancos. Esta instrucción sustituye la interpretación anterior: blanco protagonista en navegación, cabecera, tarjetas y gráfico, marino para jerarquía/estructura, dorado puntual sin brillo artificial. Claro inicial salvo preferencia guardada; oscuro en tonos marinos, sin negro impuesto en ambos temas. La aceptación estética corresponde al propietario; una verificación técnica no implica que le guste.
 
 El usuario quiere un producto excelente y visible: diseño elegante, tipografía y pesos coherentes, lectura clara de cifras, fluidez, buen móvil, datos deportivos verificables y bankroll fiable. La calidad visual es una tarea de producto, no un retoque final que se pospone indefinidamente.
 

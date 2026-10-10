@@ -118,14 +118,14 @@
   .skip-link:focus { top: 0; }
 
   .nav {
-    --color-text-muted: #b4bfd2; --color-text-secondary: #f7f9fc; --color-bg-elevated: #101c34;
-    --nav-text: #f7f9fc; --nav-surface: #07090f; --nav-accent: var(--nio-gold); --nav-active-bg: #10254d;
+    --color-text-muted: var(--nio-muted); --color-text-secondary: var(--nio-ink); --color-bg-elevated: var(--nio-raised);
+    --nav-text: var(--nio-ink); --nav-surface: var(--nio-surface); --nav-accent: var(--nio-ink); --nav-active-bg: var(--nio-selection);
     --logo-text-color: var(--nav-text);
-    --logo-accent: var(--nio-gold);
+    --logo-accent: var(--nio-accent);
     background: var(--nio-chrome);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid #ffd44740;
+    border-bottom: 1px solid var(--nio-border);
     height: 64px;
     transition: box-shadow 0.3s;
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
@@ -155,7 +155,7 @@
     color: var(--color-text-muted); transition: color 0.15s, background 0.15s; white-space: nowrap;
   }
   .nav__link:hover { color: var(--nav-text); background: var(--color-bg-elevated); }
-  .nav__link--active { color: var(--nav-accent); background: var(--nav-active-bg); }
+  .nav__link--active { color: var(--nav-accent); background: var(--nav-active-bg); box-shadow: inset 0 -2px var(--nio-gold); }
 
   /* Controls */
   .nav__controls {
@@ -187,7 +187,7 @@
     position: absolute; top: calc(100% + 8px); right: 0;
     min-width: 200px; max-width: min(320px, calc(100vw - 40px)); background: var(--nav-surface);
     border: 1px solid var(--color-border); border-radius: 12px;
-    padding: 8px; box-shadow: 0 16px 40px rgba(0,0,0,0.5); z-index: 1000;
+    padding: 8px; box-shadow: 0 16px 40px var(--nio-shadow); z-index: 1000;
     animation: menuIn 0.15s ease;
   }
   @keyframes menuIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; } }
