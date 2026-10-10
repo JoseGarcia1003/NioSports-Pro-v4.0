@@ -1,5 +1,11 @@
 # NioSports Pro — acuerdos persistentes
 
+## Dirección de producto del 10 de octubre de 2026
+
+- El propietario pidió potenciar NioSports con autonomía e inspiración en Props.Cash, sin copiar. Primera entrega y continuidad: `docs/MATCH_STUDIO_2026-10-10.md`. La vista Match Studio adelanta exploración visual aislada con ejemplos identificados; no certifica F17 ni habilita modelos, recomendaciones, props de jugadores o API pagada.
+- No repetir F0–F7 ni confundir esta preview de producto con validación predictiva. Conservar las correcciones urgentes y la secuencia pendientes de la revisión del 10/10.
+- Si los documentos de continuidad no están en `docs/`, buscarlos en `docs/carpeta/`: el propietario los ha movido localmente. Conservar esa reorganización sin descartarla ni incluirla indiscriminadamente en una entrega de código.
+
 ## Mandato vigente de reconstrucción (27 de septiembre de 2026)
 
 - Leer primero `docs/RECONSTRUCTION_MASTER_PLAN.md` y el acta de fase indicada en WORK_STATE. La solicitud íntegra está en `docs/reconstruction/REQUEST_2026-09-27.md`; sustituye el orden anterior de diseño y mejoras.
