@@ -2,6 +2,7 @@
 
 ## Dirección de producto del 10 de octubre de 2026
 
+- Última petición: dejar los colores a un lado y centrarse en funcionalidad y diseño de uso. Conservar los tokens actuales; priorizar encontrar → comparar → consultar detalle, especialmente en móvil. Esta entrega mejora Match Studio sin habilitar datos reales ni certificar las fases técnicas pendientes.
 - El propietario pidió potenciar NioSports con autonomía e inspiración en Props.Cash, sin copiar. Primera entrega y continuidad: `docs/MATCH_STUDIO_2026-10-10.md`. La vista Match Studio adelanta exploración visual aislada con ejemplos identificados; no certifica F17 ni habilita modelos, recomendaciones, props de jugadores o API pagada.
 - No repetir F0–F7 ni confundir esta preview de producto con validación predictiva. Conservar las correcciones urgentes y la secuencia pendientes de la revisión del 10/10.
 - Si los documentos de continuidad no están en `docs/`, buscarlos en `docs/carpeta/`: el propietario los ha movido localmente. Conservar esa reorganización sin descartarla ni incluirla indiscriminadamente en una entrega de código.
