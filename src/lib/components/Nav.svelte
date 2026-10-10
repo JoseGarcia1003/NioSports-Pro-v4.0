@@ -118,13 +118,14 @@
   .skip-link:focus { top: 0; }
 
   .nav {
-    --color-text-muted: var(--nio-muted); --color-text-secondary: var(--nio-ink); --color-bg-elevated: var(--nio-raised);
-    --nav-text: var(--nio-ink); --nav-surface: var(--nio-surface); --nav-accent: var(--nio-accent); --nav-active-bg: var(--nio-selection);
+    --color-text-muted: #b4bfd2; --color-text-secondary: #f7f9fc; --color-bg-elevated: #101c34;
+    --nav-text: #f7f9fc; --nav-surface: #07090f; --nav-accent: var(--nio-gold); --nav-active-bg: #10254d;
     --logo-text-color: var(--nav-text);
-    background: var(--nio-page);
+    --logo-accent: var(--nio-gold);
+    background: var(--nio-chrome);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid #ffd44740;
     height: 64px;
     transition: box-shadow 0.3s;
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;

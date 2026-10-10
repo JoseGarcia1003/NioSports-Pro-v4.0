@@ -107,10 +107,10 @@ $: if (browser && !$authLoading) {
     --color-accent: var(--nio-accent);
     --color-accent-hover: var(--nio-accent-hover);
     --color-accent-glow: rgba(213,180,107,0.16);
-    --color-accent-gradient: linear-gradient(135deg, var(--nio-gold), #b58d43);
+    --color-accent-gradient: var(--nio-gold-gradient);
     --color-cta: var(--nio-gold);
     --color-cta-hover: var(--nio-accent-hover);
-    --color-cta-gradient: linear-gradient(135deg, var(--nio-gold), #b58d43);
+    --color-cta-gradient: var(--nio-gold-gradient);
     --color-success: #10B981;
     --color-warning: var(--nio-gold);
     --color-error: #EF4444;
@@ -136,10 +136,10 @@ $: if (browser && !$authLoading) {
     --color-accent: var(--nio-accent);
     --color-accent-hover: var(--nio-accent-hover);
     --color-accent-glow: rgba(137,98,25,0.12);
-    --color-accent-gradient: linear-gradient(135deg, var(--nio-gold), #b58d43);
+    --color-accent-gradient: var(--nio-gold-gradient);
     --color-cta: var(--nio-accent);
     --color-cta-hover: var(--nio-gold);
-    --color-cta-gradient: linear-gradient(135deg, var(--nio-gold), #b58d43);
+    --color-cta-gradient: var(--nio-gold-gradient);
     --color-success: #059669;
     --color-warning: var(--nio-accent);
     --color-error: #dc2626;

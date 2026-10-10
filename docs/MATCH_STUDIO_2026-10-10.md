@@ -12,6 +12,14 @@ La referencia inspira búsqueda, ventanas históricas, vistas comparativas y det
 
 ## Corrección de identidad — azul marino y dorado
 
+### Segunda iteración: marino intenso, negro y oro luminoso
+
+El propietario indicó después que la primera corrección tampoco le representa: solicita marino fuerte, dorado reluciente y negro combinado. La verificación técnica previa no constituía aceptación estética y esta segunda iteración sustituye su dirección mate/suave.
+
+Paleta: marino #001B52, fondo oscuro #00143D, superficies negras #07090F, navegación #030509, oro brillante #FFD447. El encabezado mezcla marino intenso y negro; título, marca y acciones principales usan un acabado metálico de oro. El tema claro conserva blanco en lectura y tarjetas, con navegación negra, encabezado marino y gráfico negro/oro para mantener fuerza e identidad. El oro oscuro #795600 se reserva para texto pequeño sobre blanco, sin convertir los protagonistas en marrón.
+
+No cambian cálculos ni datos. Riesgos: exceso de brillo, contraste del degradado y pérdida de coherencia al cambiar tema. Se usan efectos estáticos y contenidos, etiquetas de gráfico exactas y regiones con contraste medido. Contrastes sólidos: oro/negro 14,34:1, oro/marino 11,54:1, texto dorado oscuro/blanco 6,68:1; texto oscuro en el punto más oscuro del degradado de acción 5,93:1. No se presenta como auditoría integral de accesibilidad. Cierre técnico y preview se registran tras comprobar escritorio, móvil y ambos temas; aceptación estética pendiente del propietario.
+
 El propietario rechazó los fondos y acentos de la primera preview y especificó azul marino, detalles dorados, negro y blanco, respetando los temas oscuro/claro. Esta preferencia sustituye la propuesta inicial de menta y queda persistida también en AGENTS.md.
 
 - Fuente única de paleta: `src/lib/styles/brand.css`. Oscuro: fondo #07162B, superficies #0D203B, dorado #D5B46B y texto casi blanco. Claro: fondo #F5F6F8, tarjetas blancas, texto marino/negro y dorado de texto #896219.

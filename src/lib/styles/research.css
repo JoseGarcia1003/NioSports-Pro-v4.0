@@ -11,3 +11,19 @@
 .research-lab .match-names strong{font-size:13px}.research-lab .match-names small,.research-lab .sample-reading p,.research-lab .line-control label,.research-lab .lab-filters label{font-size:12px}
 .research-lab .detail-metrics>div>span{font-size:10px}.research-lab .rail-note p,.research-lab .rail-note a,.research-lab .lab-evidence dt{font-size:11px}.research-lab .lab-evidence dd{font-size:12px}
 @media(prefers-reduced-motion:reduce){.research-lab *{scroll-behavior:auto;transition:none!important}}
+/* Segunda dirección del propietario: marino intenso + negro + oro luminoso. */
+.lab-rail{background:var(--nio-chrome);--lab-ink:#f7f9fc;--lab-muted:#b4bfd2;--lab-accent:var(--nio-gold);--lab-soft:#101c34;--lab-line:#26354f;--lab-selection:#10254d;border-right-color:#26354f}
+.lab-main{background:radial-gradient(ellipse at 70% 0%,#00307a35,transparent 50%)}
+.lab-header{padding:28px;border:1px solid #35527b;border-top:2px solid var(--nio-gold);border-radius:12px;background:var(--nio-hero);box-shadow:0 18px 40px #0003;color:#fff;position:relative;overflow:hidden}
+.lab-header::after{content:'';position:absolute;right:-80px;top:-110px;width:230px;height:230px;border:1px solid #ffd44730;border-radius:50%;pointer-events:none;box-shadow:0 0 80px #ffd4470a}
+.research-lab .lab-header .lab-kicker{color:#ffdf72}.lab-header p{color:#c4cee1}.lab-header h1{font-size:clamp(30px,3vw,44px);font-weight:700;letter-spacing:-.045em}
+.lab-header h1>span{color:var(--nio-gold);background:var(--nio-gold-gradient);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.lab-header .calendar-link{color:#081126;background:var(--nio-gold-gradient);border-color:#ffe38a;font-weight:700;box-shadow:0 2px 15px #ffc62e24;position:relative;z-index:1}
+.nio-mark{background:var(--nio-gold-gradient);box-shadow:0 0 18px #ffc62e20}.research-lab .rail-link.current{border-left:2px solid var(--nio-gold);box-shadow:inset 0 0 18px #00276b55}
+.lab-overview{border-top:1px solid var(--nio-gold-border)}.detail-panel{border-top:2px solid var(--nio-gold);box-shadow:0 16px 40px var(--nio-shadow)}
+.detail-mark{color:var(--nio-gold);background:var(--nio-chrome);border-color:#ffd44770;box-shadow:0 0 20px #ffd4470b}.research-lab .match-monogram{color:var(--nio-gold);background:var(--nio-navy)}
+.research-lab .research-match.chosen{border-left-width:3px;border-left-color:var(--nio-gold)}.research-lab .mode-buttons .active{background:var(--nio-navy);color:var(--nio-gold);box-shadow:inset 0 -2px var(--nio-gold)}
+.research-lab .lab-primary{background:var(--nio-gold-gradient);color:#081126}.research-lab .detail-metrics>div:first-child strong{font-weight:700}
+[data-theme=dark] .detail-metrics>div:first-child strong{text-shadow:0 0 24px #ffcc3230}
+@media(max-width:760px){.lab-header{padding:22px 18px;align-items:flex-start}.lab-header h1{font-size:31px;max-width:280px}.lab-header .calendar-link{padding:12px}.lab-main{padding-top:18px}}
+@media(forced-colors:active){.lab-header h1>span{background:none;-webkit-text-fill-color:currentColor}}

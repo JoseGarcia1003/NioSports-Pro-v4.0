@@ -116,13 +116,13 @@
   font-weight: var(--font-semibold);
   font-size: 14px;
   line-height: 1.5;
-  background: var(--product-accent);
+  background: var(--nio-gold-gradient);
   color: var(--nio-navy);
   text-decoration: none;
   cursor: pointer;
   transition: background-color .15s ease, box-shadow .15s ease;
 }
-.product-action:hover { background: #e6c983; box-shadow: 0 3px 12px rgba(0, 0, 0, .12); }
+.product-action:hover { background: var(--nio-gold); box-shadow: 0 3px 12px rgba(0, 0, 0, .12); }
 .product-link {
   display: inline-flex;
   align-items: center;

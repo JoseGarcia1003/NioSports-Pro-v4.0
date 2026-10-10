@@ -1,40 +1,43 @@
 /* Identidad indicada por el propietario: marino, dorado, negro y blanco. */
 :root, [data-theme="dark"] {
-  --nio-navy: #07162b;
-  --nio-gold: #d5b46b;
-  --nio-page: #07162b;
-  --nio-surface: #0d203b;
-  --nio-raised: #142b49;
-  --nio-border: #344b69;
+  --nio-navy: #001b52;
+  --nio-gold: #ffd447;
+  --nio-page: #00143d;
+  --nio-surface: #07090f;
+  --nio-raised: #101c34;
+  --nio-border: #293c60;
   --nio-ink: #f7f9fc;
   --nio-muted: #b0bed1;
-  --nio-accent: #d5b46b;
-  --nio-accent-hover: #e6c983;
-  --nio-selection: #1c2c41;
-  --nio-gold-soft: rgba(213,180,107,.1);
-  --nio-gold-border: rgba(213,180,107,.4);
-  --nio-chart-under: #90a1ba;
+  --nio-accent: #ffd447;
+  --nio-accent-hover: #ffeb9a;
+  --nio-selection: #12264c;
+  --nio-gold-soft: rgba(255,212,71,.12);
+  --nio-gold-border: rgba(255,212,71,.55);
+  --nio-chart-under: #7394c9;
   --nio-chart-equal: #ffffff;
   --nio-shadow: rgba(0,0,0,.3);
-  --logo-background: var(--nio-navy);
+  --nio-chrome: #030509;
+  --nio-gold-gradient: linear-gradient(115deg,#bd870a 0%,#ffdc59 25%,#fff0a8 45%,#ffcd32 65%,#d69b13 100%);
+  --nio-hero: linear-gradient(112deg,#00143d 0%,#00276b 65%,#06090f 100%);
+  --logo-background: var(--nio-chrome);
   --logo-symbol: var(--nio-gold);
   --logo-text-color: var(--nio-ink);
   --logo-accent: var(--nio-accent);
 }
 [data-theme="light"] {
-  --nio-page: #f5f6f8;
+  --nio-page: #f2f4f8;
   --nio-surface: #ffffff;
   --nio-raised: #edf1f6;
   --nio-border: #cad2de;
-  --nio-ink: #101a2c;
+  --nio-ink: #050c1d;
   --nio-muted: #536279;
   /* Dorado oscuro para texto pequeño sobre blanco; el dorado de marca
      permanece en símbolos y botones rellenos con texto marino. */
-  --nio-accent: #896219;
-  --nio-accent-hover: #705015;
-  --nio-selection: #f6f0e3;
-  --nio-gold-soft: #f6f0e3;
-  --nio-gold-border: #cbb57d;
+  --nio-accent: #795600;
+  --nio-accent-hover: #614500;
+  --nio-selection: #fff4c9;
+  --nio-gold-soft: #fff4c9;
+  --nio-gold-border: #a37c18;
   --nio-chart-under: #264266;
   --nio-chart-equal: #151515;
   --nio-shadow: rgba(7,22,43,.08);

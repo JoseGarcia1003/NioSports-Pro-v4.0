@@ -40,7 +40,7 @@
   </aside>
 
   <div class="lab-main">
-    <header class="lab-header"><div><div class="lab-kicker"><span class="live-dot"></span>NIOSPORTS / BASKETBALL RESEARCH</div><h1>Encuentra tu perspectiva<span>.</span></h1><p>Explora la muestra. Contrasta la línea. Entiende el contexto.</p></div><a class="calendar-link" href="/sports/nba">Ver calendario <ArrowUpRight size={16}/></a></header>
+    <header class="lab-header"><div><div class="lab-kicker"><span class="live-dot"></span>NIOSPORTS / BASKETBALL RESEARCH</div><h1>Encuentra tu <span>perspectiva.</span></h1><p>Explora la muestra. Contrasta la línea. Entiende el contexto.</p></div><a class="calendar-link" href="/sports/nba">Ver calendario <ArrowUpRight size={16}/></a></header>
     <div class="lab-modebar"><div class="mode-buttons" role="group" aria-label="Origen de los datos"><button class:active={mode==='demo'} aria-pressed={mode==='demo'} on:click={()=>switchMode('demo')}>Ejemplo interactivo</button><button class:active={mode==='real'} aria-pressed={mode==='real'} on:click={()=>switchMode('real')}>Datos reales</button></div><span class="mode-note">{mode==='demo'?'Equipos y resultados ficticios · Sin recomendaciones':'Fuente de análisis pendiente · Sin datos de ejemplo'}</span></div>
 
     <section class="lab-overview" aria-label="Contexto de la vista">
