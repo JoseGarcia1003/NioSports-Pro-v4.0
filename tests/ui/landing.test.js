@@ -63,4 +63,15 @@ describe('Landing shows today\'s real NBA slate', () => {
     expect(board.textContent).toContain('Líneas de total no disponibles');
     expect(board.textContent).not.toContain('O/U');
   });
+
+  it('hides the pre-game line once the game has started', async () => {
+    const lines = () => new Response(JSON.stringify({ source: 'The Odds API', fetchedAt: '2026-11-01T18:00:00Z', events: [
+      { id: 'x', commenceTime: '2026-11-01T20:30:00Z', home: 'Orlando Magic', away: 'Boston Celtics', books: [{}], consensus: 211.5 }
+    ] }), { status: 200 });
+    vi.stubGlobal('fetch', router(() => ok([game(1, '2026-11-01T20:30:00Z', { status_state: 'in_progress', period: 2, home_team_score: 40, visitor_team_score: 44 })]), lines));
+    const screen = render(LandingExperience);
+    const board = screen.getByRole('region', { name: 'Hoy en la NBA' });
+    await waitFor(() => expect(board.textContent).toContain('En juego'));
+    expect(board.textContent).not.toContain('O/U');
+  });
 });

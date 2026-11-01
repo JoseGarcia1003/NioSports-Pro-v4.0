@@ -23,7 +23,7 @@
     <ul class="games">
       {#each games as game (game.id)}
         {@const st = gameStatus(game, d => timeFormat.format(d))}
-        {@const line = totalLineFor(game, lines)}
+        {@const line = st.score ? null : totalLineFor(game, lines)}
         <li>
           <div class="teams">
             {#each [game.visitor_team, game.home_team] as team, i}

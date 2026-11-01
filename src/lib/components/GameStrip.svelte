@@ -15,7 +15,7 @@
     <ul>
       {#each games as game (game.id)}
         {@const st = gameStatus(game, d => timeFormat.format(d))}
-        {@const line = totalLineFor(game, lines)}
+        {@const line = st.score ? null : totalLineFor(game, lines)}
         <li>
           <a href="/sports/nba" aria-label={`${game.visitor_team.full_name} en ${game.home_team.full_name}, ${st.label}`}>
             <span class="rows">
