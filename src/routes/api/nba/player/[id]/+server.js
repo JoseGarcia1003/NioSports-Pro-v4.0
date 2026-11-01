@@ -1,8 +1,10 @@
 import { json } from '@sveltejs/kit';
 import { adminDatabase } from '$lib/server/entitlements.js';
+import { requireIdentity } from '$lib/server/identity.js';
 
 // Full stored history of one player (newest first) for splits and head-to-head.
-export async function GET({ params }) {
+export async function GET({ params, request }) {
+  await requireIdentity(request);
   const id = Number(params.id);
   if (!Number.isInteger(id) || id <= 0) return json({ error: 'invalid player' }, { status: 400 });
   const { data, error } = await adminDatabase()

@@ -14,6 +14,7 @@
   import BottomNav from '$lib/components/BottomNav.svelte';
   import DemoBanner from '$lib/components/DemoBanner.svelte';
   import GameStrip from '$lib/components/GameStrip.svelte';
+  import { safeNext } from '$lib/product/navigation.js';
   import ToastContainer from '$lib/components/ToastContainer.svelte';
 
 
@@ -42,9 +43,13 @@
   });
 
 $: if (browser && !$authLoading) {
-    const isPublic = ['/today','/sports','/sports/nba','/sports/nba/analisis','/sports/nba/props','/totales','/predictions','/account','/pricing','/methodology','/public'].includes($page.url.pathname) || $page.url.pathname.startsWith('/legal/') || $page.url.pathname === '/' || $page.url.pathname === '/bankroll' || $page.url.pathname === '/tennis' || /^\/tennis\/player\/[^/]+\/?$/.test($page.url.pathname) || PUBLIC_ROUTES.some(r => $page.url.pathname.startsWith(r));
-    if (!$isAuthenticated && !isPublic) goto('/login');
-    if ($isAuthenticated && ['/', '/login'].includes($page.url.pathname)) goto('/today');
+    // Visitors only see the landing, the access screens and the legal pages;
+    // every product screen requires a session (the APIs enforce it too).
+    const path = $page.url.pathname;
+    const isPublic = path === '/' || path.startsWith('/legal/') || PUBLIC_ROUTES.some(r => path.startsWith(r));
+    if (!$isAuthenticated && !isPublic) goto(`/login?next=${encodeURIComponent(path + $page.url.search)}`, { replaceState: true });
+    if ($isAuthenticated && path === '/') goto('/today');
+    if ($isAuthenticated && path === '/login') goto(safeNext($page.url.searchParams.get('next')), { replaceState: true });
     if ($isAuthenticated && $authStore.userId !== subscriptionUser) {
       subscriptionUser = $authStore.userId;
       loadSubscription();

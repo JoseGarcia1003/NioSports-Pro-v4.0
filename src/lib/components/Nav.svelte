@@ -43,7 +43,7 @@
   async function handleLogout() {
     closeUserMenu();
     await logout();
-    goto('/login');
+    goto('/');
   }
 
   $: userName = $currentUser?.displayName ?? $currentUser?.email?.split('@')[0] ?? 'Usuario';

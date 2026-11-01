@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render, cleanup, waitFor, fireEvent } from '@testing-library/svelte';
+// The board calls the APIs with the user's session; tests route it to the stubbed fetch.
+vi.mock('$lib/services/authenticated-fetch.js', () => ({ authenticatedFetch: (url, options) => fetch(url, options) }));
 import NbaPropsBoard from '../../src/lib/components/NbaPropsBoard.svelte';
 
 // newest first: [date, opp, home, min, pts, reb, ast, fg3m, season, team]

@@ -4,6 +4,9 @@
   import { nbaToday, loadNbaToday } from '$lib/stores/nba-today.js';
   import { gameStatus, totalLineFor, teamColor } from '$lib/product/teams.js';
 
+  /** Link at the bottom of the board; visitors are sent to sign in instead of the app. */
+  export let cta = { href: '/sports/nba', label: 'Abrir el centro NBA' };
+
   // Today's real NBA slate with consensus total lines; never filled with samples.
   onMount(() => { loadNbaToday(); });
   const timeFormat = new Intl.DateTimeFormat('es', { hour: '2-digit', minute: '2-digit' });
@@ -51,7 +54,7 @@
     {#if fetchedAt && state !== 'unavailable'}Partidos: balldontlie · consultado {timeFormat.format(fetchedAt)} · hora local{:else}Partidos: balldontlie{/if}
     {#if state === 'ready'}<br />{#if lines}Líneas de total: {lines.source} · mediana entre casas · actualizadas {timeFormat.format(new Date(lines.fetchedAt))}{:else}Líneas de total no disponibles ahora mismo.{/if}{/if}
   </p>
-  <a class="board-link" href="/sports/nba">Abrir el centro NBA <ArrowUpRight size={16} /></a>
+  <a class="board-link" href={cta.href}>{cta.label} <ArrowUpRight size={16} /></a>
 </section>
 
 <style>

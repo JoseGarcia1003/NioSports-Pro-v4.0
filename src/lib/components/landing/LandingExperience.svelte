@@ -16,11 +16,11 @@
   <header class="masthead">
     <a href="/" class="brand" aria-label="NioSports Pro, inicio"><Logo size={34} /></a>
     <nav aria-label="Secciones">
-      <a href="/sports/nba">NBA</a>
-      <a href="/tennis">Tenis</a>
-      <a href="/methodology">Metodología</a>
+      <a href="#ofrece">Qué incluye</a>
+      <a href="#principios">Cómo trabajamos</a>
+      <a href="#preguntas">Preguntas</a>
     </nav>
-    <a class="sign-in" href="/login">Entrar</a>
+    <div class="access"><a class="sign-in" href="/login">Entrar</a><a class="join" href="/login?modo=registro">Crear cuenta</a></div>
   </header>
 
   <section class="hero" aria-labelledby="landing-title">
@@ -29,15 +29,15 @@
       <h1 id="landing-title">El partido,<br />explicado<br /><span>con datos.</span></h1>
       <p class="intro">Calendario real, contexto de cada encuentro y control de tu bankroll. Cada cifra indica su fuente y su hora; si un dato falta, lo verás como ausencia, nunca inventado.</p>
       <div class="actions">
-        <a class="primary" href="/sports/nba">Ver la NBA de hoy <ArrowUpRight size={18} /></a>
-        <a class="secondary" href="/methodology">Cómo analizamos <ArrowRight size={16} /></a>
+        <a class="primary" href="/login?modo=registro">Crear cuenta gratis <ArrowUpRight size={18} /></a>
+        <a class="secondary" href="#ofrece">Ver qué incluye <ArrowRight size={16} /></a>
       </div>
     </div>
 
-    <NbaTodayBoard />
+    <NbaTodayBoard cta={{ href: '/login?next=%2Fsports%2Fnba%2Fprops', label: 'Entra para ver las props de hoy' }} />
   </section>
 
-  <section class="offer" aria-labelledby="offer-title">
+  <section class="offer" id="ofrece" aria-labelledby="offer-title">
     <div class="section-head"><p class="eyebrow">Qué encontrarás</p><h2 id="offer-title">Lo que ya funciona y lo que estamos construyendo.</h2></div>
     <div class="cards">
       {#each offer as item}
@@ -45,20 +45,19 @@
           <span class="chip" class:on={item.live}>{item.status}</span>
           <h3>{item.title}</h3>
           <p>{item.text}</p>
-          {#if item.href}<a href={item.href}>Abrir <ArrowUpRight size={15} /></a>{/if}
         </article>
       {/each}
     </div>
   </section>
 
-  <section class="principles" aria-label="Principios">
+  <section class="principles" id="principios" aria-label="Principios">
     <p><Check size={17} /> Datos con fuente y hora de corte</p>
     <p><Check size={17} /> Sin pronóstico si la evidencia no alcanza</p>
     <p><Check size={17} /> Ejemplos siempre rotulados</p>
     <p><Check size={17} /> Sin promesas de ganancias</p>
   </section>
 
-  <section class="questions" aria-labelledby="questions-title">
+  <section class="questions" id="preguntas" aria-labelledby="questions-title">
     <h2 id="questions-title">Preguntas claras.</h2>
     <div>
       <details><summary>¿Los pronósticos garantizan ganancias?<ChevronDown size={18} /></summary><p>No. Son estimaciones con incertidumbre. Todavía no publicamos una tasa de acierto: cuando exista, mostrará su muestra y su periodo.</p></details>
@@ -74,15 +73,21 @@
 </div>
 
 <style>
+  :global(html) { scroll-behavior: smooth; }
+  .landing [id] { scroll-margin-top: 24px; }
   .landing { position: relative; min-height: 100vh; background: radial-gradient(1100px 520px at 78% 8%, color-mix(in srgb, var(--nio-gold) 13%, transparent), transparent 62%), radial-gradient(900px 600px at 0% 0%, color-mix(in srgb, var(--nio-gold) 5%, transparent), transparent 60%), var(--nio-page); color: var(--nio-ink); font-family: var(--font-sans); font-variant-numeric: lining-nums tabular-nums; }
   .landing > * { max-width: 1240px; margin-inline: auto; padding-inline: 28px; }
   .eyebrow { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: var(--nio-muted); margin: 0 0 10px; }
 
   .masthead { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-block: 18px; }
   .brand { text-decoration: none; color: inherit; }
-  .masthead nav { display: flex; gap: 26px; }
+  .masthead nav { display: flex; gap: 26px; align-items: center; }
+  .masthead nav a { display: inline-flex; align-items: center; min-height: 40px; }
   .masthead nav a, footer a { color: var(--nio-muted); text-decoration: none; font-size: 14px; font-weight: 500; }
   .masthead nav a:hover, footer a:hover { color: var(--nio-ink); }
+  .access { display: flex; gap: 8px; align-items: center; }
+  .join { min-height: 40px; display: inline-flex; align-items: center; padding: 0 16px; border-radius: 10px; background: var(--nio-action); color: var(--nio-action-ink); text-decoration: none; font-size: 14px; font-weight: 700; }
+  .join:focus-visible { outline: 2px solid var(--nio-accent); outline-offset: 3px; }
   .sign-in { min-height: 40px; display: inline-flex; align-items: center; padding: 0 16px; border: 1px solid var(--nio-border); border-radius: 10px; background: var(--nio-surface); color: var(--nio-ink); text-decoration: none; font-size: 14px; font-weight: 600; }
 
   .hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 56px; align-items: center; padding-block: 56px 72px; }
@@ -93,9 +98,8 @@
   .primary { min-height: 52px; box-shadow: 0 10px 30px color-mix(in srgb, var(--nio-gold) 25%, transparent); display: inline-flex; align-items: center; gap: 10px; padding: 0 22px; border-radius: 12px; background: var(--nio-action); color: var(--nio-action-ink); text-decoration: none; font-weight: 600; font-size: 15px; }
   .primary :global(svg) { color: var(--nio-action-icon); }
   .secondary { display: inline-flex; align-items: center; gap: 8px; color: var(--nio-ink); text-decoration: none; font-weight: 600; font-size: 15px; min-height: 44px; }
-  .primary:focus-visible, .secondary:focus-visible, .sign-in:focus-visible, .cards a:focus-visible, summary:focus-visible { outline: 2px solid var(--nio-accent); outline-offset: 3px; }
+  .primary:focus-visible, .secondary:focus-visible, .sign-in:focus-visible, summary:focus-visible { outline: 2px solid var(--nio-accent); outline-offset: 3px; }
 
-  .cards a { display: inline-flex; align-items: center; gap: 6px; color: var(--nio-accent); text-decoration: none; font-weight: 600; font-size: 14px; min-height: 32px; }
 
   .offer { padding-block: 24px 56px; }
   .section-head h2, .questions h2 { font-family: var(--font-display); text-transform: uppercase; font-weight: 800; font-size: clamp(32px, 4vw, 52px); letter-spacing: 0; margin: 0 0 26px; max-width: 640px; line-height: 1.15; }

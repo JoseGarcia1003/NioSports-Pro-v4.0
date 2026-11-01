@@ -1,9 +1,11 @@
 import { json } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
 import { adminDatabase } from '$lib/server/entitlements.js';
+import { requireIdentity } from '$lib/server/identity.js';
 import { scheduleFor, selectPlayers, dayFor } from '$lib/server/nba-props.js';
 
-export async function GET({ url }) {
+export async function GET({ url, request }) {
+  await requireIdentity(request);
   const offset = url.searchParams.get('day') === '1' ? 1 : 0;
   const day = dayFor(offset);
   if (!env.BALLDONTLIE_API_KEY) return json({ error: 'schedule_unavailable' }, { status: 503 });

@@ -2,6 +2,7 @@
   import { onMount, tick } from 'svelte';
   import { STATS, toGame, hitRate, average, referenceLine, seasonGames, statValue, defenseFor, splitRate } from '$lib/nba/props.js';
   import { teamColor } from '$lib/product/teams.js';
+  import { authenticatedFetch } from '$lib/services/authenticated-fetch.js';
 
   let state = 'loading';
   let payload = null;
@@ -22,7 +23,7 @@
     controller = new AbortController();
     state = 'loading';
     try {
-      const res = await fetch(`/api/nba/props${day ? '?day=1' : ''}`, { signal: controller.signal });
+      const res = await authenticatedFetch(`/api/nba/props${day ? '?day=1' : ''}`, { signal: controller.signal });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error);
       payload = { ...body, players: body.players.map(p => ({ ...p, games: p.games.map(toGame) })) };
@@ -38,7 +39,7 @@
     if (history[id]) return;
     history = { ...history, [id]: 'loading' };
     try {
-      const res = await fetch(`/api/nba/player/${id}`);
+      const res = await authenticatedFetch(`/api/nba/player/${id}`);
       const body = await res.json();
       if (!res.ok) throw new Error();
       history = { ...history, [id]: body.games.map(toGame) };

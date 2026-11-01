@@ -23,3 +23,9 @@ export function planLabel(sub) {
   if (sub.status==='unavailable') return 'Plan por verificar';
   return ['pro','elite'].includes(sub.plan)&&['active','trialing'].includes(sub.status)?`Premium · ${sub.plan==='elite'?'Elite':'Pro'}`:'FREE';
 }
+
+/** Destination after signing in: only same-site paths, never back to /login. */
+export function safeNext(value) {
+  const n = typeof value === 'string' ? value : '';
+  return /^\/(?!\/)[^\\]*$/.test(n) && !n.startsWith('/login') ? n : '/today';
+}

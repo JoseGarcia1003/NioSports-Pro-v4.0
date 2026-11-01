@@ -11,6 +11,12 @@
   import { loginWithEmail, loginWithGoogle, registerWithEmail, resetPassword } from '$lib/firebase';
   import { theme } from '$lib/stores/ui';
   import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
+  import { safeNext } from '$lib/product/navigation.js';
+  $: next = safeNext($page?.url?.searchParams?.get('next'));
+  // ?modo=registro opens the sign-up tab directly (from the landing's 'Crear cuenta').
+  import { onMount } from 'svelte';
+  onMount(() => { if ($page?.url?.searchParams?.get('modo') === 'registro') mode = 'register'; });
   let mode = 'login', email = '', password = '', loading = false, error = '', notice = '', showPassword = false;
   function changeMode(next) { if (loading) return; mode = next; error = ''; notice = ''; showPassword = false; password = ''; }
   function friendlyError(code) {
@@ -37,7 +43,7 @@
         notice = 'Si existe una cuenta con este correo, recibirás las instrucciones para recuperar el acceso. Revisa también la carpeta de spam.';
       } else {
         await (mode === 'register' ? registerWithEmail : loginWithEmail)(email.trim(), password);
-        await goto('/today');
+        await goto(next);
       }
     } catch (e) { error = friendlyError(e.code); }
     finally { loading = false; }
@@ -45,7 +51,7 @@
   async function google() {
     if (loading) return;
     loading = true; error = ''; notice = '';
-    try { await loginWithGoogle(); await goto('/today'); }
+    try { await loginWithGoogle(); await goto(next); }
     catch (e) { if (e.code !== 'auth/popup-closed-by-user') error = friendlyError(e.code); }
     finally { loading = false; }
   }
