@@ -8,7 +8,8 @@
 - Corregido: 500 en dev en /, /today, /sports/nba y /tennis (vite `server.fs.allow` para ml/contracts); lockfile desincronizado que rompía `npm ci`.
 - Crítico pendiente (E0): Metodología y Planes afirman calibración Platt/ECE/walk-forward, CLV y dashboards que el repositorio no respalda.
 - Decisiones del propietario registradas (sección 9 de la auditoría). E0 ejecutado en local (sección 10): afirmaciones falsas corregidas en Metodología/Legal/Planes/correo, deportes vacíos reducidos, 14 componentes muertos eliminados. Check 0/0, 554+19 pruebas aprobadas, revisión visual en claro/oscuro 1440/390.
-- BLOQUEO: push a GitHub rechazado (403, la app de Claude no tiene acceso al repositorio). Commits solo locales hasta que el propietario reconecte GitHub. Integración en `main` autorizada, pendiente del mismo acceso.
+- GitHub reconectado por el propietario. Rama subida y `main` avanzado (fast-forward) a da69a7ca con autorización expresa: incluye F0–F7, Match Studio navy/dorado y E0. Build de producción local aprobado. Despliegue de Vercel en producción NO verificado todavía: falta autorizar el acceso del conector al equipo Vercel y la red del entorno bloquea el dominio.
+- Cuentas gratuitas creadas por el propietario: The Odds API (clave enviada a su correo) y balldontlie (ya existente). La clave de balldontlie apareció en una captura del chat: debe rotarse y guardarse solo como variable de entorno. Ninguna clave está en el repositorio.
 - Siguiente acción: E2 sistema de diseño único (navy/dorado/blanco, una familia sans + mono tabular, tokens, un logo) y E3 navegación; en paralelo, el propietario crea cuentas gratuitas de datos (sección 11). La reconstrucción F8+ queda pausada en favor de los datos reales (E4/E5), sin descartar F0–F7.
 
 ## Historial (no vigente)
