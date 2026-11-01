@@ -83,3 +83,22 @@ export function defenseFor(defense, team, stat) {
 export function splitRate(games, stat, line, predicate) {
   return hitRate(games.filter(predicate), stat, line);
 }
+
+/** Re-reads a hit-rate result for one side: 'over' (más de) or 'under' (menos de). */
+export function sided(h, side) {
+  const hits = side === 'under' ? h.under : h.over;
+  const decided = h.over + h.under;
+  return { ...h, hits, rate: decided ? hits / decided : null };
+}
+
+/** Sorts board rows by a rate key, best first; empty samples go last. */
+export function sortRows(rows, key) {
+  if (key === 'minutes') return rows;
+  return [...rows].sort((a, b) => {
+    const ra = a[key].rate, rb = b[key].rate;
+    if (ra == null && rb == null) return 0;
+    if (ra == null) return 1;
+    if (rb == null) return -1;
+    return rb - ra || b[key].n - a[key].n;
+  });
+}

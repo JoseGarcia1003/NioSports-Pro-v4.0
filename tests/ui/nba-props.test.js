@@ -66,4 +66,20 @@ describe('NBA props board', () => {
     expect(detail.textContent).toContain('Defensa de ORL');
     expect(detail.textContent).toContain('1 de 2'); // 31 over, 12 under at line 24,5
   });
+
+  it('switches to the under side, filters by venue and sorts by L10', async () => {
+    const second = { ...payload.players[0], id: 8, name: 'Bench Shooter', home: true, minutesL5: 22, games: [g(10), g(12), g(30), g(9), g(11)] };
+    vi.stubGlobal('fetch', respond({ ...payload, players: [...payload.players, second] }));
+    const screen = render(NbaPropsBoard);
+    await waitFor(() => expect(screen.getByText('Bench Shooter')).toBeTruthy());
+    await fireEvent.click(screen.getByRole('button', { name: 'Menos de' }));
+    // Tatum PTS line 24,5: L5 under = 2 of 5 → 40%
+    expect(screen.getByRole('table').textContent).toContain('40%');
+    await fireEvent.click(screen.getByRole('button', { name: 'Local' }));
+    expect(screen.queryByText('Jayson Tatum')).toBeNull();
+    await fireEvent.click(screen.getByRole('button', { name: 'Todos' , exact: true }));
+    await fireEvent.change(screen.getByRole('combobox', { name: /Ordenar/ }), { target: { value: 'l10' } });
+    const names = [...screen.getByRole('table').querySelectorAll('.player b')].map(b => b.textContent);
+    expect(names.length).toBe(2);
+  });
 });

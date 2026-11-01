@@ -48,3 +48,15 @@ describe('matchup context', () => {
     expect(splitRate(games, 'pts', 19.5, g => g.opponent === 'CHI').rate).toBe(0);
   });
 });
+
+import { sided, sortRows } from '../../src/lib/nba/props.js';
+describe('board ordering and sides', () => {
+  it('reads the under side without counting pushes', () => {
+    expect(sided({ n: 5, over: 1, under: 3, push: 1 }, 'under')).toMatchObject({ hits: 3, rate: 0.75 });
+    expect(sided({ n: 0, over: 0, under: 0, push: 0 }, 'over').rate).toBeNull();
+  });
+  it('sorts by rate with empty samples last and larger samples first on ties', () => {
+    const r = (id, rate, n) => ({ id, l10: { rate, n } });
+    expect(sortRows([r('a', 0.5, 10), r('b', null, 0), r('c', 0.8, 10), r('d', 0.8, 5)], 'l10').map(x => x.id)).toEqual(['c', 'd', 'a', 'b']);
+  });
+});

@@ -1,6 +1,6 @@
 <script>
   import { onMount, tick } from 'svelte';
-  import { STATS, toGame, hitRate, average, referenceLine, seasonGames, statValue, defenseFor, splitRate } from '$lib/nba/props.js';
+  import { STATS, toGame, hitRate, average, referenceLine, seasonGames, statValue, defenseFor, splitRate, sided, sortRows } from '$lib/nba/props.js';
   import { teamColor } from '$lib/product/teams.js';
   import { authenticatedFetch } from '$lib/services/authenticated-fetch.js';
 
@@ -9,6 +9,10 @@
   let stat = 'pts';
   let gameFilter = 'all';
   let query = '';
+  let side = 'over';
+  let venue = 'all';
+  let minMinutes = 0;
+  let sortBy = 'minutes';
   let lines = {};
   let selected = null;
   let controller;
@@ -51,7 +55,8 @@
     if (selected) loadHistory(selected);
     if (selected && typeof window !== 'undefined' && window.innerWidth < 1100) {
       await tick();
-      detailEl?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+      const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+      detailEl?.scrollIntoView?.({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
     }
   }
 
@@ -69,13 +74,18 @@
   const shortDate = d => new Date(`${d}T12:00:00Z`).toLocaleDateString('es', { day: 'numeric', month: 'short' });
   const timeFormat = new Intl.DateTimeFormat('es', { hour: '2-digit', minute: '2-digit' });
 
-  $: rows = (payload?.players || [])
+  $: rows = sortRows((payload?.players || [])
     .filter(p => gameFilter === 'all' || String(p.gameId) === gameFilter)
+    .filter(p => venue === 'all' || (venue === 'home') === p.home)
+    .filter(p => p.minutesL5 >= minMinutes)
     .filter(p => !query.trim() || p.name.toLowerCase().includes(query.trim().toLowerCase()) || p.team.toLowerCase() === query.trim().toLowerCase())
     .map(p => {
       const line = lineOf(p, stat, lines);
-      return { p, line, custom: key(p, stat) in lines, l5: hitRate(p.games, stat, line, 5), l10: hitRate(p.games, stat, line, 10), l20: hitRate(p.games, stat, line, 20), season: hitRate(seasonGames(p.games), stat, line), avg: average(p.games, stat, 10), spark: p.games.slice(0, 10).reverse(), def: defenseFor(payload?.defense, p.opp, stat) };
-    });
+      return { p, line, custom: key(p, stat) in lines, l5: sided(hitRate(p.games, stat, line, 5), side), l10: sided(hitRate(p.games, stat, line, 10), side), l20: sided(hitRate(p.games, stat, line, 20), side), season: sided(hitRate(seasonGames(p.games), stat, line), side), avg: average(p.games, stat, 10), spark: p.games.slice(0, 10).reverse(), def: defenseFor(payload?.defense, p.opp, stat) };
+    }), sortBy);
+  // A bar "hits" when it lands on the chosen side of the line.
+  $: isHit = (v, line) => (side === 'under' ? v < line : v > line);
+  $: isMiss = (v, line) => (side === 'under' ? v > line : v < line);
   $: if (selected && !rows.some(r => r.p.id === selected)) selected = null;
   $: detail = rows.find(r => r.p.id === selected);
 </script>
@@ -102,6 +112,28 @@
       {/each}
     </div>
     <input type="search" placeholder="Buscar jugador o equipo (MIL)…" aria-label="Buscar jugador o equipo" bind:value={query} />
+  </div>
+
+  <div class="filters">
+    <div class="segment" role="group" aria-label="Lado de la línea">
+      <button type="button" class:on={side === 'over'} aria-pressed={side === 'over'} on:click={() => (side = 'over')}>Más de</button>
+      <button type="button" class:on={side === 'under'} aria-pressed={side === 'under'} on:click={() => (side = 'under')}>Menos de</button>
+    </div>
+    <div class="segment" role="group" aria-label="Localía de hoy">
+      {#each [['all', 'Todos'], ['home', 'Local'], ['away', 'Visitante']] as [id, label]}
+        <button type="button" class:on={venue === id} aria-pressed={venue === id} on:click={() => (venue = id)}>{label}</button>
+      {/each}
+    </div>
+    <label class="select">Minutos L5
+      <select bind:value={minMinutes}>
+        <option value={0}>Todos</option><option value={20}>20+</option><option value={25}>25+</option><option value={30}>30+</option>
+      </select>
+    </label>
+    <label class="select">Ordenar
+      <select bind:value={sortBy}>
+        <option value="minutes">Más minutos</option><option value="l5">Mejor L5</option><option value="l10">Mejor L10</option><option value="l20">Mejor L20</option><option value="season">Mejor temporada</option>
+      </select>
+    </label>
   </div>
 
   {#if payload?.games?.length}
@@ -138,14 +170,14 @@
               {#if r.custom}<button type="button" class="reset" aria-label="Volver a la referencia" on:click={() => reset(r.p)}>↺</button>{/if}
             </span>
             {#each [r.l5, r.l10, r.l20, r.season] as h, i}
-              <span role="cell" class={`rate ${tone(h)}`} data-label={['L5', 'L10', 'L20', 'Temp.'][i]}><b>{pct(h)}</b><small title={h.push ? `${h.push} partido(s) exactamente en la línea, no cuentan` : ''}>{h.over}/{h.over + h.under}{h.push ? ` · ${h.push} =` : ''}</small></span>
+              <span role="cell" class={`rate ${tone(h)}`} data-label={['L5', 'L10', 'L20', 'Temp.'][i]}><b>{pct(h)}</b><small title={h.push ? `${h.push} partido(s) exactamente en la línea, no cuentan` : ''}>{h.hits}/{h.over + h.under}{h.push ? ` · ${h.push} =` : ''}</small></span>
             {/each}
             <span role="cell" class="avg">{fmt(r.avg)}</span>
             <span role="cell" class="spark" aria-label={`Últimos 10: ${r.spark.map(g => statValue(g, stat)).join(', ')}`}>
               {#each r.spark as g}
                 {@const v = statValue(g, stat)}
                 {@const max = Math.max(r.line * 2, ...r.spark.map(x => statValue(x, stat)), 1)}
-                <i class:over={v > r.line} class:under={v < r.line} style={`height:${Math.max(6, (v / max) * 100)}%`}></i>
+                <i class:over={isHit(v, r.line)} class:under={isMiss(v, r.line)} style={`height:${Math.max(6, (v / max) * 100)}%`}></i>
               {/each}
               <em style={`bottom:${(r.line / Math.max(r.line * 2, ...r.spark.map(x => statValue(x, stat)), 1)) * 100}%`}></em>
             </span>
@@ -161,12 +193,12 @@
         <aside class="detail" bind:this={detailEl} aria-label={`Detalle de ${detail.p.name}`}>
           <div class="detail-head">
             <i class="badge big" style={`--team:${teamColor(detail.p.team)}`}>{detail.p.team}</i>
-            <div><h2>{detail.p.name}</h2><p>{STATS[stat].label} · línea {fmt(detail.line)} · {detail.p.home ? 'vs' : '@'} {detail.p.opp}</p></div>
+            <div><h2>{detail.p.name}</h2><p>{STATS[stat].label} · {side === 'over' ? 'más de' : 'menos de'} {fmt(detail.line)} · {detail.p.home ? 'vs' : '@'} {detail.p.opp}</p></div>
             <button type="button" class="close" aria-label="Cerrar detalle" on:click={() => (selected = null)}>✕</button>
           </div>
           <div class="kpis">
             {#each [['L5', detail.l5], ['L10', detail.l10], ['L20', detail.l20], ['Temporada', detail.season]] as [label, h]}
-              <div class={tone(h)}><span>{label}</span><b>{pct(h)}</b><small>{h.over} de {h.over + h.under}</small></div>
+              <div class={tone(h)}><span>{label}</span><b>{pct(h)}</b><small>{h.hits} de {h.over + h.under}</small></div>
             {/each}
           </div>
           <div class="context">
@@ -180,8 +212,8 @@
             {:else if hist}
               <div class="splits">
                 {#each [['Local', g => g.home], ['Visitante', g => !g.home], [`vs ${detail.p.opp}`, g => g.opponent === detail.p.opp], ['30+ min', g => g.minutes >= 30]] as [label, fn]}
-                  {@const h = splitRate(hist, stat, detail.line, fn)}
-                  <div class={tone(h)}><span>{label}</span><b>{pct(h)}</b><small>{h.n ? `${h.over} de ${h.over + h.under}` : 'sin partidos'}</small></div>
+                  {@const h = sided(splitRate(hist, stat, detail.line, fn), side)}
+                  <div class={tone(h)}><span>{label}</span><b>{pct(h)}</b><small>{h.n ? `${h.hits} de ${h.over + h.under}` : 'sin partidos'}</small></div>
                 {/each}
               </div>
               <p class="muted">Divisiones sobre {hist.length} partidos guardados (temporadas {[...new Set(hist.map(g => g.season))].join(' y ')}).</p>
@@ -193,7 +225,7 @@
               {@const v = statValue(g, stat)}
               <div class="bar-col">
                 <span class="val">{v}</span>
-                <i class:over={v > detail.line} class:under={v < detail.line} style={`height:${Math.max(3, (v / max) * 100)}%`}></i>
+                <i class:over={isHit(v, detail.line)} class:under={isMiss(v, detail.line)} style={`height:${Math.max(3, (v / max) * 100)}%`}></i>
                 {#if i % 2 === games20.length % 2}<small>{g.home ? '' : '@'}{g.opponent}</small>{/if}
               </div>
             {/each}
@@ -222,6 +254,12 @@
   .controls { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
   input[type='search'] { min-height: 40px; min-width: 260px; flex: 0 1 320px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-ink); font: inherit; }
   .games { margin-bottom: 16px; }
+  .filters { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; margin: 4px 0 12px; }
+  .segment { display: inline-flex; padding: 3px; border: 1px solid var(--nio-border); border-radius: 10px; background: var(--nio-surface); }
+  .segment button { min-height: 34px; padding: 0 12px; border: 0; border-radius: 7px; background: none; color: var(--nio-muted); font-weight: 600; font-size: 13px; }
+  .segment button.on { background: var(--nio-action); color: var(--nio-action-ink); }
+  .select { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--nio-muted); font-weight: 600; }
+  .select select { min-height: 38px; padding: 0 10px; border-radius: 9px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-ink); font: inherit; font-weight: 600; }
   .layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; align-items: start; }
   .layout.with-detail { grid-template-columns: minmax(0, 1fr) minmax(320px, 420px); }
   .table { border: 1px solid var(--nio-border); border-radius: 16px; background: var(--nio-surface); overflow: hidden; }
