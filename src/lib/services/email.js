@@ -66,8 +66,8 @@ export async function sendWelcomeEmail(to, displayName) {
       Hola <strong style="color:${BRAND.text}">${name}</strong>, tu cuenta está lista.
     </p>
     <p style="color:${BRAND.muted};font-size:14px;line-height:1.6;margin:0 0 24px;">
-      NioSports Pro utiliza XGBoost ML con 26+ features para analizar totales NBA por período (Q1, HALF, FULL). 
-      Cada predicción incluye proyección, probabilidad calibrada, edge y expected value.
+      En NioSports Pro encontrarás análisis deportivos con fuente y contexto, y tu bankroll personal. 
+      Solo publicamos pronósticos cuando los datos lo permiten, y cada uno muestra sus límites.
     </p>
     <div style="text-align:center;margin:28px 0;">
       <a href="https://nio-sports-pro-v4-0.vercel.app/" 

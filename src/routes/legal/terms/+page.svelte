@@ -23,19 +23,18 @@
 
     <section>
       <h2>2. Descripción del Servicio</h2>
-      <p>{appName} es una plataforma de análisis estadístico deportivo que proporciona predicciones generadas por modelos de machine learning (XGBoost) sobre totales de la NBA. El Servicio incluye:</p>
+      <p>{appName} es una plataforma de análisis estadístico deportivo que ofrece análisis estadísticos y, cuando hay datos suficientes, pronósticos sobre eventos deportivos. El Servicio incluye o incluirá:</p>
       <ul>
-        <li>Predicciones estadísticas sobre partidos de la NBA</li>
+        <li>Análisis y pronósticos estadísticos sobre partidos, jugadores y equipos</li>
         <li>Herramientas de seguimiento de bankroll personal</li>
-        <li>Análisis de Closing Line Value (CLV)</li>
-        <li>Track record público y auditable</li>
+        <li>Un historial público de pronósticos registrados antes del inicio de cada evento, cuando esté disponible</li>
       </ul>
     </section>
 
     <section>
       <h2>3. Disclaimer — No es Asesoramiento Financiero</h2>
       <p><strong>{appName} NO es un servicio de asesoramiento financiero, de inversión, ni de apuestas.</strong> Toda la información proporcionada es exclusivamente para fines de entretenimiento y análisis estadístico.</p>
-      <p>Las predicciones del modelo tienen una tasa histórica de acierto del ~61% en validación cruzada. El rendimiento pasado no garantiza resultados futuros. Nunca apuestes dinero que no puedas permitirte perder.</p>
+      <p>El Servicio no garantiza ninguna tasa de acierto ni beneficio. Cualquier cifra de rendimiento que se publique indicará su muestra y periodo; el rendimiento pasado no garantiza resultados futuros. Nunca apuestes dinero que no puedas permitirte perder.</p>
     </section>
 
     <section>

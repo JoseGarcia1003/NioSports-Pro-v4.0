@@ -20,11 +20,10 @@
       ...PLANS.free,
       icon: Shield,
       highlights: [
-        { text: 'Deportes y calculadora de totales', included: true },
+        { text: 'Deportes y herramientas de análisis', included: true },
         { text: '1 selección Premium por edición publicada', included: true },
         { text: 'Bankroll personal', included: true },
         { text: 'Estadísticas de tus resultados', included: true },
-        { text: 'CLV Tracking', included: false },
         { text: 'Exportar CSV', included: false },
       ]
     },
@@ -32,23 +31,21 @@
       ...PLANS.pro,
       icon: Zap,
       highlights: [
-        { text: 'Deportes y calculadora de totales', included: true },
+        { text: 'Deportes y herramientas de análisis', included: true },
         { text: 'Todos los pronósticos disponibles', included: true },
         { text: 'Módulo Bankroll', included: true },
-        { text: 'Dashboard completo', included: true },
+        { text: 'Estadísticas de tus resultados', included: true },
         { text: 'Exportar CSV', included: true },
-        { text: 'CLV Tracking', included: false },
       ]
     },
     {
       ...PLANS.elite,
       icon: Crown,
       highlights: [
-        { text: 'Deportes y calculadora de totales', included: true },
+        { text: 'Deportes y herramientas de análisis', included: true },
         { text: 'Todos los pronósticos disponibles', included: true },
         { text: 'Módulo Bankroll', included: true },
-        { text: 'Dashboard + Stats completas', included: true },
-        { text: 'CLV Tracking avanzado', included: true },
+        { text: 'Estadísticas de tus resultados', included: true },
         { text: 'Exportar CSV', included: true },
       ]
     }
@@ -107,6 +104,7 @@
     <span class="page__label">Planes y precios</span>
     <h1 class="page__title">Empieza gratis. Amplía tu análisis.</h1>
     <p class="page__subtitle">Todos los deportes disponibles en FREE. Premium amplía los análisis y las herramientas.</p>
+    <p class="page__subtitle">Los pronósticos se publican solo cuando hay datos verificados; algunos días el catálogo puede estar vacío.</p>
   </header>
 
   {#if success}

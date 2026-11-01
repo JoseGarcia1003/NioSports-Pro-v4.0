@@ -16,8 +16,8 @@
 
     <section>
       <h2>Sobre las Predicciones</h2>
-      <p>Nuestro modelo XGBoost v3.0 tiene una tasa de acierto validada de ~61% en walk-forward backtesting. Esto significa que aproximadamente <strong>4 de cada 10 predicciones serán incorrectas</strong>. El rendimiento histórico no garantiza resultados futuros.</p>
-      <p>Las líneas de apuestas están diseñadas por los libros para ser difíciles de superar consistentemente. El 95% de los apostadores pierde dinero a largo plazo.</p>
+      <p>NioSports Pro no tiene hoy una tasa de acierto validada que publicar. Cuando exista, se mostrará junto con su tamaño de muestra y su periodo. Incluso un buen análisis falla con frecuencia: <strong>ningún pronóstico es seguro</strong> y el rendimiento pasado no garantiza resultados futuros.</p>
+      <p>Las casas de apuestas incluyen un margen en sus cuotas, lo que hace difícil obtener beneficios de forma sostenida.</p>
     </section>
 
     <section>

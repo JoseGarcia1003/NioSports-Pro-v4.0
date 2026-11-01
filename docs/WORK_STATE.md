@@ -7,7 +7,9 @@
 - Verificado hoy: svelte-check 0/0; 554 pruebas de lógica/servidor + 19 de UI aprobadas; 15 rutas a 1440/390 px sin desbordamiento en local. Producción NO verificada: el dominio está bloqueado por la red del entorno y la cuenta Vercel conectada no tiene acceso al equipo.
 - Corregido: 500 en dev en /, /today, /sports/nba y /tennis (vite `server.fs.allow` para ml/contracts); lockfile desincronizado que rompía `npm ci`.
 - Crítico pendiente (E0): Metodología y Planes afirman calibración Platt/ECE/walk-forward, CLV y dashboards que el repositorio no respalda.
-- Siguiente acción: esperar las decisiones 1–5 del propietario (sección 7 de la auditoría); después, E0 (consolidar ramas, corregir afirmaciones, ocultar deportes vacíos). La reconstrucción F8+ queda pausada en favor de los datos reales (E4/E5), sin descartar F0–F7.
+- Decisiones del propietario registradas (sección 9 de la auditoría). E0 ejecutado en local (sección 10): afirmaciones falsas corregidas en Metodología/Legal/Planes/correo, deportes vacíos reducidos, 14 componentes muertos eliminados. Check 0/0, 554+19 pruebas aprobadas, revisión visual en claro/oscuro 1440/390.
+- BLOQUEO: push a GitHub rechazado (403, la app de Claude no tiene acceso al repositorio). Commits solo locales hasta que el propietario reconecte GitHub. Integración en `main` autorizada, pendiente del mismo acceso.
+- Siguiente acción: E2 sistema de diseño único (navy/dorado/blanco, una familia sans + mono tabular, tokens, un logo) y E3 navegación; en paralelo, el propietario crea cuentas gratuitas de datos (sección 11). La reconstrucción F8+ queda pausada en favor de los datos reales (E4/E5), sin descartar F0–F7.
 
 ## Historial (no vigente)
 
