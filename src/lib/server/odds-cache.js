@@ -1,6 +1,6 @@
 // NBA game totals from The Odds API, cached so the free plan (500 credits/month)
 // is never spent per visitor. One refresh costs 1 credit (1 market x 1 region);
-// with a 6 h TTL that is at most ~120 credits per month.
+// with a 6 h TTL that is at most ~120 credits per month. The cache lives in Supabase.
 
 export const TOTALS_KEY = 'niosports:odds:nba:totals:v1';
 const LOCK_KEY = `${TOTALS_KEY}:lock`;
@@ -30,19 +30,20 @@ export function median(values) {
 }
 
 /**
- * @param {{ redis: any, apiKey: string, fetchImpl?: typeof fetch, now?: number }} deps
+ * Cache store contract: get(key) → payload|null, put(key, payload), lock(key, seconds) → boolean, unlock(key).
+ * @param {{ store: any, apiKey: string, fetchImpl?: typeof fetch, now?: number }} deps
  */
-export async function getNbaTotals({ redis, apiKey, fetchImpl = fetch, now = Date.now() }) {
+export async function getNbaTotals({ store, apiKey, fetchImpl = fetch, now = Date.now() }) {
   if (!apiKey) return { ok: false, reason: 'not_configured' };
   // Without the cache every visitor would spend credits: refuse instead.
-  if (!redis) return { ok: false, reason: 'cache_unavailable' };
+  if (!store) return { ok: false, reason: 'cache_unavailable' };
 
   let cached;
-  try { cached = await redis.get(TOTALS_KEY); } catch { return { ok: false, reason: 'cache_unavailable' }; }
+  try { cached = await store.get(TOTALS_KEY); } catch { return { ok: false, reason: 'cache_unavailable' }; }
   if (cached && now - Date.parse(cached.fetchedAt) < TOTALS_TTL_SECONDS * 1000) return { ok: true, ...cached, cached: true };
 
   // Only one request refreshes; the rest keep serving the previous copy.
-  const gotLock = await redis.set(LOCK_KEY, '1', { nx: true, ex: 60 }).catch(() => null);
+  const gotLock = await store.lock(LOCK_KEY, 60).catch(() => false);
   if (!gotLock) return cached ? { ok: true, ...cached, cached: true, stale: true } : { ok: false, reason: 'refreshing' };
 
   try {
@@ -56,13 +57,36 @@ export async function getNbaTotals({ redis, apiKey, fetchImpl = fetch, now = Dat
       quotaRemaining: Number.isFinite(remaining) ? remaining : null,
       events: normalizeTotals(await res.json())
     };
-    await redis.set(TOTALS_KEY, payload, { ex: TOTALS_TTL_SECONDS * 4 });
+    await store.put(TOTALS_KEY, payload);
     return { ok: true, ...payload, cached: false };
   } catch {
     return cached ? { ok: true, ...cached, cached: true, stale: true } : { ok: false, reason: 'network_error' };
   } finally {
-    await redis.del(LOCK_KEY).catch(() => {});
+    await store.unlock(LOCK_KEY).catch(() => {});
   }
 }
 
 export { sameTeam } from '$lib/product/teams.js';
+
+// Supabase-backed store (server only, service role; tables provider_cache/provider_locks).
+export function supabaseStore(db) {
+  return {
+    async get(key) {
+      const { data, error } = await db.from('provider_cache').select('payload').eq('key', key).maybeSingle();
+      if (error) throw error;
+      return data?.payload ?? null;
+    },
+    async put(key, payload) {
+      const { error } = await db.from('provider_cache').upsert({ key, payload, updated_at: new Date().toISOString() });
+      if (error) throw error;
+    },
+    async lock(key, seconds) {
+      const { data, error } = await db.rpc('try_provider_lock', { p_key: key, p_seconds: seconds });
+      if (error) throw error;
+      return data === true;
+    },
+    async unlock(key) {
+      await db.from('provider_locks').delete().eq('key', key);
+    }
+  };
+}
