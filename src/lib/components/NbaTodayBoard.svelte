@@ -2,18 +2,37 @@
   import { onMount } from 'svelte';
   import { ArrowUpRight } from 'lucide-svelte';
   import { nbaCalendarUrl, nbaCalendarRows } from '$lib/product/calendar.js';
+  import { sameTeam } from '$lib/product/teams.js';
 
   // Today's real NBA slate: the first thing a visitor sees is live product, not a slogan.
   let games = [];
   let state = 'loading';
   let fetchedAt = null;
   let controller;
+  let lines = null; // { fetchedAt, source, events } from /api/odds/nba-totals, or null when unavailable
+
+  async function loadLines(signal) {
+    try {
+      const res = await fetch('/api/odds/nba-totals', { signal });
+      const body = await res.json();
+      lines = res.ok && Array.isArray(body.events) ? body : null;
+    } catch { lines = null; }
+  }
+
+  // Pair a provider game with its betting event: same nicknames, start within 12 h.
+  function lineFor(game, data) {
+    if (!data) return null;
+    const start = Date.parse(game.datetime);
+    const hit = data.events.find(e => sameTeam(e.home, game.home_team.name) && sameTeam(e.away, game.visitor_team.name) && Math.abs(Date.parse(e.commenceTime) - start) < 12 * 3600000);
+    return hit && Number.isFinite(hit.consensus) ? { point: hit.consensus, books: hit.books.length } : null;
+  }
 
   async function load() {
     controller?.abort();
     controller = new AbortController();
     state = 'loading';
     try {
+      loadLines(controller.signal);
       const res = await fetch(nbaCalendarUrl(Date.now(), 0), { signal: controller.signal });
       const body = await res.json().catch(() => ({}));
       games = [...nbaCalendarRows(res, body)].sort((a, b) => String(a.datetime).localeCompare(String(b.datetime)));
@@ -49,12 +68,16 @@
         <ul class="games">
           {#each games as game (game.id)}
             {@const st = gameState(game)}
+            {@const line = lineFor(game, lines)}
             <li>
               <div class="teams">
                 <span><b>{game.visitor_team.abbreviation}</b> {game.visitor_team.full_name}{#if st.score}<em>{game.visitor_team_score}</em>{/if}</span>
                 <span><b>{game.home_team.abbreviation}</b> {game.home_team.full_name}{#if st.score}<em>{game.home_team_score}</em>{/if}</span>
               </div>
-              <span class="when" class:live={st.score}>{st.label}</span>
+              <span class="side">
+                <span class="when" class:live={st.score}>{st.label}</span>
+                {#if line}<span class="line" title={`Mediana de ${line.books} casas`}>Total {line.point.toLocaleString('es')}</span>{/if}
+              </span>
             </li>
           {/each}
         </ul>
@@ -65,7 +88,8 @@
       {/if}
 
       <p class="source">
-        {#if fetchedAt && state !== 'unavailable'}Fuente: balldontlie · consultado {timeFormat.format(fetchedAt)} · hora local{:else}Fuente: balldontlie{/if}
+        {#if fetchedAt && state !== 'unavailable'}Partidos: balldontlie · consultado {timeFormat.format(fetchedAt)} · hora local{:else}Partidos: balldontlie{/if}
+        {#if state === 'ready'}<br />{#if lines}Líneas de total: {lines.source} · mediana entre casas · actualizadas {timeFormat.format(new Date(lines.fetchedAt))}{:else}Líneas de total no disponibles ahora mismo.{/if}{/if}
       </p>
       <a class="board-link" href="/sports/nba">Abrir el centro NBA <ArrowUpRight size={16} /></a>
     </section>
@@ -83,6 +107,8 @@
   .teams span { display: flex; align-items: baseline; gap: 8px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .teams b { color: var(--nio-ink); font-weight: 700; min-width: 38px; }
   .teams em { font-style: normal; font-weight: 700; color: var(--nio-ink); margin-left: auto; padding-left: 8px; }
+  .side { display: grid; justify-items: end; gap: 4px; }
+  .line { font-size: 12px; font-weight: 600; color: var(--nio-accent); background: var(--nio-gold-soft); border: 1px solid var(--nio-gold-border); border-radius: 999px; padding: 2px 8px; white-space: nowrap; }
   .when { font-size: 14px; font-weight: 600; color: var(--nio-ink); white-space: nowrap; }
   .when.live { color: var(--nio-accent); }
   .skeleton span { display: block; height: 12px; border-radius: 6px; background: var(--nio-raised); width: 70%; }
