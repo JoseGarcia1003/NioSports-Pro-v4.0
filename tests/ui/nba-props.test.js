@@ -56,7 +56,7 @@ describe('NBA props board', () => {
   it('shows the opponent defense rank and head-to-head splits from the full history', async () => {
     const withDefense = { ...payload, defense: { ORL: { games: 6, pts: 129, reb: 48, ast: 29, fg3m: 15 }, CHI: { games: 6, pts: 110, reb: 44, ast: 25, fg3m: 12 } } };
     const history = { id: 7, games: [['2026-04-12', 'ORL', false, 36, 31, 6, 5, 3, '2025-26', 'BOS'], ['2026-03-01', 'ORL', true, 34, 12, 6, 5, 1, '2025-26', 'BOS'], ...payload.players[0].games] };
-    vi.stubGlobal('fetch', vi.fn(async url => new Response(JSON.stringify(String(url).includes('/api/nba/player/') ? history : withDefense))));
+    vi.stubGlobal('fetch', vi.fn(async url => new Response(JSON.stringify(String(url).includes('/api/nba/player') ? history : withDefense))));
     const screen = render(NbaPropsBoard);
     await waitFor(() => expect(screen.getByText('Jayson Tatum')).toBeTruthy());
     expect(screen.getByRole('table').textContent).toContain('DEF 1º');

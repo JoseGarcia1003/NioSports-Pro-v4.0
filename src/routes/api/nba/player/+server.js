@@ -3,9 +3,11 @@ import { adminDatabase } from '$lib/server/entitlements.js';
 import { requireIdentity } from '$lib/server/identity.js';
 
 // Full stored history of one player (newest first) for splits and head-to-head.
-export async function GET({ params, request }) {
+// The id travels as ?id= because dynamic /api/ segments collide with the legacy
+// root api/ folder routing on Vercel and return a platform 404.
+export async function GET({ url, request }) {
   await requireIdentity(request);
-  const id = Number(params.id);
+  const id = Number(url.searchParams.get('id'));
   if (!Number.isInteger(id) || id <= 0) return json({ error: 'invalid player' }, { status: 400 });
   const { data, error } = await adminDatabase()
     .from('nba_player_games')

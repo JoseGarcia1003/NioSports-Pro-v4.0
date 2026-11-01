@@ -39,7 +39,7 @@
     if (history[id]) return;
     history = { ...history, [id]: 'loading' };
     try {
-      const res = await authenticatedFetch(`/api/nba/player/${id}`);
+      const res = await authenticatedFetch(`/api/nba/player?id=${id}`);
       const body = await res.json();
       if (!res.ok) throw new Error();
       history = { ...history, [id]: body.games.map(toGame) };

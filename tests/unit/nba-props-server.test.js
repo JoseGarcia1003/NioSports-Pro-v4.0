@@ -26,11 +26,11 @@ describe('props board selection', () => {
 });
 
 import { GET as propsGET } from '../../src/routes/api/nba/props/+server.js';
-import { GET as playerGET } from '../../src/routes/api/nba/player/[id]/+server.js';
+import { GET as playerGET } from '../../src/routes/api/nba/player/+server.js';
 describe('props APIs require a session', () => {
   it('rejects anonymous requests before touching data', async () => {
     const anon = new Request('http://x/api/nba/props');
     await expect(propsGET({ url: new URL(anon.url), request: anon })).rejects.toMatchObject({ status: 401 });
-    await expect(playerGET({ params: { id: '7' }, request: anon })).rejects.toMatchObject({ status: 401 });
+    await expect(playerGET({ url: new URL('http://x/api/nba/player?id=7'), request: anon })).rejects.toMatchObject({ status: 401 });
   });
 });
