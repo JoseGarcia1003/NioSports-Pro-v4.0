@@ -32,3 +32,19 @@ describe('prop analytics', () => {
     expect(seasonGames([g(10), g(12, 5, 3, 2, '2025-26')])).toHaveLength(1);
   });
 });
+
+import { defenseFor, splitRate } from '../../src/lib/nba/props.js';
+describe('matchup context', () => {
+  const defense = { ORL: { games: 6, pts: 110, reb: 44, ast: 25, fg3m: 12 }, CHI: { games: 6, pts: 129, reb: 48, ast: 29, fg3m: 15 }, BOS: { games: 5, pts: 105, reb: 40, ast: 22, fg3m: 14 } };
+  it('ranks what the opponent allows, 1 = most allowed', () => {
+    expect(defenseFor(defense, 'CHI', 'pts')).toEqual({ value: 129, rank: 1, of: 3, games: 6 });
+    expect(defenseFor(defense, 'BOS', 'fg3m').rank).toBe(2);
+    expect(defenseFor(defense, 'ORL', 'pra').value).toBe(179);
+    expect(defenseFor(defense, 'XXX', 'pts')).toBeNull();
+  });
+  it('computes split hit rates', () => {
+    const games = [toGame(['d', 'ORL', true, 30, 25, 5, 3, 2, 's', 'BOS']), toGame(['d', 'CHI', false, 30, 10, 5, 3, 2, 's', 'BOS'])];
+    expect(splitRate(games, 'pts', 19.5, g => g.home).rate).toBe(1);
+    expect(splitRate(games, 'pts', 19.5, g => g.opponent === 'CHI').rate).toBe(0);
+  });
+});

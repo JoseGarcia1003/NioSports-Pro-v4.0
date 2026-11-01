@@ -64,3 +64,22 @@ export function seasonGames(games) {
   const s = currentSeason(games);
   return games.filter(g => g.season === s);
 }
+
+const DEFENSE_FIELDS = { pts: ['pts'], reb: ['reb'], ast: ['ast'], fg3m: ['fg3m'], pra: ['pts', 'reb', 'ast'], pr: ['pts', 'reb'], pa: ['pts', 'ast'], ra: ['reb', 'ast'] };
+
+/**
+ * What the opponent allows per game for a stat and its rank among teams
+ * (1 = allows the most, i.e. the most favourable matchup for an over).
+ * @param {Record<string, {games:number, pts:number, reb:number, ast:number, fg3m:number}>} defense
+ */
+export function defenseFor(defense, team, stat) {
+  if (!defense?.[team]) return null;
+  const value = t => DEFENSE_FIELDS[stat].reduce((s, f) => s + Number(defense[t][f]), 0);
+  const ordered = Object.keys(defense).sort((a, b) => value(b) - value(a));
+  return { value: value(team), rank: ordered.indexOf(team) + 1, of: ordered.length, games: defense[team].games };
+}
+
+/** Hit rate restricted to games matching a predicate (splits: home/away, opponent, minutes). */
+export function splitRate(games, stat, line, predicate) {
+  return hitRate(games.filter(predicate), stat, line);
+}

@@ -1,6 +1,6 @@
 <script>
   import { onMount, tick } from 'svelte';
-  import { STATS, toGame, hitRate, average, referenceLine, seasonGames, statValue } from '$lib/nba/props.js';
+  import { STATS, toGame, hitRate, average, referenceLine, seasonGames, statValue, defenseFor, splitRate } from '$lib/nba/props.js';
   import { teamColor } from '$lib/product/teams.js';
 
   let state = 'loading';
@@ -33,8 +33,21 @@
   }
   onMount(() => { load(); return () => controller?.abort(); });
 
+  let history = {};
+  async function loadHistory(id) {
+    if (history[id]) return;
+    history = { ...history, [id]: 'loading' };
+    try {
+      const res = await fetch(`/api/nba/player/${id}`);
+      const body = await res.json();
+      if (!res.ok) throw new Error();
+      history = { ...history, [id]: body.games.map(toGame) };
+    } catch { history = { ...history, [id]: 'error' }; }
+  }
+
   async function select(id) {
     selected = selected === id ? null : id;
+    if (selected) loadHistory(selected);
     if (selected && typeof window !== 'undefined' && window.innerWidth < 1100) {
       await tick();
       detailEl?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
@@ -60,7 +73,7 @@
     .filter(p => !query.trim() || p.name.toLowerCase().includes(query.trim().toLowerCase()) || p.team.toLowerCase() === query.trim().toLowerCase())
     .map(p => {
       const line = lineOf(p, stat, lines);
-      return { p, line, custom: key(p, stat) in lines, l5: hitRate(p.games, stat, line, 5), l10: hitRate(p.games, stat, line, 10), l20: hitRate(p.games, stat, line, 20), season: hitRate(seasonGames(p.games), stat, line), avg: average(p.games, stat, 10), spark: p.games.slice(0, 10).reverse() };
+      return { p, line, custom: key(p, stat) in lines, l5: hitRate(p.games, stat, line, 5), l10: hitRate(p.games, stat, line, 10), l20: hitRate(p.games, stat, line, 20), season: hitRate(seasonGames(p.games), stat, line), avg: average(p.games, stat, 10), spark: p.games.slice(0, 10).reverse(), def: defenseFor(payload?.defense, p.opp, stat) };
     });
   $: if (selected && !rows.some(r => r.p.id === selected)) selected = null;
   $: detail = rows.find(r => r.p.id === selected);
@@ -115,7 +128,7 @@
           <div class="tr" role="row" class:active={selected === r.p.id}>
             <span role="cell" class="player-cell"><button type="button" class="player" on:click={() => select(r.p.id)} aria-expanded={selected === r.p.id}>
               <i class="badge" style={`--team:${teamColor(r.p.team)}`}>{r.p.team}</i>
-              <span><b>{r.p.name}</b><small>{r.p.home ? 'vs' : '@'} {r.p.opp} · {fmt(r.p.minutesL5)} min L5</small></span>
+              <span><b>{r.p.name}</b><small>{r.p.home ? 'vs' : '@'} {r.p.opp} · {fmt(r.p.minutesL5)} min L5{#if r.def}{' '}<em class="def" class:good={r.def.rank <= 10} class:bad={r.def.rank > r.def.of - 10} title={`${r.p.opp} permite ${fmt(r.def.value)} por partido; puesto ${r.def.rank} de ${r.def.of} (1 = permite más)`}>DEF {r.def.rank}º</em>{/if}</small></span>
             </button></span>
             <span class="line" role="cell">
               <button type="button" aria-label="Bajar línea" on:click={() => nudge(r.p, -0.5)}>−</button>
@@ -142,6 +155,7 @@
 
       {#if detail}
         {@const games20 = detail.p.games.slice(0, 20).reverse()}
+        {@const hist = Array.isArray(history[detail.p.id]) ? history[detail.p.id] : null}
         {@const max = Math.max(detail.line * 1.6, ...games20.map(g => statValue(g, stat)), 1)}
         <aside class="detail" bind:this={detailEl} aria-label={`Detalle de ${detail.p.name}`}>
           <div class="detail-head">
@@ -153,6 +167,24 @@
             {#each [['L5', detail.l5], ['L10', detail.l10], ['L20', detail.l20], ['Temporada', detail.season]] as [label, h]}
               <div class={tone(h)}><span>{label}</span><b>{pct(h)}</b><small>{h.over} de {h.over + h.under}</small></div>
             {/each}
+          </div>
+          <div class="context">
+            {#if detail.def}
+              <p class="def-line"><b>Defensa de {detail.p.opp}:</b> permite {fmt(detail.def.value)} {STATS[stat].label.toLowerCase()} por partido · puesto <b class:good={detail.def.rank <= 10} class:bad={detail.def.rank > detail.def.of - 10}>{detail.def.rank}º de {detail.def.of}</b> (1 = permite más) · {detail.def.games} partidos esta temporada.</p>
+            {/if}
+            {#if history[detail.p.id] === 'loading'}
+              <p class="muted" role="status">Cargando historial completo…</p>
+            {:else if history[detail.p.id] === 'error'}
+              <p class="muted">No se pudo cargar el historial completo.</p>
+            {:else if hist}
+              <div class="splits">
+                {#each [['Local', g => g.home], ['Visitante', g => !g.home], [`vs ${detail.p.opp}`, g => g.opponent === detail.p.opp], ['30+ min', g => g.minutes >= 30]] as [label, fn]}
+                  {@const h = splitRate(hist, stat, detail.line, fn)}
+                  <div class={tone(h)}><span>{label}</span><b>{pct(h)}</b><small>{h.n ? `${h.over} de ${h.over + h.under}` : 'sin partidos'}</small></div>
+                {/each}
+              </div>
+              <p class="muted">Divisiones sobre {hist.length} partidos guardados (temporadas {[...new Set(hist.map(g => g.season))].join(' y ')}).</p>
+            {/if}
           </div>
           <div class="chart" role="img" aria-label={`Últimos ${games20.length} partidos frente a la línea ${detail.line}`}>
             <em class="ref" style={`bottom:${(detail.line / max) * 100}%`}><span>{fmt(detail.line)}</span></em>
@@ -239,6 +271,22 @@
   .bar-col small { position: absolute; bottom: -18px; font-size: 9px; color: var(--nio-muted); white-space: nowrap; }
   .ref { position: absolute; left: 0; right: 0; border-top: 2px dashed var(--nio-accent); z-index: 1; }
   .ref span { position: absolute; right: 0; top: -18px; font-size: 11px; font-weight: 700; color: var(--nio-accent); background: var(--nio-surface); padding: 0 4px; border-radius: 4px; }
+  .def { white-space: nowrap; font-style: normal; font-weight: 700; font-size: 10px; letter-spacing: .04em; padding: 1px 6px; border-radius: 999px; border: 1px solid var(--nio-border); color: var(--nio-muted); }
+  .def.good { color: var(--nio-hit); border-color: color-mix(in srgb, var(--nio-hit) 45%, transparent); }
+  .def.bad { color: var(--nio-miss); border-color: color-mix(in srgb, var(--nio-miss) 45%, transparent); }
+  .context { margin: 0 0 16px; display: grid; gap: 10px; }
+  .def-line { margin: 0; font-size: 13px; line-height: 1.55; color: var(--nio-muted); }
+  .def-line b { color: var(--nio-ink); }
+  .def-line b.good { color: var(--nio-hit); }
+  .def-line b.bad { color: var(--nio-miss); }
+  .splits { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .splits div { display: grid; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--nio-border); }
+  .splits span { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--nio-muted); white-space: nowrap; }
+  .splits b { font-family: var(--font-display); font-size: 20px; }
+  .splits small { font-size: 11px; color: var(--nio-muted); }
+  .splits .hit b { color: var(--nio-hit); }
+  .splits .miss b { color: var(--nio-miss); }
+  .muted { margin: 0; font-size: 12px; color: var(--nio-muted); }
   .foot { font-size: 12px; color: var(--nio-muted); line-height: 1.55; margin: 0; }
   button:focus-visible, input:focus-visible { outline: 2px solid var(--nio-accent); outline-offset: 2px; }
   @media (max-width: 1100px) { .layout.with-detail { grid-template-columns: 1fr; } .detail { position: static; } }
@@ -253,6 +301,6 @@
     .rate::before { content: attr(data-label); font-size: 10px; letter-spacing: .06em; color: var(--nio-muted); text-transform: uppercase; }
     .spark { height: 30px; }
     input[type='search'] { min-width: 0; flex: 1 1 100%; }
-    .kpis { grid-template-columns: repeat(2, 1fr); }
+    .kpis, .splits { grid-template-columns: repeat(2, 1fr); }
   }
 </style>

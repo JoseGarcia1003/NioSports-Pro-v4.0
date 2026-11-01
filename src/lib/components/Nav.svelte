@@ -7,10 +7,10 @@
   import { browser } from '$app/environment';
   import { onMount, onDestroy } from 'svelte';
   import Logo from '$lib/components/Logo.svelte';
-  import { Home, Cpu, Wallet, Trophy, User, Sun, Moon, LogOut } from 'lucide-svelte';
+  import { Home, Cpu, Wallet, Trophy, User, Sun, Moon, LogOut, BarChart3 } from 'lucide-svelte';
 
   import { PRIMARY_NAV, navActive } from '$lib/product/navigation.js';
-  const icons={Home,Cpu,Trophy,Wallet,User};
+  const icons={Home,Cpu,Trophy,Wallet,User,BarChart3};
   const NAV_LINKS=PRIMARY_NAV.map(item=>({...item,icon:icons[item.icon]}));
 
   let scrolled = false;

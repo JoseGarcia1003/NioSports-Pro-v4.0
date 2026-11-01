@@ -17,5 +17,11 @@ export async function GET({ url }) {
   if (error) return json({ error: 'stats_unavailable' }, { status: 503 });
   const players = selectPlayers(data || [], games);
   const statsThrough = players.reduce((max, p) => (p.games[0][0] > max ? p.games[0][0] : max), '');
-  return json({ day, games, players, statsThrough: statsThrough || null, sources: { schedule: 'balldontlie', stats: 'stats.nba.com' } });
+  const season = players[0]?.games[0]?.[8] ?? null;
+  let defense = null;
+  if (season) {
+    const allowed = await db.rpc('nba_team_allowed', { p_season: season });
+    if (!allowed.error) defense = Object.fromEntries((allowed.data || []).map(r => [r.team, { games: r.games, pts: Number(r.pts), reb: Number(r.reb), ast: Number(r.ast), fg3m: Number(r.fg3m) }]));
+  }
+  return json({ day, games, players, statsThrough: statsThrough || null, season, defense, sources: { schedule: 'balldontlie', stats: 'stats.nba.com' } });
 }

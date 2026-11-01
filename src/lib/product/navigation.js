@@ -6,12 +6,18 @@ export const SPORTS = [
 ];
 export const PRIMARY_NAV = [
   { href:'/today', label:'Hoy', icon:'Home', paths:['/today'] },
+  { href:'/sports/nba/props', label:'Props', icon:'BarChart3', paths:['/sports/nba/props'] },
   { href:'/predictions', label:'Pronósticos', icon:'Cpu', paths:['/predictions','/picks'] },
   { href:'/sports', label:'Deportes', icon:'Trophy', paths:['/sports','/tennis','/totales'] },
   { href:'/bankroll', label:'Bankroll', icon:'Wallet', paths:['/bankroll','/tracking','/stats','/results'] },
   { href:'/account', label:'Cuenta', icon:'User', paths:['/account','/pricing'] }
 ];
-export function navActive(item, path) { return item.paths.some(root=>path===root||path.startsWith(`${root}/`)); }
+const matchLength = (item, path) => Math.max(0, ...item.paths.filter(root => path === root || path.startsWith(`${root}/`)).map(root => root.length));
+// The most specific destination wins: /sports/nba/props is Props, not Deportes.
+export function navActive(item, path) {
+  const own = matchLength(item, path);
+  return own > 0 && PRIMARY_NAV.every(other => matchLength(other, path) <= own);
+}
 export function planLabel(sub) {
   if (sub.status==='loading') return 'Consultando plan…';
   if (sub.status==='unavailable') return 'Plan por verificar';
