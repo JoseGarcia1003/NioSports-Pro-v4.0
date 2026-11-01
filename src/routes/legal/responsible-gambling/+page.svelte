@@ -44,7 +44,7 @@
     <section>
       <h2>Nuestro Compromiso</h2>
       <ul>
-        <li>Publicamos resultados reales incluyendo pérdidas, sin cherry-picking</li>
+        <li>Cuando publiquemos resultados, incluirán todas las pérdidas, sin seleccionar solo los aciertos</li>
         <li>No prometemos ganancias ni "sistemas infalibles"</li>
         <li>El bankroll tracker está diseñado para promover gestión responsable</li>
         <li>Usuarios menores de 18 años no pueden usar el Servicio</li>

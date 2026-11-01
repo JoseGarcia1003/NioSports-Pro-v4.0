@@ -4,4 +4,4 @@ Disallow: /api/
 Disallow: /bankroll
 Disallow: /tracking
 
-Sitemap: https://niosports.pro/sitemap.xml
+Sitemap: https://nio-sports-pro-v4-0.vercel.app/sitemap.xml
