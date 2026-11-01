@@ -9,6 +9,7 @@
   const today = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
 
   const shortcuts = [
+    { href: '/sports/nba/props', title: 'Props NBA', text: 'Tasa de acierto de cada jugador frente a la línea: L5, L10, L20 y temporada.', status: 'Datos reales', live: true },
     { href: '/sports/nba', title: 'Centro NBA', text: 'Calendario de hoy y mañana con búsqueda y contexto de cada partido.', status: 'Datos reales', live: true },
     { href: '/sports/nba/analisis', title: 'Match Studio', text: 'Explora ventanas L5/L10/L20 y líneas de referencia.', status: 'Ejemplo', live: false },
     { href: '/tennis', title: 'Tenis', text: 'Orden de juego, superficies, saque y resto. Datos reales con sesión iniciada.', status: 'Según cobertura', live: false },
