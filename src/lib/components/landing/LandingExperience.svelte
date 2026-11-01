@@ -1,76 +1,215 @@
 <script>
-  import { ArrowUpRight, ArrowRight, Activity, Wallet, ScanLine, Check, ChevronDown } from 'lucide-svelte';
-  let active = 'bank';
-  const views = [ {id:'bank',label:'Control de bank'}, {id:'analysis',label:'Análisis NBA'}, {id:'record',label:'Registro personal'} ];
+  import { onMount } from 'svelte';
+  import { ArrowUpRight, ArrowRight, Check, ChevronDown } from 'lucide-svelte';
+  import Logo from '$lib/components/Logo.svelte';
+  import { nbaCalendarUrl, nbaCalendarRows } from '$lib/product/calendar.js';
+
+  // Today's real NBA slate: the first thing a visitor sees is live product, not a slogan.
+  let games = [];
+  let state = 'loading';
+  let fetchedAt = null;
+  let controller;
+
+  async function load() {
+    controller?.abort();
+    controller = new AbortController();
+    state = 'loading';
+    try {
+      const res = await fetch(nbaCalendarUrl(Date.now(), 0), { signal: controller.signal });
+      const body = await res.json().catch(() => ({}));
+      games = [...nbaCalendarRows(res, body)].sort((a, b) => String(a.datetime).localeCompare(String(b.datetime)));
+      fetchedAt = new Date();
+      state = games.length ? 'ready' : 'empty';
+    } catch (err) {
+      if (err?.name !== 'AbortError') state = 'unavailable';
+    }
+  }
+
+  onMount(() => { load(); return () => controller?.abort(); });
+
+  const timeFormat = new Intl.DateTimeFormat('es', { hour: '2-digit', minute: '2-digit' });
+  function gameState(game) {
+    const s = String(game.status_state || '').toLowerCase();
+    if (s === 'final' || /final/i.test(game.status)) return { label: 'Final', score: true };
+    if (s === 'in_progress' || s === 'live' || (game.period > 0 && s !== 'scheduled')) return { label: game.period ? `En juego · C${game.period}` : 'En juego', score: true };
+    const start = new Date(game.datetime);
+    return { label: Number.isNaN(start.getTime()) ? 'Por confirmar' : timeFormat.format(start), score: false };
+  }
+
+  const offer = [
+    { title: 'Calendario NBA', status: 'Disponible', live: true, text: 'Partidos de hoy y mañana con datos del proveedor, hora local y estado del encuentro.', href: '/sports/nba' },
+    { title: 'Props de jugadores', status: 'En construcción', live: false, text: 'Línea, tasa de acierto L5/L10/L20, rival, defensa por posición y minutos esperados.' },
+    { title: 'Props de equipo y totales', status: 'En construcción', live: false, text: 'Ritmo, eficiencia, descanso y periodos por separado: partido, mitad y primer cuarto.' },
+    { title: 'Tenis por superficie', status: 'Demostración', live: false, text: 'Rendimiento de la temporada en cada pista, saque y resto. Hoy con ejemplos identificados.', href: '/tennis?demo=1' },
+    { title: 'Tu bankroll', status: 'Disponible', live: true, text: 'Capital disponible, comprometido y beneficio separados. Un registro, no una casa de apuestas.', href: '/bankroll?demo=1' }
+  ];
 </script>
 
-<div class="experience">
-  <nav aria-label="Navegación de presentación" class="masthead">
-    <a class="brand" href="/" aria-label="NioSports Pro, inicio"><span class="mark">N↗</span><span>nio<span class="brand-light">sports</span><small>PRO</small></span></a>
-    <div class="nav-links"><a href="/sports">Deportes ↗</a><a href="#producto">El producto</a><a href="#metodo">Cómo funciona</a></div>
-    <a class="sign-in" href="/login">Entrar <ArrowUpRight size={15}/></a>
-  </nav>
+<div class="landing">
+  <header class="masthead">
+    <a href="/" class="brand" aria-label="NioSports Pro, inicio"><Logo size={34} /></a>
+    <nav aria-label="Secciones">
+      <a href="/sports/nba">NBA</a>
+      <a href="/tennis">Tenis</a>
+      <a href="/methodology">Metodología</a>
+    </nav>
+    <a class="sign-in" href="/login">Entrar</a>
+  </header>
 
   <section class="hero" aria-labelledby="landing-title">
-    <div class="hero-copy">
-      <p class="eyebrow"><span class="status-dot"></span> NBA + TENNIS / BANKROLL</p>
-      <h1 id="landing-title">El juego cambia.<br/>Tu criterio<br/><em>marca la diferencia.</em></h1>
-      <p class="intro">Una perspectiva más clara del partido y de tu capital. Explora NBA y tenis, revisa la evidencia y lleva el control de cada decisión.</p>
-      <div class="hero-actions"><a class="primary" href="/today">Explorar el producto <ArrowUpRight size={19}/></a><a class="text-link" href="#metodo">Conocer el enfoque <ArrowRight size={16}/></a></div>
-      <p class="caption"><Check size={14}/> Explora sin registro · Ejemplos siempre identificados</p>
+    <div class="copy">
+      <p class="eyebrow">NBA · Tenis · Bankroll</p>
+      <h1 id="landing-title">El partido, explicado <span>con datos.</span></h1>
+      <p class="intro">Calendario real, contexto de cada encuentro y control de tu bankroll. Cada cifra indica su fuente y su hora; si un dato falta, lo verás como ausencia, nunca inventado.</p>
+      <div class="actions">
+        <a class="primary" href="/sports/nba">Ver la NBA de hoy <ArrowUpRight size={18} /></a>
+        <a class="secondary" href="/methodology">Cómo analizamos <ArrowRight size={16} /></a>
+      </div>
     </div>
 
-    <div class="preview" id="producto">
-      <div class="preview-top"><span><Activity size={16}/> NIO / WORKSPACE</span><span class="example-label">EJEMPLO VISUAL</span></div>
-      <div class="tabs" role="group" aria-label="Explorar funciones del producto">
-        {#each views as view}<button type="button" class:selected={active===view.id} aria-pressed={active===view.id} on:click={()=>active=view.id}>{view.label}</button>{/each}
+    <section class="board" aria-labelledby="board-title" aria-busy={state === 'loading'}>
+      <div class="board-head">
+        <div><p class="eyebrow">En directo del proveedor</p><h2 id="board-title">Hoy en la NBA</h2></div>
+        {#if state === 'ready'}<span class="count">{games.length} {games.length === 1 ? 'partido' : 'partidos'}</span>{/if}
       </div>
-      <div class="preview-content" aria-live="polite">
-        {#if active==='bank'}
-          <div class="preview-heading"><div><p class="eyebrow">TU CAPITAL, EN PERSPECTIVA</p><h2>Cada movimiento cuenta.</h2></div><Wallet size={24}/></div>
-          <div class="sample-balance"><span>Disponible</span><strong>$1.284<span>,50</span></strong><p>Patrimonio total <b>$1.359,50</b></p></div>
-          <div class="sample-grid"><div><span>Comprometido</span><strong>$75,00</strong><small>1 ticket pendiente</small></div><div><span>Capital neto</span><strong>$1.200,00</strong><small>Aportaciones − retiros</small></div></div>
-          <div class="exposure"><div><span>Capital reservado</span><span>6%</span></div><div class="bar"><i></i></div></div>
-          <a class="preview-link" href="/bankroll?demo=1">Abrir el panel de ejemplo <ArrowUpRight size={17}/></a>
-        {:else if active==='analysis'}
-          <div class="preview-heading"><div><p class="eyebrow">ANTES DE LA DECISIÓN</p><h2>El contexto importa.</h2></div><ScanLine size={24}/></div>
-          <div class="analysis-periods"><span>Primer cuarto</span><span>Primera mitad</span><span>Partido completo</span></div>
-          <div class="analysis-row"><span>Estadísticas del período</span><b>Requeridas</b></div><div class="analysis-row"><span>Línea de mercado</span><b>Sin dato</b></div>
-          <div class="abstain"><span>◎</span><div><strong>Esperar también es una decisión.</strong><p>Sin línea disponible, el generador automático no crea un pick.</p></div></div>
-          <p class="preview-note">El cálculo por reglas se distingue del modelo remoto. Una estimación no garantiza un resultado.</p>
-        {:else}
-          <div class="preview-heading"><div><p class="eyebrow">TRAZABILIDAD PERSONAL</p><h2>De la intuición al registro.</h2></div><Activity size={24}/></div>
-          <div class="record-row"><span class="record-icon">+</span><div><strong>Aportación de capital</strong><small>Tu punto de partida</small></div><b>$100,00</b></div>
-          <div class="record-row"><span class="record-icon">↗</span><div><strong>Reserva del ticket</strong><small>Disponible: $90 · reservado: $10</small></div><b>−$10,00</b></div>
-          <div class="record-row"><span class="record-icon">✓</span><div><strong>Resultado ganado · cuota 2.00</strong><small>Resultado indicado manualmente</small></div><b>+$20,00</b></div>
-          <div class="record-total"><span>Beneficio del ejemplo</span><strong>$10,00</strong></div><p class="preview-note">Aportar capital no cuenta como beneficio. El registro no realiza transferencias ni envía apuestas.</p>
-        {/if}
-      </div>
-      <div class="preview-bottom"><span class="status-dot"></span> Vista interactiva · Cifras simuladas, no resultados reales</div>
+
+      {#if state === 'loading'}
+        <ul class="games" aria-label="Cargando partidos">{#each [0, 1, 2] as i}<li class="skeleton" aria-hidden="true"><span></span><span></span></li>{/each}</ul>
+      {:else if state === 'ready'}
+        <ul class="games">
+          {#each games as game (game.id)}
+            {@const st = gameState(game)}
+            <li>
+              <div class="teams">
+                <span><b>{game.visitor_team.abbreviation}</b> {game.visitor_team.full_name}{#if st.score}<em>{game.visitor_team_score}</em>{/if}</span>
+                <span><b>{game.home_team.abbreviation}</b> {game.home_team.full_name}{#if st.score}<em>{game.home_team_score}</em>{/if}</span>
+              </div>
+              <span class="when" class:live={st.score}>{st.label}</span>
+            </li>
+          {/each}
+        </ul>
+      {:else if state === 'empty'}
+        <p class="state">No hay partidos programados hoy según el proveedor.</p>
+      {:else}
+        <div class="state"><p>No pudimos confirmar los partidos ahora mismo. No mostramos datos sin fuente.</p><button type="button" on:click={load}>Reintentar</button></div>
+      {/if}
+
+      <p class="source">
+        {#if fetchedAt && state !== 'unavailable'}Fuente: balldontlie · consultado {timeFormat.format(fetchedAt)} · hora local{:else}Fuente: balldontlie{/if}
+      </p>
+      <a class="board-link" href="/sports/nba">Abrir el centro NBA <ArrowUpRight size={16} /></a>
+    </section>
+  </section>
+
+  <section class="offer" aria-labelledby="offer-title">
+    <div class="section-head"><p class="eyebrow">Qué encontrarás</p><h2 id="offer-title">Lo que ya funciona y lo que estamos construyendo.</h2></div>
+    <div class="cards">
+      {#each offer as item}
+        <article>
+          <span class="chip" class:on={item.live}>{item.status}</span>
+          <h3>{item.title}</h3>
+          <p>{item.text}</p>
+          {#if item.href}<a href={item.href}>Abrir <ArrowUpRight size={15} /></a>{/if}
+        </article>
+      {/each}
     </div>
-    <span class="hero-index" aria-hidden="true">01 / UNA MEJOR PERSPECTIVA</span>
   </section>
 
-  <section class="principles" aria-label="Principios del producto"><span>Menos ruido.<br/><strong>Más claridad.</strong></span><p><Check size={17}/> Capital y beneficio separados</p><p><Check size={17}/> Ejemplos identificados</p><p><Check size={17}/> Sin promesas de ganancias</p></section>
-
-  <section class="method" id="metodo" aria-labelledby="method-title">
-    <div class="section-intro"><p class="eyebrow">UN PROCESO CON SENTIDO</p><h2 id="method-title">Entender. Registrar.<br/><em>Aprender.</em></h2><p>La experiencia se construye alrededor de tus decisiones, desde el análisis hasta la revisión de tu registro.</p></div>
-    <div class="steps"><article><span>01</span><div><h3>Pon el partido en contexto.</h3><p>Consulta estimaciones por período y distingue los datos disponibles de lo que todavía falta.</p></div></article><article><span>02</span><div><h3>Conoce tu exposición.</h3><p>Separa el saldo disponible del capital comprometido. Cada ticket tiene un lugar en tu registro.</p></div></article><article><span>03</span><div><h3>Revisa con perspectiva.</h3><p>Diferencia aportaciones, retiros y resultados. Evalúa tu registro sin confundir depósitos con beneficios.</p></div></article></div>
+  <section class="principles" aria-label="Principios">
+    <p><Check size={17} /> Datos con fuente y hora de corte</p>
+    <p><Check size={17} /> Sin pronóstico si la evidencia no alcanza</p>
+    <p><Check size={17} /> Ejemplos siempre rotulados</p>
+    <p><Check size={17} /> Sin promesas de ganancias</p>
   </section>
 
-  <section class="questions" aria-labelledby="questions-title"><h2 id="questions-title">Las cosas claras,<br/>desde el principio.</h2><div>
-    <details><summary>¿Qué puedo probar ahora?<ChevronDown size={18}/></summary><p>El panel de bank está disponible en modo de ejemplo, sin crear una cuenta. Sus cifras son simuladas y sus operaciones están desactivadas. El uso con cuentas reales requiere la activación del servicio.</p></details>
-    <details><summary>¿Las predicciones garantizan ganancias?<ChevronDown size={18}/></summary><p>No. Son estimaciones sujetas a incertidumbre. La precisión y rentabilidad del modelo no están demostradas; los resultados mostrados en esta presentación son ejemplos.</p></details>
-    <details><summary>¿NioSports guarda o mueve mi dinero?<ChevronDown size={18}/></summary><p>No. El bank es un registro personal de capital y tickets. No custodia fondos, no realiza transferencias y no envía apuestas a terceros.</p></details>
-  </div></section>
+  <section class="questions" aria-labelledby="questions-title">
+    <h2 id="questions-title">Preguntas claras.</h2>
+    <div>
+      <details><summary>¿Los pronósticos garantizan ganancias?<ChevronDown size={18} /></summary><p>No. Son estimaciones con incertidumbre. Todavía no publicamos una tasa de acierto: cuando exista, mostrará su muestra y su periodo.</p></details>
+      <details><summary>¿De dónde salen los datos?<ChevronDown size={18} /></summary><p>De proveedores deportivos externos, citados en cada pantalla junto con la hora de consulta. Si un proveedor falla, la pantalla lo indica.</p></details>
+      <details><summary>¿NioSports guarda o mueve mi dinero?<ChevronDown size={18} /></summary><p>No. El bankroll es un registro personal. No custodia fondos, no hace transferencias ni envía apuestas.</p></details>
+    </div>
+  </section>
 
-  <footer><div class="footer-cta"><p class="eyebrow">EMPIEZA POR EXPLORAR</p><h2>Una visión más clara.<br/>Un siguiente paso.</h2><a class="primary" href="/bankroll?demo=1">Ver el nuevo bank <ArrowUpRight size={19}/></a></div><div class="footer-base"><span>NioSports Pro</span><p>Análisis deportivo y registro personal de bank · Versión en desarrollo</p><a href="#landing-title">Volver arriba ↑</a></div></footer>
+  <footer>
+    <span>NioSports Pro · Versión en desarrollo</span>
+    <nav aria-label="Legal"><a href="/legal/terms">Términos</a><a href="/legal/privacy">Privacidad</a><a href="/legal/responsible-gambling">Juego responsable</a></nav>
+  </footer>
 </div>
 
 <style>
-  .experience{--mint:#a7edc7;--muted:#a1aca6;color:#f0f3ed;background:#0b100e;font-family:Inter,system-ui,sans-serif;overflow:clip}.experience a{color:inherit;text-decoration:none}.experience a:focus-visible,.experience button:focus-visible,.experience summary:focus-visible{outline:2px solid var(--mint);outline-offset:5px}.masthead{max-width:1376px;padding:26px 40px;display:flex;align-items:center;justify-content:space-between;margin:auto;border-bottom:1px solid #ffffff13}.brand{display:flex;gap:11px;align-items:center;font-size:23px;font-weight:750;letter-spacing:-1px}.mark{display:grid;place-items:center;width:36px;height:36px;color:#0b100e;background:var(--mint);font-size:18px;border-radius:9px}.brand-light{font-weight:400}.brand small{font-size:9px;letter-spacing:1px;margin-left:6px;color:var(--mint)}.nav-links{display:flex;gap:32px;font-size:13px;color:var(--muted)}.sign-in{display:flex;gap:12px;align-items:center;border:1px solid #ffffff26;padding:10px 17px;border-radius:7px;font-size:12px}.hero{max-width:1376px;margin:auto;padding:85px 40px 75px;display:grid;grid-template-columns:1.08fr 1fr;gap:64px;align-items:center;position:relative}.eyebrow{font-size:10px;letter-spacing:2px;font-weight:550;color:var(--muted);display:flex;align-items:center;gap:9px}.status-dot{width:6px;height:6px;border-radius:50%;display:inline-block;background:var(--mint);flex-shrink:0}h1{font-size:clamp(40px,4.7vw,69px);font-weight:550;letter-spacing:-3.3px;line-height:1.09;margin:28px 0}em{font-style:normal;color:var(--mint)}.intro{color:var(--muted);font-size:15px;line-height:1.8;max-width:430px}.hero-actions{display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-top:30px}.primary{display:inline-flex;align-items:center;gap:22px;background:var(--mint);color:#0b100e!important;padding:16px 20px;border-radius:7px;font-size:13px;font-weight:650;transition:background .18s}.primary:hover{background:#c5f5d9}.text-link{display:flex;gap:10px;align-items:center;font-size:12px}.caption{display:flex;gap:7px;align-items:center;font-size:10px;color:var(--muted);margin-top:17px}.hero-index{position:absolute;bottom:20px;font-size:8px;letter-spacing:2px;color:#65766b}.preview{border:1px solid #ffffff1c;border-radius:14px;background:#121b16;box-shadow:0 30px 85px #0004;min-width:0;scroll-margin-top:20px}.preview-top{display:flex;justify-content:space-between;align-items:center;padding:20px;gap:10px;border-bottom:1px solid #ffffff0e;font-size:9px;letter-spacing:1px}.preview-top>span:first-child{display:flex;gap:8px;align-items:center}.example-label{color:#d0bd8c;font-size:8px}.tabs{display:flex;padding:14px 17px 0;gap:4px}.tabs button{font:inherit;font-size:10px;color:var(--muted);background:transparent;border:0;padding:9px 10px;border-radius:5px;cursor:pointer;flex:1}.tabs button.selected{background:#ffffff0e;color:var(--mint)}.preview-content{padding:25px;min-height:365px}.preview-heading{display:flex;justify-content:space-between;gap:15px;align-items:center;color:var(--mint)}.preview-heading .eyebrow{font-size:8px;letter-spacing:1.2px}.preview-heading h2{font-size:19px;letter-spacing:-.6px;font-weight:500;color:#edf2ec;margin:8px 0 20px}.sample-balance>span,.sample-grid span{font-size:10px;color:var(--muted)}.sample-balance>strong{display:block;font-size:49px;letter-spacing:-2px;font-weight:500;line-height:1.2;margin-top:4px}.sample-balance>strong span{font-size:31px;color:#b1bdb5}.sample-balance p{font-size:10px;color:var(--muted);margin:8px 0 22px}.sample-balance b{font-weight:400;color:#edf2ec;margin-left:9px}.sample-grid{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #ffffff12;border-bottom:1px solid #ffffff12;padding:15px 0;gap:20px}.sample-grid strong{display:block;font-size:21px;font-weight:500;margin:5px 0}.sample-grid small{font-size:9px;color:var(--muted)}.exposure{margin:20px 0}.exposure>div:first-child{display:flex;justify-content:space-between;font-size:9px;color:var(--muted)}.bar{margin-top:9px;height:3px;background:#ffffff10;border-radius:3px}.bar i{display:block;width:6%;height:100%;background:#d0bd8c}.preview-link{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--mint)!important}.preview-bottom{padding:14px 20px;border-top:1px solid #ffffff10;color:#a1aca6;font-size:9px;display:flex;align-items:center;gap:8px}.analysis-periods{display:flex;gap:5px;margin:6px 0 22px;flex-wrap:wrap}.analysis-periods span{font-size:9px;padding:7px;background:#ffffff08;border-radius:4px}.analysis-row{display:flex;justify-content:space-between;font-size:11px;border-bottom:1px solid #ffffff10;padding:14px 0}.analysis-row b{font-weight:400;color:#d0bd8c}.abstain{display:flex;gap:13px;background:#d0bd8c0a;border:1px solid #d0bd8c22;border-radius:7px;padding:17px;margin:20px 0}.abstain strong{font-size:12px;font-weight:500}.abstain p,.preview-note{font-size:11px;line-height:1.7;color:var(--muted);margin-top:8px}.record-row{display:flex;align-items:center;gap:12px;padding:18px 0;border-bottom:1px solid #ffffff10}.record-icon{color:var(--mint);width:20px}.record-row strong{display:block;font-weight:450;font-size:11px}.record-row small{display:block;font-size:9px;color:var(--muted);margin-top:5px}.record-row b{font-size:12px;font-weight:400;margin-left:auto;white-space:nowrap}.record-total{display:flex;justify-content:space-between;margin:20px 0;font-size:12px}.record-total strong{color:var(--mint);font-size:22px;font-weight:500}.principles{max-width:1296px;margin:20px auto 0;display:flex;justify-content:space-between;align-items:center;gap:20px;border-block:1px solid #ffffff15;padding:30px 0}.principles>span{font-size:17px;line-height:1.5;color:var(--muted)}.principles strong{font-weight:500;color:#edf2ec}.principles p{display:flex;align-items:center;gap:10px;font-size:11px;color:var(--muted)}.principles :global(svg){color:var(--mint)}.method{max-width:1296px;margin:auto;padding:100px 0;display:grid;grid-template-columns:1fr 1fr;gap:90px;scroll-margin-top:30px}.section-intro h2,.questions h2{font-size:42px;font-weight:450;letter-spacing:-1.5px;line-height:1.15;margin:20px 0}.section-intro>p:last-child{font-size:14px;line-height:1.8;color:var(--muted);max-width:360px}.steps article{display:flex;gap:25px;padding:25px 0;border-bottom:1px solid #ffffff16}.steps article:first-child{padding-top:0}.steps article>span{font-size:11px;color:var(--mint);padding-top:6px}.steps h3{font-size:18px;letter-spacing:-.5px;font-weight:450;margin-bottom:9px}.steps p{font-size:12px;line-height:1.8;color:var(--muted)}.questions{max-width:1296px;margin:auto;padding:55px 0 80px;border-top:1px solid #ffffff15;display:grid;grid-template-columns:1fr 1.2fr;gap:50px}.questions h2{font-size:29px;margin-top:0}.questions details{border-bottom:1px solid #ffffff18;padding:19px 0}.questions details:first-child{padding-top:0}.questions summary{display:flex;align-items:center;justify-content:space-between;gap:20px;list-style:none;cursor:pointer;font-size:13px}.questions summary::-webkit-details-marker{display:none}.questions details p{font-size:12px;line-height:1.8;color:var(--muted);padding:15px 25px 0 0}footer{background:#14231a;padding:65px 40px 25px}.footer-cta{max-width:1296px;margin:auto;text-align:center}.footer-cta .eyebrow{justify-content:center}.footer-cta h2{font-size:42px;line-height:1.2;font-weight:450;letter-spacing:-1.5px;margin:20px 0 25px}.footer-base{max-width:1296px;display:flex;justify-content:space-between;align-items:center;gap:20px;margin:60px auto 0;border-top:1px solid #ffffff15;padding-top:20px;font-size:10px;color:var(--muted)}
-  @media(max-width:1400px){.principles,.method,.questions{margin-inline:40px}}
-  @media(max-width:1050px){.hero{gap:30px;padding-top:55px}h1{font-size:46px;letter-spacing:-2px}.hero-actions{gap:18px}.method{gap:45px}.principles{flex-wrap:wrap}.principles>span{width:100%}.preview-content{padding:20px}.tabs button{padding:8px 5px;font-size:9px}}
-  @media(max-width:760px){.masthead{padding:20px}.nav-links{display:none}.hero{grid-template-columns:1fr;padding:42px 20px 55px;gap:36px}.hero-copy{max-width:520px}h1{font-size:clamp(38px,8.6vw,58px);letter-spacing:-1.9px}.intro{font-size:14px}.hero-index{display:none}.preview{max-width:540px;width:100%}.principles,.method,.questions{margin-inline:20px}.principles{gap:16px}.principles p{font-size:10px}.method,.questions{grid-template-columns:1fr;gap:32px;padding:55px 0}.section-intro h2{font-size:36px}.questions h2{font-size:29px}.footer-cta h2{font-size:34px}footer{padding:45px 20px 25px}.footer-base{flex-wrap:wrap;margin-top:40px}.preview-content{min-height:365px}.tabs button{font-size:10px}.caption{font-size:9px}}
-  @media(prefers-reduced-motion:reduce){.primary{transition:none}}
+  .landing { min-height: 100vh; background: var(--nio-page); color: var(--nio-ink); font-family: var(--font-sans); font-variant-numeric: lining-nums tabular-nums; }
+  .landing > * { max-width: 1200px; margin-inline: auto; padding-inline: 28px; }
+  .eyebrow { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: var(--nio-muted); margin: 0 0 10px; }
+
+  .masthead { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-block: 18px; }
+  .brand { text-decoration: none; color: inherit; }
+  .masthead nav { display: flex; gap: 26px; }
+  .masthead nav a, footer a { color: var(--nio-muted); text-decoration: none; font-size: 14px; font-weight: 500; }
+  .masthead nav a:hover, footer a:hover { color: var(--nio-ink); }
+  .sign-in { min-height: 40px; display: inline-flex; align-items: center; padding: 0 16px; border: 1px solid var(--nio-border); border-radius: 10px; background: var(--nio-surface); color: var(--nio-ink); text-decoration: none; font-size: 14px; font-weight: 600; }
+
+  .hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 56px; align-items: center; padding-block: 56px 72px; }
+  h1 { font-size: clamp(38px, 5.2vw, 64px); line-height: 1.04; letter-spacing: -.045em; font-weight: 700; margin: 0 0 22px; color: var(--nio-ink); text-wrap: balance; }
+  h1 span { color: var(--nio-accent); }
+  .intro { font-size: 17px; line-height: 1.7; color: var(--nio-muted); max-width: 540px; margin: 0 0 30px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px 22px; align-items: center; }
+  .primary { min-height: 48px; display: inline-flex; align-items: center; gap: 10px; padding: 0 22px; border-radius: 12px; background: var(--nio-action); color: var(--nio-action-ink); text-decoration: none; font-weight: 600; font-size: 15px; }
+  .primary :global(svg) { color: var(--nio-action-icon); }
+  .secondary { display: inline-flex; align-items: center; gap: 8px; color: var(--nio-ink); text-decoration: none; font-weight: 600; font-size: 15px; min-height: 44px; }
+  .primary:focus-visible, .secondary:focus-visible, .sign-in:focus-visible, .board a:focus-visible, .cards a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--nio-accent); outline-offset: 3px; }
+
+  .board { border: 1px solid var(--nio-border); border-top: 3px solid var(--nio-gold); border-radius: 18px; background: var(--nio-surface); padding: 24px; box-shadow: 0 18px 50px var(--nio-shadow); }
+  .board-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; margin-bottom: 14px; }
+  .board h2 { font-size: 22px; letter-spacing: -.02em; margin: 0; }
+  .count { font-size: 13px; color: var(--nio-muted); white-space: nowrap; }
+  .games { list-style: none; margin: 0; padding: 0; }
+  .games li { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 14px 0; border-top: 1px solid var(--nio-border); }
+  .teams { display: grid; gap: 6px; min-width: 0; font-size: 14px; color: var(--nio-muted); }
+  .teams span { display: flex; align-items: baseline; gap: 8px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .teams b { color: var(--nio-ink); font-weight: 700; min-width: 38px; }
+  .teams em { font-style: normal; font-weight: 700; color: var(--nio-ink); margin-left: auto; padding-left: 8px; }
+  .when { font-size: 14px; font-weight: 600; color: var(--nio-ink); white-space: nowrap; }
+  .when.live { color: var(--nio-accent); }
+  .skeleton span { display: block; height: 12px; border-radius: 6px; background: var(--nio-raised); width: 70%; }
+  .skeleton span + span { width: 18%; }
+  .state { border-top: 1px solid var(--nio-border); padding: 18px 0; color: var(--nio-muted); font-size: 14px; margin: 0; }
+  .state p { margin: 0 0 12px; }
+  .state button { min-height: 40px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-raised); color: var(--nio-ink); font: inherit; font-weight: 600; cursor: pointer; }
+  .source { font-size: 12px; color: var(--nio-muted); margin: 6px 0 14px; padding-top: 12px; border-top: 1px solid var(--nio-border); }
+  .board-link, .cards a { display: inline-flex; align-items: center; gap: 6px; color: var(--nio-accent); text-decoration: none; font-weight: 600; font-size: 14px; min-height: 32px; }
+
+  .offer { padding-block: 24px 56px; }
+  .section-head h2, .questions h2 { font-size: clamp(26px, 3vw, 36px); letter-spacing: -.035em; margin: 0 0 26px; max-width: 640px; line-height: 1.15; }
+  .cards { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+  .cards article { display: flex; flex-direction: column; gap: 10px; padding: 20px; border: 1px solid var(--nio-border); border-radius: 14px; background: var(--nio-surface); }
+  .cards h3 { font-size: 17px; margin: 0; letter-spacing: -.01em; }
+  .cards p { font-size: 13.5px; line-height: 1.6; color: var(--nio-muted); margin: 0; flex: 1; }
+  .chip { align-self: flex-start; font-size: 11px; font-weight: 600; padding: 4px 9px; border-radius: 999px; background: var(--nio-raised); color: var(--nio-muted); }
+  .chip.on { background: var(--nio-gold-soft); color: var(--nio-accent); border: 1px solid var(--nio-gold-border); }
+
+  .principles { display: flex; flex-wrap: wrap; gap: 12px 30px; padding-block: 26px; border-block: 1px solid var(--nio-border); }
+  .principles p { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 14px; font-weight: 500; }
+  .principles :global(svg) { color: var(--nio-accent); }
+
+  .questions { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 40px; padding-block: 64px; }
+  details { border-bottom: 1px solid var(--nio-border); }
+  summary { list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 18px 0; cursor: pointer; font-weight: 600; font-size: 16px; }
+  summary::-webkit-details-marker { display: none; }
+  details[open] summary :global(svg) { transform: rotate(180deg); }
+  details p { margin: 0 0 18px; color: var(--nio-muted); line-height: 1.7; font-size: 15px; }
+
+  footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 14px; padding-block: 28px 40px; border-top: 1px solid var(--nio-border); font-size: 13px; color: var(--nio-muted); }
+  footer nav { display: flex; flex-wrap: wrap; gap: 18px; }
+
+  @media (max-width: 1100px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 900px) { .hero { grid-template-columns: 1fr; gap: 36px; padding-block: 32px 48px; } .questions { grid-template-columns: 1fr; gap: 8px; } }
+  @media (max-width: 640px) {
+    .landing > * { padding-inline: 16px; }
+    .masthead nav { display: none; }
+    .cards { grid-template-columns: 1fr; }
+    .board { padding: 18px; }
+    .teams span { font-size: 13px; }
+  }
+  @media (prefers-reduced-motion: reduce) { details[open] summary :global(svg) { transform: none; } }
 </style>
