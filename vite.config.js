@@ -3,6 +3,9 @@ import { defineConfig } from 'vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 
 export default defineConfig({
+  // src/lib/data/contract.js imports ml/contracts/dictionary.json; SvelteKit's dev
+  // server only serves src/ by default, so /today, /sports/nba and /tennis returned 500 in dev.
+  server: { fs: { allow: ['ml/contracts'] } },
   plugins: [
     sveltekit(),
     SvelteKitPWA({

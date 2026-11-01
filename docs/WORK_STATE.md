@@ -1,5 +1,16 @@
 # Punto de control — leer antes de continuar
 
+## VIGENTE — Evaluación integral del 1 de noviembre de 2026
+
+- Rama de trabajo `claude/focused-ramanujan-9avptc`, creada desde `codex/match-studio` (75a22ba8), que contiene `codex/security-integrity`. `main` sigue en ab9b63a4 (22/09); ninguna rama posterior está integrada.
+- Entregable: `docs/AUDIT_2026-11-01.md` (calificación por sección, hallazgos H1–H6, plan E0–E8, decisiones pendientes).
+- Verificado hoy: svelte-check 0/0; 554 pruebas de lógica/servidor + 19 de UI aprobadas; 15 rutas a 1440/390 px sin desbordamiento en local. Producción NO verificada: el dominio está bloqueado por la red del entorno y la cuenta Vercel conectada no tiene acceso al equipo.
+- Corregido: 500 en dev en /, /today, /sports/nba y /tennis (vite `server.fs.allow` para ml/contracts); lockfile desincronizado que rompía `npm ci`.
+- Crítico pendiente (E0): Metodología y Planes afirman calibración Platt/ECE/walk-forward, CLV y dashboards que el repositorio no respalda.
+- Siguiente acción: esperar las decisiones 1–5 del propietario (sección 7 de la auditoría); después, E0 (consolidar ramas, corregir afirmaciones, ocultar deportes vacíos). La reconstrucción F8+ queda pausada en favor de los datos reales (E4/E5), sin descartar F0–F7.
+
+## Historial (no vigente)
+
 ## Incidencia GitHub Actions — 9 de octubre de 2026
 
 - Captura del propietario contrastada con run CI #78, ID 35780410017, job 106924207119, commit main ab9b63a4 del 22/09. Anotación exacta: "The job was not started because your account is locked due to a billing issue." No arrancó el runner ni ejecutó pruebas; no atribuir este rojo a un error de compilación del código.
