@@ -13,12 +13,12 @@ import { writable, derived } from 'svelte/store';
 import { browser } from '$app/environment';
 
 // ── Tema oscuro/claro ─────────────────────────────────────────────
-// La presentación inicial es clara; una elección guardada tiene prioridad.
+// La presentación inicial es oscura; una elección guardada tiene prioridad.
 function getInitialTheme() {
-  if (!browser) return 'light';
+  if (!browser) return 'dark';
   const saved = localStorage.getItem('ns_theme');
   if (saved === 'light' || saved === 'dark') return saved;
-  return 'light';
+  return 'dark';
 }
 
 const _theme = writable(getInitialTheme());

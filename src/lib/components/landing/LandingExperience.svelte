@@ -26,7 +26,7 @@
   <section class="hero" aria-labelledby="landing-title">
     <div class="copy">
       <p class="eyebrow">NBA · Tenis · Bankroll</p>
-      <h1 id="landing-title">El partido, explicado <span>con datos.</span></h1>
+      <h1 id="landing-title">El partido,<br />explicado<br /><span>con datos.</span></h1>
       <p class="intro">Calendario real, contexto de cada encuentro y control de tu bankroll. Cada cifra indica su fuente y su hora; si un dato falta, lo verás como ausencia, nunca inventado.</p>
       <div class="actions">
         <a class="primary" href="/sports/nba">Ver la NBA de hoy <ArrowUpRight size={18} /></a>
@@ -74,11 +74,11 @@
 </div>
 
 <style>
-  .landing { min-height: 100vh; background: var(--nio-page); color: var(--nio-ink); font-family: var(--font-sans); font-variant-numeric: lining-nums tabular-nums; }
-  .landing > * { max-width: 1200px; margin-inline: auto; padding-inline: 28px; }
+  .landing { position: relative; min-height: 100vh; background: radial-gradient(1100px 520px at 78% 8%, color-mix(in srgb, var(--nio-gold) 13%, transparent), transparent 62%), radial-gradient(900px 600px at 0% 0%, color-mix(in srgb, var(--nio-gold) 5%, transparent), transparent 60%), var(--nio-page); color: var(--nio-ink); font-family: var(--font-sans); font-variant-numeric: lining-nums tabular-nums; }
+  .landing > * { max-width: 1240px; margin-inline: auto; padding-inline: 28px; }
   .eyebrow { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: var(--nio-muted); margin: 0 0 10px; }
 
-  .masthead { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-block: 18px; }
+  .masthead { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-block: 18px; }
   .brand { text-decoration: none; color: inherit; }
   .masthead nav { display: flex; gap: 26px; }
   .masthead nav a, footer a { color: var(--nio-muted); text-decoration: none; font-size: 14px; font-weight: 500; }
@@ -86,11 +86,11 @@
   .sign-in { min-height: 40px; display: inline-flex; align-items: center; padding: 0 16px; border: 1px solid var(--nio-border); border-radius: 10px; background: var(--nio-surface); color: var(--nio-ink); text-decoration: none; font-size: 14px; font-weight: 600; }
 
   .hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 56px; align-items: center; padding-block: 56px 72px; }
-  h1 { font-size: clamp(38px, 5.2vw, 64px); line-height: 1.04; letter-spacing: -.045em; font-weight: 700; margin: 0 0 22px; color: var(--nio-ink); text-wrap: balance; }
+  h1 { font-family: var(--font-display); text-transform: uppercase; font-size: clamp(56px, 8.4vw, 118px); line-height: .9; letter-spacing: -.005em; font-weight: 800; margin: 0 0 26px; color: var(--nio-ink); }
   h1 span { color: var(--nio-accent); }
   .intro { font-size: 17px; line-height: 1.7; color: var(--nio-muted); max-width: 540px; margin: 0 0 30px; }
   .actions { display: flex; flex-wrap: wrap; gap: 12px 22px; align-items: center; }
-  .primary { min-height: 48px; display: inline-flex; align-items: center; gap: 10px; padding: 0 22px; border-radius: 12px; background: var(--nio-action); color: var(--nio-action-ink); text-decoration: none; font-weight: 600; font-size: 15px; }
+  .primary { min-height: 52px; box-shadow: 0 10px 30px color-mix(in srgb, var(--nio-gold) 25%, transparent); display: inline-flex; align-items: center; gap: 10px; padding: 0 22px; border-radius: 12px; background: var(--nio-action); color: var(--nio-action-ink); text-decoration: none; font-weight: 600; font-size: 15px; }
   .primary :global(svg) { color: var(--nio-action-icon); }
   .secondary { display: inline-flex; align-items: center; gap: 8px; color: var(--nio-ink); text-decoration: none; font-weight: 600; font-size: 15px; min-height: 44px; }
   .primary:focus-visible, .secondary:focus-visible, .sign-in:focus-visible, .cards a:focus-visible, summary:focus-visible { outline: 2px solid var(--nio-accent); outline-offset: 3px; }
@@ -98,7 +98,7 @@
   .cards a { display: inline-flex; align-items: center; gap: 6px; color: var(--nio-accent); text-decoration: none; font-weight: 600; font-size: 14px; min-height: 32px; }
 
   .offer { padding-block: 24px 56px; }
-  .section-head h2, .questions h2 { font-size: clamp(26px, 3vw, 36px); letter-spacing: -.035em; margin: 0 0 26px; max-width: 640px; line-height: 1.15; }
+  .section-head h2, .questions h2 { font-family: var(--font-display); text-transform: uppercase; font-weight: 800; font-size: clamp(32px, 4vw, 52px); letter-spacing: 0; margin: 0 0 26px; max-width: 640px; line-height: 1.15; }
   .cards { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
   .cards article { display: flex; flex-direction: column; gap: 10px; padding: 20px; border: 1px solid var(--nio-border); border-radius: 14px; background: var(--nio-surface); }
   .cards h3 { font-size: 17px; margin: 0; letter-spacing: -.01em; }

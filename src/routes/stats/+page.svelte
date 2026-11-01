@@ -278,7 +278,7 @@
 
   .page__header { margin-bottom: 32px; }
   .page__label { font-size: 0.8rem; font-weight: 700; color: #6366F1; text-transform: uppercase; letter-spacing: 0.15em; }
-  .page__title { font-family: 'Inter', sans-serif; font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 900; letter-spacing: -0.03em; margin: 8px 0 6px; }
+  .page__title { font-family: var(--font-sans); font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 900; letter-spacing: -0.03em; margin: 8px 0 6px; }
   .page__subtitle { font-size: 0.9rem; color: var(--color-text-muted); }
 
   /* KPIs */
@@ -307,7 +307,7 @@
   .card--wide { grid-column: 1 / -1; }
 
   .card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; padding: 22px 20px; margin-bottom: 16px; }
-  .card__title { font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .card__title { font-family: var(--font-sans); font-size: 0.95rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
 
   /* Two col */
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }

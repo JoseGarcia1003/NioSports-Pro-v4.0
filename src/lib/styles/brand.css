@@ -1,51 +1,63 @@
-/* Blanco como base; marino estructural y oro puntual, sin acabados metálicos. */
-:root, [data-theme="light"] {
-  --nio-navy: #112d54;
-  --nio-gold: #d6ae49;
-  --nio-page: #f5f7fa;
-  --nio-surface: #ffffff;
-  --nio-raised: #f0f3f8;
-  --nio-border: #dce3ec;
-  --nio-ink: #132c4e;
-  --nio-muted: #596a80;
-  --nio-accent: #886516;
-  --nio-accent-hover: #6b4d0c;
-  --nio-selection: #edf2fa;
-  --nio-gold-soft: #fcf7e8;
-  --nio-gold-border: #e6d6a7;
-  --nio-chart-over: #193d6b;
-  --nio-chart-under: #b5c7de;
-  --nio-chart-equal: #bf912e;
-  --nio-shadow: rgba(17,45,84,.05);
-  --nio-chrome: #ffffff;
-  --nio-action: #112d54;
-  --nio-action-ink: #ffffff;
-  --nio-action-icon: var(--nio-gold);
+/* NioSports — identidad noviembre 2026.
+   Oscuro por defecto: grafito casi negro, un único acento dorado propio y
+   verde/rojo reservados al significado (supera / no supera la línea).
+   El tema claro invierte la jerarquía con blancos cálidos y dorado oscuro
+   para conservar contraste AA (≥4,5:1) en textos. */
+:root, [data-theme="dark"] {
+  --nio-navy: #0e1116;
+  --nio-gold: #f5c04a;
+  --nio-page: #0a0c10;
+  --nio-surface: #12151b;
+  --nio-raised: #1a1e26;
+  --nio-border: #262b35;
+  --nio-ink: #f3f5f8;
+  --nio-muted: #9aa3b2;
+  --nio-accent: #f5c04a;
+  --nio-accent-hover: #ffd77a;
+  --nio-selection: #1f2430;
+  --nio-gold-soft: rgba(245, 192, 74, .10);
+  --nio-gold-border: rgba(245, 192, 74, .35);
+  --nio-hit: #2fd17a;
+  --nio-miss: #ff5a5f;
+  --nio-chart-over: #2fd17a;
+  --nio-chart-under: #ff5a5f;
+  --nio-chart-equal: #f5c04a;
+  --nio-shadow: rgba(0, 0, 0, .45);
+  --nio-chrome: #0d1015;
+  --nio-action: #f5c04a;
+  --nio-action-ink: #111317;
+  --nio-action-icon: #111317;
   --nio-gold-gradient: var(--nio-gold);
   --nio-hero: var(--nio-surface);
-  --logo-background: var(--nio-navy);
-  --logo-symbol: var(--nio-gold);
+  --logo-background: var(--nio-gold);
+  --logo-symbol: #0a0c10;
   --logo-text-color: var(--nio-ink);
   --logo-accent: var(--nio-accent);
 }
-[data-theme="dark"] {
-  --nio-page: #0d1d34;
-  --nio-surface: #142841;
-  --nio-raised: #1a3250;
-  --nio-border: #30445e;
-  --nio-ink: #f4f7fc;
-  --nio-muted: #b0c0d4;
-  --nio-accent: #e2bd62;
-  --nio-accent-hover: #f2d997;
-  --nio-selection: #203d60;
-  --nio-gold-soft: #302f2a;
-  --nio-gold-border: #756844;
-  --nio-chart-over: #e2bd62;
-  --nio-chart-under: #7093bb;
-  --nio-chart-equal: #f4f7fc;
-  --nio-shadow: rgba(5,15,30,.16);
-  --nio-chrome: #142841;
-  --nio-action: #e2bd62;
-  --nio-action-ink: #112d54;
-  --nio-action-icon: #112d54;
+[data-theme="light"] {
+  --nio-navy: #0e1116;
+  --nio-gold: #e0a82e;
+  --nio-page: #f6f6f3;
+  --nio-surface: #ffffff;
+  --nio-raised: #efefea;
+  --nio-border: #e2e1da;
+  --nio-ink: #0e1116;
+  --nio-muted: #5b6270;
+  --nio-accent: #946606;
+  --nio-accent-hover: #6f4c04;
+  --nio-selection: #f3eedf;
+  --nio-gold-soft: #fbf3df;
+  --nio-gold-border: #ead39a;
+  --nio-hit: #12864b;
+  --nio-miss: #c62f35;
+  --nio-chart-over: #12864b;
+  --nio-chart-under: #c62f35;
+  --nio-chart-equal: #946606;
+  --nio-shadow: rgba(14, 17, 22, .06);
+  --nio-chrome: #ffffff;
+  --nio-action: #0e1116;
+  --nio-action-ink: #ffffff;
+  --nio-action-icon: var(--nio-gold);
+  --logo-background: #0e1116;
+  --logo-symbol: var(--nio-gold);
 }

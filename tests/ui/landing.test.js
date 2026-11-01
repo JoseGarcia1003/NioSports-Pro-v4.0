@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render, cleanup, waitFor, fireEvent } from '@testing-library/svelte';
 import LandingExperience from '../../src/lib/components/landing/LandingExperience.svelte';
+import { resetNbaToday } from '../../src/lib/stores/nba-today.js';
 
 const team = (full_name, abbreviation) => ({ full_name, abbreviation, name: full_name.split(' ').slice(-1)[0] });
 const game = (id, datetime, extra = {}) => ({ id, datetime, status: datetime, status_state: 'scheduled', period: 0, home_team: team('Orlando Magic', 'ORL'), visitor_team: team('Boston Celtics', 'BOS'), home_team_score: 0, visitor_team_score: 0, ...extra });
@@ -8,7 +9,7 @@ const ok = data => new Response(JSON.stringify({ data }), { headers: { 'X-Data-S
 const noLines = () => new Response(JSON.stringify({ ok: false, events: null }), { status: 503 });
 // Route by URL: the board asks for games and, in parallel, for betting lines.
 const router = (games, lines = noLines) => vi.fn(url => Promise.resolve(String(url).includes('/api/odds/') ? lines() : games()));
-afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
+afterEach(() => { cleanup(); vi.unstubAllGlobals(); resetNbaToday(); });
 
 describe('Landing shows today\'s real NBA slate', () => {
   it('lists provider games with their source', async () => {
@@ -49,7 +50,7 @@ describe('Landing shows today\'s real NBA slate', () => {
     vi.stubGlobal('fetch', router(() => ok([game(1, '2026-11-01T20:30:00Z')]), lines));
     const screen = render(LandingExperience);
     const board = screen.getByRole('region', { name: 'Hoy en la NBA' });
-    await waitFor(() => expect(board.textContent).toContain('Total 216,5'));
+    await waitFor(() => expect(board.textContent).toContain('O/U 216,5'));
     expect(board.textContent).not.toContain('230,5');
     expect(board.textContent).toContain('Líneas de total: The Odds API');
   });
@@ -60,6 +61,6 @@ describe('Landing shows today\'s real NBA slate', () => {
     const board = screen.getByRole('region', { name: 'Hoy en la NBA' });
     await waitFor(() => expect(board.textContent).toContain('Boston Celtics'));
     expect(board.textContent).toContain('Líneas de total no disponibles');
-    expect(board.textContent).not.toContain('Total ');
+    expect(board.textContent).not.toContain('O/U');
   });
 });

@@ -101,7 +101,7 @@
   
   /* Familias */
   --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-display: var(--font-sans);
+  --font-display: 'Barlow Condensed', 'Arial Narrow', var(--font-sans);
   --font-mono: 'DM Mono', 'Fira Code', 'Consolas', monospace;
   
   /* Tamaños */

@@ -399,7 +399,7 @@
 
   .page__header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 36px; }
   .page__label { font-size: 0.8rem; font-weight: 700; color: #6366F1; text-transform: uppercase; letter-spacing: 0.15em; }
-  .page__title { font-family: 'Inter', sans-serif; font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 900; letter-spacing: -0.03em; margin: 8px 0 6px; }
+  .page__title { font-family: var(--font-sans); font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 900; letter-spacing: -0.03em; margin: 8px 0 6px; }
   .page__subtitle { font-size: 1rem; color: var(--color-text-muted); }
 
   .btn-export {
@@ -448,7 +448,7 @@
     background: var(--color-bg-card); border: 1px solid var(--color-border);
     border-radius: 16px; padding: 22px 20px; margin-bottom: 16px;
   }
-  .card__title { font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 700; margin-bottom: 16px; letter-spacing: -0.01em; }
+  .card__title { font-family: var(--font-sans); font-size: 0.95rem; font-weight: 700; margin-bottom: 16px; letter-spacing: -0.01em; }
 
   /* Period breakdown */
   .breakdown-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }

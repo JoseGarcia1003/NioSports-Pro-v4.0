@@ -259,7 +259,7 @@
   .page__header { margin-bottom: 28px; }
   .page__top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; }
   .page__label { font-size: 0.8rem; font-weight: 700; color: #6366F1; text-transform: uppercase; letter-spacing: 0.15em; }
-  .page__title { font-family: 'Inter', sans-serif; font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 900; letter-spacing: -0.03em; margin: 8px 0 6px; }
+  .page__title { font-family: var(--font-sans); font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 900; letter-spacing: -0.03em; margin: 8px 0 6px; }
   .page__subtitle { font-size: 0.9rem; color: var(--color-text-muted); }
 
   .btn-add { display: flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 10px; border: 1px solid rgba(99,102,241,0.25); background: rgba(99,102,241,0.1); color: #6366F1; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: all 0.15s; }
@@ -267,7 +267,7 @@
 
   /* Form */
   .form-card { background: var(--color-bg-card); border: 1px solid rgba(99,102,241,0.2); border-radius: 16px; padding: 22px 20px; margin-bottom: 24px; }
-  .form-title { font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 800; margin-bottom: 18px; }
+  .form-title { font-family: var(--font-sans); font-size: 1rem; font-weight: 800; margin-bottom: 18px; }
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
   @media (max-width: 540px) { .form-grid { grid-template-columns: 1fr; } }
   .field--full { grid-column: 1 / -1; }
@@ -295,7 +295,7 @@
   @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
 
   .card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; padding: 20px; }
-  .card__title { font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .card__title { font-family: var(--font-sans); font-size: 0.95rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
 
   /* Pick Items */
   .pick-list { display: flex; flex-direction: column; gap: 10px; max-height: 520px; overflow-y: auto; }

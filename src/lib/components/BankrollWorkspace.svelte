@@ -46,7 +46,7 @@
     </section>
     <div class="grid">
       <section class="panel chart"><div class="panel-head"><div><span class="eyebrow">PERSPECTIVA</span><h2>Evolución del saldo</h2></div><small>Últimos {series.length} movimientos</small></div>
-        {#if series.length>1}<svg viewBox="0 0 800 210" role="img" aria-label="Evolución del saldo disponible, incluye aportaciones y retiros"><defs><linearGradient id="bank-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#65e2b5" stop-opacity=".24"/><stop offset="100%" stop-color="#65e2b5" stop-opacity="0"/></linearGradient></defs><path d="M20 45H780M20 110H780M20 175H780" stroke="#ffffff0e" fill="none"/><polygon points={`20,200 ${points} 780,200`} fill="url(#bank-area)"/><polyline {points} stroke="#65e2b5" stroke-width="3" fill="none" stroke-linejoin="round"/></svg><small>Saldo disponible, no curva de rentabilidad. Incluye aportaciones, retiros y reservas.</small>{:else}<div class="quiet">La evolución aparecerá después de dos movimientos.</div>{/if}
+        {#if series.length>1}<svg viewBox="0 0 800 210" role="img" aria-label="Evolución del saldo disponible, incluye aportaciones y retiros"><defs><linearGradient id="bank-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--nio-gold)" stop-opacity=".24"/><stop offset="100%" stop-color="var(--nio-gold)" stop-opacity="0"/></linearGradient></defs><path d="M20 45H780M20 110H780M20 175H780" stroke="var(--nio-border)" fill="none"/><polygon points={`20,200 ${points} 780,200`} fill="url(#bank-area)"/><polyline {points} stroke="var(--nio-gold)" stroke-width="3" fill="none" stroke-linejoin="round"/></svg><small>Saldo disponible, no curva de rentabilidad. Incluye aportaciones, retiros y reservas.</small>{:else}<div class="quiet">La evolución aparecerá después de dos movimientos.</div>{/if}
       </section>
       <section class="panel form-panel"><span class="eyebrow">REGISTRO MANUAL</span><h2>Añadir movimiento</h2><p>Control personal. No mueve dinero ni envía apuestas.</p><form on:submit|preventDefault={submit}>
         <label for="bank-type">Tipo de movimiento</label><select id="bank-type" bind:value={type} disabled={demo||saving}><option value="deposit">Aportar capital</option><option value="withdraw">Registrar retiro</option><option value="stake">Reservar stake de un ticket</option></select>
@@ -62,27 +62,21 @@
 
 <style>
   .workspace {
-    --bank-text: #eaf2ee; --bank-muted: #a4b9ae; --bank-border: #2c4136;
-    --bank-surface: #101c17; --bank-input: #0b1510; --bank-hover: #203a2c;
-    --bank-accent: #70ddb0; --bank-accent-text: #081d12; --bank-positive: #70ddb0;
-    --bank-negative: #f5aaa7; --bank-balance: linear-gradient(135deg,#17372b,#14291f);
-    --bank-notice-bg: #26261c; --bank-notice-text: #ead397; --bank-notice-border: #655a35;
+    --bank-text: var(--nio-ink); --bank-muted: var(--nio-muted); --bank-border: var(--nio-border);
+    --bank-surface: var(--nio-surface); --bank-input: var(--nio-page); --bank-hover: var(--nio-raised);
+    --bank-accent: var(--nio-action); --bank-accent-text: var(--nio-action-ink); --bank-positive: var(--nio-hit);
+    --bank-negative: var(--nio-miss); --bank-balance: linear-gradient(135deg, var(--nio-gold-soft), var(--nio-surface) 70%);
+    --bank-notice-bg: var(--nio-gold-soft); --bank-notice-text: var(--nio-accent); --bank-notice-border: var(--nio-gold-border);
     max-width: 1360px; margin: auto; padding: 40px 28px 90px; color: var(--bank-text);
     font-family: var(--font-sans); font-size: 14px; line-height: 1.6; font-variant-numeric: tabular-nums;
-  }
-  :global([data-theme="light"]) .workspace {
-    --bank-text: #152b21; --bank-muted: #52695d; --bank-border: #d4e1d8;
-    --bank-surface: #fff; --bank-input: #f6f9f7; --bank-hover: #eaf2ed;
-    --bank-accent: #206b48; --bank-accent-text: #fff; --bank-positive: #206b48;
-    --bank-negative: #aa3436; --bank-balance: linear-gradient(135deg,#e6f3eb,#f6faf7);
-    --bank-notice-bg: #fff8e9; --bank-notice-text: #795816; --bank-notice-border: #e9d9b5;
   }
   header { display:flex; justify-content:space-between; align-items:center; gap:24px; margin-bottom:30px; }
   header > div { min-width:0; }
   .eyebrow { font-size:11px; letter-spacing:1.3px; font-weight:600; color:var(--bank-muted); }
   h1,h2 { font-family:var(--font-display); font-weight:700; text-wrap:balance; }
-  h1 { font-size:clamp(32px,3.7vw,48px); line-height:1.12; letter-spacing:-.04em; margin:14px 0; }
-  h1 em { color:var(--bank-positive); font-style:normal; }
+  h1 { font-size:clamp(44px,5.4vw,72px); line-height:.95; letter-spacing:0; margin:14px 0; text-transform:uppercase; font-weight:800; }
+  h2 { font-family:var(--font-sans); }
+  h1 em { color:var(--nio-accent); font-style:normal; }
   h2 { font-size:22px; line-height:1.3; letter-spacing:-.025em; margin:10px 0 20px; }
   p { color:var(--bank-muted); font-size:14px; line-height:1.7; }
   small { font-size:12px; color:var(--bank-muted); line-height:1.6; }

@@ -1,6 +1,6 @@
 /* Shared product rhythm: titles, reading copy, actions and data. */
 .product-page {
-  --color-text-muted: #aab6c8;
+  --color-text-muted: var(--nio-muted);
   --product-accent: var(--nio-gold);
   --product-accent-text: var(--nio-accent);
   --product-accent-soft: var(--nio-gold-soft);
@@ -19,19 +19,25 @@
 }
 
 [data-theme="light"] .product-page {
-  --color-text-muted: #526277;
+  --color-text-muted: var(--nio-muted);
   --product-accent-text: var(--nio-accent);
   --product-accent-soft: var(--nio-gold-soft);
   --product-accent-border: var(--nio-gold-border);
-  --product-surface: #ffffff;
-  --product-border: #dce3eb;
+  --product-surface: var(--nio-surface);
+  --product-border: var(--nio-border);
   --product-shadow: 0 6px 22px rgba(23, 43, 71, .035);
 }
 
 .product-page :is(h1, h2, h3, h4) {
-  font-family: var(--font-display);
   font-weight: var(--font-bold);
   text-wrap: balance;
+}
+/* Condensed display voice only where size allows it: page and section titles. */
+.product-page :is(h1, h2) {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -.005em;
+  text-transform: uppercase;
 }
 .product-page strong { font-weight: var(--font-bold); }
 .product-page :is(p, h1, h2, h3, h4, a) { overflow-wrap: anywhere; }
@@ -56,11 +62,11 @@
 }
 .product-heading > div { min-width: 0; }
 .product-heading h1 {
-  max-width: 800px;
-  font-size: clamp(32px, 3.7vw, 48px);
-  line-height: 1.12;
-  margin: 14px 0 16px;
-  letter-spacing: -.045em;
+  max-width: 900px;
+  font-size: clamp(40px, 5vw, 68px);
+  line-height: .98;
+  margin: 12px 0 16px;
+  letter-spacing: 0;
 }
 .product-heading p {
   max-width: 640px;

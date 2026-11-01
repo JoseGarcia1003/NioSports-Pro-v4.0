@@ -410,7 +410,7 @@
 
   .page__header { margin-bottom: 28px; }
   .page__label { font-size: 0.8rem; font-weight: 700; color: #6366F1; text-transform: uppercase; letter-spacing: 0.15em; }
-  .page__title { font-family: 'Inter', sans-serif; font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 900; letter-spacing: -0.03em; margin: 8px 0 6px; }
+  .page__title { font-family: var(--font-sans); font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 900; letter-spacing: -0.03em; margin: 8px 0 6px; }
   .page__subtitle { font-size: 0.9rem; color: var(--color-text-muted); }
 
   .tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--color-border); padding-bottom: 12px; }
@@ -512,7 +512,7 @@
 
   .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 20px; }
   .modal { background: var(--color-bg-elevated); border: 1px solid var(--color-border-hover); border-radius: 18px; padding: 28px 24px; width: 100%; max-width: 380px; }
-  .modal__title { font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 800; margin-bottom: 6px; }
+  .modal__title { font-family: var(--font-sans); font-size: 1.1rem; font-weight: 800; margin-bottom: 6px; }
   .modal__sub { font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 20px; }
   .modal__field { margin-bottom: 20px; }
   .modal__field label { display: block; font-size: 0.78rem; color: var(--color-text-muted); margin-bottom: 6px; }
