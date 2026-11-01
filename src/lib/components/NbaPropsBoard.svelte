@@ -2,6 +2,7 @@
   import { onMount, tick } from 'svelte';
   import { STATS, toGame, hitRate, average, referenceLine, seasonGames, statValue, defenseFor, splitRate, sided, sortRows } from '$lib/nba/props.js';
   import { teamColor } from '$lib/product/teams.js';
+  import { analyseProp } from '$lib/nba/analysis.js';
   import { authenticatedFetch } from '$lib/services/authenticated-fetch.js';
 
   let state = 'loading';
@@ -189,6 +190,7 @@
       {#if detail}
         {@const games20 = detail.p.games.slice(0, 20).reverse()}
         {@const hist = Array.isArray(history[detail.p.id]) ? history[detail.p.id] : null}
+        {@const reading = analyseProp({ games: detail.p.games, history: hist, stat, side, line: detail.line, opponent: detail.p.opp, home: detail.p.home, defense: payload?.defense })}
         {@const max = Math.max(detail.line * 1.6, ...games20.map(g => statValue(g, stat)), 1)}
         <aside class="detail" bind:this={detailEl} aria-label={`Detalle de ${detail.p.name}`}>
           <div class="detail-head">
@@ -201,6 +203,22 @@
               <div class={tone(h)}><span>{label}</span><b>{pct(h)}</b><small>{h.hits} de {h.over + h.under}</small></div>
             {/each}
           </div>
+          <section class="reading" aria-labelledby="reading-title">
+            <div class="reading-head">
+              <h3 id="reading-title">Lectura de los datos</h3>
+              <span class={`verdict ${reading.reading}`}>{reading.reading === 'favorable' ? 'Favorable' : reading.reading === 'desfavorable' ? 'Desfavorable' : 'Mixta'}</span>
+            </div>
+            <p class="tally">{reading.favour} señal{reading.favour === 1 ? '' : 'es'} a favor · {reading.against} en contra · para «{side === 'over' ? 'más de' : 'menos de'} {fmt(detail.line)}»{#if !hist} · cargando historial…{/if}</p>
+            <ul>
+              {#each reading.findings as f}
+                <li class:pro={f.weight > 0} class:con={f.weight < 0} class:caution={f.caution}>
+                  <span class="mark" aria-hidden="true">{f.weight > 0 ? '▲' : f.weight < 0 ? '▼' : f.caution ? '!' : '•'}</span>
+                  <span><b>{f.title}.</b> {f.text}</span>
+                </li>
+              {/each}
+            </ul>
+            <p class="muted">Resumen automático de datos verificados. No es una probabilidad ni una recomendación de apuesta.</p>
+          </section>
           <div class="context">
             {#if detail.def}
               <p class="def-line"><b>Defensa de {detail.p.opp}:</b> permite {fmt(detail.def.value)} {STATS[stat].label.toLowerCase()} por partido · puesto <b class:good={detail.def.rank <= 10} class:bad={detail.def.rank > detail.def.of - 10}>{detail.def.rank}º de {detail.def.of}</b> (1 = permite más) · {detail.def.games} partidos esta temporada.</p>
@@ -326,6 +344,20 @@
   .splits .hit b { color: var(--nio-hit); }
   .splits .miss b { color: var(--nio-miss); }
   .muted { margin: 0; font-size: 12px; color: var(--nio-muted); }
+  .reading { margin: 0 0 16px; padding: 14px; border: 1px solid var(--nio-border); border-radius: 12px; background: var(--nio-page); }
+  .reading-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .reading h3 { font-family: var(--font-display); text-transform: uppercase; font-size: 20px; margin: 0; letter-spacing: .01em; }
+  .verdict { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--nio-border); color: var(--nio-muted); }
+  .verdict.favorable { color: var(--nio-hit); border-color: color-mix(in srgb, var(--nio-hit) 45%, transparent); }
+  .verdict.desfavorable { color: var(--nio-miss); border-color: color-mix(in srgb, var(--nio-miss) 45%, transparent); }
+  .tally { margin: 6px 0 10px; font-size: 12px; color: var(--nio-muted); }
+  .reading ul { list-style: none; margin: 0 0 10px; padding: 0; display: grid; gap: 8px; }
+  .reading li { display: grid; grid-template-columns: 18px 1fr; gap: 6px; font-size: 13px; line-height: 1.5; color: var(--nio-muted); }
+  .reading li b { color: var(--nio-ink); }
+  .reading .mark { font-size: 11px; line-height: 1.9; color: var(--nio-muted); text-align: center; }
+  .reading li.pro .mark { color: var(--nio-hit); }
+  .reading li.con .mark { color: var(--nio-miss); }
+  .reading li.caution .mark { color: var(--nio-accent); font-weight: 800; }
   .foot { font-size: 12px; color: var(--nio-muted); line-height: 1.55; margin: 0; }
   button:focus-visible, input:focus-visible { outline: 2px solid var(--nio-accent); outline-offset: 2px; }
   @media (max-width: 1100px) { .layout.with-detail { grid-template-columns: 1fr; } .detail { position: static; } }

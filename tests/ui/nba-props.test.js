@@ -44,6 +44,8 @@ describe('NBA props board', () => {
     await fireEvent.click(screen.getByRole('button', { name: /Jayson Tatum/ }));
     const detail = screen.getByRole('complementary', { name: 'Detalle de Jayson Tatum' });
     expect(detail.textContent).toContain('Temporada');
+    expect(detail.textContent).toContain('Lectura de los datos');
+    expect(detail.textContent).toContain('No es una probabilidad ni una recomendación');
   });
 
   it('never shows figures when the stats source fails', async () => {
