@@ -1,5 +1,14 @@
 # NioSports Pro — acuerdos persistentes
 
+## Dirección vigente del 1 de noviembre de 2026 (sustituye órdenes anteriores donde choquen)
+
+- Referencia: `docs/AUDIT_2026-11-01.md`, secciones 6 (plan E0–E8), 9 (decisiones del propietario) y 11 (fuentes gratuitas).
+- Producto: props de jugadores completas + props de equipo/totales + análisis que fundamente cada pronóstico. La IA redacta solo sobre datos verificados entregados por el sistema; nunca aporta cifras propias. Tenis con el mismo enfoque de contexto (superficie, temporada, saque/resto).
+- Datos: sin presupuesto de pago por ahora. Desarrollar con niveles gratuitos (The Odds API, balldontlie) y datasets descargados. Esto sustituye «API solo en Fase 19». Claves solo como variables de entorno; nunca en chat, documentos ni repositorio.
+- Interfaz: el sistema de diseño único (E2) y la navegación (E3) avanzan ya; sustituye «interfaz solo en Fase 17». La reconstrucción F8+ del modelo queda pausada hasta tener datos reales; F0–F7 se conservan.
+- Público: español primero, desde Ecuador; inglés nativo planificado. Revisión legal por jurisdicción antes de cobrar.
+- Ramas: integración en `main` autorizada por el propietario cuando mejore el producto. Trabajo en `claude/focused-ramanujan-9avptc`.
+
 ## Dirección de producto del 10 de octubre de 2026
 
 - Última petición: dejar los colores a un lado y centrarse en funcionalidad y diseño de uso. Conservar los tokens actuales; priorizar encontrar → comparar → consultar detalle, especialmente en móvil. Esta entrega mejora Match Studio sin habilitar datos reales ni certificar las fases técnicas pendientes.
