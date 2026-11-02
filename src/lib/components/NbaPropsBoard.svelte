@@ -1,6 +1,6 @@
 <script>
   import { onMount, tick } from 'svelte';
-  import { STATS, toGame, hitRate, average, referenceLine, seasonGames, statValue, defenseFor, splitRate, sided, sortRows } from '$lib/nba/props.js';
+  import { STATS, toGame, hitRate, average, referenceLine, seasonGames, statValue, defenseFor, splitRate, sided, sortRows, teammateSplit } from '$lib/nba/props.js';
   import { teamColor, playerKey } from '$lib/product/teams.js';
   import { analyseProp } from '$lib/nba/analysis.js';
   import { authenticatedFetch } from '$lib/services/authenticated-fetch.js';
@@ -62,6 +62,9 @@
   }
 
   let history = {};
+  // Rotation teammates per player and the one chosen for the "sin compañero" split.
+  let mates = {};
+  let mateId = '';
   async function loadHistory(id) {
     if (history[id]) return;
     history = { ...history, [id]: 'loading' };
@@ -70,11 +73,13 @@
       const body = await res.json();
       if (!res.ok) throw new Error();
       history = { ...history, [id]: body.games.map(toGame) };
+      mates = { ...mates, [id]: Array.isArray(body.teammates) ? body.teammates : null };
     } catch { history = { ...history, [id]: 'error' }; }
   }
 
   async function select(id) {
     selected = selected === id ? null : id;
+    mateId = '';
     if (selected) loadHistory(selected);
     if (selected && typeof window !== 'undefined' && window.innerWidth < 1100) {
       await tick();
@@ -259,6 +264,26 @@
                   <div class={tone(h)}><span>{label}</span><b>{pct(h)}</b><small>{h.n ? `${h.hits} de ${h.over + h.under}` : 'sin partidos'}</small></div>
                 {/each}
               </div>
+              {#if mates[detail.p.id]?.length}
+                {@const mate = mates[detail.p.id].find(m => String(m.id) === mateId)}
+                <div class="mate">
+                  <label>Sin compañero
+                    <select bind:value={mateId}>
+                      <option value="">Elegir compañero…</option>
+                      {#each mates[detail.p.id] as m}<option value={String(m.id)}>{m.name} · {fmt(m.minutes)} min · faltó a {m.missed}</option>{/each}
+                    </select>
+                  </label>
+                  {#if mate}
+                    {@const split = teammateSplit(hist, stat, detail.line, mate)}
+                    <div class="splits two">
+                      {#each [[`Sin ${mate.name}`, sided(split.without, side)], [`Con ${mate.name}`, sided(split.with, side)]] as [label, h]}
+                        <div class={tone(h)}><span>{label}</span><b>{pct(h)}</b><small>{h.n ? `${h.hits} de ${h.over + h.under}` : 'sin partidos'}</small></div>
+                      {/each}
+                    </div>
+                    <p class="muted">{split.without.n < 5 ? 'Muestra pequeña: menos de 5 partidos sin él, no es concluyente. ' : ''}Temporada {mate.season} con {mate.team}. Cuenta como ausente si no tiene estadísticas en ese partido (lesión, descanso o decisión técnica; la fuente no distingue el motivo). Solo se listan compañeros habituales.</p>
+                  {/if}
+                </div>
+              {/if}
               <p class="muted">Divisiones sobre {hist.length} partidos guardados (temporadas {[...new Set(hist.map(g => g.season))].join(' y ')}).</p>
             {/if}
           </div>
@@ -281,6 +306,10 @@
 </section>
 
 <style>
+  .mate { margin: 12px 0 4px; display: grid; gap: 8px; }
+  .mate label { display: grid; gap: 6px; font-size: 12px; font-weight: 600; color: var(--nio-muted); text-transform: uppercase; letter-spacing: .06em; }
+  .mate select { min-height: 40px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-ink); font: inherit; font-size: 14px; text-transform: none; letter-spacing: 0; font-weight: 500; }
+  .splits.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .props { max-width: 1320px; margin: auto; padding: 28px 24px 100px; color: var(--nio-ink); font-family: var(--font-sans); font-variant-numeric: tabular-nums; }
   .head { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; }
   .eyebrow { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: var(--nio-muted); margin: 0 0 8px; }

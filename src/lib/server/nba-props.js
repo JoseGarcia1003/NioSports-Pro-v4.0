@@ -55,3 +55,30 @@ export async function loadBoard(db, apiKey, offset = 0) {
   }
   return { day, games, players, statsThrough, season, defense };
 }
+
+/**
+ * Rotation teammates for a player's current team and season, with the games each
+ * one played. rows: box scores of other players of that team in the player's games.
+ * @param {Array<{player_id:number, player_name:string, game_id:string, minutes:number|string}>} rows
+ * @param {{ team: string, season: string, gameIds: string[] }} scope
+ */
+export function rotationTeammates(rows, scope, { limit = 8, minMinutes = 15 } = {}) {
+  const total = scope.gameIds.length;
+  if (!total) return [];
+  const inScope = new Set(scope.gameIds);
+  const byId = new Map();
+  for (const r of rows || []) {
+    if (!inScope.has(r.game_id)) continue;
+    const m = byId.get(r.player_id) || { id: r.player_id, name: r.player_name, minutes: 0, gameIds: [] };
+    m.minutes += Number(r.minutes) || 0;
+    m.gameIds.push(r.game_id);
+    byId.set(r.player_id, m);
+  }
+  return [...byId.values()]
+    .map(m => ({ ...m, minutes: Math.round((m.minutes / m.gameIds.length) * 10) / 10, team: scope.team, season: scope.season, missed: total - m.gameIds.length }))
+    // A regular must have played a fair share: someone who joined late would
+    // otherwise look "absent" in games before he was on the roster.
+    .filter(m => m.minutes >= minMinutes && m.gameIds.length >= Math.max(2, Math.ceil(total * 0.4)))
+    .sort((a, b) => b.minutes - a.minutes)
+    .slice(0, limit);
+}

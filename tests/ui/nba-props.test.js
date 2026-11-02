@@ -95,4 +95,21 @@ describe('NBA props board', () => {
     await fireEvent.click(screen.getByRole('button', { name: 'REB' }));
     expect(screen.getByRole('table').textContent).toContain('Ref.');
   });
+  it('splits the hit rate with and without a chosen teammate', async () => {
+    const h = (id, pts) => ['2026-10-30', 'CHI', true, 34, pts, 6, 5, 2, '2026-27', 'BOS', id];
+    const history = { id: 7, games: [h('g1', 30), h('g2', 28), h('g3', 10), h('g4', 26), h('g5', 24), h('g6', 20)],
+      teammates: [{ id: 9, name: 'Jaylen Brown', minutes: 34, missed: 2, team: 'BOS', season: '2026-27', gameIds: ['g3', 'g5', 'g6', 'g4'] }] };
+    vi.stubGlobal('fetch', vi.fn(async url => String(url).includes('/api/odds/') ? new Response('{}', { status: 503 }) : new Response(JSON.stringify(String(url).includes('/api/nba/player') ? history : payload))));
+    const screen = render(NbaPropsBoard);
+    await waitFor(() => expect(screen.getByText('Jayson Tatum')).toBeTruthy());
+    await fireEvent.click(screen.getByRole('button', { name: /Jayson Tatum/ }));
+    const select = await screen.findByRole('combobox', { name: /Sin compañero/ });
+    await fireEvent.change(select, { target: { value: '9' } });
+    const detail = screen.getByRole('complementary', { name: 'Detalle de Jayson Tatum' });
+    // line 24,5: without (g1 30, g2 28) → 2 de 2; with (10, 26, 24, 20) → 1 de 4
+    await waitFor(() => expect(detail.textContent).toContain('Sin Jaylen Brown'));
+    expect(detail.textContent).toContain('2 de 2');
+    expect(detail.textContent).toContain('1 de 4');
+    expect(detail.textContent).toContain('Muestra pequeña');
+  });
 });

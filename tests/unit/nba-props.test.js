@@ -60,3 +60,14 @@ describe('board ordering and sides', () => {
     expect(sortRows([r('a', 0.5, 10), r('b', null, 0), r('c', 0.8, 10), r('d', 0.8, 5)], 'l10').map(x => x.id)).toEqual(['c', 'd', 'a', 'b']);
   });
 });
+
+import { teammateSplit } from '../../src/lib/nba/props.js';
+describe('teammateSplit', () => {
+  const t = (id, pts, team = 'BOS', season = '2026-27') => toGame(['2026-10-30', 'NYK', true, 34, pts, 5, 3, 2, season, team, id]);
+  it('splits hit rates by whether the teammate played, within his team and season', () => {
+    const games = [t('g1', 30), t('g2', 20), t('g3', 28), t('g4', 18), t('g0', 40, 'MIL'), t('g9', 40, 'BOS', '2025-26'), t(null, 40)];
+    const split = teammateSplit(games, 'pts', 24.5, { team: 'BOS', season: '2026-27', gameIds: ['g2', 'g4'] });
+    expect(split.without).toMatchObject({ over: 2, under: 0, n: 2 });
+    expect(split.with).toMatchObject({ over: 0, under: 2, n: 2 });
+  });
+});

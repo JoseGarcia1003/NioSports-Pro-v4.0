@@ -41,3 +41,29 @@ describe('signals API requires a session', () => {
     await expect(signalsGET({ request: new Request('http://x/api/nba/signals') })).rejects.toMatchObject({ status: 401 });
   });
 });
+
+import { rotationTeammates } from '../../src/lib/server/nba-props.js';
+describe('rotationTeammates', () => {
+  const scope = { team: 'BOS', season: '2026-27', gameIds: ['0022600001', '0022600002', '0022600003', '0022600004'] };
+  const row = (id, name, game, minutes) => ({ player_id: id, player_name: name, game_id: game, minutes });
+  it('averages minutes over games played, counts misses and drops fringe players', () => {
+    const rows = [
+      row(1, 'Jaylen', '0022600001', 35), row(1, 'Jaylen', '0022600002', 33), row(1, 'Jaylen', '0022600004', 34),
+      row(2, 'Derrick', '0022600001', 30), row(2, 'Derrick', '0022600002', 30), row(2, 'Derrick', '0022600003', 30), row(2, 'Derrick', '0022600004', 30),
+      row(3, 'Bench', '0022600001', 6),
+      row(4, 'Other season', '0022500999', 40)
+    ];
+    const out = rotationTeammates(rows, scope);
+    expect(out.map(m => m.name)).toEqual(['Jaylen', 'Derrick']);
+    expect(out[0]).toMatchObject({ id: 1, minutes: 34, missed: 1, team: 'BOS', season: '2026-27' });
+    expect(out[0].gameIds).toEqual(['0022600001', '0022600002', '0022600004']);
+    expect(out[1].missed).toBe(0);
+  });
+  it('skips late arrivals who played too few of the games', () => {
+    const rows = [row(5, 'New', '0022600004', 30)];
+    expect(rotationTeammates(rows, scope)).toEqual([]);
+  });
+  it('returns nothing without games in scope', () => {
+    expect(rotationTeammates([row(1, 'X', '0022600001', 30)], { ...scope, gameIds: [] })).toEqual([]);
+  });
+});

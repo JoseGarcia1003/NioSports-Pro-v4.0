@@ -13,7 +13,7 @@ export const STATS = {
 };
 
 export function toGame(t) {
-  return { date: t[0], opponent: t[1], home: t[2], minutes: Number(t[3]), season: t[8], team: t[9], raw: [t[0], t[1], t[2], Number(t[3]), Number(t[4]), Number(t[5]), Number(t[6]), Number(t[7])] };
+  return { date: t[0], opponent: t[1], home: t[2], minutes: Number(t[3]), season: t[8], team: t[9], gameId: t[10] ?? null, raw: [t[0], t[1], t[2], Number(t[3]), Number(t[4]), Number(t[5]), Number(t[6]), Number(t[7])] };
 }
 
 export function statValue(game, stat) {
@@ -101,4 +101,21 @@ export function sortRows(rows, key) {
     if (rb == null) return -1;
     return rb - ra || b[key].n - a[key].n;
   });
+}
+
+/**
+ * Splits a player's games by whether a teammate played. Only games of the
+ * teammate's team and season with a known game id count; a teammate "did not
+ * play" when he has no box score in that game (stats.nba.com lists only
+ * players who took the floor).
+ * @param {any[]} games player's games from toGame (with gameId)
+ * @param {{ team: string, season: string, gameIds: string[] }} mate
+ */
+export function teammateSplit(games, stat, line, mate) {
+  const played = new Set(mate.gameIds);
+  const pool = games.filter(g => g.gameId && g.team === mate.team && g.season === mate.season);
+  return {
+    without: hitRate(pool.filter(g => !played.has(g.gameId)), stat, line),
+    with: hitRate(pool.filter(g => played.has(g.gameId)), stat, line)
+  };
 }
