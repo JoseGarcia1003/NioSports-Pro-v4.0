@@ -155,10 +155,45 @@ describe('player points lines', () => {
     expect(await getNbaPlayerPoints({ store: store(), apiKey: 'k', events, quotaHint: 120, fetchImpl, now })).toEqual({ ok: false, reason: 'quota_reserved' });
     expect(fetchImpl).not.toHaveBeenCalled();
   });
-  it('serves the cached copy within 12 hours without spending credits', async () => {
-    const s = store(); s.m.set(PROPS_KEY, { fetchedAt: '2026-11-02T08:00:00Z', players: {} });
-    const fetchImpl = vi.fn();
-    expect((await getNbaPlayerPoints({ store: s, apiKey: 'k', events, quotaHint: 400, fetchImpl, now })).cached).toBe(true);
-    expect(fetchImpl).not.toHaveBeenCalled();
+  describe('credit budget: one request per game per day, on game day only', () => {
+    const at = iso => Date.parse(iso);
+    const evs = [{ id: 'e1', commenceTime: '2026-11-02T23:00:00Z' }, { id: 'e3', commenceTime: '2026-11-03T00:30:00Z' }, { id: 'later', commenceTime: '2026-11-03T23:00:00Z' }];
+    const okFetch = () => vi.fn(async () => new Response(JSON.stringify(ev), { headers: { 'x-requests-remaining': '470', 'x-requests-last': '1' } }));
+    it('reuses a game fetched today and only pays for games not yet cached', async () => {
+      const s = store();
+      s.m.set(PROPS_KEY, { fetchedAt: '2026-11-02T12:00:00Z', events: { e1: { fetchedAt: '2026-11-02T12:00:00Z', commenceTime: '2026-11-02T23:00:00Z' } }, players: { 'old one': { name: 'Old One', books: [], consensus: 20, eventId: 'e1' } } });
+      const fetchImpl = okFetch();
+      const r = await getNbaPlayerPoints({ store: s, apiKey: 'k', events: evs, quotaHint: 400, fetchImpl, now: at('2026-11-02T15:00:00Z') });
+      expect(fetchImpl).toHaveBeenCalledTimes(1);
+      expect(String(fetchImpl.mock.calls[0][0])).toContain('/events/e3/odds');
+      expect(r.players['old one'].eventId).toBe('e1');
+      expect(r.players['luka doncic'].eventId).toBe('e3');
+      expect(Object.keys(r.events).sort()).toEqual(['e1', 'e3']);
+      const again = okFetch();
+      expect((await getNbaPlayerPoints({ store: s, apiKey: 'k', events: evs, quotaHint: 400, fetchImpl: again, now: at('2026-11-02T18:00:00Z') })).cached).toBe(true);
+      expect(again).not.toHaveBeenCalled();
+    });
+    it('never requests games beyond 20 h from now', async () => {
+      const fetchImpl = okFetch();
+      await getNbaPlayerPoints({ store: store(), apiKey: 'k', events: evs, quotaHint: 400, fetchImpl, now: at('2026-11-02T15:00:00Z') });
+      expect(fetchImpl.mock.calls.map(c => String(c[0]).match(/events\/(\w+)\//)[1])).toEqual(['e1', 'e3']);
+    });
+    it('refreshes a game only after 24 h and drops games that ended', async () => {
+      const s = store();
+      s.m.set(PROPS_KEY, { fetchedAt: '2026-11-01T10:00:00Z', events: { e1: { fetchedAt: '2026-11-01T10:00:00Z', commenceTime: '2026-11-02T23:00:00Z' }, gone: { fetchedAt: '2026-11-01T10:00:00Z', commenceTime: '2026-11-01T23:00:00Z' } }, players: { 'gone player': { name: 'Gone', books: [], consensus: 9, eventId: 'gone' } } });
+      const fetchImpl = okFetch();
+      const r = await getNbaPlayerPoints({ store: s, apiKey: 'k', events: [evs[0]], quotaHint: 400, fetchImpl, now: at('2026-11-02T15:00:00Z') });
+      expect(fetchImpl).toHaveBeenCalledTimes(1);
+      expect(r.events.gone).toBeUndefined();
+      expect(r.players['gone player']).toBeUndefined();
+    });
+    it('treats the previous cache format as already fetched (no double charge on deploy)', async () => {
+      const s = store();
+      s.m.set(PROPS_KEY, { fetchedAt: '2026-11-02T08:00:00Z', players: { 'luka doncic': { name: 'Luka Dončić', books: [], consensus: 33.5, eventId: 'e1' } } });
+      const fetchImpl = okFetch();
+      const r = await getNbaPlayerPoints({ store: s, apiKey: 'k', events: [evs[0]], quotaHint: 400, fetchImpl, now: at('2026-11-02T15:00:00Z') });
+      expect(fetchImpl).not.toHaveBeenCalled();
+      expect(r.players['luka doncic'].consensus).toBe(33.5);
+    });
   });
 });

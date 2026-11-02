@@ -142,7 +142,13 @@ def main():
         print("Falta la libreria nba_api. Ejecuta primero:  py -m pip install nba_api")
         return 1
 
-    secret = os.environ.get("NIO_INGEST_SECRET") or getpass.getpass("Pega tu clave de ingesta (no se mostrara) y pulsa Enter: ").strip()
+    secret = (os.environ.get("NIO_INGEST_SECRET") or "").strip()
+    if not secret:
+        if not sys.stdin or not sys.stdin.isatty():
+            # Unattended run (Programador de tareas): never wait for typing.
+            print("Falta la clave de ingesta. Revisa clave_ingesta.txt junto a nio_tarea_diaria.bat.")
+            return 1
+        secret = getpass.getpass("Pega tu clave de ingesta (no se mostrara) y pulsa Enter: ").strip()
     if len(secret) < 24:
         print("La clave parece incompleta. Copiala de nuevo desde Vercel (INGEST_SECRET).")
         return 1

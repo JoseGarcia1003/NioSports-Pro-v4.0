@@ -101,11 +101,15 @@ export function supabaseStore(db) {
 }
 
 // ── Player props (points) ──────────────────────────────────────────────────
-// One request per upcoming game for the player_points market, refreshed at most
-// every 12 h and only while the monthly quota keeps a reserve for game totals.
+// Credit budget (free plan: 500/month; this market costs 1 credit per game):
+// each game is requested at most once per day and only on its game day (within
+// 20 h of tip-off). Later visits reuse the stored lines and only fetch games not
+// yet in the cache, so a typical month stays near one credit per NBA game. A
+// reserve is always kept for game totals.
 export const PROPS_KEY = 'niosports:odds:nba:player-points:v1';
 const PROPS_LOCK = `${PROPS_KEY}:lock`;
-export const PROPS_TTL_SECONDS = 12 * 3600;
+export const PROPS_WINDOW_HOURS = 20;
+export const PROPS_REFETCH_HOURS = 24;
 export const QUOTA_RESERVE = 150;
 const EVENT_URL = id => `https://api.the-odds-api.com/v4/sports/basketball_nba/events/${encodeURIComponent(id)}/odds`;
 
@@ -139,6 +143,7 @@ export function normalizePlayerPoints(eventPayload) {
 }
 
 /**
+ * Lines per player for upcoming games, fetched game by game and cached.
  * @param {{ store: any, apiKey: string, events: Array<{id:string, commenceTime:string}>, quotaHint?: number|null, fetchImpl?: typeof fetch, now?: number }} deps
  */
 export async function getNbaPlayerPoints({ store, apiKey, events, quotaHint = null, fetchImpl = fetch, now = Date.now() }) {
@@ -146,18 +151,29 @@ export async function getNbaPlayerPoints({ store, apiKey, events, quotaHint = nu
   if (!store) return { ok: false, reason: 'cache_unavailable' };
   let cached;
   try { cached = await store.get(PROPS_KEY); } catch { return { ok: false, reason: 'cache_unavailable' }; }
-  if (cached && now - Date.parse(cached.fetchedAt) < PROPS_TTL_SECONDS * 1000) return { ok: true, ...cached, cached: true };
+  const known = cached?.events && typeof cached.events === 'object' ? { ...cached.events } : {};
+  // Older cache format (one timestamp for every game): treat its games as fetched then.
+  if (cached && !cached.events && Number.isFinite(Date.parse(cached.fetchedAt))) {
+    const starts = new Map((events || []).map(e => [e.id, e.commenceTime]));
+    for (const v of Object.values(cached.players || {})) if (v.eventId && !known[v.eventId]) known[v.eventId] = { fetchedAt: cached.fetchedAt, commenceTime: starts.get(v.eventId) ?? cached.fetchedAt };
+  }
 
-  const upcoming = (events || []).filter(e => { const t = Date.parse(e.commenceTime); return t > now && t - now < 36 * 3600 * 1000; });
-  if (!upcoming.length) return cached ? { ok: true, ...cached, cached: true, stale: true } : { ok: false, reason: 'no_upcoming_games' };
-
-  if (Number.isFinite(quotaHint) && quotaHint < QUOTA_RESERVE) return cached ? { ok: true, ...cached, cached: true, stale: true } : { ok: false, reason: 'quota_reserved' };
+  const soon = (events || []).filter(e => { const t = Date.parse(e.commenceTime); return t > now && t - now < PROPS_WINDOW_HOURS * 3600 * 1000; });
+  // Only games without a copy from the last 24 h cost a credit.
+  const due = soon.filter(e => !known[e.id] || now - Date.parse(known[e.id].fetchedAt) >= PROPS_REFETCH_HOURS * 3600 * 1000);
+  const serve = extra => (cached ? { ok: true, ...cached, cached: true, ...extra } : null);
+  if (!due.length) return serve({}) ?? { ok: false, reason: soon.length ? 'refreshing' : 'no_upcoming_games' };
+  if (Number.isFinite(quotaHint) && quotaHint < QUOTA_RESERVE) return serve({ stale: true }) ?? { ok: false, reason: 'quota_reserved' };
   const gotLock = await store.lock(PROPS_LOCK, 120).catch(() => false);
-  if (!gotLock) return cached ? { ok: true, ...cached, cached: true, stale: true } : { ok: false, reason: 'refreshing' };
+  if (!gotLock) return serve({ stale: true }) ?? { ok: false, reason: 'refreshing' };
   try {
-    const players = {};
-    let remaining = Number.isFinite(quotaHint) ? quotaHint : null, lastCost = null, fetched = 0, lastError = null;
-    for (const event of upcoming) {
+    // Keep lines of games that have not finished long ago; drop the rest.
+    const keepEvent = id => known[id] && Date.parse(known[id].commenceTime) > now - 12 * 3600 * 1000;
+    const players = Object.fromEntries(Object.entries(cached?.players || {}).filter(([, v]) => keepEvent(v.eventId)));
+    const eventsOut = Object.fromEntries(Object.entries(known).filter(([id]) => keepEvent(id)));
+    let remaining = Number.isFinite(quotaHint) ? quotaHint : (Number.isFinite(cached?.quotaRemaining) ? cached.quotaRemaining : null);
+    let lastCost = cached?.creditsPerGame ?? null, fetched = 0, lastError = null;
+    for (const event of due) {
       if (remaining != null && remaining < QUOTA_RESERVE) break;
       const url = `${EVENT_URL(event.id)}?${new URLSearchParams({ apiKey, regions: 'us', markets: 'player_points', oddsFormat: 'decimal', dateFormat: 'iso' })}`;
       const res = await fetchImpl(url, { signal: AbortSignal.timeout(8000) });
@@ -167,18 +183,20 @@ export async function getNbaPlayerPoints({ store, apiKey, events, quotaHint = nu
       if (Number.isFinite(c)) lastCost = c;
       if (!res.ok) { lastError = res.status; continue; }
       fetched++;
+      for (const [k, v] of Object.entries(players)) if (v.eventId === event.id) delete players[k];
       for (const [k, v] of Object.entries(normalizePlayerPoints(await res.json()))) players[k] = { ...v, eventId: event.id };
+      eventsOut[event.id] = { fetchedAt: new Date(now).toISOString(), commenceTime: event.commenceTime };
     }
     if (!fetched) {
       // Leave a trace (no key, no payload) so a silent failure can be diagnosed later.
-      await store.put(DIAG_KEY, { market: 'player_points', at: new Date(now).toISOString(), upstreamStatus: lastError, quotaRemaining: remaining, games: upcoming.length }).catch(() => {});
-      return cached ? { ok: true, ...cached, cached: true, stale: true } : { ok: false, reason: 'upstream_error', upstreamStatus: lastError };
+      await store.put(DIAG_KEY, { market: 'player_points', at: new Date(now).toISOString(), upstreamStatus: lastError, quotaRemaining: remaining, games: due.length }).catch(() => {});
+      return serve({ stale: true }) ?? { ok: false, reason: 'upstream_error', upstreamStatus: lastError };
     }
-    const payload = { source: 'The Odds API', market: 'player_points', fetchedAt: new Date(now).toISOString(), quotaRemaining: remaining, creditsPerGame: lastCost, games: fetched, players };
+    const payload = { source: 'The Odds API', market: 'player_points', fetchedAt: new Date(now).toISOString(), quotaRemaining: remaining, creditsPerGame: lastCost, games: Object.keys(eventsOut).length, events: eventsOut, players };
     await store.put(PROPS_KEY, payload);
-    return { ok: true, ...payload, cached: false };
+    return { ok: true, ...payload, cached: false, fetchedNow: fetched };
   } catch {
-    return cached ? { ok: true, ...cached, cached: true, stale: true } : { ok: false, reason: 'network_error' };
+    return serve({ stale: true }) ?? { ok: false, reason: 'network_error' };
   } finally {
     await store.unlock(PROPS_LOCK).catch(() => {});
   }
