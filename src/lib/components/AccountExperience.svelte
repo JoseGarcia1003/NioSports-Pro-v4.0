@@ -22,8 +22,8 @@
   $: firstName = $currentUser?.displayName?.trim().split(/\s+/)[0];
   $: accessLabel = $isAuthenticated ? planLabel($subscription) : 'Modo visitante';
   const tools = [
-    { title: 'Mis estadísticas', description: 'La perspectiva de tu propio historial.', href: '/stats', icon: ChartNoAxesCombined, tag: 'RENDIMIENTO' },
-    { title: 'Resultados', description: 'Vuelve a tus selecciones resueltas.', href: '/results', icon: History, tag: 'SEGUIMIENTO' },
+    { title: 'Props del día', description: 'Jugadores y equipos frente a la línea, con datos oficiales.', href: '/sports/nba/props', icon: ChartNoAxesCombined, tag: 'ANÁLISIS' },
+    { title: 'Mi bankroll', description: 'Capital, tickets abiertos y registro de movimientos.', href: '/bankroll', icon: History, tag: 'CONTROL' },
     { title: 'Historial verificable', description: 'Señales selladas antes del partido y su resultado real.', href: '/predictions', icon: ShieldCheck, tag: 'TRANSPARENCIA' }
   ];
   async function portal() {

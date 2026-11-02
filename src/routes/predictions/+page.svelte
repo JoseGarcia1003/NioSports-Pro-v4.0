@@ -43,7 +43,7 @@
   </section>
 
   <nav class="product-section resources" aria-label="Seguimiento y metodología">
-    <a href="/results"><strong>Mis resultados</strong><span>Revisa tus selecciones <span aria-hidden="true">↗</span></span></a>
+    <a href="/bankroll"><strong>Mi bankroll</strong><span>Tu registro personal <span aria-hidden="true">↗</span></span></a>
     <a href="#history-title"><strong>Historial verificable</strong><span>Señales selladas y su resultado <span aria-hidden="true">↗</span></span></a>
     <a href="/methodology"><strong>Metodología</strong><span>Cómo se calcula un análisis <span aria-hidden="true">↗</span></span></a>
     <a href="/pricing"><strong>Qué amplía Premium</strong><span>Compara los planes <span aria-hidden="true">↗</span></span></a>

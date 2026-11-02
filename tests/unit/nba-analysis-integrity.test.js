@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('$lib/services/authenticated-fetch.js', () => ({ authenticatedFetch: vi.fn() }));
 import { authenticatedFetch } from '$lib/services/authenticated-fetch.js';
 import { generateAIPicks, getPicksSummary, groupPicksByGame } from '../../src/lib/services/ai-picks-generator.js';
-import { pickKey, resultUpdate, savedAnalysis } from '../../src/routes/picks/pick-actions.js';
+import { pickKey, resultUpdate, savedAnalysis } from '../../src/lib/picks/pick-actions.js';
 
 const stats = { Lakers: { fullHome: 115 }, Celtics: { fullAway: 112 } };
 const game = (patch = {}) => ({ id: 'nba-1', homeTeam: 'Lakers', awayTeam: 'Celtics', status: 'Scheduled', lines: { FULL: 220 }, ...patch });

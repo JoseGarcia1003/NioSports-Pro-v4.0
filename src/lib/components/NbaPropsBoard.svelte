@@ -43,6 +43,7 @@
   onMount(() => {
     // ?game=<id> (from the NBA hub) opens the board filtered to that game.
     const requested = $page?.url?.searchParams?.get('game');
+    if ($page?.url?.searchParams?.get('vista') === 'equipos') view = 'teams';
     load().then(() => { if (requested && payload?.games?.some(g => String(g.id) === requested)) gameFilter = requested; });
     loadMarket();
     return () => controller?.abort();
