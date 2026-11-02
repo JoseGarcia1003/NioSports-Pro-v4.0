@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { getNbaTotals, normalizeTotals, median, sameTeam, supabaseStore, TOTALS_KEY } from '../../src/lib/server/odds-cache.js';
+import { getNbaTotals, normalizeTotals, median, sameTeam, supabaseStore, TOTALS_KEY, DIAG_KEY } from '../../src/lib/server/odds-cache.js';
 
 const event = (books) => ({ id: 'e1', commence_time: '2026-11-01T20:30:00Z', home_team: 'Orlando Magic', away_team: 'Boston Celtics', bookmakers: books });
 const book = (key, point, over = 1.91, under = 1.91) => ({ key, title: key, markets: [{ key: 'totals', last_update: '2026-11-01T18:00:00Z', outcomes: [{ name: 'Over', price: over, point }, { name: 'Under', price: under, point }] }] });
@@ -38,12 +38,33 @@ describe('NBA totals cache', () => {
 
   it('serves a fresh cached copy without spending credits', async () => {
     const now = Date.parse('2026-11-01T20:00:00Z');
-    const redis = fakeRedis({ [TOTALS_KEY]: { source: 'The Odds API', fetchedAt: '2026-11-01T18:00:00Z', events: [] } });
+    const redis = fakeRedis({ [TOTALS_KEY]: { source: 'The Odds API', fetchedAt: '2026-11-01T18:00:00Z', events: [{ id: 'e1', commenceTime: '2026-11-01T23:00:00Z' }] } });
     const fetchImpl = vi.fn();
     const r = await getNbaTotals({ store: redis, apiKey: 'k', fetchImpl, now });
     expect(r.ok).toBe(true);
     expect(r.cached).toBe(true);
     expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it('refreshes after an hour when the cached copy has no game left to start', async () => {
+    const now = Date.parse('2026-11-02T01:00:00Z');
+    const old = { source: 'The Odds API', fetchedAt: '2026-11-01T21:00:00Z', events: [{ id: 'e1', commenceTime: '2026-11-01T23:30:00Z' }] };
+    const fetchImpl = vi.fn(async () => okResponse([event([book('a', 227.5)])]));
+    const r = await getNbaTotals({ store: fakeRedis({ [TOTALS_KEY]: old }), apiKey: 'k', fetchImpl, now });
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(r.cached).toBe(false);
+    const recent = { ...old, fetchedAt: '2026-11-02T00:30:00Z' };
+    const again = vi.fn();
+    expect((await getNbaTotals({ store: fakeRedis({ [TOTALS_KEY]: recent }), apiKey: 'k', fetchImpl: again, now })).cached).toBe(true);
+    expect(again).not.toHaveBeenCalled();
+  });
+
+  it('records the upstream status of a failed refresh for diagnosis', async () => {
+    const redis = fakeRedis();
+    const r = await getNbaTotals({ store: redis, apiKey: 'k', fetchImpl: async () => new Response('{}', { status: 401 }), now: Date.parse('2026-11-02T01:00:00Z') });
+    expect(r).toMatchObject({ ok: false, upstreamStatus: 401 });
+    expect(redis.store.get(DIAG_KEY)).toMatchObject({ market: 'totals', upstreamStatus: 401 });
+    expect(JSON.stringify(redis.store.get(DIAG_KEY))).not.toContain('apiKey');
   });
 
   it('refreshes once when stale and stores the result', async () => {
@@ -122,6 +143,12 @@ describe('player points lines', () => {
     expect(String(fetchImpl.mock.calls[0][0])).toContain('markets=player_points');
     expect(r).toMatchObject({ ok: true, quotaRemaining: 480, creditsPerGame: 1, games: 1 });
     expect(s.m.get(PROPS_KEY).players['luka doncic'].eventId).toBe('e1');
+  });
+  it('records why no game could be fetched', async () => {
+    const s = store();
+    const r = await getNbaPlayerPoints({ store: s, apiKey: 'k', events, quotaHint: 400, fetchImpl: async () => new Response('{}', { status: 422 }), now });
+    expect(r).toMatchObject({ ok: false, reason: 'upstream_error', upstreamStatus: 422 });
+    expect(s.m.get(DIAG_KEY)).toMatchObject({ market: 'player_points', upstreamStatus: 422, games: 1 });
   });
   it('keeps a quota reserve for game totals', async () => {
     const fetchImpl = vi.fn();

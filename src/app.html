@@ -20,10 +20,14 @@
     <meta name="twitter:title" content="NioSports Pro — Análisis deportivo con datos" />
     <meta name="twitter:description" content="Análisis deportivo con datos y contexto para NBA y tenis, y control de tu bankroll." />
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap" rel="stylesheet">
+    <!-- Fonts: self-hosted (src/lib/styles/fonts.css). The two that paint the first
+         screen are preloaded so headings never swap fonts after rendering. -->
+    <link rel="preload" href="/fonts/barlow-condensed-latin-00a5e45f.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/dm-sans-latin-1c49a6eb.woff2" as="font" type="font/woff2" crossorigin>
+
+    <!-- Returning members get the loader instead of a flash of the public landing
+         while the session is restored (flag set by +layout.svelte; no personal data). -->
+    <script nonce="%sveltekit.nonce%">try{if(localStorage.getItem('nio:session'))document.documentElement.setAttribute('data-session','')}catch(e){}</script>
 
     %sveltekit.head%
   </head>

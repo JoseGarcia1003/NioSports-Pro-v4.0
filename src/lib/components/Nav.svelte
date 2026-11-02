@@ -3,7 +3,6 @@
   import { goto } from '$app/navigation';
   import { theme } from '$lib/stores/ui';
   import { currentUser } from '$lib/stores/auth';
-  import { logout } from '$lib/firebase';
   import { browser } from '$app/environment';
   import { onMount, onDestroy } from 'svelte';
   import Logo from '$lib/components/Logo.svelte';
@@ -42,6 +41,7 @@
 
   async function handleLogout() {
     closeUserMenu();
+    const { logout } = await import('$lib/firebase');
     await logout();
     goto('/');
   }

@@ -5,6 +5,7 @@
   import { onMount } from 'svelte';
   import { onNavigate } from '$app/navigation';
   import '$lib/styles/tokens.css';
+  import '$lib/styles/fonts.css';
   import '$lib/styles/brand.css';
   import '$lib/styles/animations.css';
   import { goto } from '$app/navigation';
@@ -18,7 +19,6 @@
   import ToastContainer from '$lib/components/ToastContainer.svelte';
 
 
-  import { initFirebase } from '$lib/firebase';
   import { authStore, isAuthenticated, authLoading } from '$lib/stores/auth';
   import { loadSubscription, resetSubscription } from '$lib/stores/subscription';
   import { theme } from '$lib/stores/ui';
@@ -28,7 +28,8 @@
   let subscriptionUser = null;
 
   onMount(async () => {
-  try { await initFirebase(); } catch { authStore.setUser(null); authStore.setError('No se pudo iniciar la autenticación'); }
+  // Firebase (auth + database, ~300 KB) loads after first paint, not in the entry bundle.
+  try { const { initFirebase } = await import('$lib/firebase'); await initFirebase(); } catch { authStore.setUser(null); authStore.setError('No se pudo iniciar la autenticación'); }
   document.documentElement.setAttribute('data-theme', $theme);
   });
 
@@ -41,6 +42,15 @@
       });
     });
   });
+
+  // Remember only that this browser had a session, so the landing can render from
+  // the server for visitors while members see the loader until auth resolves.
+  $: if (browser && !$authLoading) {
+    try {
+      if ($isAuthenticated) localStorage.setItem('nio:session', '1');
+      else { localStorage.removeItem('nio:session'); document.documentElement.removeAttribute('data-session'); }
+    } catch { /* storage unavailable: nothing to remember */ }
+  }
 
 $: if (browser && !$authLoading) {
     // Visitors only see the landing, the access screens and the legal pages;
@@ -59,6 +69,8 @@ $: if (browser && !$authLoading) {
     }
   }
 
+  // Pages that render fully on the server without waiting for the session.
+  $: isServerPublic = $page.url.pathname === '/' || $page.url.pathname.startsWith('/legal/');
   $: isPublicPage = PUBLIC_ROUTES.some(r => $page.url.pathname.startsWith(r));
   $: isLandingPage = !$isAuthenticated && $page.url.pathname === '/';
   $: showNav = !isPublicPage && !isLandingPage;
@@ -66,7 +78,7 @@ $: if (browser && !$authLoading) {
 
 <div data-theme={$theme} class="app">
   {#if $page.url.pathname === '/sports/nba' || $page.url.pathname === '/totales'}<CourtBackground />{/if}
-  {#if $authLoading}
+  {#if $authLoading && !isServerPublic}
     <div class="app-loading">
       <div class="app-loading__content">
         <div class="app-loading__logo">
@@ -81,6 +93,9 @@ $: if (browser && !$authLoading) {
       </div>
     </div>
   {:else}
+    {#if $authLoading}
+      <div class="app-loading session-loader" aria-hidden="true"><div class="app-loading__spinner"></div></div>
+    {/if}
     {#if showNav}
       <Nav />
       <DemoBanner />
@@ -224,6 +239,8 @@ $: if (browser && !$authLoading) {
     }
   }
 
+  .app-loading.session-loader { display: none; }
+  :global(html[data-session]) .app-loading.session-loader { display: flex; position: fixed; inset: 0; z-index: 1000; background: var(--nio-page); }
   .app-loading {
     min-height: 100vh;
     display: flex;

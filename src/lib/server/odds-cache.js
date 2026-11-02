@@ -5,6 +5,8 @@
 export const TOTALS_KEY = 'niosports:odds:nba:totals:v1';
 const LOCK_KEY = `${TOTALS_KEY}:lock`;
 export const TOTALS_TTL_SECONDS = 6 * 3600;
+export const EMPTY_TTL_SECONDS = 3600;
+export const DIAG_KEY = 'niosports:odds:nba:last-error:v1';
 const ODDS_URL = 'https://api.the-odds-api.com/v4/sports/basketball_nba/odds';
 
 export function normalizeTotals(events) {
@@ -40,7 +42,11 @@ export async function getNbaTotals({ store, apiKey, fetchImpl = fetch, now = Dat
 
   let cached;
   try { cached = await store.get(TOTALS_KEY); } catch { return { ok: false, reason: 'cache_unavailable' }; }
-  if (cached && now - Date.parse(cached.fetchedAt) < TOTALS_TTL_SECONDS * 1000) return { ok: true, ...cached, cached: true };
+  const age = cached ? now - Date.parse(cached.fetchedAt) : Infinity;
+  // A copy with no game still to start is useless for today's lines: refresh it
+  // after an hour instead of waiting for the full TTL (≤ 1 extra credit/hour).
+  const upcoming = cached && Array.isArray(cached.events) && cached.events.some(e => Date.parse(e.commenceTime) > now);
+  if (cached && age < (upcoming ? TOTALS_TTL_SECONDS : EMPTY_TTL_SECONDS) * 1000) return { ok: true, ...cached, cached: true };
 
   // Only one request refreshes; the rest keep serving the previous copy.
   const gotLock = await store.lock(LOCK_KEY, 60).catch(() => false);
@@ -50,7 +56,10 @@ export async function getNbaTotals({ store, apiKey, fetchImpl = fetch, now = Dat
     const url = `${ODDS_URL}?${new URLSearchParams({ apiKey, regions: 'us', markets: 'totals', oddsFormat: 'decimal', dateFormat: 'iso' })}`;
     const res = await fetchImpl(url, { signal: AbortSignal.timeout(8000) });
     const remaining = Number(res.headers.get('x-requests-remaining'));
-    if (!res.ok) return cached ? { ok: true, ...cached, cached: true, stale: true } : { ok: false, reason: 'upstream_error', upstreamStatus: res.status };
+    if (!res.ok) {
+      await store.put(DIAG_KEY, { market: 'totals', at: new Date(now).toISOString(), upstreamStatus: res.status, quotaRemaining: Number.isFinite(remaining) ? remaining : null }).catch(() => {});
+      return cached ? { ok: true, ...cached, cached: true, stale: true } : { ok: false, reason: 'upstream_error', upstreamStatus: res.status };
+    }
     const payload = {
       source: 'The Odds API',
       fetchedAt: new Date(now).toISOString(),
@@ -147,7 +156,7 @@ export async function getNbaPlayerPoints({ store, apiKey, events, quotaHint = nu
   if (!gotLock) return cached ? { ok: true, ...cached, cached: true, stale: true } : { ok: false, reason: 'refreshing' };
   try {
     const players = {};
-    let remaining = Number.isFinite(quotaHint) ? quotaHint : null, lastCost = null, fetched = 0;
+    let remaining = Number.isFinite(quotaHint) ? quotaHint : null, lastCost = null, fetched = 0, lastError = null;
     for (const event of upcoming) {
       if (remaining != null && remaining < QUOTA_RESERVE) break;
       const url = `${EVENT_URL(event.id)}?${new URLSearchParams({ apiKey, regions: 'us', markets: 'player_points', oddsFormat: 'decimal', dateFormat: 'iso' })}`;
@@ -156,11 +165,15 @@ export async function getNbaPlayerPoints({ store, apiKey, events, quotaHint = nu
       const c = Number(res.headers.get('x-requests-last'));
       if (Number.isFinite(r)) remaining = r;
       if (Number.isFinite(c)) lastCost = c;
-      if (!res.ok) continue;
+      if (!res.ok) { lastError = res.status; continue; }
       fetched++;
       for (const [k, v] of Object.entries(normalizePlayerPoints(await res.json()))) players[k] = { ...v, eventId: event.id };
     }
-    if (!fetched) return cached ? { ok: true, ...cached, cached: true, stale: true } : { ok: false, reason: 'upstream_error' };
+    if (!fetched) {
+      // Leave a trace (no key, no payload) so a silent failure can be diagnosed later.
+      await store.put(DIAG_KEY, { market: 'player_points', at: new Date(now).toISOString(), upstreamStatus: lastError, quotaRemaining: remaining, games: upcoming.length }).catch(() => {});
+      return cached ? { ok: true, ...cached, cached: true, stale: true } : { ok: false, reason: 'upstream_error', upstreamStatus: lastError };
+    }
     const payload = { source: 'The Odds API', market: 'player_points', fetchedAt: new Date(now).toISOString(), quotaRemaining: remaining, creditsPerGame: lastCost, games: fetched, players };
     await store.put(PROPS_KEY, payload);
     return { ok: true, ...payload, cached: false };
