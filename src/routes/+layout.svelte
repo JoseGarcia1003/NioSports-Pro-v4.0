@@ -13,7 +13,6 @@
   import Nav from '$lib/components/Nav.svelte';
   import BottomNav from '$lib/components/BottomNav.svelte';
   import DemoBanner from '$lib/components/DemoBanner.svelte';
-  import GameStrip from '$lib/components/GameStrip.svelte';
   import { safeNext } from '$lib/product/navigation.js';
   import ToastContainer from '$lib/components/ToastContainer.svelte';
   import UpdateNotice from '$lib/components/UpdateNotice.svelte';
@@ -104,7 +103,6 @@ $: if (browser && !$authLoading) {
     {/if}
 
     <main id="main-content" class="app-main" class:app-main--with-nav={showNav} class:app-main--with-bottom={showNav}>
-      {#if showNav && !['/', '/today'].includes($page.url.pathname)}<GameStrip />{/if}
       <slot />
     </main>
 

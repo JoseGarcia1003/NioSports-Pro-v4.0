@@ -28,7 +28,7 @@
   const playerLink=id=>`/tennis/player/${encodeURIComponent(id)}?${new URLSearchParams({tz:timezone,...(demo?{demo:'1',demoAt:data.fetchedAt}:{})})}`;
 </script>
 
-<svelte:head><title>{profile?.player.name||'Perfil de jugador'} · NioSports Tennis</title><meta name="description" content="Temporada, superficies, últimos partidos y fuentes del perfil de tenis."/></svelte:head>
+<svelte:head><title>{profile?.player.name||'Perfil de jugador'} · Tenis · NioSports Pro</title><meta name="description" content="Temporada, superficies, últimos partidos y fuentes del perfil de tenis."/></svelte:head>
 <div class="profile tennis-theme">
   <a class="back" href={`/tennis?${query}`}>← Volver al calendario de tenis</a>
   {#if loading}<p class="panel" role="status">Cargando ficha del jugador…</p>

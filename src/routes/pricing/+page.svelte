@@ -41,7 +41,7 @@
   }
 </script>
 
-<svelte:head><title>Planes — NioSports Pro</title></svelte:head>
+<svelte:head><title>Planes · NioSports Pro</title></svelte:head>
 
 <div class="page">
   <header class="head">

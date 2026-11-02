@@ -1,21 +1,19 @@
 <script>
   import { ArrowUpRight } from 'lucide-svelte';
-  import { subscription } from '$lib/stores/subscription.js';
-  import { currentUser, isAuthenticated } from '$lib/stores/auth.js';
-  import { planLabel } from '$lib/product/navigation.js';
+  import { currentUser } from '$lib/stores/auth.js';
   import NbaTodayBoard from './NbaTodayBoard.svelte';
 
   $: name = $currentUser?.displayName?.split(' ')[0];
   const today = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
 
   const shortcuts = [
-    { href: '/sports/nba/props', title: 'Props de jugadores', text: 'Cada jugador de hoy frente a la línea: L5, L10, L20 y temporada.', status: 'Datos reales', live: true },
-    { href: '/sports/nba/puntos', title: 'Mercado de puntos', text: 'Puntos por equipo y total del partido frente a la línea de las casas.', status: 'Datos reales', live: true },
-    { href: '/predictions', title: 'Señales del día', text: 'Props con lectura claramente favorable, selladas antes del partido.', status: 'Datos reales', live: true },
-    { href: '/sports/nba/estadisticas', title: 'Estadísticas NBA', text: 'Líderes de jugadores y equipos, ordenables por cualquier columna.', status: 'Datos reales', live: true },
-    { href: '/sports/nba/clasificacion', title: 'Clasificación NBA', text: 'Conferencias Este y Oeste con local, visitante, últimos 10 y racha.', status: 'Datos reales', live: true },
+    { href: '/sports/nba/props', title: 'Props de jugadores', text: 'Cada jugador de hoy frente a la línea: L5, L10, L20 y temporada.' },
+    { href: '/sports/nba/puntos', title: 'Mercado de puntos', text: 'Puntos por equipo y total del partido frente a la línea de las casas.' },
+    { href: '/predictions', title: 'Señales del día', text: 'Props con lectura claramente favorable, selladas antes del partido.' },
+    { href: '/sports/nba/estadisticas', title: 'Estadísticas NBA', text: 'Líderes de jugadores y equipos, ordenables por cualquier columna.' },
+    { href: '/sports/nba/clasificacion', title: 'Clasificación NBA', text: 'Conferencias Este y Oeste con local, visitante, últimos 10 y racha.' },
     { href: '/tennis', title: 'Tenis', text: 'Orden de juego, superficies, saque y resto.', status: 'Según cobertura', live: false },
-    { href: '/bankroll', title: 'Bankroll', text: 'Capital disponible, comprometido y beneficio separados.', status: 'Disponible', live: true }
+    { href: '/bankroll', title: 'Bankroll', text: 'Capital disponible, comprometido y beneficio separados.' }
   ];
 </script>
 
@@ -26,7 +24,6 @@
       <h1>{name ? `Hola, ${name}.` : 'Tu jornada deportiva.'}</h1>
       <p>Lo que se juega hoy, con fuente y hora. Desde aquí llegas a cada herramienta en un toque.</p>
     </div>
-    <a class="product-badge" href="/account">{$isAuthenticated ? planLabel($subscription) : 'Tu espacio'} <span aria-hidden="true">↗</span></a>
   </header>
 
   <div class="layout">
@@ -34,7 +31,7 @@
     <nav class="shortcuts" aria-label="Herramientas">
       {#each shortcuts as item}
         <a href={item.href}>
-          <span class="top"><strong>{item.title}</strong><span class="chip" class:on={item.live}>{item.status}</span></span>
+          <span class="top"><strong>{item.title}</strong>{#if item.status}<span class="chip">{item.status}</span>{/if}</span>
           <span class="text">{item.text}</span>
           <ArrowUpRight size={16} aria-hidden="true" />
         </a>
@@ -57,7 +54,6 @@
   .top strong { font-size: 16px; }
   .text { font-size: 13.5px; line-height: 1.55; color: var(--nio-muted); }
   .chip { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 999px; background: var(--nio-raised); color: var(--nio-muted); }
-  .chip.on { background: var(--nio-gold-soft); color: var(--nio-accent); border: 1px solid var(--nio-gold-border); }
   .foot { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
   @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
   @media (max-width: 640px) { .home.product-page { padding: 24px 16px 100px; } .home .product-heading { flex-direction: column; gap: 14px; } }

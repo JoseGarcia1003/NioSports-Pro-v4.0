@@ -6,7 +6,9 @@ const cases = [
   ['tracking', '/predictions#history-title'],
   ['stats', '/bankroll'],
   ['results', '/bankroll'],
-  ['totales', '/sports/nba/puntos']
+  ['totales', '/sports/nba/puntos'],
+  ['sports', '/sports/nba'],
+  ['public', '/predictions#history-title']
 ];
 
 describe('legacy routes', () => {

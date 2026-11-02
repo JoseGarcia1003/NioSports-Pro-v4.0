@@ -5,7 +5,7 @@
   import { gameStatus, totalLineFor, teamColor, teamStyle } from '$lib/product/teams.js';
 
   /** Link at the bottom of the board; visitors are sent to sign in instead of the app. */
-  export let cta = { href: '/sports/nba', label: 'Abrir el centro NBA' };
+  export let cta = { href: '/sports/nba', label: 'Ver todos los partidos' };
 
   // Today's real NBA slate with consensus total lines; never filled with samples.
   onMount(() => { loadNbaToday(); });

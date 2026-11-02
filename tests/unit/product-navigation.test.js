@@ -8,6 +8,6 @@ describe('product architecture',()=>{
  it('does not invent an available pick when there are none',()=>{for(const n of [0,-1,NaN,Infinity,1.5])expect(getMaxPicks('free',n)).toBe(0);});
  it('shows exactly one FREE selection and all available paid selections',()=>{expect(getMaxPicks('free',40)).toBe(1);expect(getMaxPicks('unknown',40)).toBe(1);expect(getMaxPicks('pro',40)).toBe(40);expect(getMaxPicks('elite',40)).toBe(40);});
  it('opens personal statistics and bankroll while retaining advanced export gating',()=>{expect(hasFeature('free','bankroll')).toBe(true);expect(hasFeature('free','fullStats')).toBe(true);expect(hasFeature('free','csvExport')).toBe(false);});
- it('distinguishes unavailable billing from a verified subscription',()=>{expect(planLabel({plan:'elite',status:'unavailable'})).toBe('Plan por verificar');expect(planLabel({plan:'elite',status:'canceled'})).toBe('FREE');expect(planLabel({plan:'pro',status:'trialing'})).toBe('Premium · Pro');});
+ it('distinguishes unavailable billing from a verified subscription',()=>{expect(planLabel({plan:'elite',status:'unavailable'})).toBe('Plan por verificar');expect(planLabel({plan:'elite',status:'canceled'})).toBe('Beta gratuita');expect(planLabel({plan:'pro',status:'trialing'})).toBe('Premium · Pro');});
  it('only returns to same-site paths after signing in',()=>{expect(safeNext('/sports/nba/props?x=1')).toBe('/sports/nba/props?x=1');for(const bad of ['https://evil.com','//evil.com','/\\evil.com','/login?next=/x','',null,'javascript:alert(1)'])expect(safeNext(bad)).toBe('/today');});
 });

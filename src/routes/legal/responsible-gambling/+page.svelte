@@ -1,5 +1,5 @@
 <svelte:head>
-  <title>Juego Responsable — NioSports Pro</title>
+  <title>Juego responsable · NioSports Pro</title>
 </svelte:head>
 
 <div class="legal-page">

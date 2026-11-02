@@ -16,6 +16,12 @@
   let venue = 'all';
   let minMinutes = 0;
   let sortBy = 'minutes';
+  // Long slates: show 20 players at a time; filters fold away on phones.
+  const PAGE = 20;
+  let shown = PAGE;
+  let showFilters = false;
+  $: activeFilters = (side !== 'over') + (venue !== 'all') + (minMinutes > 0) + (sortBy !== 'minutes');
+  $: stat, gameFilter, query, side, venue, minMinutes, sortBy, day, (shown = PAGE);
   let lines = {};
   let selected = null;
   let controller;
@@ -152,7 +158,10 @@
     <input type="search" placeholder="Buscar jugador o equipo (MIL)…" aria-label="Buscar jugador o equipo" bind:value={query} />
   </div>
 
-  <div class="filters">
+  <button type="button" class="filters-toggle" aria-expanded={showFilters} aria-controls="props-filters" on:click={() => (showFilters = !showFilters)}>
+    Filtros{activeFilters ? ` · ${activeFilters} activo${activeFilters === 1 ? '' : 's'}` : ''} <span aria-hidden="true">{showFilters ? '▲' : '▼'}</span>
+  </button>
+  <div class="filters" id="props-filters" class:collapsed={!showFilters}>
     <div class="segment" role="group" aria-label="Lado de la línea">
       <button type="button" class:on={side === 'over'} aria-pressed={side === 'over'} on:click={() => (side = 'over')}>Más de</button>
       <button type="button" class:on={side === 'under'} aria-pressed={side === 'under'} on:click={() => (side = 'under')}>Menos de</button>
@@ -199,7 +208,7 @@
         <div class="tr th" role="row">
           <span role="columnheader">Jugador</span><span role="columnheader">Línea</span><span role="columnheader">L5</span><span role="columnheader">L10</span><span role="columnheader">L20</span><span role="columnheader">Temp.</span><span role="columnheader">Prom. L10</span><span role="columnheader">Últimos 10</span>
         </div>
-        {#each rows as r (r.p.id)}
+        {#each rows.slice(0, shown) as r (r.p.id)}
           <div class="tr" role="row" class:active={selected === r.p.id}>
             <span role="cell" class="player-cell"><button type="button" class="player" on:click={() => select(r.p.id)} aria-expanded={selected === r.p.id}>
               <i class="badge" style={teamStyle(r.p.team)}>{r.p.team}</i>
@@ -226,6 +235,7 @@
           </div>
         {/each}
         {#if !rows.length}<p class="state">Ningún jugador coincide con la búsqueda.</p>{/if}
+        {#if rows.length > shown}<button type="button" class="more" on:click={() => (shown += PAGE)}>Mostrar {Math.min(PAGE, rows.length - shown)} jugadores más · {rows.length - shown} restantes</button>{/if}
       </div>
 
       {#if detail}
@@ -327,7 +337,7 @@
   .props { max-width: 1320px; margin: auto; padding: 8px 24px 100px; color: var(--nio-ink); font-family: var(--font-sans); font-variant-numeric: tabular-nums; }
   .head { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; }
   .eyebrow { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: var(--nio-muted); margin: 0 0 8px; }
-  h1 { font-family: var(--font-display); text-transform: uppercase; font-weight: 800; font-size: clamp(44px, 6vw, 76px); line-height: .95; margin: 0 0 12px; }
+  h1 { font-family: var(--font-display); text-transform: uppercase; font-weight: 800; font-size: clamp(34px, 4.2vw, 52px); line-height: .95; margin: 0 0 10px; }
   .lead { color: var(--nio-muted); max-width: 640px; margin: 0; line-height: 1.6; }
   .days, .chips, .games { display: flex; gap: 6px; flex-wrap: wrap; }
   button { font: inherit; cursor: pointer; }
@@ -341,6 +351,14 @@
   input[type='search'] { min-height: 40px; min-width: 260px; flex: 0 1 320px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-ink); font: inherit; }
   .games { margin-bottom: 16px; }
   .filters { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; margin: 4px 0 12px; }
+  .filters-toggle { display: none; }
+  .more { display: block; margin: 14px auto; min-height: 44px; padding: 0 18px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-raised); color: var(--nio-ink); font-weight: 700; }
+  .more:focus-visible, .filters-toggle:focus-visible { outline: 2px solid var(--nio-accent); outline-offset: 2px; }
+  @media (max-width: 640px) {
+    .filters-toggle { display: inline-flex; gap: 8px; align-items: center; min-height: 40px; margin: 0 0 10px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-ink); font-weight: 700; font-size: 14px; }
+    .filters-toggle span { font-size: 9px; color: var(--nio-accent); }
+    .filters.collapsed { display: none; }
+  }
   .segment { display: inline-flex; padding: 3px; border: 1px solid var(--nio-border); border-radius: 10px; background: var(--nio-surface); }
   .segment button { min-height: 34px; padding: 0 12px; border: 0; border-radius: 7px; background: none; color: var(--nio-muted); font-weight: 600; font-size: 13px; }
   .segment button.on { background: var(--nio-action); color: var(--nio-action-ink); }

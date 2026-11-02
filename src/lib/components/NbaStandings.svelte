@@ -88,7 +88,7 @@
   .standings { max-width: 1320px; margin: auto; padding: 8px 24px 100px; color: var(--nio-ink); font-variant-numeric: tabular-nums; }
   .head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
   .eyebrow { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: var(--nio-muted); margin: 0 0 8px; }
-  h1 { font-family: var(--font-display); text-transform: uppercase; font-weight: 800; font-size: clamp(40px, 5vw, 64px); line-height: .95; margin: 0 0 10px; }
+  h1 { font-family: var(--font-display); text-transform: uppercase; font-weight: 800; font-size: clamp(34px, 4.2vw, 52px); line-height: .95; margin: 0 0 10px; }
   h2 { font-family: var(--font-display); text-transform: uppercase; font-size: 22px; margin: 0 0 10px; }
   .lead { color: var(--nio-muted); max-width: 640px; margin: 0; line-height: 1.6; }
   .tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }

@@ -128,7 +128,7 @@
   .stats { max-width: 1320px; margin: auto; padding: 8px 24px 100px; color: var(--nio-ink); font-variant-numeric: tabular-nums; }
   .head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
   .eyebrow { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: var(--nio-muted); margin: 0 0 8px; }
-  h1 { font-family: var(--font-display); text-transform: uppercase; font-weight: 800; font-size: clamp(40px, 5vw, 64px); line-height: .95; margin: 0 0 10px; }
+  h1 { font-family: var(--font-display); text-transform: uppercase; font-weight: 800; font-size: clamp(34px, 4.2vw, 52px); line-height: .95; margin: 0 0 10px; }
   .lead { color: var(--nio-muted); max-width: 680px; margin: 0; line-height: 1.6; }
   .season, .select { display: grid; gap: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--nio-muted); }
   select, input[type='search'] { min-height: 40px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-ink); font: inherit; font-size: 14px; text-transform: none; letter-spacing: 0; }

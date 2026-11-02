@@ -4,7 +4,7 @@
   import { subscription } from '$lib/stores/subscription.js';
 </script>
 
-<svelte:head><title>Pronósticos · NioSports Pro</title></svelte:head>
+<svelte:head><title>Señales del día · NioSports Pro</title></svelte:head>
 
 <div class="product-page">
   <header class="product-heading">

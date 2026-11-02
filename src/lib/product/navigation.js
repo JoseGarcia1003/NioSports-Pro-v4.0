@@ -34,7 +34,7 @@ export function navActive(item, path) {
 export function planLabel(sub) {
   if (sub.status==='loading') return 'Consultando plan…';
   if (sub.status==='unavailable') return 'Plan por verificar';
-  return ['pro','elite'].includes(sub.plan)&&['active','trialing'].includes(sub.status)?`Premium · ${sub.plan==='elite'?'Elite':'Pro'}`:'FREE';
+  return ['pro','elite'].includes(sub.plan)&&['active','trialing'].includes(sub.status)?`Premium · ${sub.plan==='elite'?'Elite':'Pro'}`:'Beta gratuita';
 }
 
 /** Destination after signing in: only same-site paths, never back to /login. */

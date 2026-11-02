@@ -5,7 +5,7 @@
 </script>
 
 <svelte:head>
-  <title>Términos de Servicio — NioSports Pro</title>
+  <title>Términos · NioSports Pro</title>
 </svelte:head>
 
 <div class="legal-page">

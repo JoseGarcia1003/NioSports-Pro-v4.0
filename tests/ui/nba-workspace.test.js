@@ -5,9 +5,12 @@ import NbaWorkspace from '../../src/lib/components/NbaWorkspace.svelte';
 const game=(id,home,away)=>({id,status:'Final',home_team:{full_name:home,abbreviation:home.slice(0,3)},visitor_team:{full_name:away,abbreviation:away.slice(0,3)},home_team_score:102,visitor_team_score:99});
 const response=(data,source='balldontlie')=>new Response(JSON.stringify({data}),{headers:{'X-Data-Source':source}});
 afterEach(()=>{cleanup();vi.unstubAllGlobals();});
+// The calendar also asks for market totals; those get their own (unavailable) answer
+// so every assertion below still counts calendar requests only.
+const stubFetch=calendar=>vi.stubGlobal('fetch',(url,options)=>String(url).includes('/api/odds/')?Promise.resolve(new Response('{}',{status:503})):calendar(url,options));
 describe('NBA calendar interactions',()=>{
  it('filters teams and selects another match without inventing detailed statistics',async()=>{
-  vi.stubGlobal('fetch',vi.fn().mockResolvedValue(response([game(1,'Boston Celtics','Los Angeles Lakers'),game(2,'Miami Heat','New York Knicks')])));
+  stubFetch(vi.fn().mockResolvedValue(response([game(1,'Boston Celtics','Los Angeles Lakers'),game(2,'Miami Heat','New York Knicks')])));
   const screen=render(NbaWorkspace);
   await waitFor(()=>expect(screen.getByRole('region',{name:'Contexto del partido'}).textContent).toContain('Boston Celtics'));
   await fireEvent.click(screen.getByRole('button',{name:/Miami Heat/}));
@@ -18,7 +21,7 @@ describe('NBA calendar interactions',()=>{
  });
  it('discards a delayed response from today after switching to tomorrow',async()=>{
   let finishToday;const fetcher=vi.fn().mockImplementationOnce(()=>new Promise(resolve=>{finishToday=resolve;})).mockResolvedValueOnce(response([game(2,'Tomorrow Home','Tomorrow Away')]));
-  vi.stubGlobal('fetch',fetcher);const screen=render(NbaWorkspace);
+  stubFetch(fetcher);const screen=render(NbaWorkspace);
   await waitFor(()=>expect(fetcher).toHaveBeenCalledTimes(1));
   await fireEvent.click(screen.getByRole('button',{name:'Mañana',exact:true}));
   await waitFor(()=>expect(screen.getByRole('button',{name:/Tomorrow Home/})).toBeTruthy());
@@ -29,11 +32,22 @@ describe('NBA calendar interactions',()=>{
  });
  it('rejects fallback matches, then recovers through the retry action',async()=>{
   const fetcher=vi.fn().mockResolvedValueOnce(response([game(1,'Fake Home','Fake Away')],'mock-fallback')).mockResolvedValueOnce(response([]));
-  vi.stubGlobal('fetch',fetcher);const screen=render(NbaWorkspace);
+  stubFetch(fetcher);const screen=render(NbaWorkspace);
   await waitFor(()=>expect(screen.getByRole('alert').textContent).toContain('fuente disponible'));
   expect(screen.queryByRole('button',{name:/Fake Home/})).toBeNull();
   await fireEvent.click(screen.getByRole('button',{name:'Reintentar consulta'}));
   await waitFor(()=>expect(screen.getByText('Sin encuentros en el calendario recibido.')).toBeTruthy());
   expect(screen.queryByRole('alert')).toBeNull();
+ });
+ it('shows the market O/U per game and links to both NBA tools for the selected game',async()=>{
+  const g={id:9,status:'2026-11-02T23:30:00Z',datetime:'2026-11-02T23:30:00Z',home_team:{full_name:'Orlando Magic',name:'Magic',abbreviation:'ORL'},visitor_team:{full_name:'Boston Celtics',name:'Celtics',abbreviation:'BOS'}};
+  const totals={source:'The Odds API',fetchedAt:'2026-11-02T14:00:00Z',events:[{home:'Orlando Magic',away:'Boston Celtics',commenceTime:'2026-11-02T23:30:00Z',consensus:221.5,books:[{},{},{}]}]};
+  vi.stubGlobal('fetch',url=>Promise.resolve(String(url).includes('/api/odds/')?new Response(JSON.stringify(totals)):response([g])));
+  const screen=render(NbaWorkspace);
+  const report=await screen.findByRole('region',{name:'Contexto del partido'});
+  await waitFor(()=>expect(report.textContent).toContain('O/U 221,5'));
+  expect(screen.getByRole('button',{name:/Boston Celtics/}).textContent).toContain('O/U 221,5');
+  expect(screen.getByRole('link',{name:/Props de jugadores/}).getAttribute('href')).toBe('/sports/nba/props?game=9');
+  expect(screen.getByRole('link',{name:/Mercado de puntos/}).getAttribute('href')).toBe('/sports/nba/puntos?game=9');
  });
 });

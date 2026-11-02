@@ -4,7 +4,7 @@
 </script>
 
 <svelte:head>
-  <title>Política de Privacidad — NioSports Pro</title>
+  <title>Privacidad · NioSports Pro</title>
 </svelte:head>
 
 <div class="legal-page">

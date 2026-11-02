@@ -48,7 +48,7 @@
 </script>
 
 <svelte:head>
-  <title>Metodología — NioSports Pro</title>
+  <title>Metodología · NioSports Pro</title>
   <meta name="description" content="Cómo analiza NioSports Pro props de jugadores, props de equipo y tenis, y qué partes del sistema están disponibles hoy." />
 </svelte:head>
 
