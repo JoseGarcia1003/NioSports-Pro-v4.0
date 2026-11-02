@@ -1,5 +1,4 @@
 <script>
-  import CourtBackground from '$lib/components/CourtBackground.svelte';
   import '$lib/styles/premium.css';
   import '$lib/styles/product.css';
   import { onMount } from 'svelte';
@@ -80,7 +79,7 @@ $: if (browser && !$authLoading) {
 </script>
 
 <div data-theme={$theme} class="app">
-  {#if $page.url.pathname === '/sports/nba' || $page.url.pathname === '/totales'}<CourtBackground />{/if}
+  
   {#if $authLoading && !isServerPublic}
     <div class="app-loading">
       <div class="app-loading__content">

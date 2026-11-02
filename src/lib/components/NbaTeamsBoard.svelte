@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { teamColor } from '$lib/product/teams.js';
+  import { teamColor, teamStyle } from '$lib/product/teams.js';
   import { toTeamGame, rateVs, mean, teamReferenceLine, marketTotalFor } from '$lib/nba/team-props.js';
 
   /** Board games ({id, home, visitor, homeName, visitorName, datetime}). */
@@ -70,7 +70,7 @@
       {#each cards as c (c.g.id)}
         <article class="card">
           <header>
-            <span class="match"><i class="badge" style={`--team:${teamColor(c.g.visitor)}`}>{c.g.visitor}</i><span class="at">@</span><i class="badge" style={`--team:${teamColor(c.g.home)}`}>{c.g.home}</i></span>
+            <span class="match"><i class="badge" style={teamStyle(c.g.visitor)}>{c.g.visitor}</i><span class="at">@</span><i class="badge" style={teamStyle(c.g.home)}>{c.g.home}</i></span>
             <small>{timeFormat.format(new Date(c.g.datetime))}</small>
           </header>
 
@@ -138,7 +138,7 @@
   .match { display: inline-flex; align-items: center; gap: 8px; }
   .at { color: var(--nio-muted); font-weight: 600; }
   header small { color: var(--nio-muted); font-size: 12px; }
-  .badge { display: inline-grid; place-items: center; width: 44px; height: 28px; border-radius: 6px; background: var(--team); color: #fff; font-style: normal; font-family: var(--font-display); font-weight: 700; font-size: 15px; letter-spacing: .04em; box-shadow: inset 0 0 0 1px rgba(255,255,255,.14); }
+  .badge { display: inline-grid; place-items: center; width: 44px; height: 28px; border-radius: 6px; background: var(--team); color: var(--team-ink, #fff); font-style: normal; font-family: var(--font-display); font-weight: 700; font-size: 15px; letter-spacing: .04em; box-shadow: inset 0 0 0 1px rgba(255,255,255,.14); }
   .block { border-top: 1px solid var(--nio-border); padding-top: 12px; display: grid; gap: 8px; }
   .block-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
   h3 { margin: 0; font-family: var(--font-display); text-transform: uppercase; font-size: 17px; letter-spacing: .02em; }

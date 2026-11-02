@@ -51,3 +51,11 @@ describe('brand contrast (WCAG AA)', () => {
     expect(contrast('#777777', '#ffffff')).toBeCloseTo(4.48, 2);
   });
 });
+
+import { teamColor, teamInk } from '../../src/lib/product/teams.js';
+import { TEAMS } from '../../src/lib/nba/season.js';
+describe('team monogram badges', () => {
+  it('every team badge text reaches AA (4.5:1) on its own colour', () => {
+    for (const code of Object.keys(TEAMS)) expect(contrast(teamInk(code), teamColor(code)), code).toBeGreaterThanOrEqual(4.5);
+  });
+});

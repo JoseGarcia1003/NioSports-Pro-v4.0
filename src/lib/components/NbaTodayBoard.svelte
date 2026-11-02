@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { ArrowUpRight } from 'lucide-svelte';
   import { nbaToday, loadNbaToday } from '$lib/stores/nba-today.js';
-  import { gameStatus, totalLineFor, teamColor } from '$lib/product/teams.js';
+  import { gameStatus, totalLineFor, teamColor, teamStyle } from '$lib/product/teams.js';
 
   /** Link at the bottom of the board; visitors are sent to sign in instead of the app. */
   export let cta = { href: '/sports/nba', label: 'Abrir el centro NBA' };
@@ -31,7 +31,7 @@
           <div class="teams">
             {#each [game.visitor_team, game.home_team] as team, i}
               <span class="team">
-                <i class="badge" style={`--team:${teamColor(team.abbreviation)}`} aria-hidden="true">{team.abbreviation}</i>
+                <i class="badge" style={teamStyle(team.abbreviation)} aria-hidden="true">{team.abbreviation}</i>
                 <span class="name">{team.full_name}</span>
                 {#if st.score}<em class="score">{i === 0 ? game.visitor_team_score : game.home_team_score}</em>{/if}
               </span>
@@ -70,7 +70,7 @@
   .games li { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 13px 0; border-top: 1px solid var(--nio-border); }
   .teams { display: grid; gap: 8px; min-width: 0; flex: 1; }
   .team { display: flex; align-items: center; gap: 10px; min-width: 0; font-size: 14px; }
-  .badge { flex: none; display: inline-grid; place-items: center; width: 34px; height: 22px; border-radius: 6px; background: var(--team); color: #fff; font-style: normal; font-family: var(--font-display); font-weight: 700; font-size: 13px; letter-spacing: .04em; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .14); }
+  .badge { flex: none; display: inline-grid; place-items: center; width: 34px; height: 22px; border-radius: 6px; background: var(--team); color: var(--team-ink, #fff); font-style: normal; font-family: var(--font-display); font-weight: 700; font-size: 13px; letter-spacing: .04em; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .14); }
   .name { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--nio-ink); font-weight: 500; }
   .score { margin-left: auto; font-style: normal; font-family: var(--font-display); font-weight: 700; font-size: 20px; color: var(--nio-ink); padding-left: 8px; }
   .side { display: grid; justify-items: end; gap: 5px; }

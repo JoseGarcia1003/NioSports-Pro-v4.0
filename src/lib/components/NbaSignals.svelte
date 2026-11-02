@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { ArrowUpRight } from 'lucide-svelte';
   import { authenticatedFetch } from '$lib/services/authenticated-fetch.js';
-  import { teamColor } from '$lib/product/teams.js';
+  import { teamColor, teamStyle } from '$lib/product/teams.js';
 
   // Sealed daily signals and their settled history. Every figure comes from the
   // server; nothing is computed or filled in on the client.
@@ -53,7 +53,7 @@
           {#each data.edition.entries as s}
             <li class="card">
               <div class="top">
-                <i class="badge" style={`--team:${teamColor(s.team)}`}>{s.team}</i>
+                <i class="badge" style={teamStyle(s.team)}>{s.team}</i>
                 <div class="who"><b>{s.name}</b><small>{s.home ? 'vs' : '@'} {s.opponent} · {time(s.tipoff)}</small></div>
                 <span class="tally">{s.favour}▲ {s.against}▼</span>
               </div>
@@ -117,7 +117,7 @@
   .cards { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
   .card { border: 1px solid var(--nio-border); border-radius: 16px; background: linear-gradient(180deg, var(--nio-raised), var(--nio-surface) 120px); padding: 16px; display: grid; gap: 10px; }
   .top { display: flex; align-items: center; gap: 10px; }
-  .badge { flex: none; display: inline-grid; place-items: center; width: 40px; height: 26px; border-radius: 6px; background: var(--team); color: #fff; font-style: normal; font-family: var(--font-display); font-weight: 700; font-size: 14px; letter-spacing: .04em; box-shadow: inset 0 0 0 1px rgba(255,255,255,.14); }
+  .badge { flex: none; display: inline-grid; place-items: center; width: 40px; height: 26px; border-radius: 6px; background: var(--team); color: var(--team-ink, #fff); font-style: normal; font-family: var(--font-display); font-weight: 700; font-size: 14px; letter-spacing: .04em; box-shadow: inset 0 0 0 1px rgba(255,255,255,.14); }
   .who { display: grid; min-width: 0; }
   .who b { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .who small { font-size: 12px; color: var(--nio-muted); }

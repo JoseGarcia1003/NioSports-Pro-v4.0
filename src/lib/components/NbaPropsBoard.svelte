@@ -1,7 +1,7 @@
 <script>
   import { onMount, tick } from 'svelte';
   import { STATS, toGame, hitRate, average, referenceLine, seasonGames, statValue, defenseFor, splitRate, sided, sortRows, teammateSplit, defenseForPosition } from '$lib/nba/props.js';
-  import { teamColor, playerKey } from '$lib/product/teams.js';
+  import { teamColor, teamStyle, playerKey } from '$lib/product/teams.js';
   import { analyseProp } from '$lib/nba/analysis.js';
   import { authenticatedFetch } from '$lib/services/authenticated-fetch.js';
   import { page } from '$app/stores';
@@ -21,7 +21,9 @@
   let controller;
   let day = 0;
   let detailEl;
-  let view = 'players';
+  /** 'players' (Props jugadores) or 'teams' (Mercado de puntos): each has its own page. */
+  export let mode = 'players';
+  $: view = mode;
 
   async function load(nextDay = day) {
     day = nextDay;
@@ -43,7 +45,6 @@
   onMount(() => {
     // ?game=<id> (from the NBA hub) opens the board filtered to that game.
     const requested = $page?.url?.searchParams?.get('game');
-    if ($page?.url?.searchParams?.get('vista') === 'equipos') view = 'teams';
     load().then(() => { if (requested && payload?.games?.some(g => String(g.id) === requested)) gameFilter = requested; });
     loadMarket();
     return () => controller?.abort();
@@ -125,8 +126,8 @@
 <section class="props" aria-labelledby="props-title">
   <header class="head">
     <div>
-      <p class="eyebrow">NBA · Props de {view === 'teams' ? 'equipos' : 'jugadores'}</p>
-      <h1 id="props-title">Props del día</h1>
+      <p class="eyebrow">NBA · {view === 'teams' ? 'Equipos y totales' : 'Props del día'}</p>
+      <h1 id="props-title">{view === 'teams' ? 'Mercado de puntos' : 'Props de jugadores'}</h1>
       <p class="lead">{view === 'teams' ? 'Cuántas veces cada equipo y cada partido superaron la línea.' : 'Cuántas veces cada jugador superó la línea en sus últimos partidos.'} Datos oficiales de box score{#if payload?.statsThrough}{' '}hasta el {shortDate(payload.statsThrough)}{/if}.</p>
     </div>
     <div class="days" role="group" aria-label="Día">
@@ -135,10 +136,7 @@
     </div>
   </header>
 
-  <div class="views" role="tablist" aria-label="Tipo de prop">
-    <button type="button" role="tab" aria-selected={view === 'players'} class:on={view === 'players'} on:click={() => (view = 'players')}>Jugadores</button>
-    <button type="button" role="tab" aria-selected={view === 'teams'} class:on={view === 'teams'} on:click={() => (view = 'teams')}>Equipos</button>
-  </div>
+
 
   {#if view === 'players'}
   <p class="notice">
@@ -204,7 +202,7 @@
         {#each rows as r (r.p.id)}
           <div class="tr" role="row" class:active={selected === r.p.id}>
             <span role="cell" class="player-cell"><button type="button" class="player" on:click={() => select(r.p.id)} aria-expanded={selected === r.p.id}>
-              <i class="badge" style={`--team:${teamColor(r.p.team)}`}>{r.p.team}</i>
+              <i class="badge" style={teamStyle(r.p.team)}>{r.p.team}</i>
               <span><b>{r.p.name}</b><small>{r.p.home ? 'vs' : '@'} {r.p.opp} · {fmt(r.p.minutesL5)} min L5{#if r.def}{' '}<em class="def" class:good={r.def.rank <= 10} class:bad={r.def.rank > r.def.of - 10} title={`${r.p.opp} permite ${fmt(r.def.value)} por partido; puesto ${r.def.rank} de ${r.def.of} (1 = permite más)`}>DEF {r.def.rank}º</em>{/if}</small></span>
             </button></span>
             <span class="line" role="cell">
@@ -237,7 +235,7 @@
         {@const max = Math.max(detail.line * 1.6, ...games20.map(g => statValue(g, stat)), 1)}
         <aside class="detail" bind:this={detailEl} aria-label={`Detalle de ${detail.p.name}`}>
           <div class="detail-head">
-            <i class="badge big" style={`--team:${teamColor(detail.p.team)}`}>{detail.p.team}</i>
+            <i class="badge big" style={teamStyle(detail.p.team)}>{detail.p.team}</i>
             <div><h2>{detail.p.name}</h2><p>{STATS[stat].label} · {side === 'over' ? 'más de' : 'menos de'} {fmt(detail.line)} · {detail.p.home ? 'vs' : '@'} {detail.p.opp}</p></div>
             <button type="button" class="close" aria-label="Cerrar detalle" on:click={() => (selected = null)}>✕</button>
           </div>
@@ -326,16 +324,12 @@
   .mate label { display: grid; gap: 6px; font-size: 12px; font-weight: 600; color: var(--nio-muted); text-transform: uppercase; letter-spacing: .06em; }
   .mate select { min-height: 40px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-ink); font: inherit; font-size: 14px; text-transform: none; letter-spacing: 0; font-weight: 500; }
   .splits.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .props { max-width: 1320px; margin: auto; padding: 28px 24px 100px; color: var(--nio-ink); font-family: var(--font-sans); font-variant-numeric: tabular-nums; }
+  .props { max-width: 1320px; margin: auto; padding: 8px 24px 100px; color: var(--nio-ink); font-family: var(--font-sans); font-variant-numeric: tabular-nums; }
   .head { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; }
   .eyebrow { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: var(--nio-muted); margin: 0 0 8px; }
   h1 { font-family: var(--font-display); text-transform: uppercase; font-weight: 800; font-size: clamp(44px, 6vw, 76px); line-height: .95; margin: 0 0 12px; }
   .lead { color: var(--nio-muted); max-width: 640px; margin: 0; line-height: 1.6; }
   .days, .chips, .games { display: flex; gap: 6px; flex-wrap: wrap; }
-  .views { display: inline-flex; gap: 4px; margin: 22px 0 0; padding: 4px; border-radius: 12px; border: 1px solid var(--nio-border); background: var(--nio-surface); }
-  .views button { min-height: 38px; padding: 0 18px; border-radius: 9px; border: 0; background: transparent; color: var(--nio-muted); font-weight: 700; font-size: 14px; }
-  .views button.on { background: var(--nio-action); color: var(--nio-action-ink); }
-  .views button:focus-visible { outline: 2px solid var(--nio-accent); outline-offset: 2px; }
   button { font: inherit; cursor: pointer; }
   .days button, .chips button, .games button { min-height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-muted); font-weight: 600; font-size: 13px; }
   .days button.on, .chips button.on, .games button.on { background: var(--nio-action); color: var(--nio-action-ink); border-color: transparent; }
@@ -363,7 +357,7 @@
   .player span { display: grid; min-width: 0; }
   .player b { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .player small { font-size: 12px; color: var(--nio-muted); }
-  .badge { flex: none; display: inline-grid; place-items: center; width: 38px; height: 24px; border-radius: 6px; background: var(--team); color: #fff; font-style: normal; font-family: var(--font-display); font-weight: 700; font-size: 13px; letter-spacing: .04em; box-shadow: inset 0 0 0 1px rgba(255,255,255,.14); }
+  .badge { flex: none; display: inline-grid; place-items: center; width: 38px; height: 24px; border-radius: 6px; background: var(--team); color: var(--team-ink, #fff); font-style: normal; font-family: var(--font-display); font-weight: 700; font-size: 13px; letter-spacing: .04em; box-shadow: inset 0 0 0 1px rgba(255,255,255,.14); }
   .badge.big { width: 52px; height: 34px; font-size: 17px; }
   .line { display: inline-flex; align-items: center; gap: 4px; }
   .line button { width: 26px; height: 26px; border-radius: 7px; border: 1px solid var(--nio-border); background: var(--nio-raised); color: var(--nio-ink); line-height: 1; }
