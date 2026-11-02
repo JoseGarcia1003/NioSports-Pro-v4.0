@@ -43,12 +43,10 @@
 <div class="account-stage"><div class="account-shell">
   <div class="page-context"><span>MI CUENTA <ChevronRight size={13} /> Tu espacio</span><span class="context-note">Análisis. Criterio. Control.</span></div>
   <header class="account-hero">
-    <img class="hero-photo" src="/images/court-night.jpg" alt="" width="1536" height="1024" fetchpriority="high" />
-    <div class="hero-shade"></div>
     <div class="hero-content"><span class="account-eyebrow hero-eyebrow"><i></i> NIOSPORTS / TU ESPACIO PERSONAL</span>
       <h1>{#if firstName}Hola, {firstName}.<br /><span>Vuelve a tu juego.</span>{:else}Cada decisión,<br /><span>con perspectiva.</span>{/if}</h1>
       <p>Analiza el partido. Entiende el riesgo.<br /> Lleva el control de tu capital, desde un solo lugar.</p>
-      <div class="hero-actions"><a class="account-button button-ivory" href="/predictions">Explorar pronósticos <ArrowUpRight size={18} /></a><a class="hero-secondary" href="/methodology">Conoce el método <ArrowRight size={16} /></a></div>
+      <div class="hero-actions"><a class="account-button button-ivory" href="/sports/nba/props">Ver props del día <ArrowUpRight size={18} /></a><a class="hero-secondary" href="/methodology">Conoce el método <ArrowRight size={16} /></a></div>
     </div>
     <div class="hero-signature" aria-hidden="true"><span>LA PASIÓN ES TUYA.</span><strong>El criterio, también.</strong><i></i></div>
     <div class="hero-bottom"><span>NBA <i></i> TENIS</span><span>Una mirada más allá del marcador <ArrowUpRight size={14} /></span></div>
