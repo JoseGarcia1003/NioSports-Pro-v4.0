@@ -77,10 +77,10 @@ describe('service worker privacy', () => {
     expect(pwa.options.workbox.navigateFallback).toBeNull();
   });
 
-  it('allows only font responses in the runtime cache', () => {
-    expect(matchingRule('https://fonts.googleapis.com/css2?family=Inter').handler).toBe('CacheFirst');
+  it('caches no third-party or data responses at runtime (fonts are self-hosted and precached)', () => {
+    expect(matchingRule('https://fonts.googleapis.com/css2?family=Inter')).toBeUndefined();
     expect(matchingRule('https://fixture.test/data/private.json')).toBeUndefined();
-    // Authorization takes precedence even for an otherwise cacheable URL.
+    // Authorization always forces the network.
     expect(matchingRule('https://fonts.googleapis.com/css2', 'Bearer account-A').handler).toBe('NetworkOnly');
   });
 
@@ -96,6 +96,6 @@ describe('service worker privacy', () => {
     });
     activate({ waitUntil: (promise) => { completion = promise; } });
     await completion;
-    expect([...names]).toEqual(['google-fonts', 'workbox-precache-v2']);
+    expect([...names]).toEqual(['workbox-precache-v2']);
   });
 });
