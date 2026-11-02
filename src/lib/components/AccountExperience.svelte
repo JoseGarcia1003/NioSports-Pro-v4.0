@@ -24,7 +24,7 @@
   const tools = [
     { title: 'Mis estadísticas', description: 'La perspectiva de tu propio historial.', href: '/stats', icon: ChartNoAxesCombined, tag: 'RENDIMIENTO' },
     { title: 'Resultados', description: 'Vuelve a tus selecciones resueltas.', href: '/results', icon: History, tag: 'SEGUIMIENTO' },
-    { title: 'Validación del modelo', description: 'Pronósticos y resultados bajo revisión.', href: '/tracking', icon: ShieldCheck, tag: 'TRANSPARENCIA' }
+    { title: 'Historial verificable', description: 'Señales selladas antes del partido y su resultado real.', href: '/predictions', icon: ShieldCheck, tag: 'TRANSPARENCIA' }
   ];
   async function portal() {
     if (busy) return;

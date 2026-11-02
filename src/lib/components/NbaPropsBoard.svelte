@@ -4,6 +4,7 @@
   import { teamColor, playerKey } from '$lib/product/teams.js';
   import { analyseProp } from '$lib/nba/analysis.js';
   import { authenticatedFetch } from '$lib/services/authenticated-fetch.js';
+  import { page } from '$app/stores';
 
   let state = 'loading';
   let payload = null;
@@ -37,7 +38,13 @@
       if (err?.name !== 'AbortError') state = 'unavailable';
     }
   }
-  onMount(() => { load(); loadMarket(); return () => controller?.abort(); });
+  onMount(() => {
+    // ?game=<id> (from the NBA hub) opens the board filtered to that game.
+    const requested = $page?.url?.searchParams?.get('game');
+    load().then(() => { if (requested && payload?.games?.some(g => String(g.id) === requested)) gameFilter = requested; });
+    loadMarket();
+    return () => controller?.abort();
+  });
 
   // Sportsbook player-points lines (consensus across books), when available.
   let market = null;
