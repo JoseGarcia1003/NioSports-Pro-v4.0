@@ -17,6 +17,7 @@
   import GameStrip from '$lib/components/GameStrip.svelte';
   import { safeNext } from '$lib/product/navigation.js';
   import ToastContainer from '$lib/components/ToastContainer.svelte';
+  import UpdateNotice from '$lib/components/UpdateNotice.svelte';
 
 
   import { authStore, isAuthenticated, authLoading } from '$lib/stores/auth';
@@ -113,6 +114,7 @@ $: if (browser && !$authLoading) {
   {/if}
 
   <ToastContainer />
+  <UpdateNotice />
 </div>
 
 <style>

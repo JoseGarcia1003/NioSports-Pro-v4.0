@@ -14,6 +14,10 @@ const config = {
       runtime: 'nodejs24.x',
     }),
 
+    // Detects a new deployment so an open tab never keeps running old code:
+    // the layout reloads fully on the next navigation and offers an update.
+    version: { pollInterval: 60_000 },
+
     // Alias $lib → src/lib (disponible en todos los archivos .svelte y .js)
     // Uso: import { authStore } from '$lib/stores/auth'
     // Sin alias necesitarías: import { authStore } from '../../lib/stores/auth'
