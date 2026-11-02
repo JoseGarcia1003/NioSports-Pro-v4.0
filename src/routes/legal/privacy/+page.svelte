@@ -20,7 +20,7 @@
       <p><strong>Datos de cuenta:</strong> email y UID proporcionados por Firebase Authentication al registrarte.</p>
       <p><strong>Datos de uso:</strong> picks guardados, transacciones de bankroll, y preferencias de la aplicación almacenados en Supabase PostgreSQL.</p>
       <p><strong>Datos de pago:</strong> procesados exclusivamente por Stripe. NioSports Pro nunca almacena números de tarjeta ni datos financieros.</p>
-      <p><strong>Datos técnicos:</strong> errores capturados por Sentry (anonimizados, sin PII).</p>
+      <p><strong>Datos técnicos:</strong> mediciones anónimas de rendimiento (tiempos de carga y respuesta) y errores técnicos. Solo registramos la sección de la página (por ejemplo, «props»), el tipo de dispositivo (móvil o escritorio) y la medición; nunca tu identidad, tu correo ni tu dirección IP. Se conservan 30 días.</p>
     </section>
 
     <section>
@@ -40,8 +40,7 @@
         <li><strong>Firebase (Google):</strong> autenticación</li>
         <li><strong>Supabase:</strong> base de datos (servidores AWS us-east-1)</li>
         <li><strong>Stripe:</strong> procesamiento de pagos</li>
-        <li><strong>Sentry:</strong> monitoreo de errores</li>
-        <li><strong>Upstash:</strong> rate limiting (sin datos personales)</li>
+        <li><strong>Sentry:</strong> monitoreo de errores, solo si se activa (hoy no lo está)</li>
         <li><strong>Vercel / Railway:</strong> infraestructura de hosting</li>
       </ul>
     </section>

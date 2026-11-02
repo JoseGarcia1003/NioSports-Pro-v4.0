@@ -1,6 +1,8 @@
 // src/hooks.server.js
 
 import * as Sentry from '@sentry/sveltekit';
+import { adminDatabase } from '$lib/server/entitlements.js';
+import { recordServerError } from '$lib/server/telemetry.js';
 
 const DSN = process.env.VITE_SENTRY_DSN || process.env.SENTRY_DSN;
 
@@ -29,6 +31,10 @@ export const handleError = Sentry.handleErrorWithSentry(
       return;
     }
     console.error(`[hooks.server] Error en ${path}:`, error?.message || error);
+    // First-party record (route pattern, message, status); never blocks or throws.
+    let db = null;
+    try { db = adminDatabase(); } catch { /* database not configured */ }
+    if (db) return recordServerError(db, { route: event?.route?.id || path, message: error?.message || String(error), status: error?.status });
   }
 );
 

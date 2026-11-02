@@ -29,6 +29,8 @@
   let subscriptionUser = null;
 
   onMount(async () => {
+  // Anonymous real-user Web Vitals and error reporting (route pattern only).
+  import('$lib/telemetry.js').then(m => m.startTelemetry(() => $page.route?.id)).catch(() => {});
   // Firebase (auth + database, ~300 KB) loads after first paint, not in the entry bundle.
   try { const { initFirebase } = await import('$lib/firebase'); await initFirebase(); } catch { authStore.setUser(null); authStore.setError('No se pudo iniciar la autenticación'); }
   document.documentElement.setAttribute('data-theme', $theme);
