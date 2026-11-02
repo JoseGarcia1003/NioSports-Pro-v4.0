@@ -5,6 +5,7 @@
   import { analyseProp } from '$lib/nba/analysis.js';
   import { authenticatedFetch } from '$lib/services/authenticated-fetch.js';
   import { page } from '$app/stores';
+  import NbaTeamsBoard from './NbaTeamsBoard.svelte';
 
   let state = 'loading';
   let payload = null;
@@ -20,6 +21,7 @@
   let controller;
   let day = 0;
   let detailEl;
+  let view = 'players';
 
   async function load(nextDay = day) {
     day = nextDay;
@@ -122,9 +124,9 @@
 <section class="props" aria-labelledby="props-title">
   <header class="head">
     <div>
-      <p class="eyebrow">NBA · Props de jugadores</p>
+      <p class="eyebrow">NBA · Props de {view === 'teams' ? 'equipos' : 'jugadores'}</p>
       <h1 id="props-title">Props del día</h1>
-      <p class="lead">Cuántas veces cada jugador superó la línea en sus últimos partidos. Datos oficiales de box score{#if payload?.statsThrough}{' '}hasta el {shortDate(payload.statsThrough)}{/if}.</p>
+      <p class="lead">{view === 'teams' ? 'Cuántas veces cada equipo y cada partido superaron la línea.' : 'Cuántas veces cada jugador superó la línea en sus últimos partidos.'} Datos oficiales de box score{#if payload?.statsThrough}{' '}hasta el {shortDate(payload.statsThrough)}{/if}.</p>
     </div>
     <div class="days" role="group" aria-label="Día">
       <button type="button" class:on={day === 0} aria-pressed={day === 0} on:click={() => load(0)}>Hoy</button>
@@ -132,6 +134,12 @@
     </div>
   </header>
 
+  <div class="views" role="tablist" aria-label="Tipo de prop">
+    <button type="button" role="tab" aria-selected={view === 'players'} class:on={view === 'players'} on:click={() => (view = 'players')}>Jugadores</button>
+    <button type="button" role="tab" aria-selected={view === 'teams'} class:on={view === 'teams'} on:click={() => (view = 'teams')}>Equipos</button>
+  </div>
+
+  {#if view === 'players'}
   <p class="notice">
     {#if market}<b>«Casa»</b>: línea real de puntos, mediana entre casas de apuestas ({market.source}, actualizada {timeFormat.format(new Date(market.fetchedAt))}). {/if}<b>«Ref.»</b>: línea de referencia (mediana de sus últimos 10 partidos ajustada a ,5), <b>no es la línea de una casa</b>. Ajusta cualquiera con − / +.
   </p>
@@ -167,6 +175,8 @@
     </label>
   </div>
 
+  {/if}
+
   {#if payload?.games?.length}
     <div class="games" role="group" aria-label="Partido">
       <button type="button" class:on={gameFilter === 'all'} on:click={() => (gameFilter = 'all')}>Todos · {payload.games.length}</button>
@@ -180,6 +190,8 @@
     <p class="state" role="status">Cargando jugadores y estadísticas…</p>
   {:else if state === 'unavailable'}
     <div class="state"><p>No pudimos cargar las estadísticas ahora mismo. No mostramos cifras sin fuente.</p><button type="button" on:click={() => load()}>Reintentar</button></div>
+  {:else if view === 'teams' && payload?.games?.length}
+    <NbaTeamsBoard games={payload.games} teams={payload.teams ?? null} {gameFilter} bind:side />
   {:else if state === 'empty'}
     <p class="state">No hay partidos o jugadores con datos suficientes para este día.</p>
   {:else}
@@ -319,6 +331,10 @@
   h1 { font-family: var(--font-display); text-transform: uppercase; font-weight: 800; font-size: clamp(44px, 6vw, 76px); line-height: .95; margin: 0 0 12px; }
   .lead { color: var(--nio-muted); max-width: 640px; margin: 0; line-height: 1.6; }
   .days, .chips, .games { display: flex; gap: 6px; flex-wrap: wrap; }
+  .views { display: inline-flex; gap: 4px; margin: 22px 0 0; padding: 4px; border-radius: 12px; border: 1px solid var(--nio-border); background: var(--nio-surface); }
+  .views button { min-height: 38px; padding: 0 18px; border-radius: 9px; border: 0; background: transparent; color: var(--nio-muted); font-weight: 700; font-size: 14px; }
+  .views button.on { background: var(--nio-action); color: var(--nio-action-ink); }
+  .views button:focus-visible { outline: 2px solid var(--nio-accent); outline-offset: 2px; }
   button { font: inherit; cursor: pointer; }
   .days button, .chips button, .games button { min-height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-muted); font-weight: 600; font-size: 13px; }
   .days button.on, .chips button.on, .games button.on { background: var(--nio-action); color: var(--nio-action-ink); border-color: transparent; }

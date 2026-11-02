@@ -67,7 +67,11 @@ export async function loadBoard(db, apiKey, offset = 0) {
       }
     }
   }
-  return { day, games, players, statsThrough, season, defense, defenseByPosition };
+  // Team points scored/allowed per game (team props); optional like the rest of the context.
+  let teamGames = null;
+  const recent = await db.rpc('nba_team_recent_games', { p_teams: teams, p_limit: 20 });
+  if (!recent.error) teamGames = Object.fromEntries((recent.data || []).map(r => [r.team, r.games]));
+  return { day, games, players, statsThrough, season, defense, defenseByPosition, teams: teamGames };
 }
 
 /** Rows {team, pos, games, pts, reb, ast, fg3m} → { [team]: { [pos]: {...} } }. */

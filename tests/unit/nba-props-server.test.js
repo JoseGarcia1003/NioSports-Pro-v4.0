@@ -80,12 +80,13 @@ describe('defense by position on the board', () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify(schedule))));
     const rows = [{ player_id: 7, player_name: 'Jayson Tatum', team: 'BOS', games: [game(36)] }];
     const db = positions => ({
-      rpc: vi.fn(async name => ({ data: name === 'nba_recent_player_games' ? rows.map(r => ({ ...r, games: r.games.map(g => [...g.slice(0, 9), 'BOS']) })) : name === 'nba_team_allowed' ? [] : [{ team: 'ORL', pos: 'F', games: 5, pts: 40, reb: 14, ast: 6, fg3m: 5 }], error: null })),
+      rpc: vi.fn(async name => ({ data: name === 'nba_recent_player_games' ? rows.map(r => ({ ...r, games: r.games.map(g => [...g.slice(0, 9), 'BOS']) })) : name === 'nba_team_allowed' ? [] : name === 'nba_team_recent_games' ? [{ team: 'BOS', games: [['2026-10-30', 'CHI', true, 125, 111, '2026-27']] }] : [{ team: 'ORL', pos: 'F', games: 5, pts: 40, reb: 14, ast: 6, fg3m: 5 }], error: null })),
       from: () => ({ select: () => ({ in: async () => ({ data: positions, error: null }) }) })
     });
     const withPos = await loadBoard(db([{ player_id: 7, position: 'F-G' }]), 'key');
     expect(withPos.players[0].position).toBe('F-G');
     expect(withPos.defenseByPosition).toEqual({ ORL: { F: { games: 5, pts: 40, reb: 14, ast: 6, fg3m: 5 } } });
+    expect(withPos.teams).toEqual({ BOS: [['2026-10-30', 'CHI', true, 125, 111, '2026-27']] });
     const without = await loadBoard(db([]), 'key');
     expect(without.players[0].position).toBeNull();
     expect(without.defenseByPosition).toBeNull();

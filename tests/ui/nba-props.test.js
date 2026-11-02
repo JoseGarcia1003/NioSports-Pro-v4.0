@@ -123,4 +123,25 @@ describe('NBA props board', () => {
     expect(detail.textContent).toContain('41,5');
     expect(detail.textContent).toContain('1º de 2');
   });
+  it('shows team points and the game total against the market line in the Equipos view', async () => {
+    const tg = (pf, pa) => ['2026-10-30', 'CHI', true, pf, pa, '2026-27'];
+    const withTeams = { ...payload, games: [{ ...payload.games[0], homeName: 'Orlando Magic', visitorName: 'Boston Celtics' }],
+      teams: { BOS: [tg(120, 110), tg(118, 100), tg(105, 99), tg(125, 111), tg(112, 108)], ORL: [tg(101, 104), tg(99, 110), tg(108, 96), tg(110, 115), tg(97, 102)] } };
+    const totals = { source: 'The Odds API', fetchedAt: '2026-11-01T20:00:00Z', events: [{ home: 'Orlando Magic', away: 'Boston Celtics', commenceTime: '2026-11-01T20:30:00Z', consensus: 211.5, books: [{}, {}, {}] }] };
+    vi.stubGlobal('fetch', vi.fn(async url => String(url).includes('/api/odds/nba-totals') ? new Response(JSON.stringify(totals)) : String(url).includes('/api/odds/') ? new Response('{}', { status: 503 }) : new Response(JSON.stringify(withTeams))));
+    const screen = render(NbaPropsBoard);
+    await waitFor(() => expect(screen.getByText('Jayson Tatum')).toBeTruthy());
+    await fireEvent.click(screen.getByRole('tab', { name: 'Equipos' }));
+    const teams = await screen.findByRole('region', { name: 'Props de equipo' });
+    await waitFor(() => expect(teams.textContent).toContain('211,5'));
+    expect(teams.textContent).toContain('Casa');
+    // BOS totals 230, 218, 204, 236, 220 vs 211,5 → 4/5; BOS points ref: median(120,118,105,125,112)=118 → 118,5 → 2/5
+    expect(teams.textContent).toContain('Total del partido');
+    expect(teams.textContent).toContain('4/5');
+    expect(teams.textContent).toContain('Puntos de BOS');
+    expect(teams.textContent).toContain('118,5');
+    await fireEvent.click(screen.getByRole('button', { name: 'Subir línea del total' }));
+    expect(teams.textContent).toContain('212');
+    expect(teams.textContent).toContain('Tuya');
+  });
 });
