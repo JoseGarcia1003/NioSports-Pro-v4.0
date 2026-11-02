@@ -5,8 +5,8 @@
 
   const offer = [
     { title: 'Calendario NBA', status: 'Disponible', live: true, text: 'Partidos de hoy y mañana con datos del proveedor, hora local y estado del encuentro.', href: '/sports/nba' },
-    { title: 'Props de jugadores', status: 'Disponible', live: true, text: 'Tasa de acierto L5/L10/L20 y de temporada frente a la línea, con el gráfico partido a partido.', href: '/sports/nba/props' },
-    { title: 'Props de equipo y totales', status: 'En construcción', live: false, text: 'Ritmo, eficiencia, descanso y periodos por separado: partido, mitad y primer cuarto.' },
+    { title: 'Props de jugadores', status: 'Disponible', live: true, text: 'Acierto L5/L10/L20 y de temporada frente a la línea, local/visitante, con y sin un compañero, y la defensa del rival.', href: '/sports/nba/props' },
+    { title: 'Props de equipo y totales', status: 'Disponible', live: true, text: 'Puntos de cada equipo y total del partido frente a la línea real de las casas. Mitades y cuartos, más adelante.', href: '/sports/nba/props?vista=equipos' },
     { title: 'Tenis por superficie', status: 'Demostración', live: false, text: 'Rendimiento de la temporada en cada pista, saque y resto. Hoy con ejemplos identificados.', href: '/tennis?demo=1' },
     { title: 'Tu bankroll', status: 'Disponible', live: true, text: 'Capital disponible, comprometido y beneficio separados. Un registro, no una casa de apuestas.', href: '/bankroll?demo=1' }
   ];

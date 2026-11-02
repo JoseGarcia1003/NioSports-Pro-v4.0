@@ -1,9 +1,9 @@
 <script>
   const status = [
-    { label: 'Datos deportivos en vivo', value: 'Sin conectar', note: 'El proveedor de datos todavía no está contratado. Las pantallas lo indican en lugar de rellenar huecos.' },
-    { label: 'Modelos predictivos', value: 'En reconstrucción', note: 'Ningún modelo está habilitado para publicar pronósticos. El modelo anterior quedó retirado por no superar la revisión.' },
+    { label: 'Datos deportivos', value: 'Conectados', note: 'Calendario (balldontlie), estadísticas oficiales por jugador y partido (stats.nba.com, carga diaria) y líneas de las casas (The Odds API, plan gratuito: totales y puntos de jugadores). Sin lesiones confirmadas todavía.' },
+    { label: 'Modelos predictivos', value: 'En reconstrucción', note: 'Ningún modelo publica probabilidades. La «lectura de los datos» es un resumen por reglas de señales a favor y en contra, no una probabilidad.' },
     { label: 'Probabilidades calibradas', value: 'No disponibles', note: 'Calibrar exige resultados reales posteriores al entrenamiento. No mostramos porcentajes sin esa comprobación.' },
-    { label: 'Historial de acierto', value: 'Sin publicar', note: 'Solo contará un pick registrado con fecha y hora antes del inicio del partido.' }
+    { label: 'Historial de señales', value: 'En marcha', note: 'Las señales se sellan antes del partido, no se editan y se liquidan con el box score oficial. La muestra aún es pequeña para medir acierto.' }
   ];
 
   const scopes = [
