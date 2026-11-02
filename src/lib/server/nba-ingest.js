@@ -60,3 +60,30 @@ export function parseBatch(body) {
   });
   return invalid.length ? { error: 'invalid rows', invalid } : { rows };
 }
+
+// ── Player positions (stats.nba.com PlayerIndex) ─────────────────────────────
+export const MAX_PLAYERS = 1000;
+const POSITION = /^[GFC](-[GFC])?$/;
+
+/** Validates { season, players: [{ player_id, player_name, team?, position }] }. */
+export function parsePlayers(body) {
+  if (!body || typeof body.season !== 'string' || !/^[0-9]{4}-[0-9]{2}$/.test(body.season)) return { error: 'season' };
+  if (!Array.isArray(body.players) || !body.players.length || body.players.length > MAX_PLAYERS) return { error: `players must contain 1-${MAX_PLAYERS} items` };
+  const invalid = [], rows = [], seen = new Set();
+  body.players.forEach((p, i) => {
+    const errors = [];
+    if (!p || typeof p !== 'object') errors.push('not an object');
+    else {
+      if (!int(p.player_id, 2_000_000_000, 1)) errors.push('player_id');
+      if (typeof p.player_name !== 'string' || !p.player_name.trim() || p.player_name.length > 80) errors.push('player_name');
+      if (p.team != null && !TEAM.test(p.team)) errors.push('team');
+      if (typeof p.position !== 'string' || !POSITION.test(p.position)) errors.push('position');
+      if (!errors.length && seen.has(p.player_id)) errors.push('duplicate in batch');
+    }
+    if (errors.length) { if (invalid.length < 20) invalid.push({ index: i, errors }); return; }
+    seen.add(p.player_id);
+    rows.push({ player_id: p.player_id, player_name: p.player_name.trim(), team: p.team ?? null, position: p.position, season: body.season });
+  });
+  if (invalid.length) return { error: 'invalid players', invalid };
+  return { rows };
+}

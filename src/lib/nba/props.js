@@ -79,6 +79,22 @@ export function defenseFor(defense, team, stat) {
   return { value: value(team), rank: ordered.indexOf(team) + 1, of: ordered.length, games: defense[team].games };
 }
 
+export const POSITION_LABEL = { G: 'bases y escoltas', F: 'aleros', C: 'pívots' };
+
+/**
+ * What `team` allows to opposing players of one primary position (G, F or C),
+ * ranked against every team with data for that position (1 = allows the most).
+ * byPosition: { [team]: { [pos]: { games, pts, reb, ast, fg3m } } }
+ */
+export function defenseForPosition(byPosition, team, position, stat) {
+  const pos = typeof position === 'string' ? position.charAt(0) : null;
+  if (!pos || !byPosition?.[team]?.[pos]) return null;
+  const teams = Object.keys(byPosition).filter(t => byPosition[t][pos]);
+  const value = t => DEFENSE_FIELDS[stat].reduce((s, f) => s + Number(byPosition[t][pos][f]), 0);
+  const ordered = teams.sort((a, b) => value(b) - value(a));
+  return { pos, label: POSITION_LABEL[pos], value: value(team), rank: ordered.indexOf(team) + 1, of: ordered.length, games: byPosition[team][pos].games };
+}
+
 /** Hit rate restricted to games matching a predicate (splits: home/away, opponent, minutes). */
 export function splitRate(games, stat, line, predicate) {
   return hitRate(games.filter(predicate), stat, line);

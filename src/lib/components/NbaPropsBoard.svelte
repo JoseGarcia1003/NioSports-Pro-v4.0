@@ -1,6 +1,6 @@
 <script>
   import { onMount, tick } from 'svelte';
-  import { STATS, toGame, hitRate, average, referenceLine, seasonGames, statValue, defenseFor, splitRate, sided, sortRows, teammateSplit } from '$lib/nba/props.js';
+  import { STATS, toGame, hitRate, average, referenceLine, seasonGames, statValue, defenseFor, splitRate, sided, sortRows, teammateSplit, defenseForPosition } from '$lib/nba/props.js';
   import { teamColor, playerKey } from '$lib/product/teams.js';
   import { analyseProp } from '$lib/nba/analysis.js';
   import { authenticatedFetch } from '$lib/services/authenticated-fetch.js';
@@ -110,7 +110,7 @@
     .map(p => {
       const line = lineOf(p, stat, lines, market);
       const book = key(p, stat) in lines ? null : marketLine(p, stat);
-      return { p, line, book, custom: key(p, stat) in lines, l5: sided(hitRate(p.games, stat, line, 5), side), l10: sided(hitRate(p.games, stat, line, 10), side), l20: sided(hitRate(p.games, stat, line, 20), side), season: sided(hitRate(seasonGames(p.games), stat, line), side), avg: average(p.games, stat, 10), spark: p.games.slice(0, 10).reverse(), def: defenseFor(payload?.defense, p.opp, stat) };
+      return { p, line, book, custom: key(p, stat) in lines, l5: sided(hitRate(p.games, stat, line, 5), side), l10: sided(hitRate(p.games, stat, line, 10), side), l20: sided(hitRate(p.games, stat, line, 20), side), season: sided(hitRate(seasonGames(p.games), stat, line), side), avg: average(p.games, stat, 10), spark: p.games.slice(0, 10).reverse(), def: defenseFor(payload?.defense, p.opp, stat), posDef: defenseForPosition(payload?.defenseByPosition, p.opp, p.position, stat) };
     }), sortBy);
   // A bar "hits" when it lands on the chosen side of the line.
   $: isHit = (v, line) => (side === 'under' ? v < line : v > line);
@@ -252,6 +252,9 @@
           <div class="context">
             {#if detail.def}
               <p class="def-line"><b>Defensa de {detail.p.opp}:</b> permite {fmt(detail.def.value)} {STATS[stat].label.toLowerCase()} por partido · puesto <b class:good={detail.def.rank <= 10} class:bad={detail.def.rank > detail.def.of - 10}>{detail.def.rank}º de {detail.def.of}</b> (1 = permite más) · {detail.def.games} partidos esta temporada.</p>
+            {/if}
+            {#if detail.posDef}
+              <p class="def-line"><b>Contra {detail.posDef.label} ({detail.p.position}):</b> {detail.p.opp} permite {fmt(detail.posDef.value)} {STATS[stat].label.toLowerCase()} por partido · puesto <b class:good={detail.posDef.rank <= 10} class:bad={detail.posDef.rank > detail.posDef.of - 10}>{detail.posDef.rank}º de {detail.posDef.of}</b> · {detail.posDef.games} partidos{detail.posDef.games < 8 ? ' (muestra aún corta)' : ''}. Posición oficial de stats.nba.com.</p>
             {/if}
             {#if history[detail.p.id] === 'loading'}
               <p class="muted" role="status">Cargando historial completo…</p>

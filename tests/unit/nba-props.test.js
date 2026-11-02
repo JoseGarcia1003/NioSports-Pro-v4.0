@@ -71,3 +71,17 @@ describe('teammateSplit', () => {
     expect(split.with).toMatchObject({ over: 0, under: 2, n: 2 });
   });
 });
+
+import { defenseForPosition } from '../../src/lib/nba/props.js';
+describe('defenseForPosition', () => {
+  const by = { ORL: { G: { games: 5, pts: 50, reb: 8, ast: 12, fg3m: 7 } }, BOS: { G: { games: 5, pts: 44, reb: 8, ast: 10, fg3m: 5 } }, MIA: { G: { games: 4, pts: 56, reb: 9, ast: 11, fg3m: 8 }, C: { games: 4, pts: 20, reb: 12, ast: 3, fg3m: 0 } } };
+  it('ranks what a team allows to the player primary position (1 = allows the most)', () => {
+    expect(defenseForPosition(by, 'ORL', 'G-F', 'pts')).toEqual({ pos: 'G', label: 'bases y escoltas', value: 50, rank: 2, of: 3, games: 5 });
+    expect(defenseForPosition(by, 'MIA', 'C', 'reb')).toMatchObject({ rank: 1, of: 1 });
+  });
+  it('returns null without position or data', () => {
+    expect(defenseForPosition(by, 'ORL', null, 'pts')).toBeNull();
+    expect(defenseForPosition(by, 'ORL', 'C', 'pts')).toBeNull();
+    expect(defenseForPosition(null, 'ORL', 'G', 'pts')).toBeNull();
+  });
+});

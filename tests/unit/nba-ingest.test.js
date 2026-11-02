@@ -69,3 +69,32 @@ describe('player box score ingestion', () => {
     expect(upsert).not.toHaveBeenCalled();
   });
 });
+
+const { parsePlayers } = await import('../../src/lib/server/nba-ingest.js');
+const { POST: POST_PLAYERS } = await import('../../src/routes/api/ingest/nba-players/+server.js');
+describe('player positions ingestion', () => {
+  const p = (over = {}) => ({ player_id: 1629639, player_name: 'Tyler Herro', team: 'MIA', position: 'G', ...over });
+  const req = (body, auth = `Bearer ${SECRET}`) => ({ request: new Request('http://x/api/ingest/nba-players', { method: 'POST', headers: { authorization: auth, 'content-type': 'application/json' }, body: JSON.stringify(body) }) });
+  afterEach(() => { upsert.mockClear(); delete env.INGEST_SECRET; });
+
+  it('accepts official positions, including combined ones', () => {
+    const r = parsePlayers({ season: '2026-27', players: [p(), p({ player_id: 2, position: 'F-C', team: null })] });
+    expect(r.rows).toEqual([
+      { player_id: 1629639, player_name: 'Tyler Herro', team: 'MIA', position: 'G', season: '2026-27' },
+      { player_id: 2, player_name: 'Tyler Herro', team: null, position: 'F-C', season: '2026-27' }
+    ]);
+  });
+  it('rejects the whole batch on any invalid or duplicated player', () => {
+    expect(parsePlayers({ season: '2026-27', players: [p({ position: 'PG' })] }).error).toBe('invalid players');
+    expect(parsePlayers({ season: '2026-27', players: [p(), p()] }).invalid[0].errors).toContain('duplicate in batch');
+    expect(parsePlayers({ season: '26-27', players: [p()] }).error).toBe('season');
+    expect(parsePlayers({ season: '2026-27', players: [] }).error).toMatch(/players must contain/);
+  });
+  it('requires the ingestion secret and stores by player id', async () => {
+    env.INGEST_SECRET = SECRET;
+    expect((await POST_PLAYERS(req({ season: '2026-27', players: [p()] }, 'Bearer wrong'))).status).toBe(401);
+    const res = await POST_PLAYERS(req({ season: '2026-27', players: [p()] }));
+    expect(res.status).toBe(200);
+    expect(upsert).toHaveBeenCalledWith([expect.objectContaining({ player_id: 1629639, position: 'G' })], { onConflict: 'player_id' });
+  });
+});

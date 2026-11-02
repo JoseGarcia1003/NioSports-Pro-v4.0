@@ -67,3 +67,28 @@ describe('rotationTeammates', () => {
     expect(rotationTeammates([row(1, 'X', '0022600001', 30)], { ...scope, gameIds: [] })).toEqual([]);
   });
 });
+
+import { groupByPosition, loadBoard } from '../../src/lib/server/nba-props.js';
+describe('defense by position on the board', () => {
+  it('groups the RPC rows by team and primary position', () => {
+    expect(groupByPosition([{ team: 'ORL', pos: 'G', games: 5, pts: '48.2', reb: '9', ast: '12.4', fg3m: '6' }, { team: 'ORL', pos: 'X', games: 5, pts: 1, reb: 1, ast: 1, fg3m: 1 }]))
+      .toEqual({ ORL: { G: { games: 5, pts: 48.2, reb: 9, ast: 12.4, fg3m: 6 } } });
+  });
+
+  it('attaches official positions and position defense, and stays usable without them', async () => {
+    const schedule = { data: [{ id: 9, datetime: '2026-11-02T23:00:00Z', status: 'scheduled', home_team: { abbreviation: 'ORL', full_name: 'Orlando Magic' }, visitor_team: { abbreviation: 'BOS', full_name: 'Boston Celtics' } }] };
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify(schedule))));
+    const rows = [{ player_id: 7, player_name: 'Jayson Tatum', team: 'BOS', games: [game(36)] }];
+    const db = positions => ({
+      rpc: vi.fn(async name => ({ data: name === 'nba_recent_player_games' ? rows.map(r => ({ ...r, games: r.games.map(g => [...g.slice(0, 9), 'BOS']) })) : name === 'nba_team_allowed' ? [] : [{ team: 'ORL', pos: 'F', games: 5, pts: 40, reb: 14, ast: 6, fg3m: 5 }], error: null })),
+      from: () => ({ select: () => ({ in: async () => ({ data: positions, error: null }) }) })
+    });
+    const withPos = await loadBoard(db([{ player_id: 7, position: 'F-G' }]), 'key');
+    expect(withPos.players[0].position).toBe('F-G');
+    expect(withPos.defenseByPosition).toEqual({ ORL: { F: { games: 5, pts: 40, reb: 14, ast: 6, fg3m: 5 } } });
+    const without = await loadBoard(db([]), 'key');
+    expect(without.players[0].position).toBeNull();
+    expect(without.defenseByPosition).toBeNull();
+    vi.unstubAllGlobals();
+  });
+});

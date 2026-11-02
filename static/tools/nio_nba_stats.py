@@ -22,6 +22,8 @@ import urllib.error
 import urllib.request
 
 ENDPOINT = "https://nio-sports-pro-v4-0.vercel.app/api/ingest/nba-player-games"
+PLAYERS_ENDPOINT = "https://nio-sports-pro-v4-0.vercel.app/api/ingest/nba-players"
+POSITIONS = {"G", "F", "C", "G-F", "F-G", "F-C", "C-F", "G-C", "C-G"}
 BATCH = 500
 TYPES = ("Regular Season", "Playoffs", "PlayIn")
 
@@ -87,11 +89,45 @@ def problems(r):
     return out
 
 
-def post(rows, secret):
-    body = json.dumps({"rows": rows}).encode("utf-8")
-    req = urllib.request.Request(ENDPOINT, data=body, method="POST", headers={"Authorization": f"Bearer {secret}", "Content-Type": "application/json"})
+def post(rows, secret, endpoint=ENDPOINT, key="rows", extra=None):
+    payload = {key: rows, **(extra or {})}
+    body = json.dumps(payload).encode("utf-8")
+    req = urllib.request.Request(endpoint, data=body, method="POST", headers={"Authorization": f"Bearer {secret}", "Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=60) as res:
         return json.loads(res.read().decode("utf-8"))
+
+
+def player_positions(season):
+    """Posicion oficial (G, F, C o combinada) de cada jugador de la temporada."""
+    from nba_api.stats.endpoints import playerindex
+    frame = playerindex.PlayerIndex(season=season, timeout=60).get_data_frames()[0]
+    players = []
+    for rec in frame.to_dict("records"):
+        pid = rec.get("PERSON_ID") or rec.get("PLAYER_ID")
+        pos = str(rec.get("POSITION") or "").strip().upper()
+        name = f"{rec.get('PLAYER_FIRST_NAME') or ''} {rec.get('PLAYER_LAST_NAME') or ''}".strip()
+        team = str(rec.get("TEAM_ABBREVIATION") or "").strip().upper() or None
+        if not pid or pos not in POSITIONS or not name:
+            continue
+        players.append({"player_id": int(pid), "player_name": name[:80], "team": team if team and len(team) == 3 else None, "position": pos})
+    return players
+
+
+def send_positions(season, secret):
+    """Las posiciones son contexto opcional: un fallo aqui no invalida los partidos."""
+    try:
+        players = player_positions(season)
+    except Exception as exc:
+        print(f"Aviso: no se pudieron descargar las posiciones ({exc}). Los partidos ya estan guardados.")
+        return
+    stored = 0
+    for i in range(0, len(players), 500):
+        try:
+            stored += post(players[i:i + 500], secret, PLAYERS_ENDPOINT, "players", {"season": season}).get("stored", 0)
+        except Exception as exc:
+            print(f"Aviso: el servidor no acepto las posiciones ({exc}).")
+            return
+    print(f"Posiciones actualizadas: {stored} jugadores.")
 
 
 def main():
@@ -155,6 +191,7 @@ def main():
         print(f"  Lote {i // BATCH + 1}: {result.get('stored', 0)} guardados")
 
     print(f"Listo. {sent} registros guardados en NioSports Pro ({args.type} {args.season}).")
+    send_positions(args.season, secret)
     return 0
 
 

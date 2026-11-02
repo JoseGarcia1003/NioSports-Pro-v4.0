@@ -112,4 +112,15 @@ describe('NBA props board', () => {
     expect(detail.textContent).toContain('1 de 4');
     expect(detail.textContent).toContain('Muestra pequeña');
   });
+  it('shows what the opponent allows to the player position when positions exist', async () => {
+    const withPos = { ...payload, players: [{ ...payload.players[0], position: 'F' }], defenseByPosition: { ORL: { F: { games: 6, pts: 41.5, reb: 15, ast: 7, fg3m: 5 } }, CHI: { F: { games: 6, pts: 36, reb: 13, ast: 6, fg3m: 4 } } } };
+    vi.stubGlobal('fetch', respond(withPos));
+    const screen = render(NbaPropsBoard);
+    await waitFor(() => expect(screen.getByText('Jayson Tatum')).toBeTruthy());
+    await fireEvent.click(screen.getByRole('button', { name: /Jayson Tatum/ }));
+    const detail = screen.getByRole('complementary', { name: 'Detalle de Jayson Tatum' });
+    expect(detail.textContent).toContain('Contra aleros (F)');
+    expect(detail.textContent).toContain('41,5');
+    expect(detail.textContent).toContain('1º de 2');
+  });
 });

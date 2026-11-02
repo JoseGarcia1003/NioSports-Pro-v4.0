@@ -53,7 +53,31 @@ export async function loadBoard(db, apiKey, offset = 0) {
     const allowed = await db.rpc('nba_team_allowed', { p_season: season });
     if (!allowed.error) defense = Object.fromEntries((allowed.data || []).map(r => [r.team, { games: r.games, pts: Number(r.pts), reb: Number(r.reb), ast: Number(r.ast), fg3m: Number(r.fg3m) }]));
   }
-  return { day, games, players, statsThrough, season, defense };
+  // Official positions and what each team allows by position: optional context,
+  // absent (null) until the owner's script has sent positions.
+  let defenseByPosition = null;
+  if (season && players.length) {
+    const pos = await db.from('nba_players').select('player_id, position').in('player_id', players.map(p => p.id));
+    if (!pos.error) {
+      const byId = new Map((pos.data || []).map(r => [r.player_id, r.position]));
+      for (const p of players) p.position = byId.get(p.id) ?? null;
+      if (byId.size) {
+        const allowed = await db.rpc('nba_team_allowed_by_position', { p_season: season });
+        if (!allowed.error) defenseByPosition = groupByPosition(allowed.data);
+      }
+    }
+  }
+  return { day, games, players, statsThrough, season, defense, defenseByPosition };
+}
+
+/** Rows {team, pos, games, pts, reb, ast, fg3m} → { [team]: { [pos]: {...} } }. */
+export function groupByPosition(rows) {
+  const out = {};
+  for (const r of rows || []) {
+    if (!/^[GFC]$/.test(r.pos)) continue;
+    (out[r.team] ||= {})[r.pos] = { games: r.games, pts: Number(r.pts), reb: Number(r.reb), ast: Number(r.ast), fg3m: Number(r.fg3m) };
+  }
+  return out;
 }
 
 /**
