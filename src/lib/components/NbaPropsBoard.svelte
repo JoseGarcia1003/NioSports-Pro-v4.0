@@ -340,7 +340,7 @@
   .days button, .chips button, .games button { min-height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-muted); font-weight: 600; font-size: 13px; }
   .days button.on, .chips button.on, .games button.on { background: var(--nio-action); color: var(--nio-action-ink); border-color: transparent; }
   .games button { display: inline-flex; align-items: center; gap: 8px; border-radius: 10px; }
-  .games small { font-weight: 500; opacity: .75; }
+  .games small { font-weight: 500; }
   .notice { margin: 20px 0 16px; padding: 12px 14px; border-radius: 12px; background: var(--nio-gold-soft); border: 1px solid var(--nio-gold-border); color: var(--nio-ink); font-size: 13px; line-height: 1.55; }
   .notice b { color: var(--nio-accent); }
   .controls { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }

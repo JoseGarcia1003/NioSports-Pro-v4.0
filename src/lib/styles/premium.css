@@ -14,7 +14,7 @@
 :global(.glass-card:hover) {
   transform: translateY(-2px);
   box-shadow: var(--shadow-elevated);
-  border-color: rgba(99, 102, 241, 0.2) !important;
+  border-color: rgba(245, 192, 74, 0.2) !important;
 }
 
 /* ═══ GRADIENT BUTTONS ═══ */
@@ -37,7 +37,7 @@
 
 :global(.btn-gradient:hover) {
   transform: translateY(-1px);
-  box-shadow: 0 6px 24px rgba(99, 102, 241, 0.35);
+  box-shadow: 0 6px 24px rgba(245, 192, 74, 0.35);
 }
 
 :global(.btn-gradient:active) {
@@ -68,7 +68,7 @@
 
 /* ═══ GLOW EFFECTS ═══ */
 :global(.glow-indigo) {
-  box-shadow: 0 0 20px var(--color-accent-glow), 0 0 60px rgba(99, 102, 241, 0.05);
+  box-shadow: 0 0 20px var(--color-accent-glow), 0 0 60px rgba(245, 192, 74, 0.05);
 }
 
 :global(.glow-gold) {
@@ -195,7 +195,7 @@
 
 /* ═══ SELECTION COLOR ═══ */
 :global(::selection) {
-  background: rgba(99, 102, 241, 0.3);
+  background: rgba(245, 192, 74, 0.3);
   color: white;
 }
 

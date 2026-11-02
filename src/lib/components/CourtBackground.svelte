@@ -96,7 +96,7 @@
   }
 
   .court__accent {
-    stroke: var(--color-accent, #6366F1);
+    stroke: var(--nio-accent);
     stroke-width: 2;
     animation: courtPulse 4s ease-in-out infinite;
   }

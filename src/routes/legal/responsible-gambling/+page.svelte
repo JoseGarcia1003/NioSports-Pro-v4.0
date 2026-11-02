@@ -56,30 +56,30 @@
 <style>
   .legal-page { max-width: 720px; margin: 0 auto; padding: 48px 24px; color: var(--color-text-primary); }
   .legal-header { margin-bottom: 48px; }
-  .back { color: #6366f1; text-decoration: none; font-size: 14px; display: block; margin-bottom: 20px; }
-  .back:hover { color: #818cf8; }
+  .back { color: var(--nio-accent); text-decoration: none; font-size: 14px; display: block; margin-bottom: 20px; }
+  .back:hover { color: var(--nio-accent-hover); }
   .warning-banner {
     display: inline-block;
-    background: rgba(245,158,11,0.12);
-    border: 1px solid rgba(245,158,11,0.3);
-    color: #fbbf24; font-size: 13px; font-weight: 600;
+    background: var(--nio-gold-soft);
+    border: 1px solid var(--nio-gold-border);
+    color: var(--nio-accent); font-size: 13px; font-weight: 600;
     padding: 6px 16px; border-radius: 8px; margin-bottom: 16px;
   }
-  h1 { font-size: 36px; font-weight: 800; margin: 0; }
-  .accent { color: #6366f1; }
+  h1 { font-family: var(--font-display); text-transform: uppercase; font-size: clamp(36px, 6vw, 54px); line-height: .95; font-weight: 800; margin: 0; }
+  .accent { color: var(--nio-accent); }
   .legal-body { display: flex; flex-direction: column; gap: 32px; }
   .highlight-box {
-    background: rgba(239,68,68,0.08);
-    border: 1px solid rgba(239,68,68,0.25);
+    background: var(--nio-gold-soft);
+    border: 1px solid var(--nio-gold-border);
     border-radius: 12px; padding: 20px 24px;
   }
-  .highlight-box p { color: #fca5a5; margin: 0; line-height: 1.7; }
+  .highlight-box p { color: var(--nio-ink); margin: 0; line-height: 1.7; }
   section { border-bottom: 1px solid var(--color-border); padding-bottom: 32px; }
   section:last-child { border-bottom: none; }
-  h2 { font-size: 18px; font-weight: 700; color: #f1f5f9; margin: 0 0 12px; }
+  h2 { font-size: 18px; font-weight: 700; color: var(--nio-ink); margin: 0 0 12px; }
   p { color: var(--color-text-muted); line-height: 1.7; margin: 0 0 12px; }
   ul { color: var(--color-text-muted); line-height: 1.7; padding-left: 20px; margin: 0; }
   li { margin-bottom: 8px; }
-  a { color: #6366f1; }
-  strong { color: #f1f5f9; }
+  a { color: var(--nio-accent); }
+  strong { color: var(--nio-ink); }
 </style>

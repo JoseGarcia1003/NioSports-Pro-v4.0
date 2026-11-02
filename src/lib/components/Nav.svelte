@@ -63,7 +63,7 @@
     <ul class="nav__links" role="list">
       {#each NAV_LINKS as link}
         {@const active = navActive(link,$page.url.pathname)}
-        <li role="none">
+        <li>
           <a href={link.href} class="nav__link" class:nav__link--active={active}
              aria-current={active ? 'page' : undefined}>
             <svelte:component this={link.icon} size={16} strokeWidth={2} />

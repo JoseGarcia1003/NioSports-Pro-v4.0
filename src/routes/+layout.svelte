@@ -127,7 +127,7 @@ $: if (browser && !$authLoading) {
     --color-border-hover: rgba(255,255,255,0.16);
     --color-text-primary: #f1f5f9;
     --color-text-secondary: rgba(255,255,255,0.7);
-    --color-text-muted: rgba(255,255,255,0.45);
+    --color-text-muted: var(--nio-muted);
     --color-accent: var(--nio-accent);
     --color-accent-hover: var(--nio-accent-hover);
     --color-accent-glow: rgba(213,180,107,0.16);
@@ -135,9 +135,9 @@ $: if (browser && !$authLoading) {
     --color-cta: var(--nio-gold);
     --color-cta-hover: var(--nio-accent-hover);
     --color-cta-gradient: var(--nio-gold-gradient);
-    --color-success: #10B981;
+    --color-success: var(--nio-hit);
     --color-warning: var(--nio-gold);
-    --color-error: #EF4444;
+    --color-error: var(--nio-miss);
     --color-gold: var(--nio-gold);
     --color-gold-glow: rgba(213,180,107,0.15);
     --shadow-card: 0 2px 12px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.05);
@@ -156,7 +156,7 @@ $: if (browser && !$authLoading) {
     --color-border-hover: rgba(7,22,43,0.2);
     --color-text-primary: #0f172a;
     --color-text-secondary: #334155;
-    --color-text-muted: #64748b;
+    --color-text-muted: var(--nio-muted);
     --color-accent: var(--nio-accent);
     --color-accent-hover: var(--nio-accent-hover);
     --color-accent-glow: rgba(137,98,25,0.12);
@@ -164,9 +164,9 @@ $: if (browser && !$authLoading) {
     --color-cta: var(--nio-accent);
     --color-cta-hover: var(--nio-gold);
     --color-cta-gradient: var(--nio-gold-gradient);
-    --color-success: #059669;
+    --color-success: var(--nio-hit);
     --color-warning: var(--nio-accent);
-    --color-error: #dc2626;
+    --color-error: var(--nio-miss);
     --color-gold: var(--nio-accent);
     --color-gold-glow: rgba(137,98,25,0.1);
     --shadow-card: 0 2px 12px rgba(7,22,43,0.06), 0 0 0 1px rgba(7,22,43,0.08);
