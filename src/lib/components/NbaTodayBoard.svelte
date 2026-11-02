@@ -6,6 +6,9 @@
 
   /** Link at the bottom of the board; visitors are sent to sign in instead of the app. */
   export let cta = { href: '/sports/nba', label: 'Ver todos los partidos' };
+  /** Max games shown (null = all). The loading rows reserve the same space, so
+      the board keeps its height when the slate arrives (no layout shift). */
+  export let limit = null;
 
   // Today's real NBA slate with consensus total lines; never filled with samples.
   onMount(() => { loadNbaToday(); });
@@ -21,10 +24,10 @@
   </div>
 
   {#if busy}
-    <ul class="games" aria-label="Cargando partidos">{#each [0, 1, 2] as i}<li class="skeleton" aria-hidden="true"><span></span><span></span></li>{/each}</ul>
+    <ul class="games" aria-label="Cargando partidos">{#each Array.from({ length: limit ?? 3 }) as _}<li class="skeleton" aria-hidden="true"><span></span><span></span></li>{/each}</ul>
   {:else if state === 'ready'}
     <ul class="games">
-      {#each games as game (game.id)}
+      {#each limit ? games.slice(0, limit) : games as game (game.id)}
         {@const st = gameStatus(game, d => timeFormat.format(d))}
         {@const line = st.score ? null : totalLineFor(game, lines)}
         <li>
@@ -44,6 +47,7 @@
         </li>
       {/each}
     </ul>
+    {#if limit && games.length > limit}<p class="more-games">y {games.length - limit} {games.length - limit === 1 ? 'partido' : 'partidos'} más hoy</p>{/if}
   {:else if state === 'empty'}
     <p class="state">No hay partidos programados hoy según el proveedor.</p>
   {:else}
@@ -58,6 +62,7 @@
 </section>
 
 <style>
+  .more-games { margin: 10px 0 0; font-size: 13px; color: var(--nio-muted); }
   .board { position: relative; border: 1px solid var(--nio-border); border-radius: 18px; background: linear-gradient(180deg, var(--nio-raised), var(--nio-surface) 140px); padding: 24px; box-shadow: 0 24px 60px var(--nio-shadow); overflow: hidden; }
   .board::before { content: ''; position: absolute; inset: 0 0 auto; height: 2px; background: linear-gradient(90deg, transparent, var(--nio-gold), transparent); }
   .eyebrow { display: flex; align-items: center; gap: 8px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: var(--nio-muted); margin: 0 0 8px; }

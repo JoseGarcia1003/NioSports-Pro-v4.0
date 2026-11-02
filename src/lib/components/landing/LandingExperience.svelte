@@ -34,7 +34,7 @@
       </div>
     </div>
 
-    <NbaTodayBoard cta={{ href: '/login?next=%2Fsports%2Fnba%2Fprops', label: 'Entra para ver las props de hoy' }} />
+    <NbaTodayBoard limit={5} cta={{ href: '/login?next=%2Fsports%2Fnba', label: 'Entra para ver todos los partidos y sus props' }} />
   </section>
 
   <section class="offer" id="ofrece" aria-labelledby="offer-title">
@@ -90,7 +90,7 @@
   .join:focus-visible { outline: 2px solid var(--nio-accent); outline-offset: 3px; }
   .sign-in { min-height: 40px; display: inline-flex; align-items: center; padding: 0 16px; border: 1px solid var(--nio-border); border-radius: 10px; background: var(--nio-surface); color: var(--nio-ink); text-decoration: none; font-size: 14px; font-weight: 600; }
 
-  .hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 56px; align-items: center; padding-block: 56px 72px; }
+  .hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 56px; align-items: start; padding-block: 56px 72px; }
   h1 { font-family: var(--font-display); text-transform: uppercase; font-size: clamp(56px, 8.4vw, 118px); line-height: .9; letter-spacing: -.005em; font-weight: 800; margin: 0 0 26px; color: var(--nio-ink); }
   h1 span { color: var(--nio-accent); }
   .intro { font-size: 17px; line-height: 1.7; color: var(--nio-muted); max-width: 540px; margin: 0 0 30px; }
