@@ -59,7 +59,7 @@
     <div class="rail-divider"></div><span class="rail-label">TU PERSPECTIVA</span>
     <button class="rail-link" class:current={onlySaved} aria-pressed={onlySaved} on:click={()=>onlySaved=!onlySaved}><Bookmark size={18}/>Guardados <span class="count">{saved.length}</span></button>
     <a class="rail-link" href="/bankroll"><span class="tennis-dot">▥</span>Mi bankroll</a>
-    <div class="rail-note"><ShieldCheck size={21}/><strong>La evidencia primero.</strong><p>Una tendencia describe la muestra. Una predicción necesita validación.</p><a href="/totales">Estado del motor <ArrowUpRight size={14}/></a></div>
+    <div class="rail-note"><ShieldCheck size={21}/><strong>La evidencia primero.</strong><p>Una tendencia describe la muestra. Una predicción necesita validación.</p><a href="/predictions">Historial verificable <ArrowUpRight size={14}/></a></div>
     <a class="rail-back" href="/sports"><ArrowLeft size={14}/>Todos los deportes</a>
   </aside>
 
@@ -102,6 +102,6 @@
       </div>
       <section class="lab-evidence" aria-labelledby="source-title"><div class="evidence-title"><ShieldCheck size={20}/><div><span class="lab-kicker">TRAZABILIDAD A LA VISTA</span><h2 id="source-title">Sabes qué estás mirando.</h2></div></div><dl><div><dt>Origen</dt><dd>Conjunto de prueba NIO</dd></div><div><dt>Contenido</dt><dd>Equipos y resultados ficticios</dd></div><div><dt>Muestra filtrada</dt><dd>{summary.n} de {selected.history.length} observaciones</dd></div><div><dt>Validación predictiva</dt><dd>No disponible</dd></div></dl><p>{RESEARCH_DEMO.id} · Referencias simuladas, sin casa de apuestas ni fecha de mercado. Los filtros no calculan EV ni modifican tu bankroll.</p></section>
     {/if}
-    <footer class="lab-footer"><span>NIO / MATCH STUDIO</span><span>Observa con claridad. Decide con criterio.</span><a href="/totales">Consultar capacidades del motor <ArrowUpRight size={13}/></a></footer>
+    <footer class="lab-footer"><span>NIO / MATCH STUDIO</span><span>Observa con claridad. Decide con criterio.</span><a href="/sports/nba/props">Ver props con datos reales <ArrowUpRight size={13}/></a></footer>
   </div>
 </div>

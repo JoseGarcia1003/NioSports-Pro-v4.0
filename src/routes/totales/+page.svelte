@@ -23,14 +23,14 @@
   <section aria-labelledby="availability">
     <h2 id="availability">Análisis predictivo no habilitado</h2>
     <p>Estamos reconstruyendo la cadena del modelo con datos verificables. Todavía no hay un modelo compatible habilitado para calcular nuevos pronósticos NBA.</p>
-    <p>El calendario sigue disponible. Tus registros anteriores se conservan; esta pantalla no genera selecciones ni modifica tu bankroll.</p>
+    <p>El calendario y la línea de total de las casas (The Odds API) ya están en el centro NBA, y las props de jugadores con datos reales en Props. Tus registros anteriores se conservan; esta pantalla no genera selecciones ni modifica tu bankroll.</p>
     <dl><div><dt>Partido completo, incluidas prórrogas</dt><dd>{capabilities.nba.FULL==='disabled_pending_compatible_artifact'?'Pendiente de modelo compatible':'Consultar disponibilidad'}</dd></div>
       <div><dt>Primer cuarto y primera mitad</dt><dd>Sin modelos propios habilitados</dd></div>
       <div><dt>Probabilidades, EV y combinadas</dt><dd>No disponibles para nuevas recomendaciones</dd></div></dl>
     <div role="status">{#if loading}Comprobando disponibilidad…{:else if error}No pudimos consultar el servicio. No se ha generado ningún pronóstico.{:else}Estado confirmado por el servicio.{/if}</div>
     <button on:click={refresh} disabled={loading}>Volver a comprobar</button>
   </section>
-  <nav aria-label="Continuar"><a href="/sports/nba">Consultar calendario NBA ↗</a><a href="/bankroll">Abrir mi bankroll ↗</a></nav>
+  <nav aria-label="Continuar"><a href="/sports/nba">Calendario y totales NBA ↗</a><a href="/sports/nba/props">Props de jugadores ↗</a><a href="/bankroll">Abrir mi bankroll ↗</a></nav>
 </div>
 <style>
   .page{--text:var(--color-text-primary);--muted:var(--color-text-secondary);--surface:var(--color-bg-card);--border:var(--color-border);--accent:var(--color-brand-primary);--bg:var(--color-text-inverse);max-width:1000px;margin:auto;padding:32px 24px 100px;color:var(--text)}
