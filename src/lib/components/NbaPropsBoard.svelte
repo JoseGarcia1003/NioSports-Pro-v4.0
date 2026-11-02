@@ -1,7 +1,7 @@
 <script>
   import { onMount, tick } from 'svelte';
   import { STATS, toGame, hitRate, average, referenceLine, seasonGames, statValue, defenseFor, splitRate, sided, sortRows } from '$lib/nba/props.js';
-  import { teamColor } from '$lib/product/teams.js';
+  import { teamColor, playerKey } from '$lib/product/teams.js';
   import { analyseProp } from '$lib/nba/analysis.js';
   import { authenticatedFetch } from '$lib/services/authenticated-fetch.js';
 
@@ -37,7 +37,22 @@
       if (err?.name !== 'AbortError') state = 'unavailable';
     }
   }
-  onMount(() => { load(); return () => controller?.abort(); });
+  onMount(() => { load(); loadMarket(); return () => controller?.abort(); });
+
+  // Sportsbook player-points lines (consensus across books), when available.
+  let market = null;
+  async function loadMarket() {
+    try {
+      const res = await authenticatedFetch('/api/odds/nba-player-points');
+      const body = await res.json();
+      market = res.ok && body.players && typeof body.players === 'object' && !Array.isArray(body.players) && Number.isFinite(Date.parse(body.fetchedAt)) ? body : null;
+    } catch { market = null; }
+  }
+  function marketLine(p, s) {
+    if (s !== 'pts' || !market) return null;
+    const m = market.players[playerKey(p.name)];
+    return m && Number.isFinite(m.consensus) ? m : null;
+  }
 
   let history = {};
   async function loadHistory(id) {
@@ -62,7 +77,7 @@
   }
 
   const key = (p, s) => `${p.id}:${s}`;
-  function lineOf(p, s, overrides) { return overrides[key(p, s)] ?? referenceLine(p.games, s); }
+  function lineOf(p, s, overrides, _market) { return overrides[key(p, s)] ?? marketLine(p, s)?.consensus ?? referenceLine(p.games, s); }
   function nudge(p, delta) {
     const current = lineOf(p, stat, lines);
     lines = { ...lines, [key(p, stat)]: Math.max(0.5, Math.round((current + delta) * 2) / 2) };
@@ -81,8 +96,9 @@
     .filter(p => p.minutesL5 >= minMinutes)
     .filter(p => !query.trim() || p.name.toLowerCase().includes(query.trim().toLowerCase()) || p.team.toLowerCase() === query.trim().toLowerCase())
     .map(p => {
-      const line = lineOf(p, stat, lines);
-      return { p, line, custom: key(p, stat) in lines, l5: sided(hitRate(p.games, stat, line, 5), side), l10: sided(hitRate(p.games, stat, line, 10), side), l20: sided(hitRate(p.games, stat, line, 20), side), season: sided(hitRate(seasonGames(p.games), stat, line), side), avg: average(p.games, stat, 10), spark: p.games.slice(0, 10).reverse(), def: defenseFor(payload?.defense, p.opp, stat) };
+      const line = lineOf(p, stat, lines, market);
+      const book = key(p, stat) in lines ? null : marketLine(p, stat);
+      return { p, line, book, custom: key(p, stat) in lines, l5: sided(hitRate(p.games, stat, line, 5), side), l10: sided(hitRate(p.games, stat, line, 10), side), l20: sided(hitRate(p.games, stat, line, 20), side), season: sided(hitRate(seasonGames(p.games), stat, line), side), avg: average(p.games, stat, 10), spark: p.games.slice(0, 10).reverse(), def: defenseFor(payload?.defense, p.opp, stat) };
     }), sortBy);
   // A bar "hits" when it lands on the chosen side of the line.
   $: isHit = (v, line) => (side === 'under' ? v < line : v > line);
@@ -104,7 +120,9 @@
     </div>
   </header>
 
-  <p class="notice"><b>Línea de referencia:</b> mediana de sus últimos 10 partidos ajustada a ,5. <b>No es la línea de una casa de apuestas</b>; ajústala con − / + a la que veas en tu casa.</p>
+  <p class="notice">
+    {#if market}<b>«Casa»</b>: línea real de puntos, mediana entre casas de apuestas ({market.source}, actualizada {timeFormat.format(new Date(market.fetchedAt))}). {/if}<b>«Ref.»</b>: línea de referencia (mediana de sus últimos 10 partidos ajustada a ,5), <b>no es la línea de una casa</b>. Ajusta cualquiera con − / +.
+  </p>
 
   <div class="controls">
     <div class="chips" role="group" aria-label="Estadística">
@@ -166,9 +184,9 @@
             </button></span>
             <span class="line" role="cell">
               <button type="button" aria-label="Bajar línea" on:click={() => nudge(r.p, -0.5)}>−</button>
-              <b class:custom={r.custom} title={r.custom ? 'Línea ajustada por ti' : 'Línea de referencia'}>{fmt(r.line)}</b>
+              <b class:custom={r.custom} title={r.custom ? 'Línea ajustada por ti' : r.book ? `Mediana de ${r.book.books.length} casas` : 'Línea de referencia'}>{fmt(r.line)}</b>
               <button type="button" aria-label="Subir línea" on:click={() => nudge(r.p, 0.5)}>+</button>
-              {#if r.custom}<button type="button" class="reset" aria-label="Volver a la referencia" on:click={() => reset(r.p)}>↺</button>{/if}
+              {#if r.custom}<button type="button" class="reset" aria-label="Volver a la línea inicial" on:click={() => reset(r.p)}>↺</button>{:else}<em class="src" class:mkt={r.book}>{r.book ? 'Casa' : 'Ref.'}</em>{/if}
             </span>
             {#each [r.l5, r.l10, r.l20, r.season] as h, i}
               <span role="cell" class={`rate ${tone(h)}`} data-label={['L5', 'L10', 'L20', 'Temp.'][i]}><b>{pct(h)}</b><small title={h.push ? `${h.push} partido(s) exactamente en la línea, no cuentan` : ''}>{h.hits}/{h.over + h.under}{h.push ? ` · ${h.push} =` : ''}</small></span>
@@ -295,6 +313,8 @@
   .line button { width: 26px; height: 26px; border-radius: 7px; border: 1px solid var(--nio-border); background: var(--nio-raised); color: var(--nio-ink); line-height: 1; }
   .line b { min-width: 40px; text-align: center; font-family: var(--font-display); font-size: 19px; }
   .line b.custom { color: var(--nio-accent); }
+  .src { font-style: normal; font-size: 9px; font-weight: 700; letter-spacing: .04em; color: var(--nio-muted); border: 1px solid var(--nio-border); border-radius: 999px; padding: 1px 5px; }
+  .src.mkt { color: var(--nio-accent); border-color: var(--nio-gold-border); }
   .line .reset { border: 0; background: none; color: var(--nio-muted); width: 20px; }
   .rate { display: grid; }
   .rate b { font-family: var(--font-display); font-size: 19px; }

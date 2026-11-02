@@ -90,3 +90,83 @@ export function supabaseStore(db) {
     }
   };
 }
+
+// ── Player props (points) ──────────────────────────────────────────────────
+// One request per upcoming game for the player_points market, refreshed at most
+// every 12 h and only while the monthly quota keeps a reserve for game totals.
+export const PROPS_KEY = 'niosports:odds:nba:player-points:v1';
+const PROPS_LOCK = `${PROPS_KEY}:lock`;
+export const PROPS_TTL_SECONDS = 12 * 3600;
+export const QUOTA_RESERVE = 150;
+const EVENT_URL = id => `https://api.the-odds-api.com/v4/sports/basketball_nba/events/${encodeURIComponent(id)}/odds`;
+
+export { playerKey } from '$lib/product/teams.js';
+import { playerKey } from '$lib/product/teams.js';
+
+/** Consensus over/under line per player from one event's bookmakers. */
+export function normalizePlayerPoints(eventPayload) {
+  const byPlayer = new Map();
+  for (const book of eventPayload?.bookmakers || []) {
+    const market = (book.markets || []).find(m => m.key === 'player_points');
+    if (!market) continue;
+    const sides = new Map();
+    for (const o of market.outcomes || []) {
+      if (!o.description || !Number.isFinite(o.point) || !Number.isFinite(o.price)) continue;
+      const k = playerKey(o.description);
+      const entry = sides.get(k) || { name: o.description };
+      if (o.name === 'Over') entry.over = o; else if (o.name === 'Under') entry.under = o;
+      sides.set(k, entry);
+    }
+    for (const [k, s] of sides) {
+      if (!s.over || !s.under || s.over.point !== s.under.point) continue;
+      const list = byPlayer.get(k) || { name: s.name, books: [] };
+      list.books.push({ key: book.key, title: book.title, point: s.over.point, over: s.over.price, under: s.under.price });
+      byPlayer.set(k, list);
+    }
+  }
+  const out = {};
+  for (const [k, v] of byPlayer) out[k] = { name: v.name, books: v.books, consensus: median(v.books.map(b => b.point)) };
+  return out;
+}
+
+/**
+ * @param {{ store: any, apiKey: string, events: Array<{id:string, commenceTime:string}>, quotaHint?: number|null, fetchImpl?: typeof fetch, now?: number }} deps
+ */
+export async function getNbaPlayerPoints({ store, apiKey, events, quotaHint = null, fetchImpl = fetch, now = Date.now() }) {
+  if (!apiKey) return { ok: false, reason: 'not_configured' };
+  if (!store) return { ok: false, reason: 'cache_unavailable' };
+  let cached;
+  try { cached = await store.get(PROPS_KEY); } catch { return { ok: false, reason: 'cache_unavailable' }; }
+  if (cached && now - Date.parse(cached.fetchedAt) < PROPS_TTL_SECONDS * 1000) return { ok: true, ...cached, cached: true };
+
+  const upcoming = (events || []).filter(e => { const t = Date.parse(e.commenceTime); return t > now && t - now < 36 * 3600 * 1000; });
+  if (!upcoming.length) return cached ? { ok: true, ...cached, cached: true, stale: true } : { ok: false, reason: 'no_upcoming_games' };
+
+  if (Number.isFinite(quotaHint) && quotaHint < QUOTA_RESERVE) return cached ? { ok: true, ...cached, cached: true, stale: true } : { ok: false, reason: 'quota_reserved' };
+  const gotLock = await store.lock(PROPS_LOCK, 120).catch(() => false);
+  if (!gotLock) return cached ? { ok: true, ...cached, cached: true, stale: true } : { ok: false, reason: 'refreshing' };
+  try {
+    const players = {};
+    let remaining = Number.isFinite(quotaHint) ? quotaHint : null, lastCost = null, fetched = 0;
+    for (const event of upcoming) {
+      if (remaining != null && remaining < QUOTA_RESERVE) break;
+      const url = `${EVENT_URL(event.id)}?${new URLSearchParams({ apiKey, regions: 'us', markets: 'player_points', oddsFormat: 'decimal', dateFormat: 'iso' })}`;
+      const res = await fetchImpl(url, { signal: AbortSignal.timeout(8000) });
+      const r = Number(res.headers.get('x-requests-remaining'));
+      const c = Number(res.headers.get('x-requests-last'));
+      if (Number.isFinite(r)) remaining = r;
+      if (Number.isFinite(c)) lastCost = c;
+      if (!res.ok) continue;
+      fetched++;
+      for (const [k, v] of Object.entries(normalizePlayerPoints(await res.json()))) players[k] = { ...v, eventId: event.id };
+    }
+    if (!fetched) return cached ? { ok: true, ...cached, cached: true, stale: true } : { ok: false, reason: 'upstream_error' };
+    const payload = { source: 'The Odds API', market: 'player_points', fetchedAt: new Date(now).toISOString(), quotaRemaining: remaining, creditsPerGame: lastCost, games: fetched, players };
+    await store.put(PROPS_KEY, payload);
+    return { ok: true, ...payload, cached: false };
+  } catch {
+    return cached ? { ok: true, ...cached, cached: true, stale: true } : { ok: false, reason: 'network_error' };
+  } finally {
+    await store.unlock(PROPS_LOCK).catch(() => {});
+  }
+}

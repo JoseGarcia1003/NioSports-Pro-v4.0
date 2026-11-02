@@ -93,3 +93,45 @@ describe('NBA totals cache', () => {
     expect(calls).toContainEqual(['from', 'provider_locks']);
   });
 });
+
+import { playerKey, normalizePlayerPoints, getNbaPlayerPoints, PROPS_KEY } from '../../src/lib/server/odds-cache.js';
+describe('player points lines', () => {
+  const ev = { bookmakers: [
+    { key: 'a', title: 'A', markets: [{ key: 'player_points', outcomes: [{ name: 'Over', description: 'Luka Dončić', point: 33.5, price: 1.9 }, { name: 'Under', description: 'Luka Dončić', point: 33.5, price: 1.9 }, { name: 'Over', description: 'Jaren Jackson Jr.', point: 18.5, price: 1.8 }, { name: 'Under', description: 'Jaren Jackson Jr.', point: 19.5, price: 1.9 }] }] },
+    { key: 'b', title: 'B', markets: [{ key: 'player_points', outcomes: [{ name: 'Over', description: 'Luka Doncic', point: 34.5, price: 1.9 }, { name: 'Under', description: 'Luka Doncic', point: 34.5, price: 1.9 }] }] }
+  ] };
+  it('matches names regardless of accents and suffixes', () => {
+    expect(playerKey('Luka Dončić')).toBe(playerKey('LUKA DONCIC'));
+    expect(playerKey('Jaren Jackson Jr.')).toBe('jaren jackson');
+  });
+  it('builds a consensus per player and drops inconsistent sides', () => {
+    const out = normalizePlayerPoints(ev);
+    expect(out['luka doncic'].consensus).toBe(34);
+    expect(out['luka doncic'].books).toHaveLength(2);
+    expect(out['jaren jackson']).toBeUndefined();
+  });
+  const store = () => { const m = new Map(); return { m, get: async k => m.get(k) ?? null, put: async (k, v) => m.set(k, v), lock: async k => (m.has(k) ? false : (m.set(k, 1), true)), unlock: async k => m.delete(k) }; };
+  const now = Date.parse('2026-11-02T15:00:00Z');
+  const events = [{ id: 'e1', commenceTime: '2026-11-02T23:00:00Z' }, { id: 'e2', commenceTime: '2026-11-02T10:00:00Z' }];
+  it('only queries upcoming games and records quota and cost', async () => {
+    const s = store();
+    const fetchImpl = vi.fn(async () => new Response(JSON.stringify(ev), { headers: { 'x-requests-remaining': '480', 'x-requests-last': '1' } }));
+    const r = await getNbaPlayerPoints({ store: s, apiKey: 'k', events, quotaHint: 490, fetchImpl, now });
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(String(fetchImpl.mock.calls[0][0])).toContain('/events/e1/odds');
+    expect(String(fetchImpl.mock.calls[0][0])).toContain('markets=player_points');
+    expect(r).toMatchObject({ ok: true, quotaRemaining: 480, creditsPerGame: 1, games: 1 });
+    expect(s.m.get(PROPS_KEY).players['luka doncic'].eventId).toBe('e1');
+  });
+  it('keeps a quota reserve for game totals', async () => {
+    const fetchImpl = vi.fn();
+    expect(await getNbaPlayerPoints({ store: store(), apiKey: 'k', events, quotaHint: 120, fetchImpl, now })).toEqual({ ok: false, reason: 'quota_reserved' });
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+  it('serves the cached copy within 12 hours without spending credits', async () => {
+    const s = store(); s.m.set(PROPS_KEY, { fetchedAt: '2026-11-02T08:00:00Z', players: {} });
+    const fetchImpl = vi.fn();
+    expect((await getNbaPlayerPoints({ store: s, apiKey: 'k', events, quotaHint: 400, fetchImpl, now })).cached).toBe(true);
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+});

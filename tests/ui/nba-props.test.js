@@ -11,7 +11,7 @@ const payload = {
   games: [{ id: 1, datetime: '2026-11-01T20:30:00Z', home: 'ORL', visitor: 'BOS' }],
   players: [{ id: 7, name: 'Jayson Tatum', team: 'BOS', opp: 'ORL', home: false, gameId: 1, minutesL5: 36, games: [g(30, 3), g(28, 1), g(10, 0), g(26, 2), g(24, 4), g(20, 2, '2025-26')] }]
 };
-const respond = (body, status = 200) => vi.fn(async () => new Response(JSON.stringify(body), { status }));
+const respond = (body, status = 200) => vi.fn(async url => String(url).includes('/api/odds/') ? new Response('{}', { status: 503 }) : new Response(JSON.stringify(body), { status }));
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe('NBA props board', () => {
@@ -24,7 +24,7 @@ describe('NBA props board', () => {
     expect(table.textContent).toContain('24,5');
     expect(table.textContent).toContain('60%');
     expect(table.textContent).toContain('50%');
-    expect(screen.getByText(/No es la línea de una casa de apuestas/)).toBeTruthy();
+    expect(screen.getByText(/no es la línea de una casa/)).toBeTruthy();
   });
 
   it('recomputes when the user moves the line and switches stat', async () => {
@@ -58,7 +58,7 @@ describe('NBA props board', () => {
   it('shows the opponent defense rank and head-to-head splits from the full history', async () => {
     const withDefense = { ...payload, defense: { ORL: { games: 6, pts: 129, reb: 48, ast: 29, fg3m: 15 }, CHI: { games: 6, pts: 110, reb: 44, ast: 25, fg3m: 12 } } };
     const history = { id: 7, games: [['2026-04-12', 'ORL', false, 36, 31, 6, 5, 3, '2025-26', 'BOS'], ['2026-03-01', 'ORL', true, 34, 12, 6, 5, 1, '2025-26', 'BOS'], ...payload.players[0].games] };
-    vi.stubGlobal('fetch', vi.fn(async url => new Response(JSON.stringify(String(url).includes('/api/nba/player') ? history : withDefense))));
+    vi.stubGlobal('fetch', vi.fn(async url => String(url).includes('/api/odds/') ? new Response('{}', { status: 503 }) : new Response(JSON.stringify(String(url).includes('/api/nba/player') ? history : withDefense))));
     const screen = render(NbaPropsBoard);
     await waitFor(() => expect(screen.getByText('Jayson Tatum')).toBeTruthy());
     expect(screen.getByRole('table').textContent).toContain('DEF 1º');
@@ -83,5 +83,16 @@ describe('NBA props board', () => {
     await fireEvent.change(screen.getByRole('combobox', { name: /Ordenar/ }), { target: { value: 'l10' } });
     const names = [...screen.getByRole('table').querySelectorAll('.player b')].map(b => b.textContent);
     expect(names.length).toBe(2);
+  });
+
+  it('uses the sportsbook points line when it exists and labels its source', async () => {
+    const market = { source: 'The Odds API', fetchedAt: '2026-11-02T14:00:00Z', players: { 'jayson tatum': { name: 'Jayson Tatum', consensus: 27.5, books: [{}, {}, {}] } } };
+    vi.stubGlobal('fetch', vi.fn(async url => new Response(JSON.stringify(String(url).includes('/api/odds/nba-player-points') ? market : payload))));
+    const screen = render(NbaPropsBoard);
+    await waitFor(() => expect(screen.getByRole('table').textContent).toContain('27,5'));
+    expect(screen.getByRole('table').textContent).toContain('Casa');
+    expect(screen.getByText(/línea real de puntos/)).toBeTruthy();
+    await fireEvent.click(screen.getByRole('button', { name: 'REB' }));
+    expect(screen.getByRole('table').textContent).toContain('Ref.');
   });
 });

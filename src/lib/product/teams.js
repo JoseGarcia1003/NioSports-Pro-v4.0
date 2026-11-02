@@ -32,3 +32,13 @@ export function totalLineFor(game, lines) {
   const hit = lines.events.find(e => sameTeam(e.home, game.home_team?.name) && sameTeam(e.away, game.visitor_team?.name) && Math.abs(Date.parse(e.commenceTime) - start) < 12 * 3600000);
   return hit && Number.isFinite(hit.consensus) ? { point: hit.consensus, books: hit.books.length } : null;
 }
+
+/** Accent-, punctuation- and suffix-insensitive key so "Luka Dončić" matches "Luka Doncic". */
+export function playerKey(name) {
+  return String(name || '')
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .toLowerCase().replace(/[.'’-]/g, ' ')
+    .replace(/\b(jr|sr|ii|iii|iv)\b/g, ' ')
+    .replace(/\s+/g, ' ').trim();
+}
+
