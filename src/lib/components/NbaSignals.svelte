@@ -6,6 +6,8 @@
 
   // Sealed daily signals and their settled history. Every figure comes from the
   // server; nothing is computed or filled in on the client.
+  /** false when the page already provides the heading (Señales page). */
+  export let heading = true;
   let state = 'loading';
   let data = null;
 
@@ -33,6 +35,7 @@
 </script>
 
 <section class="signals" aria-labelledby="signals-title">
+  {#if heading}
   <header class="head">
     <div>
       <p class="eyebrow">NBA · Señales del día</p>
@@ -40,6 +43,7 @@
       <p class="lead">Props de puntos con lectura claramente favorable frente a la línea real de las casas: al menos 3 señales a favor y 2 más que en contra. Se sellan antes del partido y no se editan después.</p>
     </div>
   </header>
+  {/if}
 
   {#if state === 'loading'}
     <p class="state" role="status">Preparando la edición del día…</p>
@@ -105,7 +109,7 @@
     </section>
   {/if}
 
-  <a class="more" href="/sports/nba/props">Explorar todas las props <ArrowUpRight size={16} /></a>
+  {#if heading}<a class="more" href="/sports/nba/props">Explorar todas las props <ArrowUpRight size={16} /></a>{/if}
 </section>
 
 <style>

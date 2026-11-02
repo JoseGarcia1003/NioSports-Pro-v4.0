@@ -235,8 +235,8 @@
           </div>
         {/each}
         {#if !rows.length}<p class="state">Ningún jugador coincide con la búsqueda.</p>{/if}
-        {#if rows.length > shown}<button type="button" class="more" on:click={() => (shown += PAGE)}>Mostrar {Math.min(PAGE, rows.length - shown)} jugadores más · {rows.length - shown} restantes</button>{/if}
       </div>
+      {#if rows.length > shown}<button type="button" class="more" on:click={() => (shown += PAGE)}>Mostrar {Math.min(PAGE, rows.length - shown)} jugadores más · {rows.length - shown} restantes</button>{/if}
 
       {#if detail}
         {@const games20 = detail.p.games.slice(0, 20).reverse()}

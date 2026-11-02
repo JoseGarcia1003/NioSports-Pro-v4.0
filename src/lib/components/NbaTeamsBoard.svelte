@@ -70,7 +70,7 @@
       {#each cards as c (c.g.id)}
         <article class="card">
           <header>
-            <span class="match"><i class="badge" style={teamStyle(c.g.visitor)}>{c.g.visitor}</i><span class="at">@</span><i class="badge" style={teamStyle(c.g.home)}>{c.g.home}</i></span>
+            <h2 class="match"><span class="sr-only">{c.g.visitor} en {c.g.home}: </span><i class="badge" aria-hidden="true" style={teamStyle(c.g.visitor)}>{c.g.visitor}</i><span class="at" aria-hidden="true">@</span><i class="badge" aria-hidden="true" style={teamStyle(c.g.home)}>{c.g.home}</i></h2>
             <small>{timeFormat.format(new Date(c.g.datetime))}</small>
           </header>
 
@@ -135,7 +135,8 @@
   .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
   .card { border: 1px solid var(--nio-border); border-radius: 16px; background: var(--nio-surface); padding: 16px; display: grid; gap: 12px; align-content: start; }
   header { display: flex; justify-content: space-between; align-items: center; }
-  .match { display: inline-flex; align-items: center; gap: 8px; }
+  .match { display: inline-flex; align-items: center; gap: 8px; margin: 0; font: inherit; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .at { color: var(--nio-muted); font-weight: 600; }
   header small { color: var(--nio-muted); font-size: 12px; }
   .badge { display: inline-grid; place-items: center; width: 44px; height: 28px; border-radius: 6px; background: var(--team); color: var(--team-ink, #fff); font-style: normal; font-family: var(--font-display); font-weight: 700; font-size: 15px; letter-spacing: .04em; box-shadow: inset 0 0 0 1px rgba(255,255,255,.14); }

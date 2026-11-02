@@ -6,18 +6,19 @@
     { label: 'Historial de señales', value: 'En marcha', note: 'Las señales se sellan antes del partido, no se editan y se liquidan con el box score oficial. La muestra aún es pequeña para medir acierto.' }
   ];
 
+  // ok = available today with real data; false = planned (shown as «Próximamente»).
   const scopes = [
     {
       title: 'Props de jugadores',
-      items: ['Minutos esperados y rol en la rotación', 'Volumen de uso y de tiros', 'Ritmo del partido y del rival', 'Defensa del rival por posición', 'Ausencias que cambian el reparto de juego']
+      items: [['Minutos recientes frente a la temporada', true], ['Acierto L5, L10, L20 y temporada', true], ['Local, visitante y cara a cara', true], ['Con y sin un compañero', true], ['Defensa del rival por posición', false], ['Ritmo del partido y del rival', false], ['Lesiones y ausencias confirmadas', false]]
     },
     {
       title: 'Props de equipo y totales',
-      items: ['Ritmo y eficiencia ofensiva/defensiva', 'Localía, descanso y viajes', 'Partido completo, primera mitad y primer cuarto por separado', 'Tendencia reciente frente a temporada completa', 'Cambios de plantilla y lesiones']
+      items: [['Puntos por equipo y total frente a la línea', true], ['Puntos permitidos por el rival', true], ['Tendencia reciente frente a la temporada', true], ['Primera mitad y primer cuarto por separado', false], ['Ritmo, eficiencia, descanso y viajes', false]]
     },
     {
       title: 'Tenis',
-      items: ['Rendimiento de la temporada en esa superficie', 'Puntos de saque y de resto ganados', 'Nivel del torneo y del rival', 'Carga de partidos y fatiga', 'El historial directo solo como un dato más']
+      items: [['Orden de juego, superficie y circuito', true], ['Rendimiento de la temporada en esa superficie', false], ['Puntos de saque y de resto ganados', false], ['Carga de partidos y fatiga', false], ['El historial directo solo como un dato más', false]]
     }
   ];
 
@@ -81,7 +82,7 @@
       {#each scopes as scope}
         <article class="product-panel">
           <h3>{scope.title}</h3>
-          <ul>{#each scope.items as item}<li>{item}</li>{/each}</ul>
+          <ul>{#each scope.items as [item, ok]}<li class:planned={!ok}><span>{item}</span><em>{ok ? 'Disponible' : 'Próximamente'}</em></li>{/each}</ul>
         </article>
       {/each}
     </div>
@@ -123,6 +124,10 @@
   .scopes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
   .scopes article { padding: 22px; }
   .scopes ul, .rules { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+  .scopes ul { list-style: none; padding-left: 0; gap: 8px; }
+  .scopes li { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .scopes li em { flex: none; font-style: normal; font-size: 11px; font-weight: 700; color: var(--nio-accent); }
+  .scopes li.planned em { color: var(--nio-muted); }
   .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 28px; }
   .steps li { display: flex; gap: 16px; padding: 18px 0; border-top: 1px solid var(--product-border); }
   .num { font-family: var(--font-mono, monospace); font-size: 13px; color: var(--product-accent-text); padding-top: 2px; }
