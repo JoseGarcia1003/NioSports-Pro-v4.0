@@ -34,3 +34,10 @@ describe('props APIs require a session', () => {
     await expect(playerGET({ url: new URL('http://x/api/nba/player?id=7'), request: anon })).rejects.toMatchObject({ status: 401 });
   });
 });
+
+import { GET as signalsGET } from '../../src/routes/api/nba/signals/+server.js';
+describe('signals API requires a session', () => {
+  it('rejects anonymous requests', async () => {
+    await expect(signalsGET({ request: new Request('http://x/api/nba/signals') })).rejects.toMatchObject({ status: 401 });
+  });
+});

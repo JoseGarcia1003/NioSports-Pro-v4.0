@@ -31,3 +31,27 @@ export function selectPlayers(rows, games) {
 export function dayFor(offset, now = Date.now()) {
   return calendarDays(now, 'America/New_York')[offset];
 }
+
+/**
+ * Today's (or tomorrow's) board: schedule, rotation players with recent games and
+ * what each team allows. Throws Error('schedule_unavailable' | 'stats_unavailable').
+ */
+export async function loadBoard(db, apiKey, offset = 0) {
+  const day = dayFor(offset);
+  if (!apiKey) throw new Error('schedule_unavailable');
+  let games;
+  try { games = await scheduleFor(day, apiKey); } catch { throw new Error('schedule_unavailable'); }
+  if (!games.length) return { day, games: [], players: [], statsThrough: null, season: null, defense: null };
+  const teams = [...new Set(games.flatMap(g => [g.home, g.visitor]))];
+  const { data, error } = await db.rpc('nba_recent_player_games', { p_teams: teams, p_limit: 20 });
+  if (error) throw new Error('stats_unavailable');
+  const players = selectPlayers(data || [], games);
+  const statsThrough = players.reduce((max, p) => (p.games[0][0] > max ? p.games[0][0] : max), '') || null;
+  const season = players[0]?.games[0]?.[8] ?? null;
+  let defense = null;
+  if (season) {
+    const allowed = await db.rpc('nba_team_allowed', { p_season: season });
+    if (!allowed.error) defense = Object.fromEntries((allowed.data || []).map(r => [r.team, { games: r.games, pts: Number(r.pts), reb: Number(r.reb), ast: Number(r.ast), fg3m: Number(r.fg3m) }]));
+  }
+  return { day, games, players, statsThrough, season, defense };
+}

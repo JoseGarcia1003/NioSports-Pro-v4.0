@@ -1,5 +1,6 @@
 <script>
   import DailyCatalog from '$lib/components/DailyCatalog.svelte';
+  import NbaSignals from '$lib/components/NbaSignals.svelte';
   import { SPORTS, planLabel } from '$lib/product/navigation.js';
   import { subscription } from '$lib/stores/subscription.js';
 </script>
@@ -10,8 +11,8 @@
   <header class="product-heading">
     <div>
       <span class="product-eyebrow">ANÁLISIS / PRONÓSTICOS</span>
-      <h1>Una selección con argumentos.</h1>
-      <p>Revisa la selección del día, su fuente y los argumentos del modelo. Cada análisis muestra también sus límites.</p>
+      <h1>Señales con argumentos.</h1>
+      <p>Cada señal muestra su línea, su fuente y las razones que la sostienen. Se sellan antes del partido y su resultado queda en un historial que no se edita.</p>
     </div>
     <span class="product-badge">{planLabel($subscription)}</span>
   </header>
@@ -22,6 +23,8 @@
     <div><span class="guide-index" aria-hidden="true">03</span><p><strong>Límites claros</strong><span>La incertidumbre, presente</span></p></div>
   </div>
 
+  <NbaSignals />
+
   <DailyCatalog />
 
   <section class="product-section sports-section" aria-labelledby="sports-title">
@@ -31,9 +34,9 @@
       {#each SPORTS.filter(sport => sport.status === 'available') as sport}
         <article class="product-panel sport-analysis">
           <div class="sport-heading"><span class="sport-symbol" aria-hidden="true">{sport.symbol}</span><span class="product-eyebrow">{sport.name}</span></div>
-          <h3>{sport.id === 'nba' ? 'Totales y estimaciones' : 'Partidos y comparaciones'}</h3>
-          <p>{sport.id === 'nba' ? 'Abre las selecciones NBA calculadas con la información disponible.' : 'Consulta la evidencia de cada encuentro; el motor puede abstenerse si la muestra no es suficiente.'}</p>
-          <a class="product-link" href={sport.id === 'nba' ? '/picks' : sport.href}>Ver análisis {sport.name} <span aria-hidden="true">↗</span></a>
+          <h3>{sport.id === 'nba' ? 'Props de jugadores' : 'Partidos y comparaciones'}</h3>
+          <p>{sport.id === 'nba' ? 'Tasa de acierto L5, L10, L20 y temporada, defensa del rival y lectura de los datos de cada jugador.' : 'Consulta la evidencia de cada encuentro; el motor puede abstenerse si la muestra no es suficiente.'}</p>
+          <a class="product-link" href={sport.id === 'nba' ? '/sports/nba/props' : sport.href}>Ver análisis {sport.name} <span aria-hidden="true">↗</span></a>
         </article>
       {/each}
     </div>
