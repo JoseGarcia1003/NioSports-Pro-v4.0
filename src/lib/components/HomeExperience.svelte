@@ -9,11 +9,11 @@
   const today = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
 
   const shortcuts = [
-    { href: '/sports/nba/props', title: 'Props NBA', text: 'Tasa de acierto de cada jugador frente a la línea: L5, L10, L20 y temporada.', status: 'Datos reales', live: true },
+    { href: '/sports/nba/props', title: 'Props NBA', text: 'Jugadores y equipos frente a la línea: L5, L10, L20 y temporada.', status: 'Datos reales', live: true },
     { href: '/sports/nba', title: 'Centro NBA', text: 'Calendario de hoy y mañana con búsqueda y contexto de cada partido.', status: 'Datos reales', live: true },
     { href: '/sports/nba/analisis', title: 'Match Studio', text: 'Explora ventanas L5/L10/L20 y líneas de referencia.', status: 'Ejemplo', live: false },
     { href: '/tennis', title: 'Tenis', text: 'Orden de juego, superficies, saque y resto. Datos reales con sesión iniciada.', status: 'Según cobertura', live: false },
-    { href: '/predictions', title: 'Pronósticos', text: 'Selecciones publicadas con sus argumentos y límites. Sin edición, no hay pick.', status: 'En reconstrucción', live: false },
+    { href: '/predictions', title: 'Señales del día', text: 'Props con lectura claramente favorable, selladas antes del partido y con historial verificable.', status: 'Datos reales', live: true },
     { href: '/bankroll', title: 'Bankroll', text: 'Capital disponible, comprometido y beneficio separados.', status: 'Disponible', live: true }
   ];
 </script>

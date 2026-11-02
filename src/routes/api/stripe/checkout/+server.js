@@ -13,6 +13,10 @@ function getSupabase() {
 
 export async function POST({ request }) {
   const identity = await requireIdentity(request);
+  // Paid plans stay closed during the open beta: nothing exclusive exists to sell
+  // yet. Opening them is an explicit owner decision (BILLING_ENABLED=true) after
+  // payments, data continuity and the legal review are validated.
+  if (env.BILLING_ENABLED !== 'true') return json({ error: 'billing_disabled' }, { status: 503 });
   if (!env.STRIPE_SECRET_KEY) return json({ error: "Billing unavailable" }, { status: 503 });
   const stripe = new Stripe(env.STRIPE_SECRET_KEY);
   try {

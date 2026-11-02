@@ -1,5 +1,4 @@
 <script>
-  import DailyCatalog from '$lib/components/DailyCatalog.svelte';
   import NbaSignals from '$lib/components/NbaSignals.svelte';
   import { SPORTS, planLabel } from '$lib/product/navigation.js';
   import { subscription } from '$lib/stores/subscription.js';
@@ -25,8 +24,6 @@
 
   <NbaSignals />
 
-  <DailyCatalog />
-
   <section class="product-section sports-section" aria-labelledby="sports-title">
     <span class="product-eyebrow">PROFUNDIZA EN EL PARTIDO</span>
     <h2 id="sports-title">Consulta por deporte</h2>
@@ -46,7 +43,7 @@
     <a href="/bankroll"><strong>Mi bankroll</strong><span>Tu registro personal <span aria-hidden="true">↗</span></span></a>
     <a href="#history-title"><strong>Historial verificable</strong><span>Señales selladas y su resultado <span aria-hidden="true">↗</span></span></a>
     <a href="/methodology"><strong>Metodología</strong><span>Cómo se calcula un análisis <span aria-hidden="true">↗</span></span></a>
-    <a href="/pricing"><strong>Qué amplía Premium</strong><span>Compara los planes <span aria-hidden="true">↗</span></span></a>
+    <a href="/pricing"><strong>Planes</strong><span>Beta gratuita <span aria-hidden="true">↗</span></span></a>
   </nav>
 </div>
 
