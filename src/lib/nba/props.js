@@ -102,31 +102,3 @@ export function sortRows(rows, key) {
     return rb - ra || b[key].n - a[key].n;
   });
 }
-
-/**
- * Compares sportsbook prices for one side of a player line (decimal odds).
- * bestPrice marks the highest price among books offering exactly `line`;
- * bestLine marks the most favourable point for the side (lowest for over,
- * highest for under). margin is the book's overround: 1/over + 1/under − 1.
- * @param {Array<{key:string,title:string,point:number,over:number,under:number}>} books
- * @param {'over'|'under'} side
- * @param {number} line
- */
-export function compareBooks(books, side, line) {
-  const valid = (books || []).filter(b => [b.point, b.over, b.under].every(Number.isFinite) && b.over > 1 && b.under > 1);
-  if (!valid.length) return [];
-  const price = b => (side === 'under' ? b.under : b.over);
-  const atLine = valid.filter(b => b.point === line);
-  const topPrice = atLine.length ? Math.max(...atLine.map(price)) : null;
-  const points = valid.map(b => b.point);
-  const topPoint = side === 'under' ? Math.max(...points) : Math.min(...points);
-  const distinctPoints = new Set(points).size > 1;
-  return valid
-    .map(b => ({
-      key: b.key, title: b.title, point: b.point, price: price(b),
-      margin: 1 / b.over + 1 / b.under - 1,
-      bestPrice: atLine.length > 1 && b.point === line && price(b) === topPrice,
-      bestLine: distinctPoints && b.point === topPoint
-    }))
-    .sort((a, b) => (side === 'under' ? b.point - a.point : a.point - b.point) || b.price - a.price);
-}

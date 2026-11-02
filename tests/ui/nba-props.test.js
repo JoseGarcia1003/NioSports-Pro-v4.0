@@ -95,22 +95,4 @@ describe('NBA props board', () => {
     await fireEvent.click(screen.getByRole('button', { name: 'REB' }));
     expect(screen.getByRole('table').textContent).toContain('Ref.');
   });
-  it('compares prices across books in the detail and marks the best line and price', async () => {
-    const books = [
-      { key: 'dk', title: 'DraftKings', point: 27.5, over: 1.87, under: 1.95 },
-      { key: 'fd', title: 'FanDuel', point: 27.5, over: 1.91, under: 1.89 },
-      { key: 'mgm', title: 'BetMGM', point: 26.5, over: 1.7, under: 2.15 }
-    ];
-    const market = { source: 'The Odds API', fetchedAt: '2026-11-02T14:00:00Z', players: { 'jayson tatum': { name: 'Jayson Tatum', consensus: 27.5, books } } };
-    vi.stubGlobal('fetch', vi.fn(async url => new Response(JSON.stringify(String(url).includes('/api/odds/nba-player-points') ? market : payload))));
-    const screen = render(NbaPropsBoard);
-    await waitFor(() => expect(screen.getByRole('table', { name: /props/i }).textContent).toContain('27,5'));
-    await fireEvent.click(screen.getByRole('button', { name: /Jayson Tatum/ }));
-    const quotes = await screen.findByRole('table', { name: 'Cuotas por casa de apuestas' });
-    const rows = [...quotes.querySelectorAll('[role=row]')].slice(1).map(r => r.textContent);
-    expect(rows[0]).toContain('BetMGM');
-    expect(rows[0]).toContain('mejor línea');
-    expect(rows.find(r => r.includes('FanDuel'))).toContain('mejor cuota');
-    expect(rows.find(r => r.includes('DraftKings'))).not.toContain('mejor');
-  });
 });
