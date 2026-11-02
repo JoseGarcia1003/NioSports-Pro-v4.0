@@ -1,6 +1,6 @@
 <script>
   import { onMount, tick } from 'svelte';
-  import { STATS, toGame, hitRate, average, referenceLine, seasonGames, statValue, defenseFor, splitRate, sided, sortRows } from '$lib/nba/props.js';
+  import { STATS, toGame, hitRate, average, referenceLine, seasonGames, statValue, defenseFor, splitRate, sided, sortRows, compareBooks } from '$lib/nba/props.js';
   import { teamColor, playerKey } from '$lib/product/teams.js';
   import { analyseProp } from '$lib/nba/analysis.js';
   import { authenticatedFetch } from '$lib/services/authenticated-fetch.js';
@@ -95,6 +95,7 @@
   const tone = r => (r.rate == null ? '' : r.rate >= 0.6 ? 'hit' : r.rate <= 0.4 ? 'miss' : '');
   const fmt = n => (n == null ? '—' : n.toLocaleString('es', { maximumFractionDigits: 1 }));
   const shortDate = d => new Date(`${d}T12:00:00Z`).toLocaleDateString('es', { day: 'numeric', month: 'short' });
+  const dec2 = n => n.toLocaleString('es', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const timeFormat = new Intl.DateTimeFormat('es', { hour: '2-digit', minute: '2-digit' });
 
   $: rows = sortRows((payload?.players || [])
@@ -262,6 +263,26 @@
               <p class="muted">Divisiones sobre {hist.length} partidos guardados (temporadas {[...new Set(hist.map(g => g.season))].join(' y ')}).</p>
             {/if}
           </div>
+          {#if marketLine(detail.p, stat)}
+            {@const quotes = compareBooks(marketLine(detail.p, stat).books, side, detail.line)}
+            {#if quotes.length}
+              <section class="quotes" aria-labelledby="quotes-title">
+                <h3 id="quotes-title">Cuotas por casa · {side === 'over' ? 'más de' : 'menos de'}</h3>
+                <div class="quote-table" role="table" aria-label="Cuotas por casa de apuestas">
+                  <div class="quote-row head" role="row"><span role="columnheader">Casa</span><span role="columnheader">Línea</span><span role="columnheader">Cuota</span><span role="columnheader" title="Margen de la casa: 1/cuota más + 1/cuota menos − 1">Margen</span></div>
+                  {#each quotes as q}
+                    <div class="quote-row" role="row">
+                      <span role="cell">{q.title}</span>
+                      <span role="cell" class:best={q.bestLine}>{fmt(q.point)}{#if q.bestLine}<small> mejor línea</small>{/if}</span>
+                      <span role="cell" class:best={q.bestPrice}>{dec2(q.price)}{#if q.bestPrice}<small> mejor cuota</small>{/if}</span>
+                      <span role="cell" class="margin">{fmt(Math.round(q.margin * 1000) / 10)} %</span>
+                    </div>
+                  {/each}
+                </div>
+                <p class="muted">Cuotas decimales de {market.source}, actualizadas a las {timeFormat.format(new Date(market.fetchedAt))}; pueden haber cambiado. «Mejor cuota» compara solo casas con la línea {fmt(detail.line)}.</p>
+              </section>
+            {/if}
+          {/if}
           <div class="chart" role="img" aria-label={`Últimos ${games20.length} partidos frente a la línea ${detail.line}`}>
             <em class="ref" style={`bottom:${(detail.line / max) * 100}%`}><span>{fmt(detail.line)}</span></em>
             {#each games20 as g, i}
@@ -281,6 +302,15 @@
 </section>
 
 <style>
+  .quotes { margin: 14px 0; }
+  .quotes h3 { font-family: var(--font-display); text-transform: uppercase; font-size: 18px; margin: 0 0 8px; }
+  .quote-table { display: grid; border: 1px solid var(--nio-border); border-radius: 12px; overflow: hidden; }
+  .quote-row { display: grid; grid-template-columns: minmax(0, 1.4fr) 1fr 1fr .8fr; gap: 8px; padding: 8px 12px; font-size: 13px; border-top: 1px solid var(--nio-border); }
+  .quote-row.head { border-top: 0; background: var(--nio-raised); color: var(--nio-muted); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  .quote-row span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .quote-row .best { color: var(--nio-accent); font-weight: 700; }
+  .quote-row small { display: block; font-size: 10px; font-weight: 600; }
+  .quote-row .margin { color: var(--nio-muted); }
   .props { max-width: 1320px; margin: auto; padding: 28px 24px 100px; color: var(--nio-ink); font-family: var(--font-sans); font-variant-numeric: tabular-nums; }
   .head { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; }
   .eyebrow { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: var(--nio-muted); margin: 0 0 8px; }

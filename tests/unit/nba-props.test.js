@@ -60,3 +60,35 @@ describe('board ordering and sides', () => {
     expect(sortRows([r('a', 0.5, 10), r('b', null, 0), r('c', 0.8, 10), r('d', 0.8, 5)], 'l10').map(x => x.id)).toEqual(['c', 'd', 'a', 'b']);
   });
 });
+
+import { compareBooks } from '../../src/lib/nba/props.js';
+
+describe('compareBooks', () => {
+  const books = [
+    { key: 'a', title: 'A', point: 24.5, over: 1.87, under: 1.95 },
+    { key: 'b', title: 'B', point: 24.5, over: 1.91, under: 1.89 },
+    { key: 'c', title: 'C', point: 23.5, over: 1.70, under: 2.15 },
+    { key: 'x', title: 'Bad', point: 24.5, over: Number.NaN, under: 1.9 }
+  ];
+  it('drops invalid prices and orders by the best point for the side', () => {
+    expect(compareBooks(books, 'over', 24.5).map(b => b.key)).toEqual(['c', 'b', 'a']);
+    expect(compareBooks(books, 'under', 24.5).map(b => b.key)).toEqual(['a', 'b', 'c']);
+  });
+  it('marks the best price at the line and the best line', () => {
+    const over = compareBooks(books, 'over', 24.5);
+    expect(over.find(b => b.bestPrice).key).toBe('b');
+    expect(over.find(b => b.bestLine).key).toBe('c');
+    const under = compareBooks(books, 'under', 24.5);
+    expect(under.find(b => b.bestPrice).key).toBe('a');
+    expect(under.filter(b => b.bestLine).map(b => b.key)).toEqual(['a', 'b']);
+  });
+  it('computes the overround of each book', () => {
+    expect(compareBooks(books, 'over', 24.5).find(b => b.key === 'a').margin).toBeCloseTo(1 / 1.87 + 1 / 1.95 - 1, 10);
+  });
+  it('does not mark a best price with a single book or best line with one point', () => {
+    const one = compareBooks([books[0]], 'over', 24.5);
+    expect(one[0].bestPrice).toBe(false);
+    expect(one[0].bestLine).toBe(false);
+    expect(compareBooks([], 'over', 24.5)).toEqual([]);
+  });
+});
