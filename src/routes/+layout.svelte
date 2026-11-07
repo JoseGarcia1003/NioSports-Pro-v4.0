@@ -25,7 +25,7 @@
 
   const PUBLIC_ROUTES = ['/login', '/register', '/forgot-password'];
   // Open to visitors (with navigation): anyone must be able to audit the record.
-  const OPEN_ROUTES = ['/verificar', '/transparencia'];
+  const OPEN_ROUTES = ['/verificar', '/transparencia', '/deportes', '/deportes/futbol', '/deportes/mlb'];
   let subscriptionUser = null;
 
   onMount(async () => {
@@ -73,7 +73,7 @@ $: if (browser && !$authLoading) {
   }
 
   // Pages that render fully on the server without waiting for the session.
-  $: isServerPublic = $page.url.pathname === '/' || $page.url.pathname.startsWith('/legal/') || OPEN_ROUTES.includes($page.url.pathname);
+  $: isServerPublic = $page.url.pathname === '/' || $page.url.pathname.startsWith('/legal/') || OPEN_ROUTES.includes($page.url.pathname) || PUBLIC_ROUTES.some(r => $page.url.pathname.startsWith(r));
   $: isPublicPage = PUBLIC_ROUTES.some(r => $page.url.pathname.startsWith(r));
   $: isLandingPage = !$isAuthenticated && $page.url.pathname === '/';
   $: showNav = !isPublicPage && !isLandingPage;

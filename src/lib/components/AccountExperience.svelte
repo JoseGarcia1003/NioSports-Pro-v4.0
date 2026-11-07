@@ -126,7 +126,7 @@
   .muted { margin: 0; color: var(--nio-muted); font-size: 14px; line-height: 1.55; }
   .plan span { display: inline-block; padding: 5px 12px; border-radius: 999px; background: var(--nio-gold-soft); border: 1px solid var(--nio-gold-border); color: var(--nio-accent); font-weight: 700; font-size: 13px; }
   .plan { margin: 0; }
-  .primary, .ghost, .themes button { display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 0 16px; border-radius: 10px; font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; text-decoration: none; }
+  .primary, .ghost, .themes button { display: inline-flex; align-items: center; gap: 8px; min-height: var(--tap, 44px); padding: 0 16px; border-radius: 10px; font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; text-decoration: none; }
   .primary { background: var(--nio-action); color: var(--nio-action-ink); border: 0; }
   .ghost { background: var(--nio-raised); color: var(--nio-ink); border: 1px solid var(--nio-border); margin-top: auto; }
   .ghost:disabled { opacity: .6; cursor: default; }
@@ -143,7 +143,7 @@
   .links span { font-size: 13px; color: var(--nio-muted); line-height: 1.45; }
   .links a > :global(svg) { position: absolute; right: 14px; top: 16px; color: var(--nio-accent); }
   .help { margin-top: 24px; border: 1px solid var(--nio-border); border-radius: 14px; background: var(--nio-surface); padding: 14px 18px; }
-  .help summary { cursor: pointer; font-weight: 700; }
+  .help summary { cursor: pointer; font-weight: 700; min-height: var(--tap, 44px); display: flex; align-items: center; }
   .help ol { margin: 12px 0 4px; padding-left: 20px; color: var(--nio-muted); line-height: 1.8; font-size: 14px; }
   .help a, .foot a { color: var(--nio-accent); }
   .foot { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--nio-border); font-size: 13px; }

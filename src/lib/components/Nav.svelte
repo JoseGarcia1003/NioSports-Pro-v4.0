@@ -139,7 +139,7 @@
   }
 
   .nav__brand {
-    display: flex; align-items: center; text-decoration: none; flex-shrink: 0; margin-right: 12px;
+    display: flex; align-items: center; text-decoration: none; flex-shrink: 0; margin-right: 12px; min-width: var(--tap, 44px); min-height: var(--tap, 44px);
   }
   .nav__brand:focus-visible { outline: 2px solid var(--nav-accent); outline-offset: 3px; border-radius: 6px; }
 

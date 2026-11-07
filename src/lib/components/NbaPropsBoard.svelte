@@ -332,7 +332,7 @@
 <style>
   .mate { margin: 12px 0 4px; display: grid; gap: 8px; }
   .mate label { display: grid; gap: 6px; font-size: 12px; font-weight: 600; color: var(--nio-muted); text-transform: uppercase; letter-spacing: .06em; }
-  .mate select { min-height: 40px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-ink); font: inherit; font-size: 14px; text-transform: none; letter-spacing: 0; font-weight: 500; }
+  .mate select { min-height: var(--tap, 44px); padding: 0 12px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-ink); font: inherit; font-size: 14px; text-transform: none; letter-spacing: 0; font-weight: 500; }
   .splits.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .props { max-width: 1320px; margin: auto; padding: 8px 24px 100px; color: var(--nio-ink); font-family: var(--font-sans); font-variant-numeric: tabular-nums; }
   .head { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; }
@@ -341,29 +341,29 @@
   .lead { color: var(--nio-muted); max-width: 640px; margin: 0; line-height: 1.6; }
   .days, .chips, .games { display: flex; gap: 6px; flex-wrap: wrap; }
   button { font: inherit; cursor: pointer; }
-  .days button, .chips button, .games button { min-height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-muted); font-weight: 600; font-size: 13px; }
+  .days button, .chips button, .games button { min-height: var(--tap, 44px); padding: 0 14px; border-radius: 999px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-muted); font-weight: 600; font-size: 13px; }
   .days button.on, .chips button.on, .games button.on { background: var(--nio-action); color: var(--nio-action-ink); border-color: transparent; }
   .games button { display: inline-flex; align-items: center; gap: 8px; border-radius: 10px; }
   .games small { font-weight: 500; }
   .notice { margin: 20px 0 16px; padding: 12px 14px; border-radius: 12px; background: var(--nio-gold-soft); border: 1px solid var(--nio-gold-border); color: var(--nio-ink); font-size: 13px; line-height: 1.55; }
   .notice b { color: var(--nio-accent); }
   .controls { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
-  input[type='search'] { min-height: 40px; min-width: 260px; flex: 0 1 320px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-ink); font: inherit; }
+  input[type='search'] { min-height: var(--tap, 44px); min-width: 260px; flex: 0 1 320px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-ink); font: inherit; }
   .games { margin-bottom: 16px; }
   .filters { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; margin: 4px 0 12px; }
   .filters-toggle { display: none; }
   .more { display: block; margin: 14px auto; min-height: 44px; padding: 0 18px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-raised); color: var(--nio-ink); font-weight: 700; }
   .more:focus-visible, .filters-toggle:focus-visible { outline: 2px solid var(--nio-accent); outline-offset: 2px; }
   @media (max-width: 640px) {
-    .filters-toggle { display: inline-flex; gap: 8px; align-items: center; min-height: 40px; margin: 0 0 10px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-ink); font-weight: 700; font-size: 14px; }
+    .filters-toggle { display: inline-flex; gap: 8px; align-items: center; min-height: var(--tap, 44px); margin: 0 0 10px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-ink); font-weight: 700; font-size: 14px; }
     .filters-toggle span { font-size: 9px; color: var(--nio-accent); }
     .filters.collapsed { display: none; }
   }
   .segment { display: inline-flex; padding: 3px; border: 1px solid var(--nio-border); border-radius: 10px; background: var(--nio-surface); }
-  .segment button { min-height: 34px; padding: 0 12px; border: 0; border-radius: 7px; background: none; color: var(--nio-muted); font-weight: 600; font-size: 13px; }
+  .segment button { min-height: var(--tap, 44px); padding: 0 12px; border: 0; border-radius: 7px; background: none; color: var(--nio-muted); font-weight: 600; font-size: 13px; }
   .segment button.on { background: var(--nio-action); color: var(--nio-action-ink); }
   .select { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--nio-muted); font-weight: 600; }
-  .select select { min-height: 38px; padding: 0 10px; border-radius: 9px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-ink); font: inherit; font-weight: 600; }
+  .select select { min-height: var(--tap, 44px); padding: 0 10px; border-radius: 9px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-ink); font: inherit; font-weight: 600; }
   .layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; align-items: start; }
   .layout.with-detail { grid-template-columns: minmax(0, 1fr) minmax(320px, 420px); }
   .table { border: 1px solid var(--nio-border); border-radius: 16px; background: var(--nio-surface); overflow: hidden; }
@@ -378,7 +378,7 @@
   .badge { flex: none; display: inline-grid; place-items: center; width: 38px; height: 24px; border-radius: 6px; background: var(--team); color: var(--team-ink, #fff); font-style: normal; font-family: var(--font-display); font-weight: 700; font-size: 13px; letter-spacing: .04em; box-shadow: inset 0 0 0 1px rgba(255,255,255,.14); }
   .badge.big { width: 52px; height: 34px; font-size: 17px; }
   .line { display: inline-flex; align-items: center; gap: 4px; }
-  .line button { width: 26px; height: 26px; border-radius: 7px; border: 1px solid var(--nio-border); background: var(--nio-raised); color: var(--nio-ink); line-height: 1; }
+  .line button { width: var(--tap, 44px); height: var(--tap, 44px); flex: none; position: relative; border-radius: 7px; border: 1px solid var(--nio-border); background: var(--nio-raised); color: var(--nio-ink); line-height: 1; }
   .line b { min-width: 40px; text-align: center; font-family: var(--font-display); font-size: 19px; }
   .line b.custom { color: var(--nio-accent); }
   .src { font-style: normal; font-size: 9px; font-weight: 700; letter-spacing: .04em; color: var(--nio-muted); border: 1px solid var(--nio-border); border-radius: 999px; padding: 1px 5px; }
@@ -396,12 +396,12 @@
   .spark i.under { background: var(--nio-miss); }
   .spark em { position: absolute; left: 0; right: 0; border-top: 1px dashed var(--nio-accent); }
   .state { padding: 22px 14px; color: var(--nio-muted); margin: 0; }
-  .state button { margin-top: 10px; min-height: 40px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-raised); color: var(--nio-ink); font-weight: 600; }
+  .state button { margin-top: 10px; min-height: var(--tap, 44px); padding: 0 16px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-raised); color: var(--nio-ink); font-weight: 600; }
   .detail { position: sticky; top: 84px; scroll-margin-top: 140px; border: 1px solid var(--nio-border); border-radius: 16px; background: linear-gradient(180deg, var(--nio-raised), var(--nio-surface) 160px); padding: 18px; }
   .detail-head { display: flex; align-items: center; gap: 12px; }
   .detail-head h2 { font-family: var(--font-display); text-transform: uppercase; font-size: 28px; line-height: 1; margin: 0; }
   .detail-head p { margin: 4px 0 0; font-size: 13px; color: var(--nio-muted); }
-  .close { margin-left: auto; width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-ink); }
+  .close { margin-left: auto; width: var(--tap, 44px); height: var(--tap, 44px); border-radius: 9px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-ink); }
   .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 16px 0; }
   .kpis div { display: grid; padding: 10px; border-radius: 10px; background: var(--nio-page); border: 1px solid var(--nio-border); }
   .kpis span { font-size: 11px; color: var(--nio-muted); text-transform: uppercase; letter-spacing: .06em; }

@@ -86,9 +86,9 @@
   .skeleton span + span { width: 18%; }
   .state { border-top: 1px solid var(--nio-border); padding: 18px 0; color: var(--nio-muted); font-size: 14px; margin: 0; }
   .state p { margin: 0 0 12px; }
-  .state button { min-height: 40px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-raised); color: var(--nio-ink); font: inherit; font-weight: 600; cursor: pointer; }
+  .state button { min-height: var(--tap, 44px); padding: 0 16px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-raised); color: var(--nio-ink); font: inherit; font-weight: 600; cursor: pointer; }
   .source { font-size: 12px; line-height: 1.6; color: var(--nio-muted); margin: 6px 0 12px; padding-top: 12px; border-top: 1px solid var(--nio-border); }
-  .board-link { display: inline-flex; align-items: center; gap: 6px; color: var(--nio-accent); text-decoration: none; font-weight: 600; font-size: 14px; min-height: 32px; }
+  .board-link { display: inline-flex; align-items: center; gap: 6px; color: var(--nio-accent); text-decoration: none; font-weight: 600; font-size: 14px; min-height: var(--tap, 44px); }
   .board-link:focus-visible, button:focus-visible { outline: 2px solid var(--nio-accent); outline-offset: 3px; }
   @media (max-width: 640px) { .board { padding: 18px; } .team { font-size: 13px; } .board h2 { font-size: 26px; } }
   @media (prefers-reduced-motion: reduce) { .pulse { animation: none; } }

@@ -77,8 +77,8 @@
   dd { margin: 2px 0 0; font-weight: 700; }
   form { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; gap: 8px; align-items: end; }
   label { display: grid; gap: 4px; font-size: 12px; color: var(--nio-muted); font-weight: 600; }
-  input { min-height: 40px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-raised); color: var(--nio-ink); font: inherit; padding: 0 10px; }
-  button { min-height: 40px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-raised); color: var(--nio-ink); font: inherit; font-weight: 700; font-size: 13px; cursor: pointer; }
+  input { min-height: var(--tap, 44px); border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-raised); color: var(--nio-ink); font: inherit; padding: 0 10px; }
+  button { min-height: var(--tap, 44px); padding: 0 14px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-raised); color: var(--nio-ink); font: inherit; font-weight: 700; font-size: 13px; cursor: pointer; }
   form button { background: var(--nio-action); color: var(--nio-action-ink); border: 0; }
   .pause { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; color: var(--nio-muted); }
   button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid var(--nio-accent); outline-offset: 2px; }

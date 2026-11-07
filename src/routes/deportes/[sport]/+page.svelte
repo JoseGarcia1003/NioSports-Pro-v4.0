@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { STATE_LABEL, KIND_LABEL } from '$lib/product/sports-hub.js';
+  import { marketLabel } from '$lib/product/labels.js';
   export let data;
 
   // Football and MLB: real schedule only when a provider delivered it; otherwise
@@ -34,7 +35,7 @@
     <section class="feeds" aria-labelledby="feeds-title">
       <h2 id="feeds-title">Estado de las fuentes</h2>
       <ul>{#each status.kinds as k}<li><span>{KIND_LABEL[k.kind]}</span><em>{STATE_LABEL[k.state]}{k.providers.length ? ` · ${k.providers.map(p => p.id).join(', ')}` : ''}</em></li>{/each}</ul>
-      <p class="muted">Mercados previstos: {status.markets.join(', ')}. Los modelos de este deporte se publicarán solo tras validarse fuera de muestra, como el de puntos NBA.</p>
+      <p class="muted">Mercados previstos: {status.markets.map(marketLabel).join(', ').toLowerCase()}. Los modelos de este deporte se publicarán solo tras validarse fuera de muestra, como el de puntos NBA.</p>
     </section>
   {/if}
 </div>
@@ -42,7 +43,7 @@
 <style>
   .page { max-width: 900px; margin: 0 auto; padding: 32px 24px 100px; color: var(--nio-ink); }
   .eyebrow { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: var(--nio-muted); margin: 0 0 8px; }
-  .eyebrow a { color: var(--nio-accent); text-decoration: none; }
+  .eyebrow a { color: var(--nio-accent); text-decoration: underline; text-underline-offset: 3px; }
   h1 { font-family: var(--font-display); text-transform: uppercase; font-weight: 800; font-size: clamp(34px, 4.2vw, 52px); line-height: .95; margin: 0 0 12px; }
   h2 { font-family: var(--font-display); text-transform: uppercase; font-size: 22px; margin: 0 0 10px; }
   .lead, .muted { color: var(--nio-muted); line-height: 1.6; }

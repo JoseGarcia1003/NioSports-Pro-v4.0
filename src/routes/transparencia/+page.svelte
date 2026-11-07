@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { MIN_SAMPLE } from '$lib/stats/calibration.js';
+  import { groupLabel, modelLabel } from '$lib/product/labels.js';
 
   // Public track record from the sealed ledger, plus each model's out-of-sample
   // backtest — always labelled as such and never mixed with published results.
@@ -16,7 +17,7 @@
   $: m = data?.models?.[0];
   $: bt = m?.backtest;
   // Reliability chart geometry (0..1 on both axes).
-  const W = 280, P = 28;
+  const W = 340, P = 44;
   const x = v => P + v * (W - 2 * P), y = v => W - P - v * (W - 2 * P);
 </script>
 
@@ -52,7 +53,7 @@
         <div><dt>Log loss</dt><dd>{num(r.probabilistic.logLoss)}</dd></div>
         <div><dt>Prob. media / frecuencia real</dt><dd>{pct(r.probabilistic.meanP)} / {pct(r.probabilistic.scoredHitRate)}</dd></div>
       </dl>
-      {#if !r.probabilistic.scored}<p class="state">Aún no hay pronósticos probabilísticos liquidados. Aparecerán cuando terminen los partidos de las ediciones selladas con el modelo {m?.id}@{m?.version}.</p>{/if}
+      {#if !r.probabilistic.scored}<p class="state">Aún no hay pronósticos probabilísticos liquidados. Aparecerán cuando terminen los partidos de las ediciones selladas con el {modelLabel(`${m?.id}@${m?.version}`)}.</p>{/if}
     </section>
 
     {#if r.byMonth.length}
@@ -72,7 +73,7 @@
         <div class="scroller" tabindex="0" role="region" aria-label="Rendimiento por grupo">
           <table>
             <thead><tr><th scope="col">Grupo</th><th scope="col">Decididos</th><th scope="col">Acierto</th><th scope="col">IC 95 %</th></tr></thead>
-            <tbody>{#each [...r.byMarket, ...r.byModel] as g}<tr><th scope="row">{g.key}</th><td>{g.decided}</td><td>{pct(g.hitRate)}</td><td>{ci(g.hitRateCI)}</td></tr>{/each}</tbody>
+            <tbody>{#each [...r.byMarket, ...r.byModel] as g}<tr><th scope="row" title={g.key}>{groupLabel(g.key)}</th><td>{g.decided}</td><td>{pct(g.hitRate)}</td><td>{ci(g.hitRateCI)}</td></tr>{/each}</tbody>
           </table>
         </div>
         {#if r.retroactive.total}<p class="muted small">{r.retroactive.total} pronósticos proceden de una edición sellada retroactivamente (2/11/2026) y se identifican como tales en el registro.</p>{/if}
@@ -81,7 +82,7 @@
 
     {#if m && bt}
       <section class="block model" aria-labelledby="bt-title">
-        <h2 id="bt-title">Modelo {m.id} · versión {m.version}</h2>
+        <h2 id="bt-title">{modelLabel(`${m.id}@${m.version}`)}</h2>
         <p class="warn" role="note"><b>Esto es una prueba histórica, no resultados publicados.</b> {bt.protocol} {bt.line}</p>
         <dl class="metrics">
           <div><dt>Partidos de prueba</dt><dd>{bt.testGames.toLocaleString('es')}</dd></div>
@@ -94,11 +95,13 @@
           <svg viewBox={`0 0 ${W} ${W}`} role="img" aria-labelledby="rel-cap">
             <line x1={x(0)} y1={y(0)} x2={x(1)} y2={y(1)} class="diag" />
             <line x1={x(0)} y1={y(0)} x2={x(1)} y2={y(0)} class="axis" /><line x1={x(0)} y1={y(0)} x2={x(0)} y2={y(1)} class="axis" />
-            {#each [0, 0.5, 1] as t}<text x={x(t)} y={W - 8} text-anchor="middle">{t * 100}%</text><text x={8} y={y(t) + 4}>{t * 100}</text>{/each}
+            {#each [0, 0.25, 0.5, 0.75, 1] as t}<line class="grid" x1={x(t)} y1={y(0)} x2={x(t)} y2={y(1)} /><line class="grid" x1={x(0)} y1={y(t)} x2={x(1)} y2={y(t)} /><text x={x(t)} y={y(0) + 16} text-anchor="middle">{t * 100} %</text><text x={x(0) - 8} y={y(t) + 4} text-anchor="end">{t * 100} %</text>{/each}
+            <text class="title" x={(x(0) + x(1)) / 2} y={W - 4} text-anchor="middle">Probabilidad estimada</text>
+            <text class="title" transform={`translate(12 ${(y(0) + y(1)) / 2}) rotate(-90)`} text-anchor="middle">Frecuencia real</text>
             <polyline class="curve" points={bt.calibrated.reliability.map(b => `${x(b.meanP)},${y(b.observed)}`).join(' ')} />
-            {#each bt.calibrated.reliability as b}<circle cx={x(b.meanP)} cy={y(b.observed)} r={Math.max(2.5, Math.min(7, Math.sqrt(b.n) / 3))}><title>{b.bin}: prob. media {pct(b.meanP)}, real {pct(b.observed)} (n={b.n})</title></circle>{/each}
+            {#each bt.calibrated.reliability as b}<circle class:thin={b.n < 30} cx={x(b.meanP)} cy={y(b.observed)} r={Math.max(3, Math.min(8, Math.sqrt(b.n) / 2.6))}><title>{b.bin}: prob. media {pct(b.meanP)}, real {pct(b.observed)} (n={b.n})</title></circle>{/each}
           </svg>
-          <figcaption id="rel-cap">Curva de calibración (prueba histórica): eje horizontal, probabilidad estimada; vertical, frecuencia observada. La diagonal es la calibración perfecta; el tamaño del punto refleja el número de casos.</figcaption>
+          <figcaption id="rel-cap">Curva de calibración (prueba histórica): eje horizontal, probabilidad estimada; vertical, frecuencia observada. La diagonal es la calibración perfecta; el tamaño del punto refleja el número de casos; los puntos atenuados tienen menos de 30 casos y son poco fiables.</figcaption>
         </figure>
         <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
         <div class="scroller" tabindex="0" role="region" aria-label="Tabla de calibración">
@@ -143,9 +146,12 @@
   th, td { padding: 9px 10px; text-align: right; border-bottom: 1px solid var(--nio-border); white-space: nowrap; }
   th[scope='row'], thead th:first-child { text-align: left; }
   thead th { background: var(--nio-raised); color: var(--nio-muted); font-size: 11px; }
-  .chart { margin: 0 0 14px; display: grid; gap: 8px; max-width: 360px; }
+  .chart { margin: 0 0 14px; display: grid; gap: 8px; max-width: 440px; }
   .chart svg { width: 100%; height: auto; }
-  .chart text { font-size: 10px; fill: var(--nio-muted); }
+  .chart text { font-size: 11px; fill: var(--nio-muted); }
+  .chart text.title { font-size: 12px; font-weight: 600; fill: var(--nio-ink); }
+  .grid { stroke: var(--nio-border); stroke-width: 1; }
+  circle.thin { opacity: .35; }
   .diag { stroke: var(--nio-muted); stroke-dasharray: 4 4; }
   .axis { stroke: var(--nio-border); }
   .curve { fill: none; stroke: var(--nio-accent); stroke-width: 2; }

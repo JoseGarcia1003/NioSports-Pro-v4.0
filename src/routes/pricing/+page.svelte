@@ -104,7 +104,7 @@
   .lead { color: var(--nio-muted); max-width: 640px; margin: 0 auto; line-height: 1.6; }
   .banner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-radius: 12px; margin-bottom: 24px; background: var(--nio-gold-soft); border: 1px solid var(--nio-gold-border); font-size: 14px; }
   .banner p { margin: 0; flex: 1 1 320px; line-height: 1.5; }
-  .banner button { min-height: 40px; padding: 0 16px; border-radius: 10px; border: 0; background: var(--nio-action); color: var(--nio-action-ink); font: inherit; font-weight: 700; cursor: pointer; }
+  .banner button { min-height: var(--tap, 44px); padding: 0 16px; border-radius: 10px; border: 0; background: var(--nio-action); color: var(--nio-action-ink); font: inherit; font-weight: 700; cursor: pointer; }
   .grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; }
   .card { background: var(--nio-surface); border: 1px solid var(--nio-border); border-radius: 20px; padding: 28px 24px; display: flex; flex-direction: column; gap: 14px; }
   .card.main { border-color: var(--nio-gold-border); background: linear-gradient(180deg, var(--nio-gold-soft), var(--nio-surface) 45%); }

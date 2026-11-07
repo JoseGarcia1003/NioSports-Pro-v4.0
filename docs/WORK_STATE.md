@@ -14,6 +14,7 @@
   - Docs: `docs/ARCHITECTURE.md`, `docs/API_INTEGRATION_CHECKLIST.md`, README reescrito, env.example ampliado.
 - Pruebas: 741+ unitarias/servidor/BD y 41 de UI aprobadas; svelte-check 0/0; build OK; axe 0 infracciones en las 5 páginas nuevas × 2 temas.
 - Pendiente del propietario: activar la tarea diaria de ingesta en su PC; credenciales de fútbol/tenis/IA; rotar claves expuestas; revisión legal; confirmar que el primer sellado real obtiene prueba OpenTimestamps.
+- Pasada de interfaz (7/11): auditor automático propio (22 páginas × 360/1280 px): 0 desbordes, 0 controles < 44 px (token `--tap`), 0 etiquetas técnicas visibles (`src/lib/product/labels.js`), 0 infracciones axe WCAG 2.2 AA en ambos temas, 0 errores. Páginas públicas en build de producción local, móvil 4G simulado: LCP 0,48–0,61 s, CLS ≤ 0,02. /deportes pasa a ser pública y renderizada en servidor; /login ya no espera a Firebase para pintar. Páginas privadas no medidas en rendimiento (requieren sesión). Pendiente: prueba con usuarios y aprobación estética del propietario.
 - Siguiente acción técnica: tras la primera ingesta, comprobar en producción una edición sellada nueva (seq 2) con anclaje, y la fila de `ingest_runs` del cron diario (MLB statsapi verificado o no).
 
 ## VIGENTE — Evaluación integral del 1 de noviembre de 2026

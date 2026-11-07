@@ -131,14 +131,14 @@
   h1 { font-family: var(--font-display); text-transform: uppercase; font-weight: 800; font-size: clamp(34px, 4.2vw, 52px); line-height: .95; margin: 0 0 10px; }
   .lead { color: var(--nio-muted); max-width: 680px; margin: 0; line-height: 1.6; }
   .season, .select { display: grid; gap: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--nio-muted); }
-  select, input[type='search'] { min-height: 40px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-ink); font: inherit; font-size: 14px; text-transform: none; letter-spacing: 0; }
+  select, input[type='search'] { min-height: var(--tap, 44px); padding: 0 12px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-ink); font: inherit; font-size: 14px; text-transform: none; letter-spacing: 0; }
   .bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin-bottom: 12px; }
   .bar input[type='search'] { flex: 1 1 220px; max-width: 340px; }
   .segment { display: inline-flex; gap: 4px; padding: 4px; border-radius: 12px; border: 1px solid var(--nio-border); background: var(--nio-surface); }
-  .segment button { min-height: 36px; padding: 0 16px; border-radius: 9px; border: 0; background: transparent; color: var(--nio-muted); font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; }
+  .segment button { min-height: var(--tap, 44px); padding: 0 16px; border-radius: 9px; border: 0; background: transparent; color: var(--nio-muted); font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; }
   .segment button.on { background: var(--nio-action); color: var(--nio-action-ink); }
   .quick { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 14px; }
-  .quick button { min-height: 34px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-muted); font: inherit; font-weight: 700; font-size: 13px; cursor: pointer; }
+  .quick button { min-height: var(--tap, 44px); padding: 0 12px; border-radius: 999px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-muted); font: inherit; font-weight: 700; font-size: 13px; cursor: pointer; }
   .quick button.on { background: var(--nio-gold-soft); color: var(--nio-accent); border-color: var(--nio-gold-border); }
   button:focus-visible, select:focus-visible, input:focus-visible, .scroller:focus-visible { outline: 2px solid var(--nio-accent); outline-offset: 2px; }
   .meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; margin: 0 0 8px; font-size: 13px; color: var(--nio-muted); }
@@ -147,8 +147,8 @@
   .scroller { overflow-x: auto; border: 1px solid var(--nio-border); border-radius: 14px; background: var(--nio-surface); }
   table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
   th, td { padding: 10px 8px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--nio-border); }
-  thead th { position: sticky; top: 0; background: var(--nio-raised); color: var(--nio-muted); font-size: 11px; font-weight: 700; letter-spacing: .04em; z-index: 1; }
-  thead th button { all: unset; cursor: pointer; display: inline-flex; gap: 3px; align-items: center; }
+  thead th { position: sticky; top: 0; padding-top: 0; padding-bottom: 0; background: var(--nio-raised); color: var(--nio-muted); font-size: 11px; font-weight: 700; letter-spacing: .04em; z-index: 1; }
+  thead th button { all: unset; cursor: pointer; display: inline-flex; gap: 3px; align-items: center; justify-content: flex-end; min-height: var(--tap, 44px); min-width: var(--tap, 44px); box-sizing: border-box; }
   thead th button:focus-visible { outline: 2px solid var(--nio-accent); outline-offset: 2px; border-radius: 4px; }
   thead th.active { color: var(--nio-ink); box-shadow: inset 0 3px var(--nio-gold); }
   thead th span { font-size: 8px; color: var(--nio-accent); }
@@ -167,9 +167,9 @@
   .pos { color: var(--nio-hit); }
   .neg { color: var(--nio-miss); }
   .empty { text-align: center; color: var(--nio-muted); padding: 24px; }
-  .more { margin: 14px auto 0; display: block; min-height: 42px; padding: 0 18px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-raised); color: var(--nio-ink); font: inherit; font-weight: 700; cursor: pointer; }
+  .more { margin: 14px auto 0; display: block; min-height: var(--tap, 44px); padding: 0 18px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-raised); color: var(--nio-ink); font: inherit; font-weight: 700; cursor: pointer; }
   .state { color: var(--nio-muted); margin: 24px 0; }
-  .state button { margin-top: 10px; min-height: 40px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-raised); color: var(--nio-ink); font: inherit; font-weight: 600; cursor: pointer; }
+  .state button { margin-top: 10px; min-height: var(--tap, 44px); padding: 0 16px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-raised); color: var(--nio-ink); font: inherit; font-weight: 600; cursor: pointer; }
   .foot { margin: 14px 0 0; font-size: 12px; color: var(--nio-muted); line-height: 1.55; }
   @media (max-width: 640px) { .stats { padding: 4px 16px 100px; } .name { min-width: 120px; } th, td { padding: 9px 6px; } }
 </style>

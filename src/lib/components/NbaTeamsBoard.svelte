@@ -146,7 +146,7 @@
   .line { display: inline-flex; align-items: center; gap: 6px; }
   .line b { font-family: var(--font-display); font-size: 22px; min-width: 52px; text-align: center; }
   .line em { font-style: normal; font-size: 11px; font-weight: 700; color: var(--nio-accent); text-transform: uppercase; letter-spacing: .06em; }
-  .line button { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--nio-border); background: var(--nio-raised); color: var(--nio-ink); font: inherit; font-weight: 700; cursor: pointer; }
+  .line button { width: var(--tap, 44px); height: var(--tap, 44px); border-radius: 8px; border: 1px solid var(--nio-border); background: var(--nio-raised); color: var(--nio-ink); font: inherit; font-weight: 700; cursor: pointer; }
   .line .reset { width: auto; padding: 0 8px; font-size: 11px; color: var(--nio-muted); }
   .line button:focus-visible { outline: 2px solid var(--nio-accent); outline-offset: 2px; }
   .rates { display: grid; grid-template-columns: 48px repeat(3, 1fr); gap: 6px; align-items: center; }
@@ -161,7 +161,7 @@
   .hint { margin: 0; font-size: 12px; color: var(--nio-muted); line-height: 1.5; }
   .state { color: var(--nio-muted); }
   .segment { display: inline-flex; gap: 4px; margin: 0 0 14px; padding: 3px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-surface); }
-  .segment button { min-height: 34px; padding: 0 14px; border-radius: 8px; border: 0; background: transparent; color: var(--nio-muted); font: inherit; font-weight: 600; font-size: 13px; cursor: pointer; }
+  .segment button { min-height: var(--tap, 44px); padding: 0 14px; border-radius: 8px; border: 0; background: transparent; color: var(--nio-muted); font: inherit; font-weight: 600; font-size: 13px; cursor: pointer; }
   .segment button.on { background: var(--nio-action); color: var(--nio-action-ink); }
   .segment button:focus-visible { outline: 2px solid var(--nio-accent); outline-offset: 2px; }
   @media (max-width: 640px) { .cards { grid-template-columns: 1fr; } }

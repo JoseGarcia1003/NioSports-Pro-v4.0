@@ -3,6 +3,7 @@
   import { ArrowUpRight } from 'lucide-svelte';
   import { authenticatedFetch } from '$lib/services/authenticated-fetch.js';
   import { teamColor, teamStyle } from '$lib/product/teams.js';
+  import { modelLabel } from '$lib/product/labels.js';
 
   // Sealed daily signals and their settled history. Every figure comes from the
   // server; nothing is computed or filled in on the client.
@@ -52,7 +53,7 @@
     <div class="state"><p>No pudimos cargar las señales. No mostramos datos sin fuente.</p><button type="button" on:click={load}>Reintentar</button></div>
   {:else}
     {#if data.edition}
-      <p class="sealed">Edición sellada a las {time(data.edition.sealedAt)} · método {data.edition.method} · {data.edition.entries.length} {data.edition.entries.length === 1 ? 'señal' : 'señales'}
+      <p class="sealed">Edición sellada a las {time(data.edition.sealedAt)} · <span title={data.edition.method}>{modelLabel(`reading@${data.edition.method}`)}</span> · {data.edition.entries.length} {data.edition.entries.length === 1 ? 'señal' : 'señales'}
         {#if data.seal}· huella <code title={data.seal.hash}>{data.seal.hash.slice(0, 12)}…</code> <a href="/verificar">Verificar</a>{/if}</p>
       {#if data.edition.entries.length}
         <ul class="cards">
@@ -68,7 +69,7 @@
               </div>
               <p class="pick"><span>{s.side === 'over' ? 'Más de' : 'Menos de'}</span> <b>{fmt(s.line)}</b> puntos <small>línea de mercado · {s.books} {s.books === 1 ? 'casa' : 'casas'}</small></p>
               {#if s.model}
-                <p class="prob"><b>{Math.round(s.model.p * 100)} %</b> probabilidad del modelo · rango probable {s.model.interval80[0]}–{s.model.interval80[1]} pts (80 %) <small>{s.model.model}</small></p>
+                <p class="prob"><b>{Math.round(s.model.p * 100)} %</b> probabilidad del modelo · rango probable {s.model.interval80[0]}–{s.model.interval80[1]} pts (80 %) <small title={s.model.model}>{modelLabel(s.model.model)}</small></p>
               {/if}
               <ul class="why">
                 {#each s.findings.slice(0, 3) as f}
@@ -88,7 +89,7 @@
 
     <section class="history" aria-labelledby="history-title">
       <div class="history-head">
-        <h3 id="history-title">Historial verificable</h3>
+        <svelte:element this={heading ? 'h3' : 'h2'} id="history-title" class="history-title">Historial verificable</svelte:element>
         {#if summary?.decided}
           <p class="score"><b>{summary.hits} de {summary.decided}</b> ({Math.round(summary.rate * 100)} %) acertadas{#if summary.decided < 50}{' · '}<em>muestra pequeña: aún no es evidencia de acierto</em>{/if}{#if summary.pending}{' · '}{summary.pending} {summary.pending === 1 ? 'pendiente' : 'pendientes'}{/if}</p>
         {:else}
@@ -125,7 +126,7 @@
   .signals { margin: 0 0 40px; font-variant-numeric: tabular-nums; }
   .sealed code { font-size: 12px; }
   .sealed a { color: var(--nio-accent); font-weight: 600; }
-  .card.locked { opacity: .85; }
+  .card.locked { border-style: dashed; }
   .card.locked a { color: var(--nio-accent); }
   .prob { margin: 0; font-size: 13px; color: var(--nio-muted); }
   .prob b { color: var(--nio-ink); font-family: var(--font-display); font-size: 18px; }
@@ -152,10 +153,10 @@
   .why li.pro span { color: var(--nio-hit); }
   .why li.con span { color: var(--nio-miss); }
   .state { color: var(--nio-muted); margin: 16px 0; }
-  .state button { margin-top: 10px; min-height: 40px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-raised); color: var(--nio-ink); font: inherit; font-weight: 600; cursor: pointer; }
+  .state button { margin-top: 10px; min-height: var(--tap, 44px); padding: 0 16px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-raised); color: var(--nio-ink); font: inherit; font-weight: 600; cursor: pointer; }
   .history { margin-top: 26px; padding: 18px; border: 1px solid var(--nio-border); border-radius: 16px; background: var(--nio-surface); }
   .history-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px 16px; }
-  .history h3 { font-family: var(--font-display); text-transform: uppercase; font-size: 22px; margin: 0; }
+  .history .history-title { font-family: var(--font-display); text-transform: uppercase; font-size: 22px; margin: 0; }
   .score { margin: 0; font-size: 13px; color: var(--nio-muted); }
   .score b { color: var(--nio-ink); }
   .score em { font-style: normal; color: var(--nio-accent); }
@@ -167,7 +168,7 @@
   .row.miss .mark { color: var(--nio-miss); }
   .actual { color: var(--nio-muted); white-space: nowrap; }
   .muted { margin: 8px 0 0; font-size: 12px; color: var(--nio-muted); line-height: 1.55; }
-  .more { display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; color: var(--nio-accent); text-decoration: none; font-weight: 600; font-size: 14px; min-height: 36px; }
+  .more { display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; color: var(--nio-accent); text-decoration: none; font-weight: 600; font-size: 14px; min-height: var(--tap, 44px); }
   .more:focus-visible, button:focus-visible { outline: 2px solid var(--nio-accent); outline-offset: 3px; }
   @media (max-width: 640px) { .cards { grid-template-columns: 1fr; } .history { padding: 14px; } }
 </style>

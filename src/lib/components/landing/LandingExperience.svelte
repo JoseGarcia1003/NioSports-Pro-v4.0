@@ -82,13 +82,13 @@
   .masthead { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-block: 18px; }
   .brand { text-decoration: none; color: inherit; }
   .masthead nav { display: flex; gap: 26px; align-items: center; }
-  .masthead nav a { display: inline-flex; align-items: center; min-height: 40px; }
+  .masthead nav a { display: inline-flex; align-items: center; min-height: var(--tap, 44px); }
   .masthead nav a, footer a { color: var(--nio-muted); text-decoration: none; font-size: 14px; font-weight: 500; }
   .masthead nav a:hover, footer a:hover { color: var(--nio-ink); }
   .access { display: flex; gap: 8px; align-items: center; }
-  .join { min-height: 40px; display: inline-flex; align-items: center; padding: 0 16px; border-radius: 10px; background: var(--nio-action); color: var(--nio-action-ink); text-decoration: none; font-size: 14px; font-weight: 700; }
+  .join { min-height: var(--tap, 44px); display: inline-flex; align-items: center; padding: 0 16px; border-radius: 10px; background: var(--nio-action); color: var(--nio-action-ink); text-decoration: none; font-size: 14px; font-weight: 700; }
   .join:focus-visible { outline: 2px solid var(--nio-accent); outline-offset: 3px; }
-  .sign-in { min-height: 40px; display: inline-flex; align-items: center; padding: 0 16px; border: 1px solid var(--nio-border); border-radius: 10px; background: var(--nio-surface); color: var(--nio-ink); text-decoration: none; font-size: 14px; font-weight: 600; }
+  .sign-in { min-height: var(--tap, 44px); display: inline-flex; align-items: center; padding: 0 16px; border: 1px solid var(--nio-border); border-radius: 10px; background: var(--nio-surface); color: var(--nio-ink); text-decoration: none; font-size: 14px; font-weight: 600; }
 
   .hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 56px; align-items: start; padding-block: 56px 72px; }
   h1 { font-family: var(--font-display); text-transform: uppercase; font-size: clamp(56px, 8.4vw, 118px); line-height: .9; letter-spacing: -.005em; font-weight: 800; margin: 0 0 26px; color: var(--nio-ink); }

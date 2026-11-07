@@ -34,7 +34,7 @@
   .toast.error { --tone: var(--nio-miss); }
   .toast__icon { flex-shrink: 0; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--tone); color: var(--nio-page); font-size: 12px; font-weight: 800; margin-top: 1px; }
   .toast__message { flex: 1; margin: 0; font-size: 14px; line-height: 1.45; }
-  .toast__close { flex-shrink: 0; width: 28px; height: 28px; margin: -4px -4px 0 0; border-radius: 8px; background: none; border: none; cursor: pointer; color: var(--nio-muted); font-size: 18px; line-height: 1; }
+  .toast__close { flex-shrink: 0; width: var(--tap, 44px); height: var(--tap, 44px); margin: -4px -4px 0 0; border-radius: 8px; background: none; border: none; cursor: pointer; color: var(--nio-muted); font-size: 18px; line-height: 1; }
   .toast__close:hover { color: var(--nio-ink); }
   .toast__close:focus-visible { outline: 2px solid var(--nio-accent); outline-offset: 2px; }
   .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }

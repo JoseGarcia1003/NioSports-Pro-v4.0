@@ -7,6 +7,7 @@
   --nio-navy: #0e1116;
   --nio-gold: #f5c04a;
   --nio-page: #0a0c10;
+  --tap: 44px; /* minimum touch target */
   --nio-surface: #12151b;
   --nio-raised: #1a1e26;
   --nio-border: #262b35;

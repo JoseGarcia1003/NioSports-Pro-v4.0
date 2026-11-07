@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { ShieldCheck, ShieldAlert, Download, Lock, Clock } from 'lucide-svelte';
   import { verifyChain, sha256Hex, GENESIS } from '$lib/integrity/seal.js';
+  import { modelLabel } from '$lib/product/labels.js';
 
   // Public verification: the browser re-computes every SHA-256 itself and checks
   // the chain links. Nothing here trusts a "verified" flag sent by our server.
@@ -75,7 +76,7 @@
               <span class="seq">#{s.seq}</span>
               <div class="what">
                 <strong>{SPORT[s.sport] ?? s.sport} · {MARKET[s.market] ?? s.market} · {s.day}</strong>
-                <small>{s.entryCount} {s.entryCount === 1 ? 'pronóstico' : 'pronósticos'} · modelo {s.model}</small>
+                <small>{s.entryCount} {s.entryCount === 1 ? 'pronóstico' : 'pronósticos'} · <span title={s.model}>{modelLabel(s.model)}</span></small>
               </div>
               <span class="badge" class:ok={v?.ok} class:fail={!v?.ok}>{v?.ok ? (v.content === 'verified' ? 'Verificado' : 'Huella encadenada') : 'Error'}</span>
             </div>
@@ -163,8 +164,8 @@
   .note { margin: 0; display: flex; gap: 6px; align-items: flex-start; font-size: 13px; color: var(--nio-muted); line-height: 1.5; }
   .note.fail { color: var(--nio-miss); }
   .actions { display: flex; flex-wrap: wrap; gap: 8px; }
-  .actions button, .actions a, .primary { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px; border-radius: 9px; border: 1px solid var(--nio-border); background: var(--nio-raised); color: var(--nio-ink); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; }
-  .primary { background: var(--nio-action); color: var(--nio-action-ink); border: 0; min-height: 42px; margin-top: 4px; justify-self: start; }
+  .actions button, .actions a, .primary { display: inline-flex; align-items: center; gap: 6px; min-height: var(--tap, 44px); padding: 0 12px; border-radius: 9px; border: 1px solid var(--nio-border); background: var(--nio-raised); color: var(--nio-ink); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; }
+  .primary { background: var(--nio-action); color: var(--nio-action-ink); border: 0; min-height: var(--tap, 44px); margin-top: 4px; justify-self: start; }
   .scroller { overflow-x: auto; border: 1px solid var(--nio-border); border-radius: 10px; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--nio-border); white-space: nowrap; }

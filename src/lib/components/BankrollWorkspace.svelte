@@ -139,7 +139,7 @@
   .empty { padding:65px 25px; text-align:center; border:1px solid var(--bank-border); border-radius:16px; background:var(--bank-surface); }
   .empty h2 { font-size:26px; margin:18px 0; }
   .empty button { margin:16px 8px; }
-  .symbol { font-size:40px; color:var(--bank-positive); }
+  .symbol { font-size:40px; color:var(--nio-accent); }
   @media(max-width:1050px) { .metrics { grid-template-columns:1fr 1fr; } .grid { grid-template-columns:1fr; } .form-panel { grid-column:auto; grid-row:auto; } .pending,.history { grid-column:auto; } .header-tools { flex-direction:column; align-items:flex-end; } }
   @media(max-width:620px) {
     .workspace { padding:25px 16px 90px; } header { align-items:flex-start; gap:12px; } .badge { display:none; } .header-tools button { padding:10px; }

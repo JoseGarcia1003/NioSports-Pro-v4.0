@@ -93,9 +93,9 @@
   .lead { color: var(--nio-muted); max-width: 640px; margin: 0; line-height: 1.6; }
   .tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
   .season { display: grid; gap: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--nio-muted); }
-  select { min-height: 40px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-ink); font: inherit; font-size: 14px; }
+  select { min-height: var(--tap, 44px); padding: 0 12px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-surface); color: var(--nio-ink); font: inherit; font-size: 14px; }
   .segment { display: inline-flex; gap: 4px; padding: 4px; border-radius: 12px; border: 1px solid var(--nio-border); background: var(--nio-surface); }
-  .segment button { min-height: 34px; padding: 0 14px; border-radius: 9px; border: 0; background: transparent; color: var(--nio-muted); font: inherit; font-weight: 700; font-size: 13px; cursor: pointer; }
+  .segment button { min-height: var(--tap, 44px); padding: 0 14px; border-radius: 9px; border: 0; background: transparent; color: var(--nio-muted); font: inherit; font-weight: 700; font-size: 13px; cursor: pointer; }
   .segment button.on { background: var(--nio-action); color: var(--nio-action-ink); }
   button:focus-visible, select:focus-visible, .scroller:focus-visible { outline: 2px solid var(--nio-accent); outline-offset: 2px; }
   .grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
@@ -124,6 +124,6 @@
   .legend .po { border-top: 2px solid var(--nio-gold); }
   .legend .pi { border-top: 2px dashed var(--nio-muted); margin-left: 6px; }
   .state { color: var(--nio-muted); margin: 24px 0; }
-  .state button { margin-top: 10px; min-height: 40px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-raised); color: var(--nio-ink); font: inherit; font-weight: 600; cursor: pointer; }
+  .state button { margin-top: 10px; min-height: var(--tap, 44px); padding: 0 16px; border-radius: 10px; border: 1px solid var(--nio-border); background: var(--nio-raised); color: var(--nio-ink); font: inherit; font-weight: 600; cursor: pointer; }
   @media (max-width: 640px) { .standings { padding: 4px 16px 100px; } .name { min-width: 76px; } .tname { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } th, td { padding: 9px 6px; } }
 </style>
