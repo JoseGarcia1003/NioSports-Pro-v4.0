@@ -1,5 +1,21 @@
 # Punto de control — leer antes de continuar
 
+## VIGENTE — Misión «plataforma de nivel mundial» (7 de noviembre de 2026)
+
+- Hecho y probado (commits 0647b44c, 0c81c1cc, 3f2874d6 y siguientes):
+  - Sellado: `prediction_seals` + `prediction_seal_anchors` (migración 20261107014907) con huella SHA-256 recalculada por la BD, cadena obligatoria, sellado antes del primer partido y sin edición/borrado para ningún rol. Edición 2/11 sellada como retroactiva (seq 1, c4adc016…); la BD de producción confirmó la misma huella que JS. OpenTimestamps se pide al sellar y en el cron diario (no verificable desde este entorno: dominio bloqueado).
+  - `/verificar` (verificación en navegador, compromiso-revelación, .ots) y `/transparencia` (Wilson, Brier, log loss, calibración, backtest etiquetado). Públicas.
+  - Modelo `nba-points@1.0.0` + backtest reproducible (`ml/backtest/`, `src/lib/models/evaluations/`): Brier 0,244 vs 0,254 (L10) en 1.373 partidos de prueba; skill ≈ 2 %; cobertura 80 % = 79,4 %. Las señales incluyen probabilidad e intervalo.
+  - Multideporte: `src/lib/sports` (config, adaptadores, HTTP resiliente, contratos, caché, frescura, registro), `ingest_runs` (20261107015003), `/api/cron/daily` sustituye a fetch-games en vercel.json, `/deportes`, `/deportes/futbol`, `/deportes/mlb`, `/api/sports/status`.
+  - Señales: no se generan con box scores de más de 3 días (`data_stale`). Hoy los datos acaban el 31/10 → **las señales quedan bloqueadas hasta que el propietario ejecute la ingesta**.
+  - Analista IA (`src/lib/ai`, `/api/ai/explain`) con verificador; desactivado sin `AI_PROVIDER`/`ANTHROPIC_API_KEY`.
+  - Bankroll: límites con enfriamiento de 24 h, pausas, alertas; aplicado en servidor (`bankroll_limits`, 20261107021249).
+  - Premium: `gateEdition` en servidor; `PREMIUM_GATING_ENABLED` desactivado (beta gratis).
+  - Docs: `docs/ARCHITECTURE.md`, `docs/API_INTEGRATION_CHECKLIST.md`, README reescrito, env.example ampliado.
+- Pruebas: 741+ unitarias/servidor/BD y 41 de UI aprobadas; svelte-check 0/0; build OK; axe 0 infracciones en las 5 páginas nuevas × 2 temas.
+- Pendiente del propietario: activar la tarea diaria de ingesta en su PC; credenciales de fútbol/tenis/IA; rotar claves expuestas; revisión legal; confirmar que el primer sellado real obtiene prueba OpenTimestamps.
+- Siguiente acción técnica: tras la primera ingesta, comprobar en producción una edición sellada nueva (seq 2) con anclaje, y la fila de `ingest_runs` del cron diario (MLB statsapi verificado o no).
+
 ## VIGENTE — Evaluación integral del 1 de noviembre de 2026
 
 - Rama de trabajo `claude/focused-ramanujan-9avptc`, creada desde `codex/match-studio` (75a22ba8), que contiene `codex/security-integrity`. `main` sigue en ab9b63a4 (22/09); ninguna rama posterior está integrada.

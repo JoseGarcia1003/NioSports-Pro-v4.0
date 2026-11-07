@@ -1,153 +1,52 @@
-# ⚽ NioSports Pro v4.0
+# NioSports Pro
 
-Estado técnico y límites comprobados: [correcciones de integridad](docs/integrity-progress.md).
-El proyecto todavía no está certificado para producción ni como modelo predictivo validado.
+Plataforma de análisis deportivo en español: props de jugadores y de equipo de la NBA, con cada cifra trazable a su fuente, pronósticos sellados criptográficamente antes de cada partido y rendimiento público calibrado. Arquitectura preparada para fútbol, tenis y MLB.
 
-Para desarrollo, copiar `env.example` a `.env.local`, instalar con `npm ci` y
-ejecutar `npm run check`, `npm run test:unit` y `npm run build`.
-Las pruebas usan fixtures; no requieren ni validan pagos o datos deportivos reales.
-Los secretos de cron y webhook son obligatorios para habilitar esos endpoints.
+**Estado (7/11/2026):** beta abierta y gratuita en producción (https://nio-sports-pro-v4-0.vercel.app). No cobra. No está certificada como modelo rentable: el modelo publicado mejora a una regla ingenua fuera de muestra, pero su ventaja sobre la tasa base es pequeña y no se ha medido frente a las líneas de las casas.
 
-Sistema inteligente de análisis deportivo y predicción de resultados basado en modelos matemáticos, estadísticos y técnicas de machine learning.
+## Qué hay
 
----
+- **NBA**: partidos, props de jugadores (L5/L10/L20/temporada, local/visitante, con/sin compañero, defensa rival), mercado de puntos, estadísticas y clasificación desde el box score oficial.
+- **Modelo `nba-points@1.0.0`**: probabilidad e intervalo 80 % por prop, validado con prueba temporal reproducible (`scripts/backtest-nba-points.mjs`).
+- **Señales selladas**: cadena SHA-256 verificada por la base de datos, anclaje OpenTimestamps y verificación en el navegador (`/verificar`).
+- **Transparencia**: acierto con intervalos de Wilson, Brier, log loss y calibración (`/transparencia`).
+- **Multideporte**: adaptadores de proveedores con reintentos, límites, validación, caché y estado honesto por deporte (`/deportes`).
+- **Bankroll responsable**: registro contable con límites, enfriamiento de 24 h, pausas y alertas aplicados en servidor.
+- **Analista IA**: arquitectura y verificador de afirmaciones; desactivado hasta configurar un proveedor.
 
-## 🚀 Descripción General
+## Documentación
 
-**NioSports Pro v4.0** es una plataforma web desarrollada para el análisis avanzado de datos deportivos, permitiendo generar predicciones, métricas y visualizaciones que apoyan la toma de decisiones en contextos deportivos.
+- [Arquitectura](docs/ARCHITECTURE.md) — módulos, base de datos, modelo, sellado y límites criptográficos.
+- [API_INTEGRATION_CHECKLIST](docs/API_INTEGRATION_CHECKLIST.md) — proveedores, variables, endpoints, validaciones y estado por deporte.
+- [Estado del trabajo](docs/WORK_STATE.md) — hecho, pendiente y bloqueos.
+- Variables de entorno: `env.example` (las claves solo en Vercel, nunca en el repositorio).
 
-El sistema integra:
-- Modelos estadísticos
-- Algoritmos de predicción
-- Procesamiento de datos en tiempo real
-- Interfaces interactivas
+## Desarrollo
 
----
+```bash
+npm ci
+```
 
-## 🎯 Objetivo del Proyecto
+```bash
+npx vitest run && npx vitest run --config vitest.ui.config.js
+```
 
-Desarrollar un sistema capaz de:
-- Analizar datos históricos deportivos
-- Generar predicciones confiables
-- Automatizar cálculos complejos
-- Visualizar métricas clave para el usuario
+```bash
+npm run check && npm run build
+```
 
----
+Backtest del modelo con la muestra incluida:
 
-## 🧠 Motor Predictivo
+```bash
+node scripts/backtest-nba-points.mjs ml/backtest/nba-points-sample-2025-26.json --split 2026-02-15
+```
 
-El sistema incorpora un motor híbrido basado en:
+## Despliegue
 
-### 📊 Modelos utilizados:
-- Promedios ponderados por recencia
-- Distribuciones estadísticas (normal)
-- Modelos de regresión
-- Enfoques tipo ensemble (combinación de modelos)
+`main` se despliega automáticamente en Vercel. Las migraciones de `supabase/migrations/` se aplican al proyecto Supabase con el mismo número de versión. Tareas programadas en `vercel.json` (`/api/cron/daily`, `/api/cron/verify-results`), autorizadas con `CRON_SECRET`.
 
-### ⚙️ Variables principales:
-- Rendimiento histórico
-- Goles/anotaciones
-- Condición local/visitante
-- Tendencias recientes
-- Factores contextuales
+## Reglas del producto
 
-### 📈 Salidas:
-- Probabilidades
-- Predicciones
-- Scores estimados
+Sin cifras inventadas; datos de prueba siempre marcados y rechazados en producción; sin comparación de cuotas entre casas (la mediana del mercado solo es referencia); la IA explica datos verificados y nunca aporta cifras propias. Juego responsable: el bankroll es un registro personal; NioSports no custodia dinero ni acepta apuestas.
 
----
-
-## 🏗️ Arquitectura del Sistema
-
-### Frontend:
-- SvelteKit
-- HTML, CSS, JavaScript
-
-### Backend:
-- API Routes (SvelteKit)
-- Lógica de negocio interna
-
-### Data & IA:
-- Python (modelo predictivo)
-- Procesamiento estadístico
-
-### Base de datos:
-- Estructuras internas / almacenamiento de datos
-
----
-
-## 🔗 Funcionalidades Principales
-
-- 🔐 Autenticación de usuarios
-- 📊 Panel de análisis (dashboard)
-- 📈 Visualización de datos
-- 🧮 Motor de predicción
-- ⚙️ Automatización de cálculos
-- 📡 Integración con APIs externas
-- 📁 Gestión de datos deportivos
-
----
-
-## 🔄 Flujo del Sistema
-
-1. Ingreso de datos
-2. Procesamiento interno
-3. Aplicación de modelos matemáticos
-4. Generación de predicciones
-5. Visualización de resultados
-
----
-
-## 🔐 Seguridad
-
-- Manejo de sesiones
-- Control de acceso
-- Protección de datos
-
----
-
-## ⚡ Tecnologías Utilizadas
-
-- SvelteKit
-- JavaScript
-- Python
-- HTML/CSS
-- APIs REST
-- Machine Learning básico
-
----
-
-## 📉 Limitaciones
-
-- Dependencia de calidad de datos
-- Modelos sujetos a incertidumbre
-- Necesidad de entrenamiento continuo
-
----
-
-## 🚀 Posibles Mejoras
-
-- Integración con modelos de Deep Learning
-- Mayor automatización
-- Optimización de rendimiento
-- Escalabilidad en la nube
-
----
-
-## 👨‍💻 Autor
-
-**José García**
-
-Proyecto desarrollado como parte de trabajo académico y tesis universitaria.
-
----
-
-## 📌 Notas Finales
-
-Este sistema representa una integración de:
-- Ingeniería de software
-- Ciencia de datos
-- Inteligencia artificial
-
-Diseñado para ser escalable, adaptable y analíticamente robusto.
+Autor: José García.

@@ -10,6 +10,7 @@
 - Ramas: integración en `main` autorizada por el propietario cuando mejore el producto. Trabajo en `claude/focused-ramanujan-9avptc`.
 - Identidad visual (1/11, autoridad delegada por el propietario tras rechazar el azul marino por «básico»): oscuro por defecto; grafito casi negro (`--nio-page #0a0c10`), un único acento dorado propio (`#f5c04a`), verde/rojo SOLO con significado (supera/no supera: `--nio-hit`/`--nio-miss`). Titulares y cifras grandes en Barlow Condensed (mayúsculas, 800); texto en DM Sans. Tokens en `src/lib/styles/brand.css`. Referencia de calidad: props.cash, sin copiarlo (sin su verde, sin logos de liga/equipos: monogramas con color de equipo). Esta sección sustituye las indicaciones de color del 10/10.
 
+- Misión del 7/11 (autonomía técnica total): plataforma multideporte (fútbol, NBA, tenis, MLB) con adaptadores de proveedores, sellado SHA-256 verificable, calibración pública, trazabilidad, incertidumbre, analista IA verificado, bankroll responsable y seguridad en servidor. Referencias: `docs/ARCHITECTURE.md` y `docs/API_INTEGRATION_CHECKLIST.md`. Nunca marcar un adaptador `verified: true` sin comprobar respuestas reales en producción; nunca publicar probabilidades de un modelo sin evaluación fuera de muestra registrada; el ledger de sellos no se edita ni se reescribe jamás.
 - Decisión del 2/11: no mostrar comparación de cuotas entre casas ni «mejor cuota/mejor línea». La línea de mercado (mediana entre casas) se usa solo como referencia de la prop.
 
 ## Dirección de producto del 10 de octubre de 2026
