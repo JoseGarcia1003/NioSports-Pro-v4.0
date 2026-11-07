@@ -19,6 +19,7 @@
     "migrate": "node scripts/migrate-firebase-to-supabase.js"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.6.0",
     "@sentry/sveltekit": "^10.43.0",
     "@supabase/supabase-js": "^2.99.3",
     "@upstash/ratelimit": "^2.0.8",

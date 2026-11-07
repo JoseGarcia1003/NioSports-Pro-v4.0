@@ -1,4 +1,5 @@
 <script>
+  import BankrollLimits from './BankrollLimits.svelte';
   import { onMount, onDestroy } from 'svelte';
   import { userId } from '$lib/stores/auth.js';
   import { authenticatedFetch } from '$lib/services/authenticated-fetch.js';
@@ -44,6 +45,7 @@
       <article><span class="eyebrow">↗ BENEFICIO NETO</span><div class="number" class:negative={profit<0} class:positive={profit>=0}>{profit>0?'+':''}{money(profit)}</div><p>Solo resultados liquidados</p><footer>ROI sobre stake resuelto <strong>{roi}</strong></footer></article>
       <article><span class="eyebrow">⇣ CAPITAL NETO</span><div class="number">{money(capital)}</div><p>Aportaciones menos retiros</p><footer>Los depósitos no son beneficio</footer></article>
     </section>
+    {#if !demo}<BankrollLimits />{/if}
     <div class="grid">
       <section class="panel chart"><div class="panel-head"><div><span class="eyebrow">PERSPECTIVA</span><h2>Evolución del saldo</h2></div><small>Últimos {series.length} movimientos</small></div>
         {#if series.length>1}<svg viewBox="0 0 800 210" role="img" aria-label="Evolución del saldo disponible, incluye aportaciones y retiros"><defs><linearGradient id="bank-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--nio-gold)" stop-opacity=".24"/><stop offset="100%" stop-color="var(--nio-gold)" stop-opacity="0"/></linearGradient></defs><path d="M20 45H780M20 110H780M20 175H780" stroke="var(--nio-border)" fill="none"/><polygon points={`20,200 ${points} 780,200`} fill="url(#bank-area)"/><polyline {points} stroke="var(--nio-gold)" stroke-width="3" fill="none" stroke-linejoin="round"/></svg><small>Saldo disponible, no curva de rentabilidad. Incluye aportaciones, retiros y reservas.</small>{:else}<div class="quiet">La evolución aparecerá después de dos movimientos.</div>{/if}

@@ -32,3 +32,25 @@ describe('Bankroll API boundary', () => {
     expect(await response.text()).not.toContain('internal secret');
   });
 });
+
+describe('Responsible-use limits are enforced on the server', () => {
+  const dbWith = state => {
+    const chain = table => ({ select: () => ({ eq: () => (table === 'bankroll_limits'
+      ? { maybeSingle: async () => ({ data: { state }, error: null }) }
+      : { gte: async () => ({ data: [], error: null }) }) }) });
+    return { rpc, from: chain };
+  };
+  it('refuses a stake during an active pause without calling the ledger', async () => {
+    adminDatabase.mockReturnValue(dbWith({ pauseUntil: new Date(Date.now() + 86400e3).toISOString() }));
+    const res = await POST({ request: request({ type: 'stake', amountMinor: 100, odds: 2 }) });
+    expect(res.status).toBe(403);
+    expect((await res.json()).limit.reason).toBe('paused');
+    expect(rpc).not.toHaveBeenCalled();
+  });
+  it('refuses a stake above the per-ticket limit and allows one below it', async () => {
+    adminDatabase.mockReturnValue(dbWith({ current: { maxStakeMinor: 500 } }));
+    expect((await POST({ request: request({ type: 'stake', amountMinor: 600, odds: 2 }) })).status).toBe(403);
+    expect((await POST({ request: request({ type: 'stake', amountMinor: 400, odds: 2 }) })).status).toBe(200);
+    expect(rpc).toHaveBeenCalledTimes(1);
+  });
+});

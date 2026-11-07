@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
-import { adminDatabase } from '$lib/server/entitlements.js';
+import { adminDatabase, getEntitlements } from '$lib/server/entitlements.js';
+import { gateEdition, gatingEnabled } from '$lib/server/access.js';
 import { requireIdentity } from '$lib/server/identity.js';
 import { loadBoard, dayFor } from '$lib/server/nba-props.js';
 import { getNbaTotals, getNbaPlayerPoints, supabaseStore } from '$lib/server/odds-cache.js';
@@ -15,7 +16,7 @@ const HISTORY_DAYS = 30;
 // Seals today's edition once (immutable table) when sportsbook lines exist,
 // then returns it with the settled history of previous editions.
 export async function GET({ request }) {
-  await requireIdentity(request);
+  const { uid } = await requireIdentity(request);
   const db = adminDatabase();
   const day = dayFor(0);
 
@@ -48,7 +49,10 @@ export async function GET({ request }) {
 
   const history = await settledHistory(db, day);
   const seal = edition ? await sealFor(db, day) : null;
-  return json({ day, edition, reason, history, seal }, { headers: { 'Cache-Control': 'no-store' } });
+  const enabled = gatingEnabled(env);
+  const plan = enabled ? (await getEntitlements(uid)).plan : null;
+  const gated = gateEdition(edition, { plan, enabled });
+  return json({ day, edition: gated.edition, locked: gated.locked, reason, history, seal }, { headers: { 'Cache-Control': 'no-store' } });
 }
 
 // Commits the stored edition to the public hash chain and asks OpenTimestamps to

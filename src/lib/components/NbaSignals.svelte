@@ -57,6 +57,9 @@
       {#if data.edition.entries.length}
         <ul class="cards">
           {#each data.edition.entries as s}
+            {#if s.locked}
+            <li class="card locked"><div class="top"><i class="badge" style={teamStyle(s.team)}>{s.team}</i><div class="who"><b>Selección premium</b><small>vs {s.opponent} · {time(s.tipoff)}</small></div></div><p class="state">Disponible con la suscripción. Su huella está en el <a href="/verificar">registro público</a>.</p></li>
+            {:else}
             <li class="card">
               <div class="top">
                 <i class="badge" style={teamStyle(s.team)}>{s.team}</i>
@@ -73,6 +76,7 @@
                 {/each}
               </ul>
             </li>
+            {/if}
           {/each}
         </ul>
       {:else}
@@ -121,6 +125,8 @@
   .signals { margin: 0 0 40px; font-variant-numeric: tabular-nums; }
   .sealed code { font-size: 12px; }
   .sealed a { color: var(--nio-accent); font-weight: 600; }
+  .card.locked { opacity: .85; }
+  .card.locked a { color: var(--nio-accent); }
   .prob { margin: 0; font-size: 13px; color: var(--nio-muted); }
   .prob b { color: var(--nio-ink); font-family: var(--font-display); font-size: 18px; }
   .prob small { display: block; font-size: 11px; }

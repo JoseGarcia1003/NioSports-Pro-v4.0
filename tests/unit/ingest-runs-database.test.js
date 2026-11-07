@@ -24,3 +24,12 @@ it('ops_health exposes seals and the latest run per sport and kind', async () =>
   expect(rows[0].h.runs[0]).toMatchObject({ sport: 'mlb', kind: 'schedule', status: 'ok' });
   expect(rows[0].h.seals).toMatchObject({ count: 0 });
 });
+
+it('bankroll limit history is private and append-only', async () => {
+  await db.exec(readFileSync('supabase/migrations/20261107021249_bankroll_limits.sql', 'utf8'));
+  await db.query(`insert into bankroll_limit_events(user_id,request,applied,deferred) values('u','{"pauseDays":7}','{}','{}')`);
+  await expect(db.exec('delete from bankroll_limit_events')).rejects.toThrow();
+  await expect(db.exec("update bankroll_limit_events set user_id='x'")).rejects.toThrow();
+  await db.exec('set role anon');
+  try { await expect(db.exec('select * from bankroll_limits')).rejects.toThrow(); } finally { await db.exec('reset role'); }
+});

@@ -1,13 +1,13 @@
 export const SPORTS = [
   { id:'nba', name:'NBA', symbol:'🏀', status:'available', href:'/sports/nba', description:'Calendario, totales y contexto de los equipos.', color:'#e9ab73' },
   { id:'tennis', name:'Tenis', symbol:'🎾', status:'available', href:'/tennis', demoHref:'/tennis?demo=1', description:'ATP, WTA y circuitos de desarrollo. Jugadores y superficies.', color:'#b4da84' },
-  { id:'football', name:'Fútbol', symbol:'⚽', status:'planned', description:'En preparación. Todavía no hay datos ni análisis disponibles.', color:'#84c9b6' },
-  { id:'baseball', name:'Béisbol', symbol:'⚾', status:'planned', description:'En preparación. Todavía no hay datos ni análisis disponibles.', color:'#94aeee' }
+  { id:'football', name:'Fútbol', symbol:'⚽', status:'planned', href:'/deportes/futbol', description:'Arquitectura lista; esperando proveedor de datos.', color:'#84c9b6' },
+  { id:'baseball', name:'Béisbol', symbol:'⚾', status:'planned', href:'/deportes/mlb', description:'Arquitectura lista; integración de calendario en verificación.', color:'#94aeee' }
 ];
 export const PRIMARY_NAV = [
   { href:'/today', label:'Hoy', icon:'Home', paths:['/today'] },
   { href:'/sports/nba', label:'NBA', icon:'Dribbble', paths:['/sports/nba','/sports','/totales'] },
-  { href:'/tennis', label:'Tenis', icon:'Volleyball', paths:['/tennis'] },
+  { href:'/deportes', label:'Deportes', icon:'Volleyball', paths:['/deportes','/tennis'] },
   { href:'/predictions', label:'Señales', icon:'Signal', paths:['/predictions','/picks','/public','/methodology','/verificar','/transparencia'] },
   { href:'/bankroll', label:'Bankroll', icon:'Wallet', paths:['/bankroll','/tracking','/stats','/results'] },
   { href:'/account', label:'Cuenta', icon:'User', paths:['/account','/pricing'] }

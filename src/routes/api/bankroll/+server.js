@@ -1,6 +1,8 @@
 import { json } from '@sveltejs/kit';
 import { requireIdentity } from '$lib/server/identity.js';
 import { adminDatabase } from '$lib/server/entitlements.js';
+import { loadLimitState, recentTickets } from '$lib/server/bankroll-limits.js';
+import { effectiveLimits, checkStake } from '$lib/bankroll/responsible.js';
 
 export async function GET({ request }) {
   const { uid } = await requireIdentity(request);
@@ -9,6 +11,13 @@ export async function GET({ request }) {
   if (error) return json({ error: 'No se pudo cargar el registro contable. Verifica la migración.' }, { status: 503 });
   return json(data, { headers: { 'Cache-Control': 'no-store' } });
 }
+
+const LIMIT_MESSAGES = {
+  paused: 'Tienes una pausa activa. No se pueden registrar nuevos tickets hasta que termine.',
+  max_stake: 'El importe supera tu límite por ticket.',
+  daily_stake: 'Este ticket superaría tu límite diario.',
+  weekly_loss: 'Alcanzaste tu límite de pérdida semanal.'
+};
 
 export async function POST({ request }) {
   const { uid } = await requireIdentity(request);
@@ -20,7 +29,15 @@ export async function POST({ request }) {
       !Number.isSafeInteger(body.amountMinor) || body.amountMinor < 0 || body.amountMinor > 100000000) {
     return json({ error: 'Tipo o importe inválido' }, { status: 400 });
   }
-  const { data, error } = await adminDatabase().rpc('bankroll_apply', {
+  const db = adminDatabase();
+  // Responsible-use limits are enforced here, on the server, before any stake is logged.
+  if (body.type === 'stake') {
+    let verdict;
+    try { verdict = checkStake(body.amountMinor, effectiveLimits(await loadLimitState(db, uid)), await recentTickets(db, uid)); }
+    catch { return json({ error: 'No se pudieron comprobar tus límites. Inténtalo de nuevo.' }, { status: 503 }); }
+    if (!verdict.allowed) return json({ error: LIMIT_MESSAGES[verdict.reason], limit: verdict }, { status: 403 });
+  }
+  const { data, error } = await db.rpc('bankroll_apply', {
     p_user: uid, p_key: key, p_kind: body.type, p_amount: body.amountMinor,
     p_ticket: body.ticketId || null, p_odds: body.odds ?? null,
     p_outcome: body.outcome || null, p_note: String(body.note || '').slice(0, 500),
