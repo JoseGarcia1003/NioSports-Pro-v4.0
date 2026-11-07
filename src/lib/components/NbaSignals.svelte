@@ -28,6 +28,7 @@
   const REASONS = {
     lines_unavailable: 'Todavía no hay líneas de las casas para los partidos de hoy. La edición se sella cuando existan.',
     no_upcoming_games: 'Los partidos de hoy ya empezaron sin edición sellada. Las señales solo se publican antes del inicio.',
+    data_stale: 'Las estadísticas guardadas no están al día. No publicamos señales calculadas con datos desactualizados.',
     unavailable: 'No pudimos preparar la edición ahora mismo. No publicamos señales sin fuente.'
   };
   const STATUS = { hit: ['✓', 'Acertó'], miss: ['✗', 'Falló'], push: ['=', 'Empate'], void: ['—', 'No jugó'], pending: ['…', 'Pendiente'] };
@@ -51,7 +52,8 @@
     <div class="state"><p>No pudimos cargar las señales. No mostramos datos sin fuente.</p><button type="button" on:click={load}>Reintentar</button></div>
   {:else}
     {#if data.edition}
-      <p class="sealed">Edición sellada a las {time(data.edition.sealedAt)} · método {data.edition.method} · {data.edition.entries.length} {data.edition.entries.length === 1 ? 'señal' : 'señales'}</p>
+      <p class="sealed">Edición sellada a las {time(data.edition.sealedAt)} · método {data.edition.method} · {data.edition.entries.length} {data.edition.entries.length === 1 ? 'señal' : 'señales'}
+        {#if data.seal}· huella <code title={data.seal.hash}>{data.seal.hash.slice(0, 12)}…</code> <a href="/verificar">Verificar</a>{/if}</p>
       {#if data.edition.entries.length}
         <ul class="cards">
           {#each data.edition.entries as s}
@@ -62,6 +64,9 @@
                 <span class="tally">{s.favour}▲ {s.against}▼</span>
               </div>
               <p class="pick"><span>{s.side === 'over' ? 'Más de' : 'Menos de'}</span> <b>{fmt(s.line)}</b> puntos <small>línea de mercado · {s.books} {s.books === 1 ? 'casa' : 'casas'}</small></p>
+              {#if s.model}
+                <p class="prob"><b>{Math.round(s.model.p * 100)} %</b> probabilidad del modelo · rango probable {s.model.interval80[0]}–{s.model.interval80[1]} pts (80 %) <small>{s.model.model}</small></p>
+              {/if}
               <ul class="why">
                 {#each s.findings.slice(0, 3) as f}
                   <li class:pro={f.weight > 0} class:con={f.weight < 0}><span aria-hidden="true">{f.weight > 0 ? '▲' : '▼'}</span>{f.text}</li>
@@ -114,6 +119,11 @@
 
 <style>
   .signals { margin: 0 0 40px; font-variant-numeric: tabular-nums; }
+  .sealed code { font-size: 12px; }
+  .sealed a { color: var(--nio-accent); font-weight: 600; }
+  .prob { margin: 0; font-size: 13px; color: var(--nio-muted); }
+  .prob b { color: var(--nio-ink); font-family: var(--font-display); font-size: 18px; }
+  .prob small { display: block; font-size: 11px; }
   .eyebrow { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: var(--nio-muted); margin: 0 0 8px; }
   h2 { font-family: var(--font-display); text-transform: uppercase; font-weight: 800; font-size: clamp(30px, 3.6vw, 46px); line-height: .98; margin: 0 0 10px; }
   .lead { color: var(--nio-muted); max-width: 720px; margin: 0; line-height: 1.6; font-size: 15px; }

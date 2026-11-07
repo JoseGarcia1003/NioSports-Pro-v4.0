@@ -36,6 +36,10 @@ it('scores forecasts and never treats small samples as conclusive', () => {
   expect(s.brier).toBeCloseTo((0.04 + 0.64) / 2, 10);
   expect(s.logLoss).toBeCloseTo(-(Math.log(0.8) + Math.log(0.2)) / 2, 10);
   expect(scoreForecasts([]).hitRate).toBeNull();
+  // Regression: forecasts without a probability still count for the hit rate.
+  const legacy = scoreForecasts([{ p: null, outcome: 'hit' }, { outcome: 'miss' }, { p: 0.7, outcome: 'hit' }]);
+  expect(legacy).toMatchObject({ decided: 3, hit: 2, scored: 1 });
+  expect(legacy.hitRate).toBeCloseTo(2 / 3, 10); expect(legacy.brier).toBeCloseTo(0.09, 10);
   expect(intervalCoverage([{ interval: [1, 3], actual: 2 }, { interval: [1, 3], actual: 5 }]).coverage).toBe(0.5);
 });
 

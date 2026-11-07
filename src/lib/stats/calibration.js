@@ -9,31 +9,34 @@ export const MIN_SAMPLE = 100;
 
 export function scoreForecasts(forecasts, { bins = 10 } = {}) {
   const counts = { hit: 0, miss: 0, push: 0, void: 0, pending: 0 };
-  const decided = [];
+  const scored = [];
   for (const f of forecasts) {
     if (!(f.outcome in counts)) continue;
     counts[f.outcome]++;
-    if ((f.outcome === 'hit' || f.outcome === 'miss') && Number.isFinite(f.p)) decided.push({ p: Math.min(1 - EPS, Math.max(EPS, f.p)), y: f.outcome === 'hit' ? 1 : 0 });
+    if ((f.outcome === 'hit' || f.outcome === 'miss') && Number.isFinite(f.p)) scored.push({ p: Math.min(1 - EPS, Math.max(EPS, f.p)), y: f.outcome === 'hit' ? 1 : 0 });
   }
-  const n = decided.length;
+  // Hit rate uses every decided forecast; probability scores only those that carried a probability.
+  const decided = counts.hit + counts.miss;
   const total = forecasts.length;
-  if (!n) return { total, ...counts, decided: 0, hitRate: null, hitRateCI: null, brier: null, logLoss: null, meanP: null, baselineBrier: null, skill: null, reliability: [], conclusive: false };
-  const hits = decided.reduce((s, d) => s + d.y, 0);
-  const brier = decided.reduce((s, d) => s + (d.p - d.y) ** 2, 0) / n;
-  const logLoss = -decided.reduce((s, d) => s + (d.y ? Math.log(d.p) : Math.log(1 - d.p)), 0) / n;
-  const base = hits / n;
-  // Climatology reference: always forecasting the observed base rate.
-  const baselineBrier = base * (1 - base);
+  const base = { total, ...counts, decided, hitRate: decided ? counts.hit / decided : null, hitRateCI: wilson(counts.hit, decided), conclusive: decided >= MIN_SAMPLE, scored: scored.length };
+  const n = scored.length;
+  if (!n) return { ...base, brier: null, logLoss: null, meanP: null, baselineBrier: null, skill: null, reliability: [] };
+  const hits = scored.reduce((s, d) => s + d.y, 0);
+  const brier = scored.reduce((s, d) => s + (d.p - d.y) ** 2, 0) / n;
+  const logLoss = -scored.reduce((s, d) => s + (d.y ? Math.log(d.p) : Math.log(1 - d.p)), 0) / n;
+  const rate = hits / n;
+  // Climatology reference: always forecasting the observed base rate of the scored set.
+  const baselineBrier = rate * (1 - rate);
   const reliability = [];
   for (let b = 0; b < bins; b++) {
     const lo = b / bins, hi = (b + 1) / bins;
-    const inBin = decided.filter(d => d.p >= lo && (b === bins - 1 ? d.p <= hi : d.p < hi));
+    const inBin = scored.filter(d => d.p >= lo && (b === bins - 1 ? d.p <= hi : d.p < hi));
     if (!inBin.length) continue;
     const h = inBin.reduce((s, d) => s + d.y, 0);
     reliability.push({ lo, hi, n: inBin.length, meanP: inBin.reduce((s, d) => s + d.p, 0) / inBin.length, observed: h / inBin.length, ci: wilson(h, inBin.length) });
   }
-  return { total, ...counts, decided: n, hitRate: base, hitRateCI: wilson(hits, n), brier, logLoss, meanP: decided.reduce((s, d) => s + d.p, 0) / n,
-    baselineBrier, skill: baselineBrier > 0 ? 1 - brier / baselineBrier : null, reliability, conclusive: n >= MIN_SAMPLE };
+  return { ...base, brier, logLoss, meanP: scored.reduce((s, d) => s + d.p, 0) / n, scoredHitRate: rate,
+    baselineBrier, skill: baselineBrier > 0 ? 1 - brier / baselineBrier : null, reliability };
 }
 
 /** Share of outcomes inside their predictive interval (80 % intervals should cover ~80 %). */

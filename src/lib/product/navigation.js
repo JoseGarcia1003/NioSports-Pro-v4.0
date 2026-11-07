@@ -8,7 +8,7 @@ export const PRIMARY_NAV = [
   { href:'/today', label:'Hoy', icon:'Home', paths:['/today'] },
   { href:'/sports/nba', label:'NBA', icon:'Dribbble', paths:['/sports/nba','/sports','/totales'] },
   { href:'/tennis', label:'Tenis', icon:'Volleyball', paths:['/tennis'] },
-  { href:'/predictions', label:'Señales', icon:'Signal', paths:['/predictions','/picks','/public','/methodology'] },
+  { href:'/predictions', label:'Señales', icon:'Signal', paths:['/predictions','/picks','/public','/methodology','/verificar','/transparencia'] },
   { href:'/bankroll', label:'Bankroll', icon:'Wallet', paths:['/bankroll','/tracking','/stats','/results'] },
   { href:'/account', label:'Cuenta', icon:'User', paths:['/account','/pricing'] }
 ];

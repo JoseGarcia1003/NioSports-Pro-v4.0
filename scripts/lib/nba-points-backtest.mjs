@@ -40,7 +40,7 @@ export function forecasts(rows, params = MODEL.params, from = null, to = null) {
   return out;
 }
 
-const pick = s => ({ n: s.decided, brier: s.brier, logLoss: s.logLoss, skillVsBaseRate: s.skill, hitRate: s.hitRate, meanP: s.meanP, reliability: s.reliability.map(b => ({ bin: `${b.lo.toFixed(1)}-${b.hi.toFixed(1)}`, n: b.n, meanP: +b.meanP.toFixed(3), observed: +b.observed.toFixed(3) })) });
+const pick = s => ({ n: s.scored, brier: s.brier, logLoss: s.logLoss, skillVsBaseRate: s.skill, hitRate: s.hitRate, meanP: s.meanP, reliability: s.reliability.map(b => ({ bin: `${b.lo.toFixed(1)}-${b.hi.toFixed(1)}`, n: b.n, meanP: +b.meanP.toFixed(3), observed: +b.observed.toFixed(3) })) });
 
 export function evaluate(rows, { split = null, params = MODEL.params, calibrator = undefined } = {}) {
   const f = forecasts(rows, params, split);

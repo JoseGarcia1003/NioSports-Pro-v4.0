@@ -1,7 +1,9 @@
 // Server side of the sealed ledger: append (with one retry on a concurrent
 // writer), external anchoring, and the public, commit-reveal read model.
 import { makeSeal, GENESIS } from '$lib/integrity/seal.js';
-import { stampDigest } from './opentimestamps.js';
+import { stampDigest, CALENDARS } from './opentimestamps.js';
+
+export const CALENDAR_SET = new Set(CALENDARS);
 
 const COLUMNS = 'seq, edition_key, sport, market, day, sealed_at, first_event_at, reveal_after, model_id, model_version, entry_count, hash, prev_hash, backfilled';
 

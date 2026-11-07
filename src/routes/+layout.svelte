@@ -24,6 +24,8 @@
   import { browser } from '$app/environment';
 
   const PUBLIC_ROUTES = ['/login', '/register', '/forgot-password'];
+  // Open to visitors (with navigation): anyone must be able to audit the record.
+  const OPEN_ROUTES = ['/verificar', '/transparencia'];
   let subscriptionUser = null;
 
   onMount(async () => {
@@ -57,7 +59,7 @@ $: if (browser && !$authLoading) {
     // Visitors only see the landing, the access screens and the legal pages;
     // every product screen requires a session (the APIs enforce it too).
     const path = $page.url.pathname;
-    const isPublic = path === '/' || path.startsWith('/legal/') || PUBLIC_ROUTES.some(r => path.startsWith(r));
+    const isPublic = path === '/' || path.startsWith('/legal/') || OPEN_ROUTES.includes(path) || PUBLIC_ROUTES.some(r => path.startsWith(r));
     if (!$isAuthenticated && !isPublic) goto(`/login?next=${encodeURIComponent(path + $page.url.search)}`, { replaceState: true });
     if ($isAuthenticated && path === '/') goto('/today');
     if ($isAuthenticated && path === '/login') goto(safeNext($page.url.searchParams.get('next')), { replaceState: true });
@@ -71,7 +73,7 @@ $: if (browser && !$authLoading) {
   }
 
   // Pages that render fully on the server without waiting for the session.
-  $: isServerPublic = $page.url.pathname === '/' || $page.url.pathname.startsWith('/legal/');
+  $: isServerPublic = $page.url.pathname === '/' || $page.url.pathname.startsWith('/legal/') || OPEN_ROUTES.includes($page.url.pathname);
   $: isPublicPage = PUBLIC_ROUTES.some(r => $page.url.pathname.startsWith(r));
   $: isLandingPage = !$isAuthenticated && $page.url.pathname === '/';
   $: showNav = !isPublicPage && !isLandingPage;
