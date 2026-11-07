@@ -5,6 +5,10 @@ import { requireIdentity } from '$lib/server/identity.js';
 import { loadBoard, dayFor } from '$lib/server/nba-props.js';
 import { getNbaTotals, getNbaPlayerPoints, supabaseStore } from '$lib/server/odds-cache.js';
 import { buildSignals, settle, summarize, SIGNAL_METHOD } from '$lib/nba/signals.js';
+import { MODEL } from '$lib/models/nba-points.js';
+import { appendSeal, anchorSeal } from '$lib/server/seals.js';
+import { freshness } from '$lib/sports/core/freshness.js';
+import { SPORTS_CONFIG } from '$lib/sports/config.js';
 
 const HISTORY_DAYS = 30;
 
@@ -27,18 +31,46 @@ export async function GET({ request }) {
       else {
         const board = await loadBoard(db, env.BALLDONTLIE_API_KEY, 0);
         const upcoming = board.games.some(g => Date.parse(g.datetime) > Date.now());
+        const boxScoresThrough = board.players.reduce((m, p) => (p.games?.[0]?.[0] > m ? p.games[0][0] : m), '');
+        const fresh = freshness(SPORTS_CONFIG.nba.freshness.boxScores, boxScoresThrough, day);
         if (!upcoming) reason = 'no_upcoming_games';
+        // Never publish model output built on stale statistics.
+        else if (!fresh.usable) reason = 'data_stale';
         else {
           const entries = buildSignals({ players: board.players, market: market.players, games: board.games, defense: board.defense });
           await db.from('nba_signal_editions').upsert({ day, method: SIGNAL_METHOD, entries }, { onConflict: 'day', ignoreDuplicates: true });
           edition = await readEdition(db, day);
+          if (edition) await sealEdition(db, edition, board.games, { boxScoresThrough, linesFetchedAt: market.fetchedAt ?? null });
         }
       }
     } catch { reason = 'unavailable'; }
   }
 
   const history = await settledHistory(db, day);
-  return json({ day, edition, reason, history }, { headers: { 'Cache-Control': 'no-store' } });
+  const seal = edition ? await sealFor(db, day) : null;
+  return json({ day, edition, reason, history, seal }, { headers: { 'Cache-Control': 'no-store' } });
+}
+
+// Commits the stored edition to the public hash chain and asks OpenTimestamps to
+// anchor it. Failures never block the signals; the ops job retries anchoring.
+async function sealEdition(db, edition, games, dataAsOf) {
+  try {
+    const tips = games.map(g => Date.parse(g.datetime)).filter(t => t > Date.now());
+    const entryTips = edition.entries.map(e => Date.parse(e.tipoff)).filter(Number.isFinite);
+    const first = Math.min(...(entryTips.length ? entryTips : tips)), last = Math.max(...(entryTips.length ? entryTips : tips));
+    if (!Number.isFinite(first) || first <= Date.now()) return;
+    const { row, created } = await appendSeal(db, {
+      editionKey: `nba:points:${edition.day}`, sport: 'nba', market: 'points', day: edition.day,
+      firstEventAt: new Date(first).toISOString(), revealAfter: new Date(last).toISOString(),
+      model: { id: MODEL.id, version: MODEL.version, method: edition.method }, dataAsOf, entries: edition.entries
+    });
+    if (created) await anchorSeal(db, row.hash, { timeoutMs: 4000 });
+  } catch (e) { console.error('[signals] seal failed', e?.message); }
+}
+
+async function sealFor(db, day) {
+  const { data } = await db.from('prediction_seals').select('seq, hash, sealed_at, reveal_after').eq('edition_key', `nba:points:${day}`).maybeSingle();
+  return data ? { seq: Number(data.seq), hash: data.hash, sealedAt: data.sealed_at, revealAfter: data.reveal_after } : null;
 }
 
 async function readEdition(db, day) {

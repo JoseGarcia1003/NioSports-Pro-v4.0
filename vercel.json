@@ -3,7 +3,7 @@
   "framework": "sveltekit",
   "crons": [
     {
-      "path": "/api/cron/fetch-games",
+      "path": "/api/cron/daily",
       "schedule": "0 14 * * *"
     },
     {

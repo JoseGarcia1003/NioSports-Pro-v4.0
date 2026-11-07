@@ -4,6 +4,7 @@
 import { toGame, hitRate, sided } from './props.js';
 import { analyseProp } from './analysis.js';
 import { playerKey } from '$lib/product/teams.js';
+import { pointsDistribution, probabilityFor } from '$lib/models/nba-points.js';
 
 export const SIGNAL_METHOD = 'reading-v1';
 export const MAX_SIGNALS = 12;
@@ -21,6 +22,8 @@ export function buildSignals({ players, market, games, defense = null, now = Dat
     const m = market?.[playerKey(p.name)];
     if (!m || !Number.isFinite(m.consensus)) continue;
     const history = p.games.map(toGame);
+    const tipDay = new Date(tip).toISOString().slice(0, 10);
+    const dist = pointsDistribution(history.map(g => ({ date: g.date, pts: g.raw[4], minutes: g.minutes })), tipDay);
     for (const side of ['over', 'under']) {
       const r = analyseProp({ games: history, history, stat: 'pts', side, line: m.consensus, opponent: p.opp, home: p.home, defense });
       if (r.reading !== 'favorable') continue;
@@ -29,6 +32,8 @@ export function buildSignals({ players, market, games, defense = null, now = Dat
         playerId: p.id, name: p.name, team: p.team, opponent: p.opp, home: p.home, gameId: p.gameId,
         tipoff: new Date(tip).toISOString(), stat: 'pts', side, line: m.consensus, books: m.books.length,
         favour: r.favour, against: r.against, l10: { hits: l10.hits, n: l10.over + l10.under },
+        // Quantitative probability from the versioned model; the reading only selects.
+        model: probabilityFor(dist, m.consensus, side),
         findings: r.findings.filter(f => f.weight !== 0).map(f => ({ weight: f.weight, title: f.title, text: f.text }))
       });
     }
