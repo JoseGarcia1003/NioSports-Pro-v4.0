@@ -7,7 +7,7 @@ export function sportReadiness(sportId, env) {
   const cfg = SPORTS_CONFIG[sportId];
   if (!cfg) return null;
   const kinds = DATA_KINDS.map(kind => {
-    const providers = cfg.providers[kind].map(id => ({ id, tier: ADAPTERS[id]?.tier ?? null, ...readiness(ADAPTERS[id], env) }));
+    const providers = cfg.providers[kind].map(id => ({ id, tier: ADAPTERS[id]?.tier ?? null, ...readiness(ADAPTERS[id], env, sportId) }));
     const state = providers.some(p => p.state === 'live') ? 'live' : providers.some(p => p.state === 'configured_unverified' || p.state === 'implemented') ? 'unverified'
       : providers.length ? 'awaiting_credentials' : 'no_provider';
     return { kind, state, providers };

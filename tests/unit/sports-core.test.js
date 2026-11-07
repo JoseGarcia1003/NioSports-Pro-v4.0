@@ -93,6 +93,11 @@ describe('adapters (shapes from the providers\' public documentation; real respo
     expect(readiness(ADAPTERS.balldontlie, { BALLDONTLIE_API_KEY: 'k' }).state).toBe('live');
     expect(sportReadiness('football', {}).overall).toBe('not_connected');
     expect(sportReadiness('nba', { BALLDONTLIE_API_KEY: 'k', ODDS_API_KEY: 'k', INGEST_SECRET: 's' }).overall).toBe('partial');
+    // Regression: odds verified for NBA must not make football or MLB look connected.
+    const keys = { ODDS_API_KEY: 'k' };
+    expect(sportReadiness('football', keys).overall).toBe('not_connected');
+    expect(sportReadiness('mlb', keys).kinds.find(k => k.kind === 'odds').state).toBe('unverified');
+    expect(sportReadiness('nba', keys).kinds.find(k => k.kind === 'odds').state).toBe('live');
     expect(allReadiness({}).map(s => s.sport)).toEqual(['nba', 'football', 'tennis', 'mlb']);
     for (const cfg of Object.values(SPORTS_CONFIG)) for (const ids of Object.values(cfg.providers)) for (const id of ids) expect(ADAPTERS[id]).toBeTruthy();
   });

@@ -6,12 +6,14 @@ import { providerRequest } from '../core/http.js';
 import { provenance } from '../core/contracts.js';
 
 /** Readiness, from configuration only (no network). */
-export function readiness(adapter, env) {
+export function readiness(adapter, env, sport = null) {
   if (adapter.mode === 'fixture') return { state: 'fixture', label: 'Datos de prueba (solo desarrollo)' };
   if (adapter.mode === 'push') return { state: adapter.verified ? 'live' : 'implemented', label: adapter.verified ? 'Conectado (envío propio)' : 'Implementado, sin verificar' };
   const missing = adapter.env.filter(k => !env[k]);
   if (missing.length) return { state: 'awaiting_credentials', label: 'Pendiente de credenciales', missing };
-  return adapter.verified ? { state: 'live', label: 'Conectado y verificado' } : { state: 'configured_unverified', label: 'Configurado; falta verificar respuestas reales' };
+  // Verification is per sport: a provider proven for NBA is not proven for football.
+  const verified = adapter.verified && (!adapter.verifiedFor || !sport || adapter.verifiedFor.includes(sport));
+  return verified ? { state: 'live', label: 'Conectado y verificado' } : { state: 'configured_unverified', label: 'Configurado; falta verificar respuestas reales' };
 }
 
 const balldontlieStatus = s => (/final/i.test(s || '') ? 'final' : /qtr|half|ot/i.test(s || '') ? 'live' : 'scheduled');
@@ -33,7 +35,7 @@ export const ADAPTERS = Object.freeze({
     docs: 'static/tools/nio_nba_stats.py (envío al endpoint /api/ingest/nba-player-games)'
   },
   'the-odds-api': {
-    id: 'the-odds-api', sport: ['nba', 'football', 'mlb'], kinds: ['odds'], tier: 'free_500_credits', env: ['ODDS_API_KEY'], verified: true,
+    id: 'the-odds-api', sport: ['nba', 'football', 'mlb'], kinds: ['odds'], tier: 'free_500_credits', env: ['ODDS_API_KEY'], verified: true, verifiedFor: ['nba'],
     docs: 'https://the-odds-api.com/liveapi/guides/v4/', note: 'Verificado para NBA (totales y puntos de jugador). Fútbol y MLB usan la misma API pero no se han verificado.'
   },
   'football-data': {

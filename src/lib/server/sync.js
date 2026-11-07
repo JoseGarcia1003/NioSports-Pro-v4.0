@@ -31,7 +31,7 @@ export async function syncSchedule(db, { sport, day, env, trigger = 'cron', fetc
   const attempts = [];
   for (const id of cfg.providers.schedule) {
     const a = ADAPTERS[id];
-    const ready = readiness(a, env);
+    const ready = readiness(a, env, sport);
     if (!a?.schedule || ready.state === 'awaiting_credentials' || ready.state === 'fixture') { attempts.push({ id, skipped: ready.state }); continue; }
     try {
       const raw = await a.schedule(day, { env, fetchImpl, limiter: limiterFor(a), log: () => {} });
