@@ -2,7 +2,7 @@ import { calendarDays } from '$lib/tennis/domain.js';
 export function nbaCalendarUrl(now=Date.now(), dayIndex=0) {
  if (![0,1].includes(dayIndex)) throw new RangeError('El calendario admite hoy y mañana.');
  const day=calendarDays(now,'America/New_York')[dayIndex];
- return `/api/proxy?${new URLSearchParams({endpoint:'/games',params:new URLSearchParams({'dates[]':day}).toString()})}`;
+ return `/api/nba/schedule?day=${day}`;
 }
 export function nbaCalendarRows(response,body) {
  if(!response.ok || response.headers.get('X-Data-Source')!=='balldontlie' || !Array.isArray(body.data))throw new Error('Calendario NBA no confirmado.');

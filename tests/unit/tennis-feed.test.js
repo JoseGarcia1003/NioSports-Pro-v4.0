@@ -20,4 +20,4 @@ it('rejects stale feeds',async()=>{await expect(ingestTennis(now+7*3600000)).rej
 it('rejects partial/truncated JSON',async()=>{fetch.mockResolvedValue(new Response('{'));await expect(ingestTennis(now)).rejects.toThrow();expect(insert).not.toHaveBeenCalled();});
 it('bounds streamed feed size even without content-length',async()=>{await expect(readLimitedJSON(new Response('0123456789'),5)).rejects.toThrow('too large');});
 it('propagates storage failure as failure',async()=>{insert.mockResolvedValue({error:{code:'42501'}});await expect(ingestTennis(now)).rejects.toThrow('storage');});
-it('protects synchronization before any request to paid provider',async()=>{const response=await POST({request:new Request('http://localhost/api/tennis/sync',{method:'POST'})});expect(response.status).toBe(401);expect(fetch).not.toHaveBeenCalled();});
+it('protects synchronization before any request to paid provider',async()=>{await expect(POST({request:new Request('http://localhost/api/tennis/sync',{method:'POST'})})).rejects.toMatchObject({status:401});expect(fetch).not.toHaveBeenCalled();});

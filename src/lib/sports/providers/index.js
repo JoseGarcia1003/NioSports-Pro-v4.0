@@ -4,6 +4,7 @@
 // response has been checked; it is never inferred from code existing.
 import { providerRequest } from '../core/http.js';
 import { provenance } from '../core/contracts.js';
+import { nbaCdn } from './nba-cdn.js';
 
 /** Readiness, from configuration only (no network). */
 export function readiness(adapter, env, sport = null) {
@@ -30,6 +31,7 @@ export const ADAPTERS = Object.freeze({
         score: { home: g.home_team_score ?? null, away: g.visitor_team_score ?? null }, provenance: provenance('balldontlie', at, { externalId: String(g.id) }) }));
     }
   },
+  'nba-cdn': nbaCdn,
   'nba-stats-ingest': {
     id: 'nba-stats-ingest', sport: ['nba'], kinds: ['boxscores'], tier: 'free', env: ['INGEST_SECRET'], mode: 'push', verified: true,
     docs: 'static/tools/nio_nba_stats.py (envío al endpoint /api/ingest/nba-player-games)'

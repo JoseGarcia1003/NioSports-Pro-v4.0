@@ -8,7 +8,7 @@ export const SPORTS_CONFIG = Object.freeze({
     id: 'nba', name: 'Baloncesto (NBA)', timezone: 'America/New_York',
     markets: ['points', 'rebounds', 'assists', 'pra', 'team_points', 'game_total'],
     modelled: { points: 'nba-points@1.0.0' },
-    providers: { schedule: ['balldontlie'], results: ['balldontlie'], boxscores: ['nba-stats-ingest'], odds: ['the-odds-api'], injuries: [], lineups: [] },
+    providers: { schedule: ['balldontlie'], results: ['balldontlie'], boxscores: ['nba-cdn', 'nba-stats-ingest'], odds: ['the-odds-api'], injuries: [], lineups: [] },
     freshness: { boxScores: { maxAgeDays: 3 }, odds: { maxAgeHours: 8 }, schedule: { maxAgeHours: 12 } }
   },
   football: {

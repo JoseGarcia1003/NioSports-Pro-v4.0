@@ -4,8 +4,8 @@ import Stripe from 'stripe';
 
 const state = vi.hoisted(() => ({ env: {}, createClient: vi.fn(), sendWelcomeEmail: vi.fn() }));
 vi.mock('$env/dynamic/private', () => ({ env: state.env }));
+vi.mock('$env/dynamic/public', () => ({ env: { PUBLIC_FIREBASE_PROJECT_ID: 'fixture-project' } }));
 vi.mock('@supabase/supabase-js', () => ({ createClient: state.createClient }));
-vi.mock('$lib/services/email.js', () => ({ sendWelcomeEmail: state.sendWelcomeEmail }));
 
 beforeEach(() => {
   vi.resetModules();
@@ -16,28 +16,31 @@ beforeEach(() => {
 
 const routes = import.meta.glob('../../src/routes/api/**/+server.js');
 
-const endpoints = [
-  ['cron/fetch-games', 'GET'], ['cron/fetch-odds', 'GET'],
-  ['cron/verify-results', 'GET'], ['email/daily-picks', 'POST'],
-  ['email/results', 'POST'], ['email/welcome', 'POST'],
-];
+// Every scheduled-job endpoint must reject callers without the exact job secret
+// before touching the database or any provider.
+const endpoints = [['cron/daily', 'GET'], ['tennis/sync', 'POST'], ['ingest/nba-player-games', 'POST'], ['ingest/nba-players', 'POST']];
+const statusOf = async promise => { try { return (await promise).status; } catch (e) { return e?.status; } };
 
 describe.each(endpoints)('%s authorization', (path, method) => {
   it.each([undefined, '', 'undefined', 'wrong'])('rejects missing configuration and header %s', async (token) => {
     const route = await routes[`../../src/routes/api/${path}/+server.js`]();
     const headers = token === undefined ? {} : { authorization: `Bearer ${token}` };
-    const response = await route[method]({ request: new Request('https://fixture.test', { method, headers }) });
-    expect(response.status).toBe(401);
+    expect(await statusOf(route[method]({ request: new Request('https://fixture.test', { method, headers, body: method === 'POST' ? '{}' : undefined }) }))).toBe(401);
     expect(state.createClient).not.toHaveBeenCalled();
-    expect(state.sendWelcomeEmail).not.toHaveBeenCalled();
   });
   it('rejects a wrong token when configured', async () => {
-    state.env.CRON_SECRET = 'configured-secret';
+    state.env.CRON_SECRET = 'configured-secret-configured-secret';
+    state.env.INGEST_SECRET = 'configured-secret-configured-secret';
     const route = await routes[`../../src/routes/api/${path}/+server.js`]();
-    const response = await route[method]({ request: new Request('https://fixture.test', {
-      method, headers: { authorization: 'Bearer wrong' },
-    }) });
-    expect(response.status).toBe(401);
+    expect(await statusOf(route[method]({ request: new Request('https://fixture.test', { method, headers: { authorization: 'Bearer wrong' }, body: method === 'POST' ? '{}' : undefined }) }))).toBe(401);
+    expect(state.createClient).not.toHaveBeenCalled();
+  });
+});
+
+describe('owner-only operations', () => {
+  it('refuses the on-demand sync without a verified identity', async () => {
+    const route = await routes['../../src/routes/api/ops/sync/+server.js']();
+    expect(await statusOf(route.POST({ request: new Request('https://fixture.test', { method: 'POST' }) }))).toBe(401);
     expect(state.createClient).not.toHaveBeenCalled();
   });
 });

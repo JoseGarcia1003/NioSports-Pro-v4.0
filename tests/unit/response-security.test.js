@@ -35,7 +35,7 @@ describe('response security', () => {
     expect(vercel.headers.flatMap((rule) => rule.headers).some(({ key }) => key.toLowerCase() === 'content-security-policy')).toBe(false);
   });
 
-  it.each(['/api/account', '/api/catalog', '/api/predict', '/api/bankroll'])('prevents persistent HTTP caching for %s', async (path) => {
+  it.each(['/api/account', '/api/nba/signals', '/api/predict', '/api/bankroll'])('prevents persistent HTTP caching for %s', async (path) => {
     const response = await handle({
       event: { url: new URL(path, 'https://fixture.test') },
       resolve: async () => new Response('private response', {
@@ -45,6 +45,17 @@ describe('response security', () => {
     expect(response.headers.get('Cache-Control')).toBe('private, no-store');
     expect(response.headers.get('Vary')).toBe('Authorization');
     expect(await response.text()).toBe('private response');
+  });
+
+  it('lets identity-independent public endpoints keep their shared cache, and nothing else', async () => {
+    const run = (path, cache, headers = {}) => handle({ event: { url: new URL(path, 'https://fixture.test'), request: new Request('https://fixture.test' + path, { headers }) },
+      resolve: async () => new Response('x', { headers: cache ? { 'Cache-Control': cache } : {} }) }).then(r => r.headers.get('Cache-Control'));
+    expect(await run('/api/public/seals', 'public, max-age=30, s-maxage=60')).toBe('public, max-age=30, s-maxage=60');
+    expect(await run('/api/nba/schedule?day=2026-11-12', 'public, max-age=30, s-maxage=60')).toContain('public');
+    // No explicit public header, an Authorization header, or a private path: never cached.
+    expect(await run('/api/public/seals', null)).toBe('private, no-store');
+    expect(await run('/api/public/seals', 'public, max-age=30', { authorization: 'Bearer x' })).toBe('private, no-store');
+    expect(await run('/api/nba/props', 'public, max-age=30')).toBe('private, no-store');
   });
 
   it('keeps static asset cache headers intact', async () => {
@@ -66,7 +77,7 @@ describe('service worker privacy', () => {
 
   it.each([
     ['https://fixture.test/api/predict'],
-    ['https://fixture.test/api/catalog'],
+    ['https://fixture.test/api/nba/signals'],
     ['https://fixture.test/api/bankroll'],
     ['https://fixture.supabase.co/rest/v1/profiles', 'Bearer account-A']
   ])('never falls back to cached private data for %s', (url, authorization) => {

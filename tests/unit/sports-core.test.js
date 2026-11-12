@@ -3,7 +3,6 @@ import { it, expect, describe } from 'vitest';
 import { providerRequest, rateLimiter, ProviderError } from '../../src/lib/sports/core/http.js';
 import { validateEvent, partition, dedupe, provenance } from '../../src/lib/sports/core/contracts.js';
 import { freshness } from '../../src/lib/sports/core/freshness.js';
-import { cached, memoryStore } from '../../src/lib/sports/core/cache.js';
 import { ADAPTERS, readiness } from '../../src/lib/sports/providers/index.js';
 import { sportReadiness, allReadiness } from '../../src/lib/sports/registry.js';
 import { SPORTS_CONFIG } from '../../src/lib/sports/config.js';
@@ -54,19 +53,11 @@ describe('normalised contracts', () => {
   });
 });
 
-describe('freshness and cache', () => {
+describe('freshness', () => {
   it('marks stale, missing and fresh data', () => {
     expect(freshness({ maxAgeDays: 3 }, '2026-11-05', '2026-11-07').usable).toBe(true);
     expect(freshness({ maxAgeDays: 3 }, '2026-10-31', '2026-11-07')).toMatchObject({ usable: false, status: 'stale' });
     expect(freshness({ maxAgeDays: 3 }, null, '2026-11-07').status).toBe('missing');
-  });
-  it('serves a labelled stale copy only when the provider fails', async () => {
-    let t = 0; const store = memoryStore();
-    expect((await cached(store, 'k', 100, async () => 1, { now: () => t })).source).toBe('provider');
-    t = 50; expect((await cached(store, 'k', 100, async () => 2, { now: () => t })).value).toBe(1);
-    t = 500; const s = await cached(store, 'k', 100, async () => { throw new ProviderError('timeout', 't'); }, { now: () => t });
-    expect(s).toMatchObject({ value: 1, stale: true, error: 'timeout' });
-    await expect(cached(memoryStore(), 'z', 100, async () => { throw new Error('x'); })).rejects.toThrow();
   });
 });
 

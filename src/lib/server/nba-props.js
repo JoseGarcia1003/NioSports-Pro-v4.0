@@ -1,15 +1,16 @@
 import { calendarDays } from '$lib/tennis/domain.js';
 
-// Builds today's (or tomorrow's) props board: provider schedule + ingested box scores.
-const BDL = 'https://api.balldontlie.io/v1/games';
+import { fetchSchedule, nbaSchedule } from './nba-schedule.js';
+
+// Builds today's (or tomorrow's) props board: cached provider schedule + ingested box scores.
+
 export const MIN_MINUTES_L5 = 12;
 
+const toGame = g => ({ id: g.id, datetime: g.datetime, status: g.status_state || g.status, home: g.home_team.abbreviation, visitor: g.visitor_team.abbreviation, homeName: g.home_team.full_name, visitorName: g.visitor_team.full_name });
+
+/** Direct provider read (no cache); the site uses the shared cached schedule below. */
 export async function scheduleFor(day, apiKey, fetchImpl = fetch) {
-  const res = await fetchImpl(`${BDL}?${new URLSearchParams({ 'dates[]': day })}`, { headers: { Authorization: apiKey }, signal: AbortSignal.timeout(6000) });
-  if (!res.ok) throw new Error(`schedule ${res.status}`);
-  const body = await res.json();
-  if (!Array.isArray(body.data)) throw new Error('schedule payload');
-  return body.data.map(g => ({ id: g.id, datetime: g.datetime, status: g.status_state || g.status, home: g.home_team.abbreviation, visitor: g.visitor_team.abbreviation, homeName: g.home_team.full_name, visitorName: g.visitor_team.full_name }));
+  return (await fetchSchedule(day, apiKey, fetchImpl)).map(toGame);
 }
 
 /** Keeps rotation players of the current season and attaches tonight's opponent. */
@@ -40,7 +41,7 @@ export async function loadBoard(db, apiKey, offset = 0) {
   const day = dayFor(offset);
   if (!apiKey) throw new Error('schedule_unavailable');
   let games;
-  try { games = await scheduleFor(day, apiKey); } catch { throw new Error('schedule_unavailable'); }
+  try { games = (await nbaSchedule(db, day, apiKey)).games.map(toGame); } catch { throw new Error('schedule_unavailable'); }
   if (!games.length) return { day, games: [], players: [], statsThrough: null, season: null, defense: null };
   const teams = [...new Set(games.flatMap(g => [g.home, g.visitor]))];
   const { data, error } = await db.rpc('nba_recent_player_games', { p_teams: teams, p_limit: 20 });

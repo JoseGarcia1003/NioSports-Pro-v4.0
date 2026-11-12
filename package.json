@@ -3,7 +3,7 @@
   "version": "4.0.0",
   "private": true,
   "type": "module",
-  "description": "Sistema predictivo NBA profesional — SvelteKit + Vite",
+  "description": "Análisis deportivo verificable — SvelteKit",
   "author": "Jose Garcia",
   "license": "MIT",
   "scripts": {
@@ -14,9 +14,7 @@
     "test:unit": "vitest run && vitest run --config vitest.ui.config.js",
     "test:ui": "vitest run --config vitest.ui.config.js",
     "test:watch": "vitest --watch",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
-    "backtesting": "node scripts/backtesting-runner.js",
-    "migrate": "node scripts/migrate-firebase-to-supabase.js"
+    "check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.6.0",
@@ -24,11 +22,9 @@
     "@supabase/supabase-js": "^2.99.3",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.37.0",
-    "dompurify": "^3.1.5",
     "firebase": "^13.1.0",
     "jose": "6.2.12",
     "lucide-svelte": "^0.577.0",
-    "resend": "^6.10.0",
     "stripe": "^20.4.1",
     "web-vitals": "^6.2.3"
   },

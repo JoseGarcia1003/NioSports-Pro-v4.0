@@ -91,10 +91,9 @@ describe('shared event probability contract',()=>{
     expect(out.calibrated).toBe(false);expect(out.recommendation).toBeNull();
     expect(out.decision.status).toBe('abstained');
   });
-  it('quarantines legacy backtest before network or output files',()=>{
-    const path='static/data/backtesting-results.json';const before=existsSync(path)?readFileSync(path,'utf8'):null;
-    const result=spawnSync(process.execPath,['scripts/backtesting-runner.js'],{encoding:'utf8'});
-    expect(result.status).not.toBe(0);expect(result.stderr).toContain('LEGACY_BACKTEST_QUARANTINED');
-    expect(existsSync(path)?readFileSync(path,'utf8'):null).toBe(before);
+  it('the legacy backtest runner and its published results no longer exist',()=>{
+    // They were quarantined in F4 and removed on 2026-11-12: nothing can run or serve them.
+    expect(existsSync('scripts/backtesting-runner.js')).toBe(false);
+    expect(existsSync('static/data/backtesting-results.json')).toBe(false);
   });
 });

@@ -38,12 +38,17 @@ export const handleError = Sentry.handleErrorWithSentry(
   }
 );
 
+/** Identity-independent, read-only endpoints (seal ledger, track record, schedules, feed status). */
+const PUBLIC_API = ['/api/public/', '/api/sports/', '/api/nba/schedule', '/api/odds/nba-totals'];
+
 export async function handle({ event, resolve }) {
   const response = await resolve(event);
 
   // SvelteKit owns CSP and its per-response nonces (see svelte.config.js).
   // API responses can depend on identity even when their URL stays the same.
-  if (event.url.pathname.startsWith('/api/')) {
+  // Only endpoints that serve the same public data to everyone may be cached.
+  const path = event.url.pathname;
+  if (path.startsWith('/api/') && !(PUBLIC_API.some(p => path.startsWith(p)) && !event.request?.headers?.has('authorization') && /^public\b/.test(response.headers.get('Cache-Control') || ''))) {
     response.headers.set('Cache-Control', 'private, no-store');
   }
 

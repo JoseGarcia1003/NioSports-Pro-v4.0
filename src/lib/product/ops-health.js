@@ -8,6 +8,7 @@ export function vitalStatus(metric, p75) {
   return p75 <= VITAL_LIMITS[metric] ? 'good' : p75 <= POOR[metric] ? 'needs-improvement' : 'poor';
 }
 
+const RUN_STATUS = { ok: 'correcta', partial: 'parcial', failed: 'fallida', skipped: 'omitida' };
 const hours = (from, now) => (now - Date.parse(from)) / 3600000;
 const ago = h => (h < 1 ? 'hace menos de 1 h' : h < 48 ? `hace ${Math.round(h)} h` : `hace ${Math.round(h / 24)} días`);
 
@@ -19,7 +20,7 @@ export function healthChecks(d, now = Date.now()) {
   if (!ingest) add('bad', 'Estadísticas NBA', 'No hay cargas registradas.');
   else {
     const h = hours(ingest, now);
-    add(h <= 30 ? 'ok' : h <= 54 ? 'warn' : 'bad', 'Estadísticas NBA', `Último partido ${d.stats.lastGame}; última carga ${ago(h)}.${h > 30 ? ' Ejecuta el script del PC.' : ''}`);
+    add(h <= 30 ? 'ok' : h <= 54 ? 'warn' : 'bad', 'Estadísticas NBA', `Último partido ${d.stats.lastGame}; última carga ${ago(h)}.${h > 30 ? ' La sincronización automática no ha traído partidos nuevos: pulsa «Sincronizar ahora» y revisa la última ejecución.' : ''}`);
   }
 
   const cache = Array.isArray(d?.cache) ? d.cache : [];
@@ -39,6 +40,15 @@ export function healthChecks(d, now = Date.now()) {
   else add(hours(`${d.signals.lastDay}T12:00:00Z`, now) <= 60 ? 'ok' : 'warn', 'Señales', `${editions} ediciones; la última del ${d.signals.lastDay}.`);
 
   add(Number(d?.positions) > 0 ? 'ok' : 'warn', 'Posiciones de jugadores', Number(d?.positions) > 0 ? `${d.positions} jugadores con posición oficial.` : 'Sin cargar: ejecuta el script actualizado para activar la defensa por posición.');
+
+  const runs = Array.isArray(d?.runs) ? d.runs : [];
+  const box = runs.find(r => r.sport === 'nba' && r.kind === 'boxscores');
+  if (box) add(box.status === 'ok' ? 'ok' : box.status === 'partial' ? 'warn' : 'bad', 'Sincronización de box scores',
+    `Última ejecución ${ago(hours(box.finished_at, now))} (${box.provider}): ${RUN_STATUS[box.status] ?? box.status}${box.records_valid ? `, ${box.records_valid} filas` : ''}${box.error_code ? ` · ${box.error_code}` : ''}.`);
+  const seals = d?.seals;
+  if (seals && Number(seals.count) > 0) add(Number(seals.anchored) >= Number(seals.count) ? 'ok' : 'warn', 'Registro sellado', `${seals.count} sellos; ${seals.anchored} con anclaje externo.`);
+  const failed = Number(d?.failedRuns24h) || 0;
+  if (failed) add('warn', 'Sincronizaciones fallidas', `${failed} en las últimas 24 h.`);
 
   const errors = Number(d?.errors24h) || 0;
   add(errors === 0 ? 'ok' : errors < 10 ? 'warn' : 'bad', 'Errores', `${errors} en las últimas 24 h.`);
