@@ -22,6 +22,9 @@
   $: profit=Number(w.profit_minor||0);
   $: capital=Number(w.deposited_minor||0)-Number(w.withdrawn_minor||0);
   $: roi=Number(w.settled_stake_minor)>0?(profit/Number(w.settled_stake_minor)*100).toLocaleString('es',{minimumFractionDigits:1,maximumFractionDigits:1})+' %':'—';
+  // Server-computed metrics (real stake and odds of every settled ticket); the demo falls back to its example wallet.
+  $: metrics=data?.metrics;
+  $: yieldText=metrics?.yield!=null?(metrics.yield*100).toLocaleString('es',{minimumFractionDigits:1,maximumFractionDigits:1})+' %':roi;
   $: exposure=available+reserved>0?Math.round(reserved/(available+reserved)*100):0;
   $: series=[...(data?.entries||[])].reverse().map(e=>Number(e.balance_minor));
   $: low=Math.min(...series,available)*.95;
@@ -42,7 +45,7 @@
     <section class="metrics" aria-label="Resumen de capital">
       <article class="balance"><span class="eyebrow">◈ SALDO DISPONIBLE</span><div class="big">{money(available)}</div><footer>Patrimonio total <strong>{money(available+reserved)}</strong></footer></article>
       <article><span class="eyebrow">◷ COMPROMETIDO</span><div class="number">{money(reserved)}</div><p>{data.tickets.length} {data.tickets.length===1?'ticket pendiente':'tickets pendientes'}</p><div class="meter"><span style={`width:${exposure}%`}></span></div><small>{exposure}% del patrimonio reservado</small></article>
-      <article><span class="eyebrow">↗ BENEFICIO NETO</span><div class="number" class:negative={profit<0} class:positive={profit>=0}>{profit>0?'+':''}{money(profit)}</div><p>Solo resultados liquidados</p><footer>ROI sobre stake resuelto <strong>{roi}</strong></footer></article>
+      <article><span class="eyebrow">↗ BENEFICIO NETO</span><div class="number" class:negative={profit<0} class:positive={profit>=0}>{profit>0?'+':''}{money(profit)}</div><p>Solo resultados liquidados</p><footer>Yield (beneficio ÷ apostado) <strong>{yieldText}</strong>{#if metrics?.decided} · Acierto <strong>{metrics.won}/{metrics.decided}</strong>{/if}</footer></article>
       <article><span class="eyebrow">⇣ CAPITAL NETO</span><div class="number">{money(capital)}</div><p>Aportaciones menos retiros</p><footer>Los depósitos no son beneficio</footer></article>
     </section>
     {#if !demo}<BankrollLimits />{/if}

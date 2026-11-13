@@ -3,13 +3,16 @@ import { requireIdentity } from '$lib/server/identity.js';
 import { adminDatabase } from '$lib/server/entitlements.js';
 import { loadLimitState, recentTickets } from '$lib/server/bankroll-limits.js';
 import { effectiveLimits, checkStake } from '$lib/bankroll/responsible.js';
+import { bankrollMetrics } from '$lib/bankroll/metrics.js';
 
 export async function GET({ request }) {
   const { uid } = await requireIdentity(request);
   const db = adminDatabase();
   const { data, error } = await db.rpc('bankroll_snapshot', { p_user: uid });
   if (error) return json({ error: 'No se pudo cargar el registro contable. Verifica la migración.' }, { status: 503 });
-  return json(data, { headers: { 'Cache-Control': 'no-store' } });
+  // Performance metrics are computed here, from every ticket, never in the browser.
+  const { data: tickets, error: failure } = await db.from('bankroll_tickets').select('status, stake_minor, odds').eq('user_id', uid).limit(5000);
+  return json({ ...data, metrics: failure ? null : bankrollMetrics(tickets || [], data?.wallet) }, { headers: { 'Cache-Control': 'no-store' } });
 }
 
 const LIMIT_MESSAGES = {
