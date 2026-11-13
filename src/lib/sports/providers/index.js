@@ -4,7 +4,6 @@
 // response has been checked; it is never inferred from code existing.
 import { providerRequest } from '../core/http.js';
 import { provenance } from '../core/contracts.js';
-import { nbaCdn } from './nba-cdn.js';
 
 /** Readiness, from configuration only (no network). */
 export function readiness(adapter, env, sport = null) {
@@ -31,7 +30,6 @@ export const ADAPTERS = Object.freeze({
         score: { home: g.home_team_score ?? null, away: g.visitor_team_score ?? null }, provenance: provenance('balldontlie', at, { externalId: String(g.id) }) }));
     }
   },
-  'nba-cdn': nbaCdn,
   'nba-stats-ingest': {
     id: 'nba-stats-ingest', sport: ['nba'], kinds: ['boxscores'], tier: 'free', env: ['INGEST_SECRET'], mode: 'push', verified: true,
     docs: 'static/tools/nio_nba_stats.py (envío al endpoint /api/ingest/nba-player-games)'
@@ -65,8 +63,8 @@ export const ADAPTERS = Object.freeze({
     }
   },
   'mlb-statsapi': {
-    id: 'mlb-statsapi', sport: ['mlb'], kinds: ['schedule', 'results', 'boxscores'], tier: 'free_public', env: [], verified: false,
-    docs: 'https://statsapi.mlb.com/api/v1/schedule (API pública de MLB; revisar sus términos antes de uso comercial)', limits: { capacity: 30, perMs: 60000 },
+    id: 'mlb-statsapi', sport: ['mlb'], kinds: ['schedule', 'results'], tier: 'free_public_non_commercial', env: [], verified: true,
+    docs: 'https://statsapi.mlb.com/api/v1/schedule — verificado con respuestas reales el 2026-11-13. Sus términos limitan el uso a fines no comerciales: hace falta un proveedor con licencia antes de cobrar.', limits: { capacity: 30, perMs: 60000 },
     async schedule(day, { fetchImpl, log, limiter, timeoutMs, retries } = {}) {
       const { body } = await providerRequest(`https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${day}`, { provider: 'mlb-statsapi', fetchImpl, log, limiter, timeoutMs, retries });
       const at = Date.now();

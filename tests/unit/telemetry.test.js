@@ -93,7 +93,7 @@ describe('owner health panel', () => {
     }, now);
     const by = t => checks.find(c => c.title === t);
     expect(by('Estadísticas NBA')).toMatchObject({ level: 'bad' });
-    expect(by('Estadísticas NBA').text).toContain('Sincronizar ahora');
+    expect(by('Estadísticas NBA').text).toContain('tarea programada de tu PC');
     expect(by('Créditos The Odds API')).toMatchObject({ level: 'warn' });
     expect(by('Líneas de puntos de jugadores')).toMatchObject({ level: 'warn' });
     expect(by('Señales')).toMatchObject({ level: 'warn' });

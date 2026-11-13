@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { it, expect, describe } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { providerRequest, rateLimiter, ProviderError } from '../../src/lib/sports/core/http.js';
 import { validateEvent, partition, dedupe, provenance } from '../../src/lib/sports/core/contracts.js';
 import { freshness } from '../../src/lib/sports/core/freshness.js';
@@ -73,6 +74,14 @@ describe('adapters (shapes from the providers\' public documentation; real respo
     const mlb = await ADAPTERS['mlb-statsapi'].schedule('2026-09-15', { fetchImpl: async () => respond(200, { dates: [{ games: [{ gamePk: 77, gameDate: '2026-09-15T23:05:00Z', status: { detailedState: 'Final' }, teams: { home: { team: { id: 1, name: 'H' }, score: 4 }, away: { team: { id: 2, name: 'V' }, score: 3 } } }] }] }) });
     expect(mlb[0]).toMatchObject({ id: 'mlb:mlb:77', status: 'final' }); expect(validateEvent(mlb[0]).ok).toBe(true);
   });
+  it('MLB adapter normalises a real statsapi response (15 final games on 2026-09-15)', async () => {
+    const real = JSON.parse(readFileSync('tests/fixtures/mlb-schedule-2026-09-15.json', 'utf8'));
+    const events = await ADAPTERS['mlb-statsapi'].schedule('2026-09-15', { fetchImpl: async () => respond(200, real) });
+    expect(events).toHaveLength(15);
+    expect(events.every(e => validateEvent(e).ok && e.status === 'final')).toBe(true);
+    expect(events[0]).toMatchObject({ id: 'mlb:mlb:824466', startsAt: '2026-09-15T22:40:00Z', home: { name: 'Cincinnati Reds' }, away: { name: 'Los Angeles Dodgers' }, score: { home: 0, away: 4 } });
+    expect(ADAPTERS['mlb-statsapi'].verified).toBe(true);
+  });
   it('fixture data is marked demo and refused in production', async () => {
     const f = await ADAPTERS.fixture.schedule('2026-11-08', { sport: 'football', env: {} });
     expect(f.every(e => e.isDemo && e.provenance.provider === 'fixture')).toBe(true);
@@ -88,6 +97,7 @@ describe('adapters (shapes from the providers\' public documentation; real respo
     const keys = { ODDS_API_KEY: 'k' };
     expect(sportReadiness('football', keys).overall).toBe('not_connected');
     expect(sportReadiness('mlb', keys).kinds.find(k => k.kind === 'odds').state).toBe('unverified');
+    expect(sportReadiness('mlb', {}).kinds.find(k => k.kind === 'schedule').state).toBe('live');
     expect(sportReadiness('nba', keys).kinds.find(k => k.kind === 'odds').state).toBe('live');
     expect(allReadiness({}).map(s => s.sport)).toEqual(['nba', 'football', 'tennis', 'mlb']);
     for (const cfg of Object.values(SPORTS_CONFIG)) for (const ids of Object.values(cfg.providers)) for (const id of ids) expect(ADAPTERS[id]).toBeTruthy();

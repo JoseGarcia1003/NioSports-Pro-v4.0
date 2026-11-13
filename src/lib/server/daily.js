@@ -1,8 +1,10 @@
 // The daily pipeline, shared by the scheduled job and the owner's "sync now"
 // button. Steps are independent: each has its own deadline and its own record
 // in ingest_runs, so a provider that hangs can neither stop nor starve the rest.
-//   1. Schedules of the four sports and missing OpenTimestamps anchors (fast, in parallel).
-//   2. NBA box scores from the public NBA CDN (results of finished games).
+//   1. Schedules of the four sports and missing OpenTimestamps anchors (in parallel).
+//   2. Box scores: only when a server-capable provider exists (none today; see
+//      nba-boxscore-sync.js). Until then they arrive from the owner's scheduled
+//      script, and this step only reports how fresh the stored data is.
 //   3. Today's signal edition: built, sealed and anchored before tip-off.
 import { syncSchedule, recordRun } from './sync.js';
 import { syncNbaBoxScores } from './nba-boxscore-sync.js';
@@ -10,7 +12,8 @@ import { ensureEdition } from './signal-edition.js';
 import { anchorSeal, unanchored } from './seals.js';
 import { supabaseStore } from './odds-cache.js';
 import { dayFor } from './nba-props.js';
-import { SPORT_IDS } from '$lib/sports/config.js';
+import { SPORT_IDS, SPORTS_CONFIG } from '$lib/sports/config.js';
+import { freshness } from '$lib/sports/core/freshness.js';
 
 /** Resolves with `fallback` if the step is still running after `ms`. */
 export function withDeadline(promise, ms, fallback) {
@@ -28,7 +31,16 @@ async function anchorsStep(db, trigger) {
   return { pending: pending.length, stored };
 }
 
-export async function runDaily(db, env, { trigger = 'cron', boxScoreBudgetMs = 25000, sync = syncNbaBoxScores, edition = ensureEdition } = {}) {
+async function boxScoreStatus(db) {
+  const { data, error } = await db.from('nba_player_games').select('game_date').order('game_date', { ascending: false }).limit(1).maybeSingle();
+  if (error) return { status: 'failed', error: 'database_read' };
+  const through = data?.game_date ?? null;
+  const fresh = freshness(SPORTS_CONFIG.nba.freshness.boxScores, through, dayFor(0));
+  return { status: 'skipped', error: 'no_server_provider', through, fresh: fresh.usable };
+}
+
+/** @param {{ boxScoreProvider?: object|null }} options a server-capable box score provider, when one is contracted */
+export async function runDaily(db, env, { trigger = 'cron', boxScoreProvider = null, boxScoreBudgetMs = 25000, sync = syncNbaBoxScores, edition = ensureEdition } = {}) {
   const startedAt = Date.now();
   const store = supabaseStore(db);
   const utcDay = new Date().toISOString().slice(0, 10);
@@ -40,8 +52,10 @@ export async function runDaily(db, env, { trigger = 'cron', boxScoreBudgetMs = 2
     return [sport, r];
   })).then(Object.fromEntries);
   const anchors = safe(anchorsStep(db, trigger), 20000);
-  const boxScores = safe(sync(db, { today: dayFor(0), trigger, budgetMs: boxScoreBudgetMs }).then(r => (
-    { status: r.status, rows: r.records_valid ?? 0, games: r.details?.gamesStored ?? 0, through: r.data_as_of ?? null, error: r.error_code ?? null })), boxScoreBudgetMs + 3000);
+  const boxScores = boxScoreProvider
+    ? safe(sync(db, { today: dayFor(0), trigger, budgetMs: boxScoreBudgetMs, provider: boxScoreProvider }).then(r => (
+      { status: r.status, rows: r.records_valid ?? 0, games: r.details?.gamesStored ?? 0, through: r.data_as_of ?? null, error: r.error_code ?? null })), boxScoreBudgetMs + 3000)
+    : safe(boxScoreStatus(db), 8000);
 
   const steps = { schedules: await schedules, anchors: await anchors, boxScores: await boxScores };
   // The edition needs the freshest box scores, so it runs after them, with what is left of ~50 s.

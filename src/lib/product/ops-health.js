@@ -20,7 +20,7 @@ export function healthChecks(d, now = Date.now()) {
   if (!ingest) add('bad', 'Estadísticas NBA', 'No hay cargas registradas.');
   else {
     const h = hours(ingest, now);
-    add(h <= 30 ? 'ok' : h <= 54 ? 'warn' : 'bad', 'Estadísticas NBA', `Último partido ${d.stats.lastGame}; última carga ${ago(h)}.${h > 30 ? ' La sincronización automática no ha traído partidos nuevos: pulsa «Sincronizar ahora» y revisa la última ejecución.' : ''}`);
+    add(h <= 30 ? 'ok' : h <= 54 ? 'warn' : 'bad', 'Estadísticas NBA', `Último partido ${d.stats.lastGame}; última carga ${ago(h)}.${h > 30 ? ' Los box scores llegan desde la tarea programada de tu PC: comprueba que está activa.' : ''}`);
   }
 
   const cache = Array.isArray(d?.cache) ? d.cache : [];

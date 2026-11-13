@@ -18,7 +18,7 @@ it('withDeadline returns the fallback instead of waiting for a hung step', async
 it('a provider that never answers cannot stop the other steps or the run from finishing', async () => {
   const db = fakeDb();
   const hung = () => new Promise(() => {});
-  const result = await runDaily(db, {}, { boxScoreBudgetMs: 50, sync: hung, edition: async () => ({ day: '2026-11-13', edition: null, created: false, reason: 'data_stale' }) });
+  const result = await runDaily(db, {}, { boxScoreBudgetMs: 50, boxScoreProvider: { id: 'x' }, sync: hung, edition: async () => ({ day: '2026-11-13', edition: null, created: false, reason: 'data_stale' }) });
   expect(result.steps.boxScores).toEqual({ status: 'failed', error: 'deadline_exceeded' });
   // Schedules of the four sports were still attempted and recorded (skipped: no providers configured here).
   expect(Object.keys(result.steps.schedules)).toEqual(['nba', 'football', 'tennis', 'mlb']);
@@ -30,8 +30,15 @@ it('the box score sync always records its run inside its own budget, even when e
   const db = fakeDb(); let t = 0;
   // Each provider call "takes" its whole timeout and then fails, as an unreachable host would.
   const slow = async ({ timeoutMs }) => { t += timeoutMs; throw Object.assign(new Error('timeout'), { code: 'timeout' }); };
-  const r = await syncNbaBoxScores(db, { today: '2026-11-13', budgetMs: 25000, now: () => t, provider: { id: 'nba-cdn', limits: { capacity: 100, perMs: 1000 }, schedule: slow, scoreboard: slow, boxScore: slow } });
+  const r = await syncNbaBoxScores(db, { today: '2026-11-13', budgetMs: 25000, now: () => t, provider: { id: 'licensed-feed', limits: { capacity: 100, perMs: 1000 }, schedule: slow, scoreboard: slow, boxScore: slow } });
   expect(r).toMatchObject({ status: 'failed', error_code: 'timeout' });
   expect(t).toBeLessThanOrEqual(25000);
   expect(db.runs).toHaveLength(1); expect(db.runs[0]).toMatchObject({ kind: 'boxscores', status: 'failed' });
 });
+
+it('without a server-capable provider it only reports how fresh the stored box scores are', async () => {
+  const db = fakeDb();
+  const result = await runDaily(db, {}, { edition: async () => ({ day: '2026-11-13', edition: null, created: false, reason: 'data_stale' }) });
+  expect(result.steps.boxScores).toMatchObject({ status: 'skipped', error: 'no_server_provider', fresh: false });
+  expect(db.runs.some(r => r.kind === 'boxscores')).toBe(false);
+}, 15000);

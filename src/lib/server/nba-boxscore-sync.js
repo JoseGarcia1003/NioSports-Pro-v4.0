@@ -1,9 +1,12 @@
-// Server-side ingestion of NBA box scores (no owner PC involved). Finds games
-// that should exist but are missing from nba_player_games, fetches each finished
-// game from the NBA public CDN, validates every row with the same rules as the
-// manual ingest, and stores whole games only. Idempotent and resumable: a run
+// Server-side ingestion of NBA box scores through an injected provider. Finds
+// games that should exist but are missing from nba_player_games, fetches each
+// finished game, validates every row with the same rules as the manual ingest,
+// and stores whole games only.
+// No provider is wired today: NBA's own endpoints (stats.nba.com, cdn.nba.com)
+// refuse cloud servers (verified from production on 2026-11-13) and we do not
+// disguise requests to get around that. A licensed box score API plugs in here
+// as { id, limits, schedule(), scoreboard(), boxScore(id) }. Idempotent and resumable: a run
 // that stops early simply continues on the next one.
-import { nbaCdn } from '$lib/sports/providers/nba-cdn.js';
 import { validateRow } from './nba-ingest.js';
 import { recordRun } from './sync.js';
 import { rateLimiter } from '$lib/sports/core/http.js';
@@ -18,7 +21,8 @@ export function missingGames(schedule, stored, { from, to }) {
     .sort((a, b) => a.day.localeCompare(b.day) || a.id.localeCompare(b.id));
 }
 
-export async function syncNbaBoxScores(db, { today, trigger = 'cron', fetchImpl = fetch, budgetMs = 25000, maxGames = 60, now = () => Date.now(), provider = nbaCdn } = {}) {
+export async function syncNbaBoxScores(db, { today, trigger = 'cron', fetchImpl = fetch, budgetMs = 25000, maxGames = 60, now = () => Date.now(), provider } = {}) {
+  if (!provider) throw new Error('box score provider required');
   const started = now(), startedIso = new Date(started).toISOString();
   // One hard deadline for the whole run: no provider call may outlive it, so the
   // run is always recorded and never starves the other steps of the pipeline.

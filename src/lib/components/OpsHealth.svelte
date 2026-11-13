@@ -46,12 +46,12 @@
     </ul>
     <div class="sync">
       <button type="button" on:click={syncNow} disabled={syncing}>{syncing ? 'Sincronizando… (hasta 1 min)' : 'Sincronizar ahora'}</button>
-      <span class="muted">Trae los box scores que falten, actualiza calendarios y sella la edición del día. También se ejecuta solo dos veces al día.</span>
+      <span class="muted">Actualiza calendarios, sella la edición del día si hay datos al día y completa anclajes. También se ejecuta sola dos veces al día.</span>
     </div>
     {#if syncError}<p class="muted" role="alert">{syncError}</p>{/if}
     {#if syncResult}
       <p class="muted" role="status">
-        Box scores: {syncResult.boxScores?.games ?? 0} partidos, {syncResult.boxScores?.rows ?? 0} filas{syncResult.boxScores?.error ? ` (${syncResult.boxScores.error})` : ''}{syncResult.boxScores?.through ? `, hasta ${syncResult.boxScores.through}` : ''} ·
+        Box scores: {syncResult.boxScores?.error === 'no_server_provider' ? `hasta ${syncResult.boxScores.through ?? '—'}${syncResult.boxScores.fresh ? '' : ' (desactualizados: ejecuta la tarea de tu PC)'}` : `${syncResult.boxScores?.games ?? 0} partidos, ${syncResult.boxScores?.rows ?? 0} filas`} ·
         Edición: {syncResult.edition?.sealed ? `${syncResult.edition.entries} señales${syncResult.edition.created ? ' (recién sellada)' : ''}` : (EDITION_REASON[syncResult.edition?.reason] ?? 'sin edición')} ·
         Anclajes nuevos: {syncResult.anchors?.stored ?? 0}
       </p>
