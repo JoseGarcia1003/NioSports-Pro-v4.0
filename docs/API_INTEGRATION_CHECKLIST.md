@@ -13,13 +13,20 @@ Regla general: las claves van **solo** en las variables de entorno de Vercel (Pr
 | `the-odds-api` | NBA, fútbol, MLB | líneas de mercado (mediana entre casas) | gratis, 500 créditos/mes | `ODDS_API_KEY` | **Verificado para NBA** (totales y puntos). Fútbol y MLB: sin verificar |
 | `football-data` | Fútbol | calendario, resultados | nivel gratuito con registro | `FOOTBALL_DATA_API_KEY` | Implementado; **pendiente de credencial** |
 | `api-football` | Fútbol | calendario, resultados, estadísticas, lesiones, alineaciones | de pago (prueba gratuita limitada) | `API_FOOTBALL_KEY` | Implementado (solo calendario); **pendiente de credencial** |
-| `mlb-statsapi` | MLB | calendario, resultados, box score | API pública sin clave | — | Implementado; **sin verificar** (revisar términos de uso comercial) |
+| `mlb-statsapi` | MLB | calendario, resultados | API pública sin clave; términos de uso no comercial | — | **Verificado** con una respuesta real (13/11); sin partidos en noviembre. Requiere proveedor con licencia antes de cobrar |
 | `tennis-feed` | Tenis | dataset propio validado | por contratar | `TENNIS_FEED_URL`, `TENNIS_API_KEY`, `TENNIS_PROVIDER_ID` | Contrato listo; **sin proveedor** |
 | `fixture` | todos | datos de prueba marcados `isDemo` | — | — | Solo desarrollo; **rechazado en producción** |
 | Analista IA (`anthropic`) | todos | redacción verificada | de pago por uso | `AI_PROVIDER=anthropic`, `ANTHROPIC_API_KEY`, opcional `AI_MODEL`, `AI_MAX_TOKENS` | Implementado; **desactivado** hasta configurar |
 | OpenTimestamps | — | anclaje de sellos en Bitcoin | gratis, sin clave | — | Implementado; se verifica en el primer sellado real en producción |
 
 Estado técnico de cada proveedor en vivo: `GET /api/sports/status` (público, sin nombres de claves) y el panel «Estado del sistema» en Cuenta (solo propietario).
+
+### Box scores de la NBA: por qué no hay vía automática gratuita
+
+Comprobado el 13/11/2026: `stats.nba.com` y `cdn.nba.com` rechazan peticiones desde centros de datos (timeout desde Vercel, «Access Denied» desde el entorno de desarrollo). No se sortea ese bloqueo. Opciones reales:
+
+1. **Gratis**: la tarea programada del PC del propietario (`static/tools/nio_tarea_diaria.bat`), que sí puede leer la fuente oficial.
+2. **De pago**: un proveedor de estadísticas por jugador que admita servidores y uso comercial. El punto de conexión es `syncNbaBoxScores(db, { provider })` en `src/lib/server/nba-boxscore-sync.js`; el proveedor debe exponer `schedule()`, `scoreboard()` y `boxScore(id)` y devolver filas con la forma de `nba_player_games`. Si sus identificadores de jugador y partido no son los oficiales de la NBA, hay que añadir una tabla de correspondencias antes de mezclar datos (trabajo pendiente y no trivial).
 
 ## 2. Variables de entorno
 
@@ -66,7 +73,8 @@ Estado técnico de cada proveedor en vivo: `GET /api/sports/status` (público, s
 | Caché con copia antigua etiquetada | `src/lib/sports/core/cache.js` |
 | Antigüedad máxima de los datos | `src/lib/sports/core/freshness.js` |
 | Sincronización con conmutación de proveedor y registro | `src/lib/server/sync.js` → tabla `ingest_runs` |
-| Orquestador diario (cron) | `src/routes/api/cron/daily/+server.js` |
+| Tarea diaria (cron y botón del propietario) | `src/lib/server/daily.js`, `src/routes/api/cron/daily/+server.js`, `src/routes/api/ops/sync/+server.js` |
+| Calendario NBA cacheado | `src/lib/server/nba-schedule.js`, `src/routes/api/nba/schedule/+server.js` |
 | Lectura pública del calendario sincronizado | `src/routes/api/sports/[sport]/schedule/+server.js` |
 
 ## 6. Campos normalizados (evento)
@@ -93,7 +101,7 @@ Estado técnico de cada proveedor en vivo: `GET /api/sports/status` (público, s
 
 | Deporte | Arquitectura | Datos reales hoy | Modelo publicado | Falta |
 |---|---|---|---|---|
-| NBA | completa | calendario, box score, líneas de puntos y totales | `nba-points@1.0.0` (validado fuera de muestra) | lesiones/alineaciones, más mercados, ingesta automática activada |
+| NBA | completa | calendario, box score, líneas de puntos y totales | `nba-points@1.0.0` (validado fuera de muestra) | lesiones/alineaciones, más mercados, **box scores automáticos (hoy dependen del PC del propietario)** |
 | Fútbol | completa (adaptadores, validación, página) | ninguno | ninguno | credencial, verificación, modelo y su validación |
 | Tenis | contrato y página existentes | ninguno | ninguno | proveedor |
-| MLB | completa (adaptador sin clave) | por verificar en producción | ninguno | verificar respuestas reales, revisar términos, modelo |
+| MLB | completa (adaptador verificado) | calendario (fuera de temporada en noviembre) | ninguno | proveedor con licencia comercial, modelo y su validación |

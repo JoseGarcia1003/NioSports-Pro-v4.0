@@ -1,5 +1,16 @@
 # Punto de control — leer antes de continuar
 
+## VIGENTE — Misión de transformación (12–13 de noviembre de 2026)
+
+- Entregable: `docs/NIOSPORTS_PRO_FINAL_AUDIT.md`. Commits b7e77acf → (este). Todo en `main` y en `claude/focused-ramanujan-9avptc`.
+- Hecho y probado: `/api/nba/schedule` cacheado (sustituye a `/api/proxy`, eliminado); tarea diaria con pasos independientes y plazos (`src/lib/server/daily.js`, crons 10:10 y 16:40 UTC, botón del propietario `/api/ops/sync`); sellado automático de la edición; anulación de señales de quien no jugó; arranque inmediato para miembros (rutas privadas renderizadas en servidor + `whenAuthReady`); panel Hoy nuevo (`/api/dashboard`); métricas de bankroll en servidor; limpieza del sistema heredado (57 archivos); CSP reducida; migración 20261112013143 aplicada.
+- Pruebas: 609 unitarias/servidor/BD + 48 UI aprobadas; svelte-check 0/0; build OK; auditor de interfaz 0 hallazgos en 12 casos.
+- Verificado en producción: calendario cacheado, endpoints retirados en 404, ejecución de la tarea del 13/11 10:51 UTC registrada con calendarios/anclajes correctos.
+- **Bloqueo real**: `stats.nba.com` y `cdn.nba.com` rechazan servidores en la nube (timeout en Vercel; «Access Denied» desde este entorno). No se disfrazan peticiones. Los box scores siguen dependiendo de la tarea del PC del propietario; último partido cargado 31/10 → sin señales nuevas hasta que se ejecute.
+- Entorno de la sesión: `niosports-pro` permite `cdn.nba.com`, `statsapi.mlb.com` y el dominio de producción (para comprobar la web directamente).
+- Pendiente del propietario: (1) activar la tarea diaria del PC o contratar un proveedor de box scores apto para servidores; (2) confirmar un inicio de sesión con Google y con correo en producción tras el cambio de CSP; (3) `OWNER_USER_IDS`; (4) rotar claves; (5) revisión legal.
+- Siguiente acción técnica: cuando haya box scores nuevos, comprobar que la tarea de las 16:40 UTC sella la edición (seq 2 en `prediction_seals`) y que al día siguiente se liquida; recoger Web Vitals de campo posteriores al nuevo arranque. Actualización mayor de vitest/vite pendiente (avisos solo de desarrollo).
+
 ## VIGENTE — Misión «plataforma de nivel mundial» (7 de noviembre de 2026)
 
 - Hecho y probado (commits 0647b44c, 0c81c1cc, 3f2874d6 y siguientes):

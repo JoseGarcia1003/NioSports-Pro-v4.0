@@ -20,7 +20,7 @@ Servidor (funciones Vercel, Node 24)  ── src/routes/api/*
 Supabase (PostgreSQL) — acceso solo con la clave de servicio desde el servidor; RLS sin políticas = clientes sin acceso.
 ```
 
-Tareas programadas (`vercel.json`): `/api/cron/daily` (calendarios de los 4 deportes, tabla heredada `games`, reintento de anclajes) y `/api/cron/verify-results`.
+Tareas programadas (`vercel.json`): `/api/cron/daily` dos veces al día (10:10 y 16:40 UTC). Ejecuta en paralelo, con plazo y registro propios por paso: calendarios de los 4 deportes, anclajes pendientes, estado de los box scores y, al final, el sellado de la edición del día. El propietario puede lanzarla con `/api/ops/sync`. Los box scores de la NBA llegan desde el script del PC del propietario (los servidores de la NBA rechazan peticiones desde la nube).
 
 ## 2. Módulos
 
@@ -31,6 +31,11 @@ Tareas programadas (`vercel.json`): `/api/cron/daily` (calendarios de los 4 depo
 | `src/lib/sports/core/` | HTTP resiliente, contratos y validación, deduplicación, caché, frescura |
 | `src/lib/sports/registry.js` | Matriz de preparación (conectado / en verificación / pendiente de credenciales) |
 | `src/lib/server/sync.js` | Sincronización con conmutación de proveedor y registro en `ingest_runs` |
+| `src/lib/server/daily.js` | Tarea diaria: pasos independientes con plazos |
+| `src/lib/server/nba-schedule.js` | Una copia cacheada del calendario NBA para toda la web |
+| `src/lib/server/signal-edition.js`, `signal-results.js` | Construcción y sellado de la edición; resultados oficiales y anulaciones |
+| `src/lib/server/dashboard.js` | Datos del panel Hoy en una sola petición |
+| `src/lib/bankroll/metrics.js` | Acierto, yield y ROI con definiciones explícitas |
 | `src/lib/nba/` | Lógica NBA existente: props, lectura `reading-v1`, señales, temporada |
 | `src/lib/models/nba-points.js` | Modelo probabilístico de puntos (versión, parámetros, calibración, registro de cambios) |
 | `src/lib/stats/` | Distribuciones, Wilson, Brier, log loss, curva de calibración, Platt, historial público |
