@@ -1,7 +1,7 @@
 <script>
   import { goto } from '$app/navigation';
   import { ArrowUpRight, Sun, Moon, Check, LogOut } from 'lucide-svelte';
-  import { currentUser, isAuthenticated } from '$lib/stores/auth.js';
+  import { currentUser, isAuthenticated, authLoading } from '$lib/stores/auth.js';
   import { subscription } from '$lib/stores/subscription.js';
   import { theme } from '$lib/stores/ui.js';
   import { planLabel } from '$lib/product/navigation.js';
@@ -58,6 +58,8 @@
           {#if $currentUser?.displayName}<div><dt>Nombre</dt><dd>{$currentUser.displayName}</dd></div>{/if}
         </dl>
         <button type="button" class="ghost" on:click={signOut} disabled={leaving}><LogOut size={16} aria-hidden="true" /> {leaving ? 'Cerrando…' : 'Cerrar sesión'}</button>
+      {:else if $authLoading}
+        <p class="muted" role="status">Comprobando tu sesión…</p>
       {:else}
         <p class="muted">No has iniciado sesión.</p>
         <a class="primary" href="/login">Entrar o crear cuenta <ArrowUpRight size={16} aria-hidden="true" /></a>

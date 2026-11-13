@@ -1,7 +1,9 @@
 import { get } from 'svelte/store';
-import { currentUser } from '$lib/stores/auth.js';
+import { currentUser, whenAuthReady } from '$lib/stores/auth.js';
 
+// Pages render before the session check ends; their private requests wait for it here.
 export async function getAccessToken() {
+  await whenAuthReady();
   return await get(currentUser)?.getIdToken() ?? null;
 }
 

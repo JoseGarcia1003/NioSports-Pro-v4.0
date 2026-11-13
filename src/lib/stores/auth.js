@@ -100,3 +100,12 @@ export const authStore = {
     return current;
   }
 };
+
+/** Resolves once the initial session check has finished (signed in or not). */
+export function whenAuthReady() {
+  return new Promise(resolve => {
+    let unsubscribe = () => {};
+    let done = false;
+    unsubscribe = _authState.subscribe(s => { if (!s.loading && !done) { done = true; resolve(); queueMicrotask(() => unsubscribe()); } });
+  });
+}

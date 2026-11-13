@@ -1,7 +1,7 @@
 <script>
   import { authenticatedFetch } from '$lib/services/authenticated-fetch.js';
   import { page } from '$app/stores';
-  import { userId } from '$lib/stores/auth';
+  import { userId, authLoading } from '$lib/stores/auth';
   import { subscription } from '$lib/stores/subscription';
   import { toasts } from '$lib/stores/ui';
   import { Check, Clock, ArrowUpRight } from 'lucide-svelte';
@@ -73,6 +73,8 @@
       </ul>
       {#if $userId}
         <a class="cta" href="/sports/nba/props">Ir a las props del día <ArrowUpRight size={16} aria-hidden="true" /></a>
+      {:else if $authLoading}
+        <span class="cta pending" aria-hidden="true"></span>
       {:else}
         <a class="cta" href="/login?modo=registro">Crear cuenta gratis <ArrowUpRight size={16} aria-hidden="true" /></a>
       {/if}
@@ -120,6 +122,7 @@
   .list.pending :global(svg) { color: var(--nio-muted); }
   .cta { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border-radius: 12px; background: var(--nio-action); color: var(--nio-action-ink); font-weight: 700; text-decoration: none; }
   .cta:focus-visible, .banner button:focus-visible, .footer-note a:focus-visible { outline: 2px solid var(--nio-accent); outline-offset: 3px; }
+  .cta.pending { background: var(--nio-raised); }
   .fine { margin: 0; font-size: 13px; color: var(--nio-muted); line-height: 1.55; }
   .footer-note { text-align: center; margin: 28px 0 0; font-size: 13px; color: var(--nio-muted); }
   .footer-note a { color: var(--nio-accent); }

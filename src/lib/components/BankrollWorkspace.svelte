@@ -1,7 +1,7 @@
 <script>
   import BankrollLimits from './BankrollLimits.svelte';
   import { onMount, onDestroy } from 'svelte';
-  import { userId } from '$lib/stores/auth.js';
+  import { userId, authLoading } from '$lib/stores/auth.js';
   import { authenticatedFetch } from '$lib/services/authenticated-fetch.js';
   import { createBankrollWorkspace } from '$lib/bankroll/workspace.js';
   let type='deposit', amount='', odds='1.91', note='', draftVersion;
@@ -35,7 +35,7 @@
   {#if demo}<aside class="demo"><strong>DEMO · DATOS SIMULADOS</strong><span>Ejemplo visual de lectura. No representa rendimiento real.</span><button on:click={load}>Volver a mi cuenta →</button></aside>{/if}
   {#if failure}<div class="message error" role="alert">{failure}<button on:click={load} disabled={saving}>Reintentar carga</button></div>{/if}
   {#if success}<div class="message" role="status">{success}</div>{/if}
-  {#if loading}<div class="empty" role="status"><h2>Consultando tu registro…</h2><p>El saldo se obtiene de la contabilidad del servidor.</p></div>
+  {#if loading || ($authLoading && !demo)}<div class="empty" role="status"><h2>Consultando tu registro…</h2><p>El saldo se obtiene de la contabilidad del servidor.</p></div>
   {:else if !data}<div class="empty"><span class="symbol">↗</span><h2>{$userId?'Tu registro todavía no está disponible':'Un lugar para cada movimiento'}</h2><p>{$userId?'No mostramos un saldo inventado cuando no podemos verificar los datos.':'Inicia sesión para consultar tu capital y registrar tus tickets.'}</p><div>{#if !$userId}<a class="primary" href="/login">Iniciar sesión</a>{/if}<button on:click={showDemo}>Explorar ejemplo visual →</button></div></div>
   {:else}
     {#if !demo && !data.wallet}<aside class="demo"><strong>Nuevo registro contable</strong><span>Aún no has registrado movimientos aquí. Los saldos e historiales del sistema anterior se conservan por separado y no se han importado automáticamente.</span></aside>{/if}

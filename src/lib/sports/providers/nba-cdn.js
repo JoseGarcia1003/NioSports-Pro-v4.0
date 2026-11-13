@@ -87,16 +87,17 @@ export const nbaCdn = {
   id: 'nba-cdn', sport: ['nba'], kinds: ['boxscores'], tier: 'free_public', env: [], verified: false,
   docs: 'https://cdn.nba.com/static/json/liveData/boxscore/boxscore_{gameId}.json (datos públicos de NBA.com; revisar términos antes de uso comercial)',
   limits: { capacity: 60, perMs: 60000 },
-  async schedule({ fetchImpl, log, limiter } = {}) {
-    const { body } = await providerRequest(`${BASE}/staticData/scheduleLeagueV2.json`, { provider: 'nba-cdn', headers: HEADERS, fetchImpl, log, limiter, timeoutMs: 20000, retries: 1 });
+  // Every call takes its own timeout so the caller can enforce one overall deadline.
+  async schedule({ fetchImpl, log, limiter, timeoutMs = 12000 } = {}) {
+    const { body } = await providerRequest(`${BASE}/staticData/scheduleLeagueV2.json`, { provider: 'nba-cdn', headers: HEADERS, fetchImpl, log, limiter, timeoutMs, retries: 0 });
     return normaliseSchedule(body);
   },
-  async scoreboard({ fetchImpl, log, limiter } = {}) {
-    const { body } = await providerRequest(`${BASE}/liveData/scoreboard/todaysScoreboard_00.json`, { provider: 'nba-cdn', headers: HEADERS, fetchImpl, log, limiter, retries: 1 });
+  async scoreboard({ fetchImpl, log, limiter, timeoutMs = 6000 } = {}) {
+    const { body } = await providerRequest(`${BASE}/liveData/scoreboard/todaysScoreboard_00.json`, { provider: 'nba-cdn', headers: HEADERS, fetchImpl, log, limiter, timeoutMs, retries: 0 });
     return normaliseScoreboard(body);
   },
-  async boxScore(gameId, { fetchImpl, log, limiter, day = null } = {}) {
-    const { body } = await providerRequest(`${BASE}/liveData/boxscore/boxscore_${encodeURIComponent(gameId)}.json`, { provider: 'nba-cdn', headers: HEADERS, fetchImpl, log, limiter, retries: 1 });
+  async boxScore(gameId, { fetchImpl, log, limiter, day = null, timeoutMs = 6000 } = {}) {
+    const { body } = await providerRequest(`${BASE}/liveData/boxscore/boxscore_${encodeURIComponent(gameId)}.json`, { provider: 'nba-cdn', headers: HEADERS, fetchImpl, log, limiter, timeoutMs, retries: 0 });
     return normaliseBoxScore(body, day);
   }
 };

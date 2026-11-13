@@ -25,9 +25,10 @@
     <link rel="preload" href="/fonts/barlow-condensed-latin-00a5e45f.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/fonts/dm-sans-latin-1c49a6eb.woff2" as="font" type="font/woff2" crossorigin>
 
-    <!-- Returning members get the loader instead of a flash of the public landing
-         while the session is restored (flag set by +layout.svelte; no personal data). -->
-    <script nonce="%sveltekit.nonce%">try{if(localStorage.getItem('nio:session'))document.documentElement.setAttribute('data-session','')}catch(e){}</script>
+    <!-- Returning members (flag set by +layout.svelte; no personal data): the app
+         shell paints at once instead of waiting for the session check, and the
+         public landing is skipped. A stale flag is corrected by the layout. -->
+    <script nonce="%sveltekit.nonce%">try{if(localStorage.getItem('nio:session')){document.documentElement.setAttribute('data-session','');if(location.pathname==='/')location.replace('/today')}}catch(e){}</script>
 
     %sveltekit.head%
   </head>

@@ -25,7 +25,7 @@ export async function recordRun(db, run) {
 /**
  * @returns {{ status: string, provider: string|null, events: any[], rejected: number, inconsistent?: boolean, error?: string }}
  */
-export async function syncSchedule(db, { sport, day, env, trigger = 'cron', fetchImpl = fetch, store = null, now = () => Date.now() }) {
+export async function syncSchedule(db, { sport, day, env, trigger = 'cron', fetchImpl = fetch, store = null, now = () => Date.now(), timeoutMs = 10000, retries = 2 }) {
   const cfg = SPORTS_CONFIG[sport];
   const started = new Date(now()).toISOString();
   const attempts = [];
@@ -34,7 +34,7 @@ export async function syncSchedule(db, { sport, day, env, trigger = 'cron', fetc
     const ready = readiness(a, env, sport);
     if (!a?.schedule || ready.state === 'awaiting_credentials' || ready.state === 'fixture') { attempts.push({ id, skipped: ready.state }); continue; }
     try {
-      const raw = await a.schedule(day, { env, fetchImpl, limiter: limiterFor(a), log: () => {} });
+      const raw = await a.schedule(day, { env, fetchImpl, limiter: limiterFor(a), log: () => {}, timeoutMs, retries });
       const { valid, rejected, inconsistent } = partition(raw);
       const events = dedupe(valid);
       // A mostly-broken response is treated as a provider failure, not as data.

@@ -2,7 +2,7 @@
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import { theme } from '$lib/stores/ui';
-  import { currentUser } from '$lib/stores/auth';
+  import { currentUser, authLoading } from '$lib/stores/auth';
   import { browser } from '$app/environment';
   import { onMount, onDestroy } from 'svelte';
   import Logo from '$lib/components/Logo.svelte';
@@ -102,7 +102,7 @@
         {/if}
       </div>
       {:else}
-        <a class="nav__login" href="/login">Iniciar sesión</a>
+        <a class="nav__login" class:pending={$authLoading} href="/login">Iniciar sesión</a>
       {/if}
     </div>
   </div>
@@ -169,6 +169,8 @@
   }
   .nav__icon-btn:hover { background: var(--color-bg-elevated); color: var(--nav-text); }
   .nav__login { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 12px; border: 1px solid var(--color-border); border-radius: 10px; color: var(--nav-text); font-size: 13px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+  /* Returning members: no «Iniciar sesión» flash while the session is restored. */
+  :global(html[data-session]) .nav__login.pending { visibility: hidden; }
   .nav__login:hover { background: var(--color-bg-elevated); }
 
   /* User menu */

@@ -76,15 +76,19 @@ $: if (browser && !$authLoading) {
   $: isPublicPage = PUBLIC_ROUTES.some(r => $page.url.pathname.startsWith(r));
   $: isLandingPage = !$isAuthenticated && $page.url.pathname === '/';
   $: showNav = !isPublicPage && !isLandingPage;
+  $: gate = $authLoading && !isServerPublic;
 </script>
 
 <div data-theme={$theme} class="app">
   
-  {#if $authLoading && !isServerPublic}
-    <div class="app-loading">
+  <!-- Member routes while the session is still unknown: visitors see the loader;
+       returning members (html[data-session], set before first paint) see the page
+       shell immediately. Private data requests wait for the session on their own. -->
+  {#if gate}
+    <div class="app-loading gate-loader">
       <div class="app-loading__content">
         <div class="app-loading__logo">
-          <svg width="48" height="48" viewBox="0 0 40 40" fill="none">
+          <svg width="48" height="48" viewBox="0 0 40 40" fill="none" aria-hidden="true">
             <rect width="40" height="40" rx="10" fill="var(--nio-navy)"/>
             <path d="M12 28V12l8 5.5L28 12v16l-8-5.5L12 28z" fill="var(--nio-gold)"/>
             <path d="M20 17.5l8 5.5V12l-8 5.5z" fill="white" opacity="0.6"/>
@@ -94,10 +98,8 @@ $: if (browser && !$authLoading) {
         <p class="app-loading__text">Cargando NioSports Pro</p>
       </div>
     </div>
-  {:else}
-    {#if $authLoading}
-      <div class="app-loading session-loader" aria-hidden="true"><div class="app-loading__spinner"></div></div>
-    {/if}
+  {/if}
+  <div class="app-shell" class:gated={gate}>
     {#if showNav}
       <Nav />
     {/if}
@@ -108,9 +110,8 @@ $: if (browser && !$authLoading) {
 
     {#if showNav}
       <BottomNav />
-
     {/if}
-  {/if}
+  </div>
 
   <ToastContainer />
   <UpdateNotice />
@@ -240,8 +241,10 @@ $: if (browser && !$authLoading) {
     }
   }
 
-  .app-loading.session-loader { display: none; }
-  :global(html[data-session]) .app-loading.session-loader { display: flex; position: fixed; inset: 0; z-index: 1000; background: var(--nio-page); }
+  .app-shell { display: contents; }
+  .app-shell.gated { display: none; }
+  :global(html[data-session]) .app-shell.gated { display: contents; }
+  :global(html[data-session]) .gate-loader { display: none; }
   .app-loading {
     min-height: 100vh;
     display: flex;
@@ -259,7 +262,7 @@ $: if (browser && !$authLoading) {
 
   .app-loading__logo {
     animation: float 2s ease-in-out infinite;
-    filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.4));
+    filter: drop-shadow(0 0 18px var(--nio-gold-soft));
   }
 
   @keyframes float {

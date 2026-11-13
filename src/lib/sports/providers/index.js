@@ -23,8 +23,8 @@ export const ADAPTERS = Object.freeze({
   balldontlie: {
     id: 'balldontlie', sport: ['nba'], kinds: ['schedule', 'results'], tier: 'free', env: ['BALLDONTLIE_API_KEY'], verified: true,
     docs: 'https://docs.balldontlie.io', limits: { capacity: 5, perMs: 60000 },
-    async schedule(day, { env, fetchImpl, log, limiter } = {}) {
-      const { body } = await providerRequest(`https://api.balldontlie.io/v1/games?dates[]=${day}&per_page=100`, { provider: 'balldontlie', headers: { Authorization: env.BALLDONTLIE_API_KEY }, fetchImpl, log, limiter });
+    async schedule(day, { env, fetchImpl, log, limiter, timeoutMs, retries } = {}) {
+      const { body } = await providerRequest(`https://api.balldontlie.io/v1/games?dates[]=${day}&per_page=100`, { provider: 'balldontlie', headers: { Authorization: env.BALLDONTLIE_API_KEY }, fetchImpl, log, limiter, timeoutMs, retries });
       const at = Date.now();
       return (body?.data || []).map(g => ({ id: `nba:bdl:${g.id}`, sport: 'nba', startsAt: g.datetime || g.date, status: balldontlieStatus(g.status),
         home: { id: g.home_team?.abbreviation, name: g.home_team?.full_name }, away: { id: g.visitor_team?.abbreviation, name: g.visitor_team?.full_name },
@@ -43,8 +43,8 @@ export const ADAPTERS = Object.freeze({
   'football-data': {
     id: 'football-data', sport: ['football'], kinds: ['schedule', 'results'], tier: 'free_registration', env: ['FOOTBALL_DATA_API_KEY'], verified: false,
     docs: 'https://www.football-data.org/documentation/quickstart', limits: { capacity: 10, perMs: 60000 },
-    async schedule(day, { env, fetchImpl, log, limiter } = {}) {
-      const { body } = await providerRequest(`https://api.football-data.org/v4/matches?dateFrom=${day}&dateTo=${day}`, { provider: 'football-data', headers: { 'X-Auth-Token': env.FOOTBALL_DATA_API_KEY }, fetchImpl, log, limiter });
+    async schedule(day, { env, fetchImpl, log, limiter, timeoutMs, retries } = {}) {
+      const { body } = await providerRequest(`https://api.football-data.org/v4/matches?dateFrom=${day}&dateTo=${day}`, { provider: 'football-data', headers: { 'X-Auth-Token': env.FOOTBALL_DATA_API_KEY }, fetchImpl, log, limiter, timeoutMs, retries });
       const at = Date.now();
       const st = s => ({ SCHEDULED: 'scheduled', TIMED: 'scheduled', IN_PLAY: 'live', PAUSED: 'live', FINISHED: 'final', POSTPONED: 'postponed', CANCELLED: 'cancelled' }[s] || 'unknown');
       return (body?.matches || []).map(m => ({ id: `football:fd:${m.id}`, sport: 'football', startsAt: m.utcDate, status: st(m.status), competition: m.competition?.name ?? null,
@@ -55,8 +55,8 @@ export const ADAPTERS = Object.freeze({
   'api-football': {
     id: 'api-football', sport: ['football'], kinds: ['schedule', 'results', 'boxscores', 'injuries', 'lineups'], tier: 'paid_or_free_trial', env: ['API_FOOTBALL_KEY'], verified: false,
     docs: 'https://www.api-football.com/documentation-v3', limits: { capacity: 10, perMs: 60000 },
-    async schedule(day, { env, fetchImpl, log, limiter } = {}) {
-      const { body } = await providerRequest(`https://v3.football.api-sports.io/fixtures?date=${day}`, { provider: 'api-football', headers: { 'x-apisports-key': env.API_FOOTBALL_KEY }, fetchImpl, log, limiter });
+    async schedule(day, { env, fetchImpl, log, limiter, timeoutMs, retries } = {}) {
+      const { body } = await providerRequest(`https://v3.football.api-sports.io/fixtures?date=${day}`, { provider: 'api-football', headers: { 'x-apisports-key': env.API_FOOTBALL_KEY }, fetchImpl, log, limiter, timeoutMs, retries });
       const at = Date.now();
       const st = s => (['FT', 'AET', 'PEN'].includes(s) ? 'final' : ['1H', 'HT', '2H', 'ET', 'P', 'LIVE'].includes(s) ? 'live' : ['NS', 'TBD'].includes(s) ? 'scheduled' : s === 'PST' ? 'postponed' : ['CANC', 'ABD'].includes(s) ? 'cancelled' : 'unknown');
       return (body?.response || []).map(f => ({ id: `football:af:${f.fixture?.id}`, sport: 'football', startsAt: f.fixture?.date, status: st(f.fixture?.status?.short), competition: f.league?.name ?? null,
@@ -67,8 +67,8 @@ export const ADAPTERS = Object.freeze({
   'mlb-statsapi': {
     id: 'mlb-statsapi', sport: ['mlb'], kinds: ['schedule', 'results', 'boxscores'], tier: 'free_public', env: [], verified: false,
     docs: 'https://statsapi.mlb.com/api/v1/schedule (API pública de MLB; revisar sus términos antes de uso comercial)', limits: { capacity: 30, perMs: 60000 },
-    async schedule(day, { fetchImpl, log, limiter } = {}) {
-      const { body } = await providerRequest(`https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${day}`, { provider: 'mlb-statsapi', fetchImpl, log, limiter });
+    async schedule(day, { fetchImpl, log, limiter, timeoutMs, retries } = {}) {
+      const { body } = await providerRequest(`https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${day}`, { provider: 'mlb-statsapi', fetchImpl, log, limiter, timeoutMs, retries });
       const at = Date.now();
       const st = s => (/final|game over|completed/i.test(s || '') ? 'final' : /in progress|manager challenge|delayed/i.test(s || '') ? 'live' : /postponed/i.test(s || '') ? 'postponed' : /cancel/i.test(s || '') ? 'cancelled' : /scheduled|pre-game|warmup/i.test(s || '') ? 'scheduled' : 'unknown');
       return (body?.dates || []).flatMap(d => d.games || []).map(g => ({ id: `mlb:mlb:${g.gamePk}`, sport: 'mlb', startsAt: g.gameDate, status: st(g.status?.detailedState),

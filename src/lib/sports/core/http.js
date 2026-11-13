@@ -28,8 +28,9 @@ const redact = url => url.replace(/([?&](api[_-]?key|apikey|key|token)=)[^&]+/gi
  *   fetchImpl?: typeof fetch, sleep?: (ms:number)=>Promise<void>, log?: (entry:object)=>void, parse?: 'json'|'bytes' }} opts
  */
 export async function providerRequest(url, opts) {
-  const { provider, headers = {}, timeoutMs = 10000, retries = 2, limiter = null, fetchImpl = fetch,
+  const { provider, headers = {}, limiter = null, fetchImpl = fetch,
     sleep = ms => new Promise(r => setTimeout(r, ms)), log = () => {}, parse = 'json' } = opts;
+  const timeoutMs = opts.timeoutMs ?? 10000, retries = opts.retries ?? 2;
   if (limiter && !limiter.take()) { log({ provider, url: redact(url), outcome: 'rate_limited_locally' }); throw new ProviderError('rate_limited', 'Local request budget exhausted', { retryable: true }); }
   let attempt = 0;
   for (;;) {

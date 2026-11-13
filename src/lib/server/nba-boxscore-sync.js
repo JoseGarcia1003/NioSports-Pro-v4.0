@@ -18,8 +18,12 @@ export function missingGames(schedule, stored, { from, to }) {
     .sort((a, b) => a.day.localeCompare(b.day) || a.id.localeCompare(b.id));
 }
 
-export async function syncNbaBoxScores(db, { today, trigger = 'cron', fetchImpl = fetch, budgetMs = 40000, maxGames = 60, now = () => Date.now(), provider = nbaCdn } = {}) {
+export async function syncNbaBoxScores(db, { today, trigger = 'cron', fetchImpl = fetch, budgetMs = 25000, maxGames = 60, now = () => Date.now(), provider = nbaCdn } = {}) {
   const started = now(), startedIso = new Date(started).toISOString();
+  // One hard deadline for the whole run: no provider call may outlive it, so the
+  // run is always recorded and never starves the other steps of the pipeline.
+  const remaining = () => budgetMs - (now() - started);
+  const within = max => Math.max(1000, Math.min(max, remaining() - 1500));
   const limiter = rateLimiter(provider.limits);
   const opts = { fetchImpl, limiter, log: () => {} };
   const finish = async run => { await recordRun(db, { sport: 'nba', kind: 'boxscores', provider: provider.id, trigger, started_at: startedIso, ...run }); return run; };
@@ -30,8 +34,8 @@ export async function syncNbaBoxScores(db, { today, trigger = 'cron', fetchImpl 
 
     // Season schedule first; today's scoreboard covers the case where it is unavailable.
     let schedule = [], sources = [];
-    try { schedule = await provider.schedule(opts); sources.push('schedule'); } catch (e) { sources.push(`schedule_failed:${e?.code || 'error'}`); }
-    if (!schedule.length) { schedule = await provider.scoreboard(opts); sources.push('scoreboard'); }
+    try { schedule = await provider.schedule({ ...opts, timeoutMs: within(10000) }); sources.push('schedule'); } catch (e) { sources.push(`schedule_failed:${e?.code || 'error'}`); }
+    if (!schedule.length) { schedule = await provider.scoreboard({ ...opts, timeoutMs: within(5000) }); sources.push('scoreboard'); }
 
     // Aggregated in the database: one row per game, well under the API row cap.
     const { data: have, error: e2 } = await db.rpc('nba_stored_games', { p_from: from });
@@ -42,9 +46,9 @@ export async function syncNbaBoxScores(db, { today, trigger = 'cron', fetchImpl 
     let rowsIn = 0, rowsValid = 0, rowsRejected = 0, gamesStored = 0, asOf = null;
     const notFinal = [], rejected = [], failed = [];
     for (const g of todo) {
-      if (now() - started > budgetMs) break;
+      if (remaining() < 4000) break;
       let box;
-      try { box = await provider.boxScore(g.id, { ...opts, day: g.day }); }
+      try { box = await provider.boxScore(g.id, { ...opts, day: g.day, timeoutMs: within(5000) }); }
       catch (e) { if (g.day < today) failed.push({ id: g.id, error: e?.code || 'error' }); continue; }
       if (!box.final) { notFinal.push(g.id); continue; }
       rowsIn += box.rows.length;
